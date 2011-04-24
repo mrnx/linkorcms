@@ -32,8 +32,8 @@ function AdminPages( $action )
 	TAddToolBox($action);
 	switch($action){
 		case 'main':
-			//AdminPagesMain();
-			//break;
+			AdminPagesMain();
+			break;
 		case 'ajaxtree':
 		case 'ajaxnode':
 			AdminPagesAjaxTree();
@@ -521,29 +521,11 @@ function AdminPagesSave()
 function AdminPagesLinkEditor()
 {
 	global $config, $db, $site;
-
-	$JsText = <<<JS
-	function StructureSwitchUrl(){
-		modbox = $("#form_mod_box").get(0);
-		if(modbox.options[0].selected){
-			$("#form_link_row").show();
-			$("#form_params_row").hide();
-		}else{
-			$("#form_link_row").hide();
-			$("#form_params_row").show();
-		}
-	}
-	$(document).ready(function(){
-		StructureSwitchUrl();
-	});
-JS;
-	System::admin()->AddJS($JsText);
-
 	$link = '';
 	$id = -1;
 	$title = '';
 	$parent_id = -1;
-	$view = array(1=>false, 2=>false, 3=>false, 4=>false);
+	$view = array(1 => false, 2 => false, 3 => false, 4 => false);
 	$enabled = array(false, false);
 	$showinmenu = array(false, false);
 	if(!isset($_GET['id'])){
@@ -552,7 +534,7 @@ JS;
 		$showinmenu[1] = true;
 		$form_title = 'Добавление ссылки';
 		$submit = 'Добавить';
-	}else{
+	} else{
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Select('pages', "`id`='$id'");
 		$pg = $db->FetchRow();
@@ -582,30 +564,10 @@ JS;
 	foreach($mods as $mod){
 		$site->DataAdd($modules_data, SafeDB($mod['folder'], 255, str), SafeDB($mod['name'], 255, str), false);
 	}
-
 	FormRow('Заголовок', $site->Edit('title', $title, false, 'style="width:400px;" maxlength="255"'));
 	FormRow('Родительская страница', $site->Select('parent_id', $cats_data));
-
-	System::admin()->FormTitleRow('Параметры ссылки');
-	FormRow('Модуль', $site->Select('module', $modules_data, false, 'id="form_mod_box"" onchange="StructureSwitchUrl()"'), false);
-	System::admin()->FormRow('Ссылка (URL)', $site->Edit('link', $link, false, 'style="width:400px;"'), false, 'id="form_link_row"');
-
-	System::admin()->FormRow('Параметры<br /><small>Только для модулей. Пример: "id=67&op=edit"</small>',
-		'<table>'
-		.'<tr><td>GET&nbsp;</td><td>'.$site->Edit('params_get', '', false, 'style="width:355px;"').'</td></tr>'
-		.'<tr><td>POST&nbsp;</td><td>'.$site->Edit('params_post', '', false, 'style="width:355px;"').'</td></tr>'
-		.'</table>',
-		false,
-		'id="form_params_row"'
-	);
-
-	$enData = GetEnData(false, 'Да', 'Нет');
-	FormRow('Открыть в новом окне<br /><small>target="_blank"</small>', $site->Select('blank', $enData));
-
-	$enData = GetEnData(false, 'Да', 'Нет');
-	FormRow('Запрет индексирования поисковиками<br /><small>&lt;noindex&gt;</small>', $site->Select('blank', $enData));
-
-	System::admin()->FormTitleRow('Параметры видимости');
+	FormRow('Ссылка на модуль', $site->Select('module', $modules_data));
+	FormRow('Ссылка (URL)', $site->Edit('link', $link, false, 'style="width:400px;"'));
 	FormRow('Кто видит', $site->Select('view', $visdata));
 	FormRow('Показать в меню', $site->Radio('showinmenu', 'off', $showinmenu[0]).'Нет&nbsp;&nbsp;'.$site->Radio('showinmenu', 'on', $showinmenu[1]).'Да');
 	FormRow('Включить', $site->Radio('enabled', 'off', $enabled[0]).'Нет&nbsp;&nbsp;'.$site->Radio('enabled', 'on', $enabled[1]).'Да');
