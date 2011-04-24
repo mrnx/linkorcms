@@ -68,12 +68,22 @@ $system = array('no_templates'=>false, 'no_messages'=>false, 'no_echo'=>false, '
 $SiteLog = null;
 $ErrorsLog = null;
 
-if(is_file('config/db_config.php')){
+// Конфигурация расположений
+require 'config/name_config.php';
+
+if(is_file('config/db_config.php')){ // Система установлена
 
 	// Загружаем конфигурацию
-	require 'config/name_config.php';
 	require 'config/db_config.php';
 	require 'config/salt.php';
+
+	// Обработка ошибок
+	include_once($config['inc_dir'].'error_handler.php');
+
+	// Логи
+	include_once ($config['inc_dir'].'logi.class.php');
+	$SiteLog = new Logi($config['log_dir'].'site.log.php');
+	$ErrorsLog = new Logi($config['log_dir'].'errors.log.php');
 
 	// Проверяем версию базы данных
 	if(!defined('SETUP_SCRIPT') && substr($config['db_version'], 0, 3) != substr(CMS_VERSION, 0, 3)){
@@ -87,18 +97,11 @@ if(is_file('config/db_config.php')){
 			</html>');
 	}
 
-	// Обработка ошибок
-	include_once($config['inc_dir'].'error_handler.php');
-
-	// Логи
-	include_once ($config['inc_dir'].'logi.class.php');
-	$SiteLog = new Logi($config['log_dir'].'site.log.php');
-	$ErrorsLog = new Logi($config['log_dir'].'errors.log.php');
-
-}elseif(!defined('SETUP_SCRIPT')){
-	// Установка
+}elseif(!defined('SETUP_SCRIPT')){ // Система не установлена
 	Header("Location: setup.php");
 	exit();
+}else{ // Идет установка
+
 }
 
 ?>

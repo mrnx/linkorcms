@@ -1529,7 +1529,7 @@ function SendMail( $ToName, $ToEmail, $Subject, $Text, $Html=false, $From='', $F
  */
 function GO( $address, $exit = true, $response_code = 303 ){
 	if($address == '') return;
-	if(!defined('ERROR_HANDLER') || count(System::$Errors) == 0){ // TODO: Учитывать значение настройки вывода ошибок в браузер
+	if(!defined('ERROR_HANDLER') || count(System::$Errors) == 0){ // todo Учитывать значение настройки вывода ошибок в браузер
 		if($response_code == 302){
 			Header('Location: '.$address);
 		}else{

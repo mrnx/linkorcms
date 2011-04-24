@@ -391,7 +391,7 @@ class PageTemplate extends Starkyt{
 		if(ob_get_level() > 0 && ob_get_length() > 0){
 			$contents = ob_get_clean().$contents;
 		}
-		if(System::$config['general']['show_script_time']){
+		if(!defined('SETUP_SCRIPT') && System::$config['general']['show_script_time']){
 			$end_time = GetMicroTime();
 			$end_time = $end_time - $GLOBALS['script_start_time'];
 			$php_time = $end_time - System::db()->QueryTotalTime;
@@ -402,7 +402,7 @@ class PageTemplate extends Starkyt{
 					.'Память: '.sprintf("%01.2f", $MB).'М./'.get_cfg_var('memory_limit').'. '
 			        .'БД: '.System::db()->NumQueries.' запросов за '.sprintf("%01.4f", System::db()->QueryTotalTime).' сек. ( PHP: '.round($persent * $php_time).'% БД: '.round($persent * System::db()->QueryTotalTime).'% )';
 		}else{
-			$info = false;
+			$info = '';
 		}
 		$contents = str_replace('%info%', $info, $contents);
 
