@@ -1,0 +1,27 @@
+{mail_nav}
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+	<tr>
+		<td style="padding: 5px; width: 160px;">
+			{mail_nav:prev_id}
+			<p align="left">
+				<a href="{mail_nav.prev_url}"><img src="{template.dir}images/prev.gif" />&nbsp;{mail_nav.lprev}</a>
+			</p>
+			{/mail_nav:prev_id}
+		</td>
+		<td style="padding: 5px;">
+			{mail_nav:back}
+			<p align="center">
+				<a href="{mail_nav.back_url}">{mail_nav.lback}</a>
+			</p>
+			{/mail_nav:back}
+		</td>
+		<td style="padding: 5px; width: 160px;">
+			{mail_nav:next_id}
+			<p align="right">
+				<a href="{mail_nav.next_url}">{mail_nav.lnext}&nbsp;<img src="{template.dir}images/next.gif" /></a>
+			</p>
+			{/mail_nav:next_id}
+		</td>
+	</tr>
+</table>
+{/mail_nav}

@@ -1,0 +1,35 @@
+<form action="{block.form_action}" method="post" class="mail_block">
+<table align="center" width="100%">
+	<tr>
+		<td align="center">
+			{block.lmail_title} <b>{block.mail_title}</b>.
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<input type="text" name="email" value="{block.lemail}" onfocus="this.value='';this.className=''" class="fade" />
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			{block.lformat}:
+			<select name="html">
+				<option value="1">{block.lhtml}</option>
+				<option value="0">{block.ltext}</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<input type="hidden" name="mail_block_form" value='1' />
+			<input type="hidden" name="topic_id" value="{block.topic_id}" />
+			<input type="submit" class="submit" value="{block.lsubmit}" />
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<a href="<?=Ufu('index.php?name=mail&op=topics', 'mail/{op}/')?>">{block.lother}</a>
+		</td>
+	</tr>
+</table>
+</form>

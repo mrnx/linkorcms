@@ -1,0 +1,80 @@
+{feedback}
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+	<tr>
+		<td style="padding: 27px; padding-bottom: 0px;">
+			<p align="left" class="read_font">{feedback.top_text}</p>
+		</td>
+	</tr>
+</table>
+<table cellspacing="0" cellpadding="0" border="0" width="100%" style="padding-left: 27px; padding-right: 27px;">
+	<tr>
+		<td style="padding-bottom: 5px;"><b>Форма обратной связи:</b></td>
+	</tr>
+	<tr>
+		<td class="fb_border" style="padding: 27px; padding-top: 5px; padding-bottom: 5px;">
+			<form action="{feedback.url}" method="post" name="feedback" onsubmit="return (check_form(this))" enctype="multipart/form-data">
+			<table cellspacing="0" cellpadding="0" border="0" width="100%" class="fb_form">
+				<tr valign="top">
+					<td class="fb_label" nowrap width="200">Ваше имя *:</td>
+					<td width="100%"><input type="text" class="fb_input" name="name" value="" /></td>
+				</tr>
+				<tr valign="top">
+					<td class="fb_label" nowrap width="20%">Ваш e-mail,<br /> на который будет выслан ответ *:</td>
+					<td width="80%"><input type="text" class="fb_input" name="email" /></td>
+				</tr>
+				<tr valign="top">
+					<td class="fb_label" nowrap width="20%">Тема сообщения *:</td>
+					<td width="80%"><input type="text" class="fb_input" name="subject" /></td>
+				</tr>
+				<tr valign="top">
+					<td class="fb_label" nowrap width="20%">Департамент *:</td>
+					<td width="80%" align="left">
+						<select name="department">
+						{departments}
+						<option value="{department.id}">{department.hname}</option>
+						{/departments}
+						</select>
+					</td>
+				</tr>
+				<tr valign="top">
+					<td class="fb_label" nowrap width="20%">Сообщение *:</td>
+					<td width="80%">
+						<textarea class="fb_input" rows="7" name="message"></textarea>
+					</td>
+				</tr>
+				<tr valign="top">
+					<td class="fb_label" nowrap width="20%">Прикрепить файл:<br /><small>Максимальный размер {feedback.max_attachment_size}.</small></td>
+					<td width="80%"><input type="file" class="fb_input" name="attach" /></td>
+				</tr>
+				{feedback:show_kaptcha}
+				<tr>
+					<td class="fb_label" align="center">
+						<img src="{feedback.kaptcha_url}" height="{feedback.kaptcha_height}" width="{feedback.kaptcha_width}" id="codeimage" />
+						<br />
+						<a href="#" onclick="document.getElementById('codeimage').src = '{feedback.kaptcha_url}&amp;time=' + Date(); return false;">Показать другую</a>
+					</td>
+					<td>
+						Введите код с картинки: <br /> <input type="text" name="keystr" />
+					</td>
+				</tr>
+				{/feedback:show_kaptcha}
+				<tr valign="top">
+					<td class="fb_label" width="20%">* - поля обязательные для заполнения.</td>
+					<td width="80%">
+						<input type="hidden" name="feedback_form" value="1" />
+						<input type="submit" value="Отправить" />
+					</td>
+				</tr>
+			</table>
+			</form>
+		</td>
+	</tr>
+</table>
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+	<tr>
+		<td style="padding: 27px;">
+			<p align="left" class="read_font">{feedback.bottom_text}</p>
+		</td>
+	</tr>
+</table>
+{/feedback}

@@ -1,0 +1,23 @@
+{news}
+<table cellspacing="0" cellpadding="0" class="newstable" width="100%">
+	<tr>
+		<td nowrap class="news_title" width="100%">
+			&nbsp;<span class="topic_cap"><a href="{news.cat_link}">{news.topic}</a></span> : {news.title}&nbsp;
+		</td>
+	</tr>
+	<tr>
+		<td valign="middle" align="left" class="news_tb_info">
+			{news:author}Новость от <b>{news.author}</b>{/news:author}
+		</td>
+	</tr>
+	<tr>
+		<td class="news_tb_client read_font" width="100%">{news.text}</td>
+	</tr>
+</table>
+<center style="font: 12px Tahoma;">- {news.com_status} -</center>
+<br />
+{comments_navigation}{/comments_navigation}
+{news_comments}{/news_comments}
+{comments_navigation}{/comments_navigation}
+{news_comments_form}{/news_comments_form}
+{/news}

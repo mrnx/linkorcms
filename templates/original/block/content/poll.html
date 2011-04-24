@@ -1,0 +1,35 @@
+<form action="{block.form_action}" method="post">
+<table width="100%">
+	<tr>
+		<td><b>{block.poll_title}</b></td>
+	</tr>
+	<tr>
+		<td class="poll_block_variants">
+			{poll_block_variants}
+			<div><label>{variant.control}&nbsp;{variant:color}<font color="{variant.color}">{/variant:color}{variant.title}{variant:color}</font>{/variant:color}</label></div>
+			{/poll_block_variants}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table width="100%">
+				<tr>
+					<td align="left" style="padding-bottom: 10px;">
+						<input type="submit" value="Ответить" />{block:poll_showresults}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="{block.poll_url}">{block.lshowresults}</a>{/block:poll_showresults}
+					</td>
+				</tr>
+				<tr>
+					<td align="left">
+						{block.lnum_voices}: {block.num_voices}<br />{block.lcomments}: {block.comments}
+					</td>
+				</tr>
+				<tr>
+					<td align="left">
+						 <a href="{block.others_url}">{block.lothers}</a>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</form>

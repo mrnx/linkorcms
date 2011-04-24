@@ -1,0 +1,33 @@
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+	<tr>
+		<td class="block_poll_title">
+			<b>{block.poll_title}</b>
+		</td>
+	</tr>
+	<tr>
+		<td style="padding: 5px;">{poll_block_results} <b>{poll:color}
+			<font color="{poll.color}">{/poll:color}{poll.title}{poll:color}</font>{/poll:color}</b>
+			<br />
+			{poll.num_voices} - {poll.value}%
+			<div class="poll_bar">
+				<table cellpadding="0" cellspacing="0" width="{poll.value}%" class="poll_bar">
+					<tr>
+						<td class="poll_bar_back"></td>
+					</tr>
+				</table>
+			</div>
+			{/poll_block_results}
+		</td>
+	</tr>
+	<tr>
+		<td align="left" style="padding: 0 0 0 4px;">
+			{block.lnum_voices}: {block.num_voices}
+			<br />
+			<a href="{block.poll_url}#comments">{block.lcomments}({block.comments})</a>
+			<br />
+			<a href="{block.others_url}">{block.lothers}</a>
+			<br />
+			<br />
+		</td>
+	</tr>
+</table>

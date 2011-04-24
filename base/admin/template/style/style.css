@@ -1,0 +1,530 @@
+
+
+/* Стили Админ-панели */
+
+@import "reset.css";
+
+* {
+	font-family: Verdana, "Geneva CY", sans-serif;
+	font-size: 9pt;
+}
+body {
+	height: 100%;
+	padding: 5px;
+}
+#wrapper {
+	text-align: left;
+	max-width: 1200px;
+	height: 100%;
+	margin: 0 auto;
+}
+a:link { color: #334433; text-decoration: none; }
+a:visited { color: #334433; text-decoration: none; }
+a:hover { color: #c66653; }
+
+textarea {
+	font-family: 'Consolas', 'Monaco', monospace;
+	font-size: 10pt;
+}
+.clear { clear: both; }
+
+
+/* Верхнее меню и логотип */
+
+div.header {
+	height: 80px;
+	background: url(../img/header.png);
+}
+div.admin_logo {
+	height: 80px;
+	background: url(../img/adminlogo.png) no-repeat left top;
+}
+.menu {
+	background-color: #F6F6F6;
+}
+.menu_backing {
+	background-color: #A5C0D4;
+	padding: 1px;
+	margin-bottom: 7px;
+
+	border: 1px #A5C0D4 solid;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+
+	box-shadow: 2px 2px 2px #DDD;
+	-webkit-box-shadow: 2px 2px 2px #DDD;
+	-moz-box-shadow: 2px 2px 2px #DDD;
+}
+
+.menu_config_btn{
+	float: right;
+	width: 16px;
+	height: 16px;
+	padding: 2px;
+	margin: 3px 2px 0 0;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+
+.menu_config_btn:hover{
+	background: #fdfcf6;
+}
+
+/* Хлебные крошки */
+
+.breadcrumb {
+	display: block;
+	clear: both;
+
+	border: 1px #D8DFEA solid;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+
+	background-color: #F6F6F6;
+	margin-bottom: 5px;
+}
+
+.breadcrumb li {
+	float: left;
+	background-color: #F6F6F6;
+	border-color: #F6F6F6;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+
+.breadcrumb a {
+	display: block;
+	float: left;
+	line-height: 20px;
+	padding: 0 5px 0 5px;
+	color: #646464;
+}
+
+.breadcrumb img {
+	vertical-align: middle;
+}
+.breadcrumb span {
+	vertical-align: middle;
+}
+
+.breadcrumb a:hover {
+	color: #222;
+}
+
+
+/* Тело страницы */
+
+#container {
+
+}
+
+
+/* Левая колонка */
+
+#sidebar {
+	float: left;
+	background-color: #F6F6F6;
+	width: 210px;
+}
+.sidebar_menu {
+	float: left;
+	background-color: #F6F6F6;
+	width: 210px;
+	margin-bottom: 5px;
+
+	border: 3px #A5C0D4 solid;
+	border-top: none;
+	border-radius: 0 0 3px 3px;
+	-moz-border-radius: 0 0 3px 3px;
+
+	box-shadow: 2px 2px 2px #DDD;
+	-webkit-box-shadow: 2px 2px 2px #DDD;
+	-moz-box-shadow: 2px 2px 2px #DDD;
+}
+.sidebar_text {
+	float: left;
+	background-color: #F6F6F6;
+	width: 200px;
+	margin-bottom: 5px;
+	padding: 5px;
+
+	border: 3px #A5C0D4 solid;
+	border-top: none;
+	border-radius: 0 0 3px 3px;
+	-moz-border-radius: 0 0 3px 3px;
+
+	box-shadow: 2px 2px 2px #DDD;
+	-webkit-box-shadow: 2px 2px 2px #DDD;
+	-moz-box-shadow: 2px 2px 2px #DDD;
+}
+.sidebar_notitle {
+	border-top: 3px #A5C0D4 solid;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+.sidebar_title {
+	float: left;
+	background-color: #A5C0D4;
+	background-image: url(../img/block_title_bg.png);
+	border-radius: 3px 3px 0 0;
+	-moz-border-radius: 3px 3px 0 0;
+	color: #FFF;
+	font-weight: bold;
+	width: 212px;
+	padding: 3px 0 4px 4px;
+	text-shadow: 0px -1px 0px #85A0D4;
+
+	box-shadow: 2px 2px 2px #DDD;
+	-webkit-box-shadow: 2px 2px 2px #DDD;
+	-moz-box-shadow: 2px 2px 2px #DDD;
+}
+#sidebar .sideNav { }
+#sidebar .sideNav li { border-bottom: 1px solid #ddd; }
+#sidebar .sideNav li a {
+	display: block;
+	color: #646464;
+	background: #F6F6F6;
+	text-decoration: none;
+	padding: 8px 19px;
+}
+#sidebar .sideNav li a:hover {
+	background: #fdfcf6;
+	color: #222;
+}
+#sidebar .sideNav li a.activate {
+	background: #DDEAF7;
+}
+#sidebar .sideNav li a.active {
+	background: #DDEAF7;
+	color: #c66653;
+}
+#sidebar .sideNav li a.active:hover {
+	background: #DDEAF7;
+	color: #c66653;
+}
+
+
+/* Колонка с контентом */
+
+.main {
+	margin-left: 224px;
+	background-color: #F6F6F6;
+
+	border: 2px #A5C0D4 solid;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+
+	box-shadow: 2px 2px 2px #DDD;
+	-webkit-box-shadow: 2px 2px 2px #DDD;
+	-moz-box-shadow: 2px 2px 2px #DDD;
+}
+
+.main_no_blocks {
+	background-color: #F6F6F6;
+
+	border: 3px #A5C0D4 solid;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+
+	box-shadow: 2px 2px 2px #DDD;
+	-webkit-box-shadow: 2px 2px 2px #DDD;
+	-moz-box-shadow: 2px 2px 2px #DDD;
+}
+
+#main-wrapper {
+	padding: 15px;
+}
+
+h3 {
+	font-size: 11pt;
+	font-weight: bold;
+	color: #5494af;
+	padding: 0;
+	margin: 0 0 10px;
+}
+
+.footer {
+	margin: 5px 0 0 220px;
+	height: 45px;
+	padding: 0 0 0 5px;
+	color: #777;
+	font-size: 8pt;
+	line-height: 14px;
+}
+.footer_no_blocks {
+	margin: 5px 0 0 0;
+	height: 45px;
+	padding: 0 0 0 5px;
+	color: #777;
+	font-size: 8pt;
+	line-height: 14px;
+}
+
+#footer a { color: #9B9B9B; }
+
+#footer a:hover { text-decoration: none; }
+
+
+/* Постраничная навигация */
+
+div.nav{
+	margin: 5px;
+	margin-top: 0;
+	text-align: center;
+}
+a.nav_item {
+	border: 1px #ccc solid;
+	background: #eee url(../img/nav_grey.png);
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	padding: 3px 8px;
+	line-height: 26px;
+}
+a.nav_item:hover {
+	color: #000;
+	border-color: #aaa;
+	box-shadow: 0 0 2px #aaa;
+	-webkit-box-shadow: 0 0 2px #aaa;
+	-moz-box-shadow: 0 0 2px #aaa;
+}
+.nav_item:active{
+	background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(1, rgb(185,224,245)),
+    color-stop(0, rgb(146,189,214))
+	);
+	background-image: -moz-linear-gradient(
+		center top,
+		rgb(185,224,245),
+		rgb(146,189,214)
+	);
+	box-shadow: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+}
+.nav_active {
+	font-weight: bold;
+
+	border: 1px #ccc solid;
+	background: #eee url(../img/nav_yellow.png);
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+
+	padding: 3px 8px;
+	line-height: 26px;
+	cursor: default;
+}
+
+.nav_item_text {
+	border: 1px #ccc solid;
+	background: #eee url(../img/nav_grey.png);
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+
+	padding: 3px 8px 3px 8px;
+	line-height: 26px;
+	cursor: default;
+}
+
+
+/* Классы стандартные которые могут использоваться в модулях админ панели */
+
+.commtable { /* Таблица комментария */
+	border: 1px #BCD6E9 solid;
+	border-bottom: none;
+	border-right: none;
+	margin: 10px 0px 10px 0px;
+}
+.commth { /* Ячейки заголовков таблицы комментария */
+	color: #000080;
+	background-color: #E1E1E1;
+	border-bottom: 1px #ABC5D8 solid;
+	border-right: 1px #ABC5D8 solid;
+	height: 16px;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+.commtd { /* Ячейки для обычных ячеек таблицы комментария*/
+	padding: 1px;
+	border: 1px #ABC5D8 solid;
+	border-top: none;
+	border-left: none;
+	background-color: #F5F5F5;
+	text-align: center;
+}
+.commtext { /* Ячейка с текстом комментария*/
+	padding: 2px;
+	padding-left: 5px;
+	border: 1px #ABC5D8 solid;
+	border-top: none;
+	border-left: none;
+	background-color: #F5F5F5;
+}
+
+
+/* Таблицы */
+
+.cfgtable {
+	width: 100%;
+	margin: 0px;
+	margin-bottom: 5px;
+	border-collapse: collapse;
+	border: 1px #CCCCCC solid;
+	cursor: default;
+}
+.cfgtable_even{
+	background-color: #F5F5FF;
+}
+.cfgtable_odd{
+	background-color: #FFF;
+}
+.cfgtable_hover{
+	background-color: #DDEAF7;
+}
+.cfgtable th{ /* Ячейки заголовков таблиц */
+	padding: 5px;
+	color: #000;
+	background-color: #E7E7E7;
+	background-image: url(../img/table_th.png);
+	border: 1px #CCCCCC solid;
+	text-shadow: 0px 1px 0px #fff;
+	text-align: center;
+	font-weight: normal;
+}
+.cfgtable td{ /* Ячейки для обычных таблиц*/
+	padding: 4px;
+	text-align: center;
+	vertical-align: middle;
+	border-bottom: 1px #CCCCCC solid;
+}
+
+/* Формы */
+
+.formtable{
+	margin: 10px 27px 27px 27px;
+	padding: 16px;
+	border: 1px #B5D0E4 solid;
+	background-color: #FFF;
+}
+.formtable th{
+	font-weight: normal;
+	font-size: 9pt;
+	color: #000;
+	padding: 5px 14px 0 14px;
+}
+.formtabletd{ /* Ячейки для элементов форм */
+	padding: 2px 14px 5px 14px;
+	vertical-align: middle;
+	border-bottom: 1px #ccc dotted;
+}
+.formtabletitle{ /* Заголовок таблицы */
+	background: url("../img/blocktitlefon.gif");
+	padding: 6px 14px 6px 14px;
+	color: #000000;
+	text-shadow: 1px 1px 1px #eeeeee;
+}
+.form_textcaption_tabletd{
+	font-weight: normal;
+	font-size: 9pt;
+	color: #000;
+	padding: 5px 14px 0 14px;
+}
+.form_text_tabletd{
+	padding: 4px 14px 10px 14px;
+	vertical-align: middle;
+	border-bottom: 1px #ccc dotted;
+}
+.fsubmit{
+	background-color: #eee;
+	padding: 4px 14px 4px 0;
+	height: 32px;
+	vertical-align: middle;
+}
+
+a.button{
+	width: 20px;
+	height: 18px;
+	border: 1px #ccc solid;
+	background: #eee url(../img/nav_grey.png);
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	display: inline-block;
+	padding-left: 0;
+	padding-top: 2px;
+	margin-right: 1px;
+	text-align: center;
+}
+a.button:hover{
+	border-color: #aaa;
+	box-shadow: 0 0 2px #aaa;
+	-webkit-box-shadow: 0 0 2px #aaa;
+	-moz-box-shadow: 0 0 2px #aaa;
+}
+a.button:active{
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(1, rgb(185,224,245)),
+		color-stop(0, rgb(146,189,214))
+	);
+	background-image: -moz-linear-gradient(
+		center top,
+		rgb(185,224,245),
+		rgb(146,189,214)
+	);
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+}
+a.button img{
+	vertical-align: bottom;
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+
+
+/* Таблица конфигурации */
+
+.configtable {
+	width: 100%;
+	border: 1px #CCCCCC solid;
+	background-color: #FFFFFF;
+	border-collapse: collapse;
+}
+
+.configsubmit {
+	text-align: right;
+	width: 100%;
+	height: 30px;
+}
+
+.leftc{
+	width: 55%;
+	background-color: #F2F3F5;
+	vertical-align: top;
+	text-align: left;
+	padding: 5px;
+	border: 1px #CCCCCC solid;
+}
+
+.rightc{
+	background-color: #F9F9F9;
+	vertical-align: top;
+	text-align: left;
+	padding: 5px;
+	border: 1px #CCCCCC solid;
+}
+
+.configdesc{
+	display: block;
+	font-size: 11px;
+	color: #888;
+	margin-top: 4px;
+}

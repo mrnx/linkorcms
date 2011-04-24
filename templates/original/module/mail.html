@@ -1,0 +1,22 @@
+{mail}
+<br />
+<form action="{mail.form_action}" method="post">
+<table align="center" width="100%" style="padding: 3px" class="mail">
+	{mail:message}
+	<tr>
+		<td align="center" class="mail_message">{mail.message}<br /><br /></td>
+	</tr>
+	{/mail:message}
+	<tr>
+		<td align="center"><input class="fade" type="text" name="email" onfocus="this.value='';this.className=''" value="{mail.lemail}" maxlength="50" /></td>
+	</tr>
+	<tr>
+		<td align="center">
+			<input type="hidden" name="mail_form" value='1' />
+			<input type="submit" class="submit" value="{mail.lsubmit}" />
+		</td>
+	</tr>
+</table>
+</form>
+<br />
+{/mail}

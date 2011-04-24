@@ -1,0 +1,37 @@
+<br />
+<form action="{block.form_action}" method="post">
+<table cellspacing="0" cellpadding="2" border="0" align="center" width="100%" style="padding: 3px">
+	<tr>
+		<td align="center">
+			{block.lmail_title} <b>{block.mail_title}</b>.
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<input class="subscribe_email" type="text" name="email" onfocus="this.value='';this.className='subscribe_email2'" value="{block.lemail}" maxlength="50" />
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			{block.lformat}:
+			<select name="html">
+				<option value="1">{block.lhtml}</option>
+				<option value="0">{block.ltext}</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<input type="hidden" name="mail_block_form" value='1' />
+			<input type="hidden" name="topic_id" value="{block.topic_id}" />
+			<input type="submit" class="submit" value="{block.lsubmit}" />
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<a href="<?=Ufu('index.php?name=mail&op=topics', 'mail/{op}/')?>">{block.lother}</a>
+		</td>
+	</tr>
+</table>
+</form>
+<br />

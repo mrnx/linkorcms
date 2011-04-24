@@ -1,0 +1,104 @@
+html{
+	font: 11px Verdana, Tahoma, sans-serif;
+}
+body{
+	font-size: 120%;
+	line-height: 1.4em;
+}
+
+h1{ padding: 10px 5px 2px 0; line-height: 1.08em; font-size: 200%;}
+h2, h3, h4, h5, h6{ padding: 5px 5px 2px 0; line-height: 1.08em; font-size: 150%;}
+
+a { color: #0B537F;text-decoration: none; }
+a:visited { color: #0B537F;text-decoration: none; }
+a:hover { color: #8A8B8B;text-decoration: none; }
+a:active { color: #8A8B8B;text-decoration: none; }
+ul { padding: 0 10px 0 20px; margin: 0 0 0 0; }
+p { margin: 0 0 10px 0; }
+
+.Title {
+	margin-bottom: 3.0pt;
+	font-size: 26.0pt;
+	font-family: "Cambria", "serif";
+	color: #17365D;
+	letter-spacing: .25pt;
+}
+
+.Subtitle {
+	margin-bottom: 10.0pt;
+	line-height: 115%;
+	font-size: 12.0pt;
+	font-family: "Cambria", "serif";
+	color: #4F81BD;
+	letter-spacing: .75pt;
+	font-style: italic;
+}
+
+.Quote {
+	margin-bottom: 10.0pt;
+	line-height: 115%;
+	font-size: 11.0pt;
+	font-family: "Calibri", "sans-serif";
+	color: black;
+	font-style: italic;
+}
+
+.IntenseQuote {
+	margin-top: 10.0pt;
+	margin-right: .65in;
+	margin-bottom: 14.0pt;
+	margin-left: .65in;
+	line-height: 115%;
+	font-size: 11.0pt;
+	font-family: "Calibri", "sans-serif";
+	color: #4F81BD;
+	font-weight: bold;
+	font-style: italic;
+}
+
+.SubtleEmphasis {
+	color: gray;
+	font-style: italic;
+}
+
+.IntenseEmphasis {
+	color: #4F81BD;
+	font-weight: bold;
+	font-style: italic;
+}
+
+.SubtleReference {
+	font-variant: small-caps;
+	color: #C0504D;
+	text-decoration: underline;
+}
+
+.IntenseReference {
+	font-variant: small-caps;
+	color: #C0504D;
+	letter-spacing: .25pt;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.BookTitle {
+	font-variant: small-caps;
+	letter-spacing: .25pt;
+	font-weight: bold;
+}
+
+.CodeForeground {
+	margin: 0in;
+	margin-bottom: .0001pt;
+	font-size: 9.0pt;
+	font-family: 'Courier New';
+	}
+
+.CodeInText {
+	font-family: 'Courier New';
+	font-weight: bold;
+}
+
+.ScreenText {
+	font-family: Tahoma;
+}

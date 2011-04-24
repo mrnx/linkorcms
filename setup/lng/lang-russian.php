@@ -1,0 +1,53 @@
+<?php
+
+define("_CHARSET", "windows-1251");
+define("_TITLE", "Установка CMS");
+define("_SETUP", "Вас приветствует программа установки LinkorCMS");
+define("_SCRIPT", "Этот скрипт поможет Вам установить LinkorCMS версии 1.3 на Ваш сервер");
+define("_WARN", "Не закрывайте окно браузера и не переходите на данную страницу до окончания установки .");
+define("_NEXT", "Далее");
+define("_BACK", "Назад");
+define("_CREATE", "Создать");
+define("_GO", "Начнём");
+define("_DBTYPE", "Выберите тип базы данных и нажмите \"Далее\"");
+define("_MYSQL", "MySQL база данных");
+define("_FILES", "Файлы");
+define("_STEP1", "Добро пожаловать!");
+define("_STEP2", "Лицензионное соглашение");
+define("_STEP3", "База данных");
+define("_STEP4_1", "Конфигурация MySQL базы данных");
+define("_STEP4_2", "Конфигурация файловой базы данных");
+define("_SQL_CREATE", "Создание и конфигурация базы MySQL");
+define("_FDB_CREATE", "Создание и конфигурация базы FilesDB");
+define("_SERVER_OK", "Подключение к серверу прошло успешно");
+define("_SERVER_FILED", "Ошибка при подключении к серверу базы данных на");
+define("_BASE_FILED", "База данных не найдена!");
+define("_BASE_OK", "База данных найдена.");
+define("_SETUP_AND_CONFIG", "Установка и конфигурация");
+define("_SQLFILE_FILED", "Не удалось найти файл запроса");
+define("_TABLE", "Таблица");
+define("_OK", "Успешно");
+define("_ERROR", "Ошибка");
+define("_ERRORS", "Ошибок");
+define("_CREATE_FILE_ERROR", "Ошибка создания файла");
+define("_FILE_GENERATED", "Файл сгенерирован инсталлятором");
+define("_DBCONFIG_FILE_COMMENT", "Настройки базы данных");
+define("_DBCONFIG_FILE", "Файл конфигурации базы данных");
+define("_SETUP_LOG", "Лог установки");
+define("_DBCREATE_FILED", "Не удалось создать базу данных");
+define("_DROP_TABLE_EX", "Удалить существующие таблицы?");
+define("_END_SETUP_MESSAGE", "Поздравляем! Установка базы данных прошла успешно.");
+define("_END_WARNING", "Внимание! Для безопасности cайта удалите папку \"setup\" с сервера.");
+define("_ADMIN_PANEL", "Админ-панель");
+define("_FDB_COMMENT", "Если вы не разбираетесь, то введите только название базы данных и ничего не изменяйте.");
+define("_SQLCONF_1", "Сервер базы данных (обычно 'localhost')");
+define("_SQLCONF_2", "Имя пользователя базы данных");
+define("_SQLCONF_3", "Пароль пользователя базы данных");
+define("_SQLCONF_4", "Название базы данных");
+define("_SQLCONF_5", "Префикс таблиц базы данных( 'prefix'_name )");
+define("_FDBCONF_1", "Директория для баз данных (с последним слэшем)");
+define("_FDBCONF_2", "Название базы данных");
+define("_FDBCONF_3", "Префикс таблиц базы данных( 'prefix'_name )");
+define("_FDBCONF_4", "Расширение для файлов таблиц (только для опытных!)");
+
+?>

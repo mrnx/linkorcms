@@ -1,0 +1,37 @@
+{poll}
+<center><a href="{poll.back_url}">{poll.back_caption}</a></center>
+<br />
+<br />
+<center>{poll.lresults_title}: <b>{poll.title}</b></center>
+<br />
+<table align="center" class="poll_results">
+{poll_result_rows}
+	<tr>
+		<td>
+			<b>{pr.answertext}</b><br />
+			{pr.num_voices} {poll.lrvalue} - {pr.value}%
+			<div class="poll_bar">
+				<table cellpadding="0" cellspacing="0" width="{pr.value}%" class="poll_bar">
+					<tr>
+						<td class="poll_bar_back"></td>
+					</tr>
+				</table>
+			</div>
+		</td>
+	</tr>
+{/poll_result_rows}
+	<tr>
+		<td align="center">
+			<br />
+			{poll.lnum_voices}: {poll.num_voices}<br />
+			{poll.lcomments}: {poll.comments}<br />
+			<br />
+		</td>
+	</tr>
+</table>
+<br />
+{page:enabled_comments}<a name="comments"></a><div class="Subtitle">Комментарии</div>{/page:enabled_comments}
+{comments_navigation}{/comments_navigation}
+{poll_comments}{/poll_comments}
+{comments_navigation}{/comments_navigation}
+{poll_comments_form}{/poll_comments_form} {/poll}

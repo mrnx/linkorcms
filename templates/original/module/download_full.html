@@ -1,0 +1,66 @@
+{download}
+<table cellpadding="5" cellspacing="0" width="100%" class="downloadtable_full">
+	<tr>
+		<th><b>{dl.file_title}</b><div style="float: right; font-weight: bold;">{dl.url}</div></th>
+	</tr>
+	<tr>
+		<td class="download_description read_font">
+			{dl.description}<br />
+			{dl:image}<div class="download_image"><a href="{dl.image}" target="_blank"><img src="{dl.thumb_image}" /></a></div>{/dl:image}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table width="100%" class="downloadinfo_table">
+				<tr align="left">
+					<th width="25%">Дата добавления:</th>
+					<td>{dl.date}</td>
+					<th width="25%">Версия файла:</th>
+					<td>{dl.version}</td>
+				</tr>
+				<tr align="left">
+					<th width="25%">Размер файла:</th>
+					<td>{dl.size}</td>
+					<th width="25%">Скачано раз:</th>
+					<td>{dl.hits}</td>
+				</tr>
+				<tr align="left">
+					<th width="25%">Комментариев:</th>
+					<td width="25%">{dl.comments}</td>
+					<th width="25%">Оценка:</th>
+					<td width="25%">{dl:allow_votes}<img src="{dl.rating_image}" class="article_rating_image" />({dl.rating_num_votes}){/dl:allow_votes}</td>
+				</tr>
+				<tr align="left">
+					<th width="25%">Автор:</th>
+					<td width="25%">{dl.author}</td>
+					<th>E-mail автора:</th>
+					<td>{dl:mail}<a href="mailto:{dl.mail}" title="{dl.mail}">{dl.mail}</a>{/dl:mail}</td>
+				</tr>
+				<tr align="left">
+					<th width="25%">Сайт автора:</th>
+					<td>{dl:homepage}<a href="{dl.homepage_url}" title="http://{dl.homepage}" target="_blank">{dl.homepage}</a>{/dl:homepage}</td>
+					<th width="25%">Формат файла:</th>
+					<td>{dl.filetype}</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td><div style="float: right; font-weight: bold;">{dl.url}</div></td>
+	</tr>
+	{dl:allow_votes}
+	<tr>
+		<td>
+			<form action="{dl.addvote_url}" method="POST">
+			<div class="download_rating">Оценить файл:&nbsp;{dl.votes}{dl.addvotesubm}</div>
+			</form>
+		</td>
+	</tr>
+	{/dl:allow_votes}
+</table>
+{page:enabled_comments}<a name="comments"></a><div class="Subtitle">Комментарии</div>{/page:enabled_comments}
+{comments_navigation}{/comments_navigation}
+{download_comments}{/download_comments}
+{comments_navigation}{/comments_navigation}
+{download_comments_form}{/download_comments_form}
+{/download}

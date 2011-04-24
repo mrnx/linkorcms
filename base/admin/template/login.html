@@ -1,0 +1,20 @@
+{template}
+<body>
+	<div class="center">
+		<form action="{login.action}" method="post">
+			{login:auth_message}<div class="auth_message">{login.auth_message}</div>{/login:auth_message}
+			<div class="auth_form">
+				<div class="auth_title"><b>{login.auth_title}</b></div>
+				<div class="auth_alert"><img src="{template.dir}img/alert.gif" /></div>
+				<div class="auth_inputs">
+					Ћогин:<br />
+					<input type="text" name="admin_name"><br />
+					ѕароль:<br />
+					<input type="password" name="admin_password"><br />
+					<input type="submit" value="¬ход" name="admin_login" class="submit">
+				</div>
+			</div>
+		</form>
+	</div>
+</body>
+{/template}

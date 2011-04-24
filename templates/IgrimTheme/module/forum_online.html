@@ -1,0 +1,23 @@
+	<table  cellpadding="0" cellspacing="0"  align="center" >
+	<tr>
+		<td class="forum_table_title">
+		</td>
+	  {gen_online}
+		<td class="forum_table_title">
+	<B>{users.title}:  {users.count}</B>
+	<span class="normal">(пользователей: {users.reg} , гостей: {users.guest})</span>
+		</td>
+	</tr>
+	<tr>
+	{users:online_img}
+	<td class="forum_status1" style="max-width:30px;">
+	<img src="{template.dir}images/online.gif"  border="0" alt="Online"/>
+	</td>	
+	{/users:online_img}
+	{/gen_online}
+
+		<td  colspan="2" class="forum_status2" style=" padding:4px;width:100%;">
+				{onlines}<span class="smallfont">{user.url}</span>{/onlines}
+		</td>
+	</tr>
+	</table>

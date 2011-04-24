@@ -1,0 +1,11 @@
+Options -Indexes
+AddDefaultCharset windows-1251
+
+RewriteEngine On
+RewriteRule ^(.+\.css)(.*)?$ compress.php?href=$1
+RewriteRule ^index\.html$ index.php
+RewriteRule ^admin/?$ admin.php
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !^/?(forum|images|base|blocks|blog|blogs|modules|plugins|scripts|setup|templates|uploads|admin|/.*\.php).*
+RewriteRule ^(.*)$ index.php?ufu=$1 [L]

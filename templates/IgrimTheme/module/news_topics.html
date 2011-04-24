@@ -1,0 +1,15 @@
+{comment} онтейнер дл€ иконки и названи€ раздела новостей.{/comment}
+
+<table align="center" class="news_topic_table" width="100%">
+	{news_topics}
+	<tr>
+		<td align="left">
+			<a href="{newstopic.url}"><img src="{newstopic.image}" /></a>
+		</td>
+		<td align="left" valign="top" width="100%" style="padding-left: 10px;">
+			<b><a href="{newstopic.url}">{newstopic.title}</a> ({newstopic.num_news})</b><br />
+			<span class="read_font">{newstopic.desc}</span>
+		</td>
+	</tr>
+	{/news_topics}
+</table>

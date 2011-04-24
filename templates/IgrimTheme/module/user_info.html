@@ -1,0 +1,80 @@
+{userinfo}
+<table cellspacing="0" cellpadding="2" width="90%" align="center">
+	<tr>
+		<td align="center" valign="center" colspan="2"><b>{user.name}</b></td>
+	</tr>
+	<tr>
+		<td align="center" valign="middle"><img src="{user.avatar}" /></td>
+		<td align="center"><img src="{user.rankimage}" /><br />{user.rank}</td>
+	</tr>
+	<tr>
+		<td align="center" valign="top" width="50%">
+			<table cellspacing="0" cellpadding="3" width="90%" border="0">
+			{user:true_name}
+				<tr>
+					<td width="30%">Настоящее имя:</td>
+					<td>{user.true_name}</td>
+				</tr>
+			{/user:true_name}
+			{user:age}
+				<tr>
+					<td width="30%">Возраст:</td>
+					<td>{user.age}</td>
+				</tr>
+			{/user:age}
+			{user:city}
+				<tr>
+					<td>Откуда:</td>
+					<td>{user.city}</td>
+				</tr>
+			{/user:city}
+			{user:email}
+				<tr>
+					<td width="30%">E-mail:</td>
+					<td>{user.email}</td>
+				</tr>
+			{/user:email}
+			{user:icq}
+				<tr>
+					<td width="30%">Номер ICQ:</td>
+					<td>{user.icq}</td>
+				</tr>
+			{/user:icq}
+			{user:site}
+				<tr>
+					<td width="30%">Сайт:</td>
+					<td><a href="{user.site_url}" target="_blank">{user.site}</a></td>
+				</tr>
+			{/user:site}
+			{user:about}
+				<tr>
+					<td width="30%">О себе:</td>
+					<td>{user.about}</td>
+				</tr>
+			{/user:about}
+			{user:online}
+				<tr>
+					<td colspan="2"><b>{user.online}</b></td>
+				</tr>
+			{/user:online}
+			</table>
+		</td>
+		<td align="center" valign="top">
+			<table cellspacing="0" cellpadding="3" border="0" width="95%">
+				<tr>
+					<td width="50%">Дата регистрации:</td>
+					<td>{user.regdate}</td>
+				</tr>
+				<tr>
+					<td>Посл. посещение:</td>
+					<td>{user.lastdate}</td>
+				</tr>
+				<tr>
+					<td>Всего посещений:</td>
+					<td>{user.counter}</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+{/userinfo}

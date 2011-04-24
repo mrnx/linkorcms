@@ -1,0 +1,25 @@
+{no_news}Новостей пока нет.{/no_news}
+{block_news}
+<table width="100%">
+{block_news_news}
+	<tr>
+		<td>
+			<table cellspacing="0" cellpadding="0" class="block_news_news">
+				<tr>
+					<td><a href="{news.url}"><b>{news.title}</b></a></td>
+				</tr>
+				<tr>
+					<td>{news.text}</td>
+				</tr>
+				<tr>
+					<td><img src="{template.dir}images/timeicon.gif" />&nbsp;{news.date}</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+{/block_news_news}
+	<tr>
+		<td align="right"><a href="<?=Ufu('index.php?name=news', '{name}/')?>">Все новости</a></td>
+	</tr>
+</table>
+{/block_news}

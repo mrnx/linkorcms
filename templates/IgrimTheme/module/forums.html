@@ -1,0 +1,92 @@
+<table cellspacing="0" cellpadding="0"   class="forum_index" >
+	<tr>
+		<td colspan="2">
+			{forums}
+			{forum:is_cat_open}
+			<table cellspacing="0" cellpadding="0"  class="forum" width="100%">
+				<tr>
+					<td>
+						<table cellspacing="0" cellpadding="0"  width="100%">
+			{/forum:is_cat_open}
+			{forum:is_cat}
+						<tr>
+							<td colspan="5"  class="forum_table_title">
+								<b>{forum.title}</b>{forum.count_read}
+							</td>
+						</tr>
+							<tr>
+								<td colspan="2" class="forum_title"><b>Раздел</b></td>
+								<td   class="forum_title" width="30"><b>Тем</b></td>
+								<td   class="forum_title" width="60"><b>Ответов</b></td>
+								<td  class="forum_title"  width="33%"><b>Последнее </b></td>
+							</tr>
+			{/forum:is_cat}
+			{forum:is_forum}
+							<tr>
+					<td class="forum_status1" align="center" width="36">
+									{forum:on}
+									    {forum:close}
+						                     <img src="{page.dir}images/on.png" title="Есть новые сообщения" alt="Есть новые" />
+								        {/forum:close}
+								        {forum:begin}
+						                      <img src="{page.dir}images/forum_new_lock.gif" title=" Тема закрыта для обсуждения. Есть новые сообщения" alt="Тема закрыта"/>
+						               {/forum:begin}
+									{/forum:on}
+								 {forum:off}
+									      {forum:close}
+						                       <img src="{page.dir}images/off.png" title="Нет новых сообщений" alt="Нет новых" />
+								          {/forum:close}
+								         {forum:begin}
+									           <img src="{page.dir}images/forum_lock.gif" title="Тема закрыта для обсуждения. Нет новых сообщений" alt="Тема закрыта" />
+								          {/forum:begin}
+									{/forum:off}
+								</td>
+								<td class="forum_status2">
+									<p class="forum_status_title"><a href="{forum.url}"><b>{forum.title}</b></a>{forum.count_read} </p>
+								
+									<FONT class="forum_description">{forum.description}</FONT>						{forum:pages} <FONT class="forum_pages"><BR>{forum.pages}</FONT>{/forum:pages}
+									{forum:subforums}	 
+									<div style="font-size:11px;  margin-top:4px; margin-bottom:4px;">Подфорумы:</div>
+									{forum.subforums}								 								  
+								  {/forum:subforums}	
+
+								</td>
+								<td  class="forum_status1" align="center">
+									{forum.topics}
+								</td>
+								<td class="forum_status1" align="center">
+									{forum.posts}
+								</td>
+								<td class="forum_status1">
+									{forum:last_title}
+									<span  class="forum_last_post"><span class="forum_last_post"><img src="{page.dir}images/timeicon.gif" alt=" "  />&nbsp;{forum.last_post}</span>
+									<br />
+									<a href="{forum.last_url_topic}"><img src="{page.dir}images/next.gif"alt=""  />&nbsp;{forum.last_title}</a>
+									от <a href="{forum.last_poster_url}">{forum.last_poster_name}</a></span>{/forum:last_title}
+								</td>
+							</tr>
+			{/forum:is_forum}
+			{forum:is_cat_close}
+							<tr class="forum_cat_close">
+								<td height="5" colspan="5"  class="forum_border"></td>
+							</tr>
+						</table>
+					</td>																 
+				</tr>
+			</table>
+			{/forum:is_cat_close}
+			{/forums}
+		</td>
+	</tr>		
+</table>
+{is_no_sub_forum}
+<table cellspacing="0" cellpadding="0"  class="forum" width="100%">
+	<tr class="forum_status2"> 
+		{is_forum_member}<td  class="forum_is_forum_member">{mark.viewnoreadurl}</td>{/is_forum_member}		
+		{old}<td  class="forum_is_forum_member" align="cener">{mark.lasttopics}</td>{/old}		
+		{is_forum_member}<td  class="forum_is_forum_member" align="right">{mark.url}</td>{/is_forum_member}		
+	</tr>
+</table>
+ {forum_online}{/forum_online}
+ {forum_statistics}{/forum_statistics}
+{/is_no_sub_forum}

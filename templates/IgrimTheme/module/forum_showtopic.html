@@ -1,0 +1,45 @@
+<a name="1"></a>
+{navigation}{/navigation}
+{subscription}	
+<p align="right" ><A HREF="index.php?name=forum&op=subscription&a=add&topic={subs.topic}">{subs.status}</A></p><BR>
+{/subscription}	
+<form action="index.php?name=forum&op=edit_posts" name="edit_posts"method="post">
+{forum_posts}{/forum_posts}
+
+{page:is_admin}
+<!-- controls list -->
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:3px">
+<tr valign="top">
+		<td align="right">
+			<div class="smallfont" style="text-align:left; white-space:nowrap; float:right">
+			<strong>Модерация (<span value="0" id="count"></span>)</strong><br />
+			<select name="do">
+				<optgroup label="Опция">
+					<option value="deleteposts">Удалить</option>
+					<option value="mergeposts">Объединить сообщения</option>
+				</optgroup>
+			</select><input type="submit" class="button" id="go" value="ОК" />
+			</div>
+		</td>
+</tr>
+</table>
+<BR>
+<!-- / controls list -->
+{/page:is_admin}
+</form>
+<br />
+{navigation}{/navigation}
+{page:is_guest}
+<table cellpadding="0" cellspacing="0" border="0" width="95%"align="center" class="forum">
+	<tr>
+		<td class="notice" align="left" >
+			Гости не могут отвечать на темы. <a href="index.php?name=forum&amp;op=login">Войдите</a> или <a href="index.php?name=user&amp;op=registration">Зарегистрируйтесь</a>.
+		</td>
+	</tr>
+</table>
+{/page:is_guest}
+{is_forum_member}
+{post_form}{/post_form}
+{/is_forum_member}	 
+{forum_online}{/forum_online} <BR>
+	

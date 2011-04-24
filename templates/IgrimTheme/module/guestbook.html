@@ -1,0 +1,38 @@
+{topgbform}{/topgbform}
+{navigation}{/navigation}
+{guestbook}
+<table border="0" cellspacing="0" cellpadding="0" width="95%" align="center" class="msgtable">
+	<tr>
+		<td>
+			<table border="0" cellspacing="0" cellpadding="0" width="100%">
+				<tr>
+					<td class="tpmsghd" align="left">
+						{gb.name}
+						{gb:email2}<a href="mailto:{gb.email2}" target="_blank" title="Написать письмо"><img src="{page.dir}images/email.gif"></a>{/gb:email2}
+					    {gb:url2}<a href="{gb.url2}" target="_blank" title="Перейти на сайт"><img src="{page.dir}images/www.gif"></a>{/gb:url2}
+						{gb:icq2}<a href="http://web.icq.com/{gb.icq2}" target="_blank" title="Номер ICQ"><img src="{page.dir}images/icq.gif"></a>{/gb:icq2}
+					</td>
+				</tr>
+				<tr>
+					<td class="btmsghd" align="left">{gb.date}</td>
+				</tr>
+				<tr>
+					<td valign="top" bgcolor="#FFFFFF" class="msgclient read_font">{gb.text}</td>
+				</tr>
+				{gb:answers}
+				<tr>
+					<td class="msgclient" id="answers">{gb.answers}</td>
+				</tr>
+				{/gb:answers}
+				{gb:admin}
+				<tr>
+					<td align="right">{gb.admin}</td>
+				</tr>
+				{/gb:admin}
+			</table>
+		</td>
+	</tr>
+</table>
+{/guestbook}
+{navigation}{/navigation}
+{bottomgbform}{/bottomgbform}

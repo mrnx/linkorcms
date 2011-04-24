@@ -1,0 +1,15 @@
+<a name="post_{post.post_id}"></a><div class="post" style="padding-left:{post.level_padding}px;">
+	<div style="float: left;">{post:user_id}<a href="{post.user_link}" />{/post:user_id}<img src="{post.user_avatar_smallest}" align="left" id="avatar" />{post:user_id}</a>{/post:user_id}</div>
+	<div style="margin-left: 36px;">
+		{post:editing}
+		<div style="float: right;"><a href="{post.edit_url}"><img src="{page.dir}images/action_edit.png" title="Редактировать" alt="Редактировать" /></a><a href="{post.delete_url}"><img src="{page.dir}images/action_delete.png" title="Удалить" alt="Удалить" /></a></div>
+		{/post:editing}
+		<div id="username"><b>{post.user_name}</b>&nbsp;<small class="fade">{post.post_date}</small>&nbsp;&nbsp;<a href="{post.post_url}" title="Ссылка на комментарий" rel="bookmark">#</a>&nbsp;{post:parent_id}<a href="{post.parent_post_url}" title="Ссылка на родителя">&uarr;</a>{/post:parent_id}</div>
+		<div id="message" style="">{post.post_message}</div>
+		<div style="float: right;">{post:parent_id}<a href="#" onclick="return post_reply('replyto{post.post_id}_{post.parent_id}');">Добавить сообщение</a> &#8226; {/post:parent_id}<a href="#" onclick="return post_reply('replyto_{post.post_id}');">Ответить</a></div>
+		<div class="clear"></div>
+		<div class="post_bottom" id="replyto{post.post_id}_{post.parent_id}" style="visibility: hidden; display: none;"></div>
+		<div class="post_bottom" id="replyto_{post.post_id}" style="visibility: hidden; display: none;"></div>
+	</div>
+</div>
+<div class="clear"></div>

@@ -1,0 +1,21 @@
+<br />
+<center>
+	{block.lhello}
+	{block.user_name}
+	<br />
+	<br />
+	<img src="{block.user_avatar_url}" />
+	<br />
+	<br />
+	{block:isadmin}<a href="{block.adminfile_url}">{block.ladminpanel}</a>
+	<br />
+	<br />
+	{/block:isadmin}
+	<a href="{block.user_info_url}">{block.luser_info}</a>
+	<br />
+	<a href="{block.edit_user_data_url}">{block.ledit_user_data}</a>
+	<br />
+	<br />
+	<a href="{block.exit_url}">{block.lexit}</a>
+	<br />
+</center>

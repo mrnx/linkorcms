@@ -1,0 +1,20 @@
+{download}
+<table cellpadding="5" cellspacing="0" width="100%" class="downloadtable">
+	<tr>
+		<th><a href="{dl.url}"><b>{dl.file_title}</b></a></th>
+	</tr>
+	<tr>
+		<td>Размер: {dl.size}  &#8226; <img src="{dl.rating}" class="article_rating_image" />({dl.num_votes})  &#8226; Добавлен: {dl.date}</td>
+	</tr>
+	<tr>
+		<td class="download_description read_font">
+			{dl.description}<br />
+			{dl:image}<div class="download_image"><a href="{dl.image}" target="_blank"><img src="{dl.thumb_image}" /></a></div>{/dl:image}
+		</td>
+	</tr>
+	<tr>
+		<td><a href="{dl.url}"><b>Скачать {dl.file_title}</b></a><div style="float: right;"><a href="{dl.url}#comments">Комментарий: {dl.comments}</a></div></td>
+	</tr>
+</table>
+{/download}
+{navigation}{/navigation}

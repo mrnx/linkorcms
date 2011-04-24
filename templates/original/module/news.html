@@ -1,0 +1,21 @@
+{news}
+<table width="100%" align="center" class="newstable">
+	<tr>
+		<th><a href="{news.link}">{news.title}</a></th>
+	</tr>
+	<tr>
+		<td class="newstext read_font">
+			{news:image}
+				{news:image_url}<a href="{news.image_url}" target="_blank">{/news:image_url}
+					<img src="{news.image}" align="left" class="news_image"/>
+				{news:image_url}</a>{/news:image_url}
+			{/news:image}
+			{news.text}
+		</td>
+	</tr>
+	<tr>
+		<td><span class="news_fade">{news.date}</span> &#8226; {news.author}<div style="float: right;"><a href="{news.link}#comments">Комментарий: {news.com_count}</a></div></td>
+	</tr>
+</table>
+{/news}
+{navigation}{/navigation}

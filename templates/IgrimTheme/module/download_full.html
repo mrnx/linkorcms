@@ -1,0 +1,97 @@
+{download}
+<table width="95%" align="center" cellspacing="0" cellpadding="1" border="0" class="download">
+	<tr>
+		<td align="center" valign="top">
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td colspan="2">
+						<table width="100%" border="0" cellspacing="1" cellpadding="4">
+							<tr>
+								<td align="left" colspan="2" class="bg1">
+									<b>Категория:</b>&nbsp;{dl.category}
+								</td>
+							</tr>
+							<tr>
+								<td align="left" width="100%" class="bg2">
+									<img src="{template.dir}images/download.gif" border="0" alt="Скачать файл" />&nbsp;&nbsp; <b>{dl.file_title}</b>
+								</td>
+								<td align="right" class="bg2" nowrap>
+									<b>{dl.url}</b>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td align="left" class="file_desc read_font">
+						<img src="{template.dir}images/decs.gif" border="0" align="buttom" alt="Описание" />&nbsp;&nbsp; {dl.description}
+					</td>
+				</tr>
+				{dl:image}
+				<tr>
+					<td class="bg5" align="center">
+						<a href="{dl.image}" target="_blank"><img src="{dl.thumb_image}" /></a>
+					</td>
+				</tr>
+				{/dl:image}
+				<tr>
+					<td>
+						<table width="100%" border="0" cellspacing="0" cellpadding="0" class="infocol">
+							<tr align="left" class="bg3">
+								<td width="25%">Дата добавления:</td>
+								<td>{dl.date}</td>
+								<td width="25%">Версия файла:</td>
+								<td>{dl.version}</td>
+							</tr>
+							<tr align="left" class="bg4">
+								<td width="25%">Размер файла:</td>
+								<td>{dl.size}</td>
+								<td width="25%">Скачано раз:</td>
+								<td>{dl.hits}</td>
+							</tr>
+							<tr align="left" class="bg3">
+								<td width="25%">Комментариев:</td>
+								<td width="25%">{dl.comments}</td>
+								<td width="25%">Оценка:</td>
+								<td width="25%">{dl.rating}</td>
+							</tr>
+							<tr align="left" class="bg4">
+								<td width="25%">Автор:</td>
+								<td width="25%">{dl.author}</td>
+								<td>E-mail автора:</td>
+								<td>{dl:mail}<a href="mailto:{dl.mail}" title="{dl.mail}">{dl.mail}</a>{/dl:mail}</td>
+							</tr>
+							<tr align="left" class="bg3">
+								<td width="25%">Сайт автора:</td>
+								<td>{dl:homepage}<a href="{dl.homepage_url}" title="http://{dl.homepage}" target="_blank">{dl.homepage}</a>{/dl:homepage}</td>
+								<td width="25%">Формат файла:</td>
+								<td>{dl.filetype}</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	{dl:allow_votes}
+	<tr>
+		<td align="center" valign="top" class="votecell">
+			<form action="{dl.addvote_url}" method="POST">
+			<table cellpadding="0" cellspacing="0" border="0" width="70%">
+				<tr>
+					<td align="center">Оценить файл :</td>
+					<td align="center">{dl.votes}</td>
+					<td align="center">{dl.addvotesubm}</td>
+				</tr>
+			</table>
+			</form>
+		</td>
+	</tr>
+	{/dl:allow_votes}
+</table>
+<br />
+{comments_navigation}{/comments_navigation}
+{download_comments}{/download_comments}
+{comments_navigation}{/comments_navigation}
+{download_comments_form}{/download_comments_form}
+{/download}

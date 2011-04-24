@@ -1,0 +1,9 @@
+{head}{head.doctype}
+<html>
+<head>
+{head.text}
+<title>{head.title}</title>
+{head.meta}
+</head>
+{head.body}
+</html>{/head}

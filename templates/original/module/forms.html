@@ -1,0 +1,22 @@
+{forms}
+{form.open}
+<table cellspacing="0" cellpadding="4" border="0" align="center" width="90%">
+	<tr>
+		<th colspan="2" class="formtitle">{form.title}</th>
+	</tr>
+	{form:desc}
+	<tr>
+		<td colspan="2" class="formsdesc read_font" align="center">{form.desc}</td>
+	</tr>
+	{/form:desc} {form_fields}
+	<tr>
+		<td class="forms_hname">{field.hname}</td>
+		<td style="padding-top: 2px;">{field.control}</td>
+	</tr>
+	{/form_fields}
+	<tr>
+		<th colspan="2" class="forms_submit">{form.submit}</th>
+	</tr>
+</table>
+{form.close}
+{/forms}

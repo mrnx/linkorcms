@@ -1,0 +1,18 @@
+<table cellspacing="0" cellpadding="0" width="80%" align="center" class="poll">
+	{polls_title}
+	<tr>
+		<td align="center" class="poll_title_td">{ptitle.public}</td>
+		<td align="center" class="poll_title_td">{ptitle.title}</td>
+		<td align="center" class="poll_title_td">{ptitle.comments}</td>
+		<td align="center" class="poll_title_td">{ptitle.voices}</td>
+	</tr>
+	{/polls_title}
+	{polls}
+	<tr>
+		<td align="center" class="poll_td">{poll.public}</td>
+		<td align="center" class="poll_td"><a href="{poll.url}">{poll.title}</a></td>
+		<td align="center" class="poll_td">{poll.comments}</td>
+		<td align="center" class="poll_td">{poll.num_voices}</td>
+	</tr>
+	{/polls}
+</table>

@@ -1,0 +1,36 @@
+{forum_moderation}
+<form name="{mod.form_name}" action="{mod.form_action}" method="post">
+	<input type="hidden" name="posts" value="{mod.posts}">
+	<input type="hidden" name="backurl" value="{mod.backurl}">
+
+	<table cellpadding="0" cellspacing="0" border="0" width="95%" align="center">
+		<tr>
+			<td align="left" style="padding-left: 20px; padding-right: 10px;">
+				{mod:reason}
+				<table align="center" width="90%">
+					<tr>
+						<td align="left" nowrap>
+							<b>Причина удаления</b><br />
+							<script>BBCodeToolBar('reason_text');</script>
+						</td>
+					</tr>
+					<tr>
+						<td width="100%">
+							<textarea name="text" id="reason_text" style="width: 100%; height:100px"></textarea>
+						</td>
+					</tr>
+				</table>
+				{/mod:reason}
+				<table align="center">
+					<tr>
+						<td align="left" nowrap>
+							<input type="button" value="Назад" align="middle" onclick="history.go(-1)">
+							<input type="submit" value="Выполнить" align="middle">
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</form>
+{/forum_moderation}

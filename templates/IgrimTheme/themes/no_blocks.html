@@ -1,0 +1,51 @@
+<?php
+	$site->Doctype = '<!DOCTYPE html>';
+	$site->AddCSSFile('style.css');
+	$site->AddJSFile('functions.js', false, true);
+?>
+{template}
+<body>
+
+	<div class="logo">
+		<div id="logo_image"></div>
+	</div>
+
+	<div class="topmenu">
+		<a href="<?=Ufu('index.php')?>"> Главная </a> :
+		<a href="<?=Ufu('index.php?name=news&op=topics', 'news/{op}/')?>"> Новости </a> :
+		<a href="<?=Ufu('index.php?name=guestbook', '{name}/')?>"> Гостевая книга </a> :
+		<a href="<?=Ufu('index.php?name=downloads', '{name}/')?>"> Скачать </a> :
+		<a href="<?=Ufu('index.php?name=articles', '{name}/')?>"> Статьи </a>
+	</div>
+
+	<div class="container">
+		<div class="content">
+			<div class="text_noblocks">
+				{tblocks}{/tblocks}
+				{content_box}{/content_box}
+				{bblocks}{/bblocks}
+			</div>
+		</div>
+		<div class="clear"></div>
+	</div>
+
+	<div class="info">
+		<div>
+			<table cellpadding="0" cellspacing="0" border="0" width="100%" class="site_copy">
+				<tr>
+					<td align="left" width="180">{page.powered}</td>
+					<td align="center">{page.copyright}</td>
+					<td width="180">&nbsp;</td>
+				</tr>
+			</table>
+		</div>
+		<div class="site_email" align="left">
+			{page:site_email}Веб мастер: <a href="mailto:{page.site_email}">{page.site_email}</a>{/page:site_email}
+		</div>
+		<div class="page_info" align="left">
+			{page.info}
+		</div>
+	</div>
+
+</body>
+{/template}

@@ -1,0 +1,26 @@
+<table class="nav_cont" Border="0" CellSpacing="0" CellPadding="0"
+	align="center">
+	<tr>
+		{is_back}
+		<td>
+		<table cellspacing="0" cellpadding="0" border="0" class="lnav">
+			<tr>
+				{back}{/back}
+			</tr>
+		</table>
+		</td>
+		{/is_back}
+		<td align="center"><table class="nav_menu" border="0" cellspacing="0" cellpadding="0">
+			<tr>{begin}{/begin}{left}{/left}<td class="nav_active">{nav.active}</td>{right}{/right}{end}{/end}</tr>
+		</table></td>
+		{is_next}
+		<td>
+		<table cellspacing="0" cellpadding="0" border="0" class="rnav">
+			<tr>
+				{next}{/next}
+			</tr>
+		</table>
+		</td>
+		{/is_next}
+	</tr>
+</table>

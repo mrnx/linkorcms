@@ -1,0 +1,109 @@
+.bbcode_toolbar{
+	padding-top: 2px;
+	padding-bottom: 4px;
+	height: 23px;
+}
+
+.bbcode_button{
+	float: left;
+	display: block;
+
+	width: 20px;
+	height: 18px;
+	border: 1px #ccc solid;
+	background: #eee url(../../../scripts/bbcode_editor/images/button_bg.png);
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	padding-left: 0;
+	padding-top: 2px;
+	margin-right: 1px;
+	text-align: center;
+
+	cursor: pointer;
+}
+.bbcode_button:hover{
+	border-color: #aaa;
+	box-shadow: 0 0 2px #aaa;
+	-webkit-box-shadow: 0 0 2px #aaa;
+	-moz-box-shadow: 0 0 2px #aaa;
+}
+.bbcode_button:active{
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(1, rgb(185,224,245)),
+		color-stop(0, rgb(146,189,214))
+	);
+	background-image: -moz-linear-gradient(
+		center top,
+		rgb(185,224,245),
+		rgb(146,189,214)
+	);
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+}
+.bbcode_button img{
+	vertical-align: bottom;
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+
+.bbcode_colorbar{
+	height: 11px;
+	padding-bottom: 2px;
+}
+
+.bbcode_color{
+	width: 13px;
+	height: 13px;
+	margin: 1px;
+	cursor: pointer;
+	float: left;
+}
+
+.bbcode_color:hover{
+	width: 13px;
+	height: 13px;
+	border: 1px solid #537BAE;
+	margin: 0;
+}
+
+.bbcode_select{
+	border: 1px #CEC8B9 solid;
+	border-radius: 3px;
+	vertical-align: top;
+	margin: 0;
+	margin-left: 2px;
+	padding: 2px;
+}
+
+.bbcode_quote{
+	margin: 0;
+	width: 95%;
+	border: 1px #CEC8B9 solid;
+	background-color: #F8F8F8;
+	padding:5px;
+}
+
+.bbcode_php{
+	margin: 0;
+	width: 95%;
+	border: 1px #CEC8B9 solid;
+	background-color: #F8F8F8;
+	padding:5px;
+}
+
+.bbcode_code{
+	margin: 0;
+	width: 95%;
+	border: 1px #CEC8B9 solid;
+	background-color: #F8F8F8;
+	padding:5px;
+}
+
+.bbcode_hide{ margin: 3px 0 3px 0; }
+.bbcode_hide a{ border: 1px #cccccc solid; background-color: #EEEEEE; display: inline-block; width: 98%; padding: 3px; outline: 0;}
+.bbcode_hide div{ border:  1px #cccccc solid; border-top: none; padding: 3px; width: 98%;}

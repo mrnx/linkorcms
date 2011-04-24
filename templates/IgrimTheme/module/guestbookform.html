@@ -1,0 +1,70 @@
+<form name="newgbmessage" action="{form.action}" method="post">
+	<table cellpadding="0" cellspacing="0" border="0" width="95%" align="center" class="commform">
+		<tr>
+			<td class="commform_title" align="left">{form.title}</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<table border="0" cellpadding="0" cellspacing="0" class="msgclient" width="80%">
+					<tr>
+						<td align="left" nowrap>{form.lname}</td>
+						<td width="100%">
+							<input style="width: 100%" type="text" name="name" value="{form.name}" maxlength="50" required />
+						</td>
+					</tr>
+					<tr>
+						<td align="left" nowrap>{form.lemail}</td>
+						<td>
+							<input style="width: 100%" type="text" name="email" value="{form.email}" maxlength="50" required />
+						</td>
+					</tr>
+					<tr>
+						<td align="right" colspan="2">
+							{form.lhideemail}&nbsp;<input type="checkbox" name="hideemail" value="1"{form.hideemail} />
+						</td>
+					</tr>
+					<tr>
+						<td align="left" nowrap>{form.lsite}</td>
+						<td>
+							<input style="width: 100%" type="text" name="site" value="{form.site}" maxlength="250" />
+						</td>
+					</tr>
+					<tr>
+						<td align="left" nowrap>{form.licq}</td>
+						<td>
+							<input style="width: 100%" type="text" name="icq" value="{form.icq}" maxlength="15" />
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" align="left" valign="top" nowrap>
+							{form.ltext}
+							<br />
+							<textarea style="width: 100%; height: 120px;" name="text" required></textarea>
+						</td>
+					</tr>
+				{form:show_kaptcha}
+					<tr>
+						<td align="center">
+							<img src="{form.kaptcha_url}" height="{form.kaptcha_height}" width="{form.kaptcha_width}" id="codeimage" />
+							<br />
+							<a href="#" onclick="document.getElementById('codeimage').src = '{form.kaptcha_url}&amp;time=' + Date(); return false;">Показать другую</a>
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td align="left" colspan="2">
+							Введите код с картинки: &nbsp&nbsp; <input type="text" name="keystr" />
+						</td>
+					</tr>
+				{/form:show_kaptcha}
+					<tr>
+						<td></td>
+						<td align="center">
+							<input type="submit" value="{form.scaption}" title="{form.hcaption}" class="submit" />
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</form>

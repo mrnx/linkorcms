@@ -1,0 +1,79 @@
+{userinfo}
+<table width="100%" align="center">
+	<tr>
+		<td align="center" valign="center" colspan="2"><h4>{user.name}</h4></td>
+	</tr>
+	<tr>
+		<td align="center" valign="middle" colspan="2"><img src="{user.avatar}" /><br /><img src="{user.rankimage}" /><br />{user.rank}<br /><br /></td>
+	</tr>
+	<tr>
+		<td align="center" valign="top" width="50%">
+			<table class="user_info" width="95%">
+			{user:true_name}
+				<tr>
+					<td width="30%" align="left">Настоящее имя:</td>
+					<td align="left">{user.true_name}</td>
+				</tr>
+			{/user:true_name}
+			{user:age}
+				<tr>
+					<td width="30%" align="left">Возраст:</td>
+					<td align="left">{user.age}</td>
+				</tr>
+			{/user:age}
+			{user:city}
+				<tr>
+					<td align="left">Откуда:</td>
+					<td align="left">{user.city}</td>
+				</tr>
+			{/user:city}
+			{user:email}
+				<tr>
+					<td width="30%" align="left">E-mail:</td>
+					<td align="left">{user.email}</td>
+				</tr>
+			{/user:email}
+			{user:icq}
+				<tr>
+					<td width="30%" align="left">Номер ICQ:</td>
+					<td align="left">{user.icq}</td>
+				</tr>
+			{/user:icq}
+			{user:site}
+				<tr>
+					<td width="30%" align="left">Сайт:</td>
+					<td align="left"><a href="{user.site_url}" target="_blank">{user.site}</a></td>
+				</tr>
+			{/user:site}
+			{user:about}
+				<tr>
+					<td width="30%" align="left">О себе:</td>
+					<td align="left">{user.about}</td>
+				</tr>
+			{/user:about}
+			{user:online}
+				<tr>
+					<td colspan="2" align="left"><b>{user.online}</b></td>
+				</tr>
+			{/user:online}
+			</table>
+		</td>
+		<td align="center" valign="top">
+			<table class="user_info" width="95%">
+				<tr>
+					<td width="50%" align="left">Дата регистрации:</td>
+					<td align="left">{user.regdate}</td>
+				</tr>
+				<tr>
+					<td align="left">Посл. посещение:</td>
+					<td align="left">{user.lastdate}</td>
+				</tr>
+				<tr>
+					<td align="left">Всего посещений:</td>
+					<td align="left">{user.counter}</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+{/userinfo}

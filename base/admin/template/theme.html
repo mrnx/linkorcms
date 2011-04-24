@@ -1,0 +1,71 @@
+<?php
+	// Подключаем jQuery, jQuery UI и плагины
+	include_once('scripts/jquery/jquery.php');
+	include_once('scripts/jquery_ui/jquery-ui.php');
+	include_once('scripts/jquery_plugins/plugins.php');
+	include_once('scripts/jquery_topmenu/topmenu.php');
+
+	System::admin()->AddJSFile('application.js');
+	System::admin()->AddCSSFile('style.css');
+
+	System::admin()->AddOnLoadJS(<<<JS
+		$('.cfgtable tr:nth-child(even)').addClass('cfgtable_even').hover(
+			function(){ $(this).addClass('cfgtable_hover'); },
+			function(){ $(this).removeClass('cfgtable_hover'); }
+		);
+		$('.cfgtable tr:nth-child(odd)').addClass('cfgtable_odd').hover(
+			function(){ $(this).addClass('cfgtable_hover'); },
+			function(){ $(this).removeClass('cfgtable_hover'); }
+		);
+		$("#sidebar .sideNav li a").mousedown(function(e){ if(e.which == 1)$(this).addClass('activate'); });
+		$("input[type=button], input[type=submit]").button();
+JS
+);
+
+?>
+{template}
+<body>
+<div id="wrapper">
+	{page.errors_text}
+	<div class="menu_backing">
+		<div class="header">
+			<div class="admin_logo"></div>
+		</div>
+
+		<div class="menu" id="admin_menu"><a class="menu_config_btn" href="admin.php?exe=adminmenu" title="Настроить меню"><img src="images/admin/config.png"></a></div>
+	</div>
+	<div class="breadcrumb">
+		<ul>
+			<li class="crumb"><a href="admin.php"><img src="images/logo16.png">&nbsp;&nbsp;<span>Админ-панель</span></a><a href="#" class="crumb"><img src="images/chevron.png"></a></li>
+			<li class="crumb"><a href="#"><img src="modules/news/news.png">&nbsp;&nbsp;<span>Новости</span></a><a href="#" class="crumb"><img src="images/chevron.png"></a></li>
+			<li class="crumb"><a href="#"><span>Добавить новость</span></a></li>
+		</ul>
+		<div style="clear: both;"></div>
+	</div>
+	<div id="container">
+		{page:tool_menu_block}
+		<div id="sidebar">
+			{admin_blocks}{/admin_blocks}
+		</div>
+		{/page:tool_menu_block}
+		<div id="main" class="{page:tool_menu_block(main|main_no_blocks)}">
+			<div id="main-wrapper">
+			{page:content_block}
+				{content_box}{/content_box}
+			{/page:content_block}
+			</div>
+		</div>
+		<div id="footer" class="{page:tool_menu_block(footer|footer_no_blocks)}">
+			<div style="float: right; font-size: 8pt;">
+				Система управления контентом {page.cms_name} v{page.cms_version}<br />
+				© 2011, LinkorCMS Development Group
+			</div>
+			{page:showinfo}%info%{/page:showinfo}
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$("#admin_menu").lTopMenu({page.menu_data});
+</script>
+</body>
+{/template}

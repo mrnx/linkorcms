@@ -1,0 +1,54 @@
+{navigation}{/navigation}
+{download}
+<table width="95%" align="center" cellspacing="0" cellpadding="1" border="0" class="download">
+	<tr>
+		<td align="center" valign="top">
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td colspan="2">
+						<table width="100%" border="0" cellspacing="1" cellpadding="4">
+							<tr>
+								<td align="left" class="bg1">
+									<a href="{dl.url}"><b>{dl.file_title}</b></a>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td class="file_desc read_font">
+						<img src="{template.dir}images/decs.gif" border="0" align="buttom" alt="Описание" />
+						{dl.description}
+					</td>
+				</tr>
+				{dl:image}
+				<tr>
+					<td class="bg5" align="center">
+						<a href="{dl.image}" target="_blank"><img src="{dl.thumb_image}" /></a>
+					</td>
+				</tr>
+				{/dl:image}
+				<tr>
+					<td>
+						<table width="100%" border="0" cellspacing="0" cellpadding="0" class="infocol">
+							<tr align="left" class="bg4">
+								<td>Размер файла:</td>
+								<td>{dl.size}</td>
+								<td>Скачиваний:</td>
+								<td>{dl.hits}</td>
+							</tr>
+							<tr align="left" class="bg3">
+								<td width="25%">Комментариев:</td>
+								<td width="25%">{dl.comments}</td>
+								<td width="25%">Оценка:</td>
+								<td width="25%"><img src="{dl.rating}" /></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+{/download}
+{navigation}{/navigation}

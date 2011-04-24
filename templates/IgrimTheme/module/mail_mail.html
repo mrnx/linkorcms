@@ -1,0 +1,21 @@
+{mail_history}
+<p class="mail_history_title">{mail_history.topic}</p>
+{navigation}{/navigation}
+<table cellspacing="0" cellpadding="0" border="0" class="mail_history" align="center">
+	<tr>
+		<th class="mail_history_th_date">{mail_history.ldate}</th>
+		<th>{mail_history.lsubject}</th>
+	</tr>
+{mail}
+	<tr>
+		<td valign="top" style="text-align: left; padding: 3px; padding-left: 10px;">
+			{mail.date}
+		</td>
+		<td valign="top" style="text-align: left; padding: 3px; padding-left: 10px;">
+			<a href="{mail.url}">{mail.subject}</a>
+		</td>
+	</tr>
+{/mail}
+</table>
+{/mail_history}
+{navigation}{/navigation}

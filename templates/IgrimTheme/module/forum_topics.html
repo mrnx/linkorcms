@@ -1,0 +1,195 @@
+<a name="1">	</a>
+<form action="index.php?name=forum&op=edit_topics" name="edit_topics" method="post">
+	<input type="hidden" name="hidecount" value="0" />
+	{navigation}{/navigation}
+	<table cellspacing="0" cellpadding="0" class="forum"  width="100%" align="center">
+		<tr>
+			<td>
+				<table cellspacing="0" cellpadding="0"   width="100%" >
+					<tr>
+				{statistik}
+						<td colspan="2" class="forum_title" align="center"><b>Темы </b>{stat.count_read}</td>
+						<td width="60" class="forum_title" align="center">Ответов</td>
+						<td width="60" class="forum_title" align="center">Просмотров</td>
+						<td  class="forum_title" style="width:27%" align="center"><b>Последнее </b></td>
+						{page:is_admin}<td width="20"  class="forum_title" align="center"></td>{/page:is_admin}
+				{/statistik}
+					</tr>
+
+				{no_topics}
+				<tr>
+					<td style="padding: 4px; border: 1px #DDEEDD solid;" align="left" colspan="5">
+						Нет сообщений...
+					</td>
+				</tr>
+				{/no_topics}
+
+				{topics}
+					<tr>
+						<td  class="forum_status1"  align="center" width="36">
+						{topic:on}
+								{topic:close}
+							<img src="{page.dir}images/on.png" title="Есть новые сообщения"alt="Есть новые" />
+								{/topic:close}
+								{topic:begin}
+							<img src="{page.dir}images/forum_new_lock.gif" title=" Тема закрыта для обсуждения. Есть новые сообщения" alt="Тема закрыта" />
+						        {/topic:begin}
+						{/topic:on}
+						{topic:off}
+								 {topic:close}
+							<img src="{page.dir}images/off.png" title="Нет новых сообщений" alt="Нет новых" />
+								  {/topic:close}
+								{topic:begin}
+							<img src="{page.dir}images/forum_lock.gif" title="Тема закрыта для обсуждения. Нет новых сообщений" alt="Тема закрыта" />
+								  {/topic:begin}
+						{/topic:off}
+						</td>
+						<td class="forum_status2">
+							<p class="forum_status_title"><b>{topic.stick}</b><a href="{topic.url}"><B>{topic.title}</B></a>{topic.read}</p>
+							<span style="color:#78828B;">Автор:</span> <a href="{topic.starter_url}">{topic.starter_name}</a>
+							<FONT  COLOR="#FF0033">&nbsp;{topic.status}</FONT>
+						{page:is_admin}
+							<a href="#" onclick="DeleteTopic('{topic.id}'); return false;"><span style="color:#78828B;">Удалить</span></a>
+						{/page:is_admin}
+						{topic:pages}<BR><FONT style="font-size:10px;  color:#838383;  line-height:12px; ">{topic.pages}</FONT>{/topic:pages}
+						</td>
+						<td class="forum_status1" align="center">
+						{topic.posts}
+						</td>
+						<td class="forum_status1" align="center">
+						{topic.hits}
+						</td>
+						<td class="forum_status1">
+						{topic:last_poster_name}
+							<span  span style="color:#78828B;"><img src="{page.dir}images/timeicon.gif" alt=""/>&nbsp;{topic.last_post}</span><br />
+							<a href="{topic.last_url}"  span style="color:#78828B;">последнее сообщение:</a>
+							<a href="{topic.last_poster_url}"  >{topic.last_poster_name}</a>{/topic:last_poster_name}
+						</td>
+						{page:is_admin}
+						<td class="forum_status1" align="center" id="{topic.id}">
+							<input type="checkbox" name="topics[{topic.id}]" id="topiclist_{topic.id}" value="{topic.id}" onclick="ShowPostYelow(this.form, 'topiclist_{topic.id}','{topic.id}');" />
+						</td>
+					{/page:is_admin}
+					</tr>
+				{/topics}
+					<tr class="forum_cat_close">
+						<td colspan="6" height="5" ></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	<table cellspacing="0" cellpadding="0"  class="forum" width="100%">
+		<tr>
+		{is_forum_member}<td  class="forum_is_forum_member">{mark.viewnoreadurl}</td>{/is_forum_member}
+		{old}<td  class="forum_is_forum_member" align="cener">{mark.lasttopics}</td>{/old}
+		{is_forum_member}<td  class="forum_is_forum_member" align="right">{mark.url}</td>{/is_forum_member}
+		</tr>
+	</table>
+	{navigation}{/navigation}
+	{page:is_admin}
+	<!-- controls list -->
+	<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:3px">
+		<tr valign="top">
+			<td align="right">
+				<div class="smallfont" style="text-align:left; white-space:nowrap; float:right">
+					<strong>Модерация (<span value="0" id="count"></span>)</strong><br />
+					<select name="do">
+						<optgroup label="Опция">
+							<option value="deletetopic">Удалить темы</option>
+							<option value="open">Открыть темы</option>
+							<option value="close">Закрыть темы</option>
+							<option value="stick">Установить для темы статус "Важная"</option>
+							<option value="unstick">Снять с темы статус "Важная"</option>
+							<option value="movetopic">Переместить темы</option>
+							<option value="mergetopic">Объединить темы</option>
+						</optgroup>
+					</select><input type="submit" class="button" id="go" value="ОК" />
+				</div>
+			</td>
+		</tr>
+	</table>
+	<BR>
+	<!-- / controls list -->
+	{/page:is_admin}
+</form>
+<br />
+
+<!--  Форма добавления тем -->
+{page:is_guest}
+<table cellpadding="0" cellspacing="0" border="0" width="95%" align="center" class="forum">
+	<tr>
+		<td class="notice" align="left">
+			Гости не могут создавать новые темы. <a href="index.php?name=forum&amp;op=login"><B>Войдите</B></a> или <a href="index.php?name=user&amp;op=registration"><B>Зарегистрируйтесь</B></a>.
+		</td>
+	</tr>
+</table>
+{/page:is_guest}
+
+{topic_form}
+<form name="forum_topic" action="{form.url}" method="post" onsubmit="return (CheckTopicForm(this))" enctype="multipart/form-data">
+	<table cellpadding="0" cellspacing="0" border="0" width="100%" align="center" class="forum">
+		<tr>
+			<td class="forum_table_title" align="left">
+				<a href="#" onclick="ShowHide('view_comform'); return false;"><b>Добавить новую тему</b></a>
+			</td>
+		</tr>
+		<tr>
+			<td  id="view_comform" class="forum_status2" style="visibility: hidden; display: none;"  align="center">
+				<table border="0" cellpadding="4" cellspacing="0" class="forum_status1" style="width: 100%; max-width:540px;"  align="center">
+					<tr>
+						<td align="left" nowrap><b>Название темы</b>*:</td>
+					</tr>
+					<tr>
+						<td width="100%">
+							<input style="width:98%; max-width:520px;" type="text" name="topic_title" value="" maxlength="255" />
+						</td>
+					</tr>
+					<tr>
+						<td align="left">
+							<div style="padding-top: 5px;"><b>Сообщение</b>*:</div>
+							<script>BBCodeToolBar('topic_text');</script>
+							<div class="clear"></div>
+							<div style="padding-top: 5px;"><textarea name="text" id="topic_text" style="width: 98%; max-width:520px; height:165px;"></textarea></div>
+						</td>
+					</tr>
+					<tr>
+						<td  align="left" width="100%">
+							<div align="left" style="width: 100%; max-width:520px;">
+								<fieldset>
+									<legend><a href="#" onclick="ShowHide('smilies'); return false;">Смайлики</a></legend>
+									<div  style="visibility: hidden; display: none;padding-left: 4px; padding-right: 4px;"  id="smilies" >
+										<div>{smilies}<img src="{smile.file}" title="{smile.desc}" onclick="smilies('topic_text','{smile.code}')" /> {/smilies}</div>
+									</div>
+								</fieldset>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" align="center">
+							<input type="submit" value="Добавить" title="Добавить тему" class="submit" />
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</form>
+{/topic_form}
+
+{topic_right}
+<table cellpadding="0" cellspacing="0"  align="left"  class="forum"  style="max-width:270px;">
+	<tr>
+		<td align="center" class="forum_table_title">
+			Права в разделе форума .
+		</td>
+	</tr>
+	<tr>
+		<td  align="left"  class="forum_status2">
+			{topic.right}
+		</td>
+	</tr>
+</table>
+{/topic_right}
+{forum_topics_statistics}{/forum_topics_statistics}
+{forum_topics_online}{/forum_topics_online}

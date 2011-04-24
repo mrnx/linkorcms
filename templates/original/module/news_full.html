@@ -1,0 +1,26 @@
+{news}
+<table width="100%" align="center" class="newstable">
+	<tr>
+		<th><a href="{news.cat_link}">{news.topic}</a>: {news.title}</th>
+	</tr>
+	<tr>
+		<td class="newstext read_font">
+			{news:image}
+				{news:image_url}<a href="{news.image_url}" target="_blank">{/news:image_url}
+					<img src="{news.image}" align="left" style="margin: 0 10px 10px 0;"/>
+				{news:image_url}</a>{/news:image_url}
+			{/news:image}
+			{news.text}
+		</td>
+	</tr>
+	<tr>
+		<td><span class="news_fade">{news.date}</span> &#8226; {news.author}</td>
+	</tr>
+</table>
+<br />
+{page:enabled_comments}<a name="comments"></a><div class="Subtitle">Комментарии</div>{/page:enabled_comments}
+{comments_navigation}{/comments_navigation}
+{news_comments}{/news_comments}
+{comments_navigation}{/comments_navigation}
+{news_comments_form}{/news_comments_form}
+{/news}

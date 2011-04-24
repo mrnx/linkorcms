@@ -1,0 +1,18 @@
+<table width="100%" align="center" class="pollslist">
+	{polls_title}
+	<tr>
+		<th align="center">{ptitle.public}</th>
+		<th align="center">{ptitle.title}</th>
+		<th align="center">{ptitle.comments}</th>
+		<th align="center">{ptitle.voices}</th>
+	</tr>
+	{/polls_title}
+	{polls}
+	<tr>
+		<td align="center">{poll.public}</td>
+		<td align="center"><a href="{poll.url}">{poll.title}</a></td>
+		<td align="center">{poll.comments}</td>
+		<td align="center">{poll.num_voices}</td>
+	</tr>
+	{/polls}
+</table>

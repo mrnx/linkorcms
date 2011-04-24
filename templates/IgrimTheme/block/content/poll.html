@@ -1,0 +1,43 @@
+<form action="{block.form_action}" method="post">
+<table cellspacing="0" cellpadding="0" boredr="0" width="100%">
+	<tr>
+		<td><b>{block.poll_title}</b></td>
+	</tr>
+	<tr>
+		<td style="padding: 5px;">
+			<table cellspacing="0" cellpadding="3" border="0">
+				{poll_block_variants}
+				<tr>
+					<td>
+						<label>{variant.control}&nbsp;{variant:color}<font color="{variant.color}">{/variant:color}{variant.title}{variant:color}</font>{/variant:color}</label>
+					</td>
+				</tr>
+				{/poll_block_variants}
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<table cellspacing="0" cellspadding="0" border="0" align="center" width="100%">
+				<tr>
+					<td align="center" style="padding-bottom: 10px;">
+						<input type="submit" value="Ответить" />
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+						{block.lnum_voices}: {block.num_voices}<br />{block.lcomments}: {block.comments}<br />
+					</td>
+				</tr>
+				<tr>
+					<td align="center" style="padding: 10px;">
+						{block:poll_showresults} <a href="{block.poll_url}">{block.lshowresults}</a>
+						<br />
+						{/block:poll_showresults} <a href="{block.others_url}">{block.lothers}</a>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</form>

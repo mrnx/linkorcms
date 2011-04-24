@@ -1,0 +1,27 @@
+{search_form}
+<form name="{form.form_name}" action="{form.url}" method="get">
+<table cellspacing="2" cellpadding="2" border="0" align="center">
+	<tr>
+		<td valign="top" align="center">
+			<input type="hidden" name="name" value="search" />
+			<input type="hidden" name="op" value="search" />
+			<input type="text" name="searchstr" value="{form.searchstr}" style="width: 210px;" maxlength="250" />&nbsp;
+			<input type="submit" value="{form.lsubmit}" />
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table cellspacing="0" cellpadding="0" border="0" align="center">
+				<tr>
+					{search_modules}
+					<td class="search_mod">
+						<label><input type="checkbox" name="mod[]" value="{mod.name}"{mod:checked} checked="checked"{/mod:checked} />&nbsp;{mod.title}</label>
+					</td>
+					{/search_modules}
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</form>
+{/search_form}

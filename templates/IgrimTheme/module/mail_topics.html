@@ -1,0 +1,42 @@
+{mail}
+<form action="{mail.form_action}" method="post">
+<table cellspacing="0" cellpadding="2" border="0" width="100%">
+	<tr>
+		<td>
+			<br />
+			{mail.lfor}
+			<b>{mail.email}</b> (<a href="<?=Ufu('index.php?name=mail&op=new', 'mail/{op}/')?>">{mail.lnew}</a>)
+			<br />
+			<br />
+		</td>
+	</tr>
+	{mail_topics}
+	<tr>
+		<td>
+			<table cellspacing="0" cellpadding="0" border="0" class="mail_topics_table">
+				<tr>
+					<td class="mail_check_id" valign="top">
+						<input type="checkbox" name="topic[]" value="{topic.id}"{topic:checked} checked="checked"{/topic:checked} />
+						<select name="html[]">
+							<option value="1">{mail.lhtml}</option>
+							<option value="0" {topic:text_checked} selected="selected"{/topic:text_checked}>{mail.ltext}</option>
+						</select>
+					</td>
+					<td class="mail_title_td">
+						&nbsp;<b>{topic.title}</b>&nbsp;&nbsp;({mail.lcount}: {topic.count}) | (<a href="{topic.history_url}">{mail.lhistory}</a>) <br /> {topic.description}
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	{/mail_topics}
+	<tr>
+		<td colspan="2" align="left">
+			<input type="hidden" name="mail_topics_form" value='1' />
+			<input type="submit" class="submit" value="{mail.lsubmit}" />
+		</td>
+	</tr>
+</table>
+</form>
+<br />
+{/mail}

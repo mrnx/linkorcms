@@ -1,0 +1,12 @@
+<ul class="block_menu">
+{block_menu_items}
+	<li><a href="{menu_item.link}"{menu_item:selected} class="block_menu_selected"{/menu_item:selected}>{menu_item.title}</a></li>
+	{menu_item:subitems}
+		<ul class="block_submenu">
+		{block_menu_subitems}
+			<li><a href="{menu_subitem.link}"{menu_subitem:selected} class="block_menu_selected"{/menu_subitem:selected}>{menu_subitem.title}</a></li>
+		{/block_menu_subitems}
+		</ul>
+	{/menu_item:subitems}
+{/block_menu_items}
+</ul>

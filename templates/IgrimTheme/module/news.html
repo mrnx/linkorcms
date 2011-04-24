@@ -1,0 +1,30 @@
+{navigation}{/navigation}
+{news}
+<table cellspacing="0" cellpadding="0" width="100%" align="center" class="newstable">
+	<tr>
+		<td {news:image}colspan="2" {/news:image}class="news_title">&nbsp;
+		<span class="topic_cap"><a href="{news.cat_link}">{news.topic}</a></span> :
+		<a href="{news.link}">{news.title}</a>
+		</td>
+	</tr>
+	<tr>
+		{news:image}
+		<td rowspan="2" class="news_pict" valign="top">
+			{news:image_url}<a href="{news.image_url}" target="_blank">{/news:image_url}<img src="{news.image}">{news:image_url}</a>{/news:image_url}
+		</td>
+		{/news:image}
+		<td valign="middle" align="left" class="news_tb_info">
+			<span class="news_fade">Опубликовано: {news.date}</span>
+		</td>
+	</tr>
+	<tr>
+		<td class="news_tb_client read_font" width="100%" valign="top">{news.text}</td>
+	</tr>
+	<tr>
+		<td {news:image}colspan="2" {/news:image}valign="middle" align="left" class="news_tb_info">
+		{news.full} {news.com}
+		</td>
+	</tr>
+</table>
+{/news}
+{navigation}{/navigation}

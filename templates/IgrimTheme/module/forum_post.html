@@ -1,0 +1,60 @@
+<a name="{post.id}"></a>
+{post:last}<a name="last"></a>{/post:last}
+<table cellspacing="0" cellpadding="0"  align="center"  id="{post.id}" class="forum_post" width="100%" >
+<tr>
+		<td valign="top" align="left" class="forum_comth" width="10%"   >
+			<b>{post.author}</b>
+		</td>
+		<td align="left" class="forum_comth" width="90%">
+			&nbsp;{post.status}&nbsp;{comment}{post.email}&nbsp;{post.homepage}{/comment}
+		</td>
+		<td align="right" class="forum_comth"   width="20">
+			<a  href="{post.url}" >#{post.num}</a>
+		</td>
+		
+		{page:is_admin}
+		{post:nodelete}
+	  		<td align="right"  class="forum_comth" width="20">
+		<input type="checkbox" name="posts[{post.id}]" id="postslist_{post.id}" value="{post.id}" onclick="ShowPostYelow(this.form, 'postslist_{post.id}','posttext{post.id}current');" />
+		</td>
+		{/post:nodelete}
+		{/page:is_admin}
+	</tr>
+	<tr >
+		<td align="left" valign="top" rowspan="4" class="forum_cominfo" >
+			{post:avatar}<CENTER><img src="{post.avatar}" class="avatar" alt="Аватар"/></CENTER>{/post:avatar}
+			{post.rank_name}
+			<br />
+			{post:rank_image}<CENTER><img src="{post.rank_image}" alt="ранг"/></CENTER>{/post:rank_image}
+			Регистрация: {post.regdate}
+			<br />
+			{post.usertopics}
+			<br />
+			{page:is_admin}
+			ip: {post.ip}<br />
+			{/page:is_admin}
+			{post:is_current_user}
+			<a href="index.php?name=forum&op=editpost&topic={post.topic_id}&post={post.id}&page={post.page}"><img src="images/admin/edit.png" title="Редактирование" alt="Редактировать" ></a>
+			{/post:is_current_user}
+			{page:is_admin}
+			{post:nodelete}<a href="#" onclick="DeletePost('{post.id}','{post.topic_id}','{post.page}'); return false;"><img src="images/admin/delete.png" title="Удалить"  alt="Удалить" ></a>
+			{/post:nodelete}
+			<br />
+			{/page:is_admin}			
+			
+		</td>
+	</tr>
+	<tr >
+		<td class="forum_time" height="25" valign="middle" colspan="3" >{post.public}</td>
+	</tr>
+	<tr>
+		<td  class="forum_text" valign="top" id="posttext{post.id}current" colspan="3">{post.text}</td>
+	</tr>
+	{is_forum_member}
+	<tr align="right" class="forum_text">
+		<td  colspan="3" >
+				<a href="#" onclick="insquote('post_text', 'view_comform', 'posttext{post.id}current', '{post.author_name}'); return false;"><img src="{template.dir}images/decs.gif" title="Цитировать" alt="Цитировать" ></a>
+				&nbsp;<a href="#" onclick="insname('post_text', 'view_comform', '{post.author_name}'); return false;"><img src="{template.dir}images/user.png" title="Вставить имя" alt="Вставить имя"  align="midle"></a><BR> <BR>
+		</td>
+	</tr>	  {/is_forum_member}
+</table>

@@ -1,0 +1,59 @@
+<table cellpadding="0" cellspacing="0" border="0" width="90%" align="center">
+	<tr>
+		<td>
+			<div style="padding-left:{post.level_padding}px;" id="post_{post.post_id}">
+				<table cellspacing="0" cellpadding="0" width="100%" class="post">
+					<tr>
+						<th align="left" class="post_top" nowrap="nowrap" valign="top"><img src="{template.dir}images/user.png" /><b>{post.user_name}</b></th>
+						<th align="left" class="post_top">
+							{post:user_email}&nbsp;Email: {post.user_email}{/post:user_email}
+							{post:user_homepage}&nbsp;Сайт: {post.user_homepage}{/post:user_homepage}
+							&nbsp;<span class="post_online">{post.user_status}</span>
+						</th>
+						<th align="center" class="post_top" width="48">
+							{post:editing}
+							<a href="{post.edit_url}"><img src="images/admin/edit.png" title="Редактировать" /></a>
+							<a href="{post.delete_url}"><img src="images/admin/delete.png" title="Удалить" /></a>
+							{/post:editing}
+						</th>
+					</tr>
+					<tr>
+						<td align="center" valign="top" width="100" class="post_info" {post:answers}rowspan="4"{/post:answers}{post:no_answers}rowspan="3"{/post:no_answers}>
+							{post:user_avatar}<img src="{post.user_avatar}" class="avatar" />{/post:user_avatar}
+							<br />
+							{post.user_rank_name}
+							{post:user_rank_image}<br /><img src="{post.user_rank_image}" />{/post:user_rank_image}
+							<br />
+						</td>
+					</tr>
+					<tr>
+						<td class="post_date" colspan="2" valign="middle" height="25"><img src="{template.dir}images/timeicon.gif">&nbsp;{post.post_date}&nbsp;&nbsp;<a href="{post.post_url}" title="Ссылка на комментарий" rel="bookmark">#</a>&nbsp;&nbsp;{post:parent_id}<a href="{post.parent_post_url}" title="Ссылка на родителя">&uarr;</a>{/post:parent_id}</td>
+					</tr>
+					<tr>
+						<td class="post_message read_font" colspan="2" valign="top">{post.post_message}</td>
+					</tr>
+					{post:answers}
+					<tr>
+						<td class="post_bottom" colspan="2" align="right" valign="bottom" height="24">
+							{post:parent_id}<a href="#" onclick="return post_reply('replyto{post.post_id}_{post.parent_id}');">Добавить сообщение</a>{/post:parent_id}
+							<a href="#" onclick="return post_reply('replyto_{post.post_id}');">Ответить</a>
+						</td>
+					</tr>
+					{post:parent_id}
+					<tr>
+						<td colspan="3">
+							<div class="post_bottom" id="replyto{post.post_id}_{post.parent_id}" style="visibility: hidden; display: none;padding-left: 20px; padding-right: 10px;">Добавить сообщение:<br /></div>
+						</td>
+					</tr>
+					{/post:parent_id}
+					<tr>
+						<td colspan="3">
+							<div class="post_bottom" id="replyto_{post.post_id}" style="visibility: hidden; display: none;padding-left: 20px; padding-right: 10px;">Ответить:<br /></div>
+						</td>
+					</tr>
+					{/post:answers}
+				</table>
+			</div>
+		</td>
+	</tr>
+</table>

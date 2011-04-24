@@ -1,0 +1,28 @@
+{page}
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+	<tr>
+		<td style="padding: 27px;" class="read_font">
+			{page:show_title}
+			<p>
+				<h1>{page.title}</h1>
+			</p>
+			{/page:show_title}
+			<p align="left">{page.text}</p>
+			<p align="right">
+			{page:show_copy}
+				{page.copyright}<br />
+			{/page:show_copy}
+			{page:show_public}
+				{page.public}<br />
+			{/page:show_public}
+			{page:show_hits}
+				{page.hits}<br />
+			{/page:show_hits}
+			{page:show_modified}
+				{page.modified}<br />
+			{/page:show_modified}
+			</p>
+		</td>
+	</tr>
+</table>
+{/page}

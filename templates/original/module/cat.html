@@ -1,0 +1,11 @@
+{cats}
+<div class="cat">
+	<div style="display: inline-block;">
+	<img src="{cat.icon_url}" align="left" class="cat_image" alt="Категория"/><b><a href="{cat.url}">{cat.title2}</a>&nbsp({cat.count})</b>
+	{cat:description}<br />{cat.description}{/cat:description}
+	</div>
+	<div style="display: inline-block; text-align: left;">{cat.childs_cats}</div>
+</div>
+{/cats}
+<div class="clear"></div>
+<div>{cat_caption}{/cat_caption}</div>

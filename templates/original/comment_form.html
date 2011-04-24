@@ -1,0 +1,54 @@
+<div class="clear"></div>
+<div class="postform_title"><a href="" onclick="return post_reply('replyto_0');">{form.form_title}</a></div>
+<div id="replyto_0" style="{form:add}visibility: hidden; display: none; {/form:add}">
+	<div id="postform" class="postform">
+		<form name="postform" action="{form.form_action}" method="post" {form:add_guest}onsubmit="return (CheckFormComment(this))"{/form:add_guest}>
+		<table width="100%">
+			{form:add_guest}
+			<tr>
+				<td width="140">{page.lang_posts_username}*<br /><input type="text" name="user_name" value="" maxlength="50" tabIndex="1" required/></td>
+				<td>{page.lang_posts_userhomepage}<br /><input type="text" name="user_homepage" value="" maxlength="250" /></td>
+			</tr>
+			<tr>
+				<td>{page.lang_posts_useremail}*<br /><input type="text" name="user_email" value="" maxlength="50" tabIndex="2" required/></td>
+				<td><label for="user_hideemail">{page.lang_posts_hideemail}</label>&nbsp;<input type="checkbox" id="user_hideemail" name="user_hideemail" value="1" checked /></td>
+			</tr>
+			{/form:add_guest}
+			<tr>
+				<td colspan="4" align="left">
+					<script>BBCodeToolBar('post_text');</script>
+					<textarea name="post_message" id="post_text" tabIndex="3" placeholder="¬ведите текст комментари€" required>{form.post_message}</textarea>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="4">
+					{smilies}<img src="{smile.file}" title="{smile.desc}" onclick="smilies('post_text','{smile.code}')" /> {/smilies}
+				</td>
+			</tr>
+			{form:show_kaptcha}
+			<tr>
+				<td align="left" colspan="4">
+					<table>
+						<tr>
+							<td></td>
+							<td><a href="#" onclick="document.getElementById('codeimage').src = '{form.kaptcha_url}&amp;time=' + Date(); return false;"><img src="{form.kaptcha_url}" height="{form.kaptcha_height}" width="{form.kaptcha_width}" id="codeimage" /></a></td>
+						</tr>
+						<tr>
+							<td>¬ведите код с картинки: </td>
+							<td><input type="text" name="keystr" tabIndex="4" required /></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			{/form:show_kaptcha}
+			<tr>
+				<td align="left" colspan="2">
+					<input type="hidden" name="parent_id" id="postform_parent_id" value="replyto_0">
+					{form:edit}<input type="button" value="{page.lang_posts_cancel}" title="{page.lang_posts_canceltitle}" class="submit" onclick="history.go(-1);" />{/form:edit}
+					<input type="submit" value="{page.lang_posts_submit}" title="{page.lang_posts_submittitle}" class="submit" tabIndex="5" />
+				</td>
+			</tr>
+		</table>
+		</form>
+	</div>
+</div>

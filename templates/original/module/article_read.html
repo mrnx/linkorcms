@@ -1,0 +1,24 @@
+{article}
+<div><h1>{art.title}</h1></div>
+<div class="read_font">{article.article}</div>
+<div class="article_read_info">
+	<span>{art.lpublic}</span>:&nbsp;{art.public}<br />
+	{art:author}<span>{art.lauthor}</span>:&nbsp;{art.author}{/art:author}<br />
+	{art:site}<span>{art.lurl}</span>:&nbsp;<a href="{art.site_url}" target="_blank">{art.site}</a>{/art:site}<br />
+	{art:email}<span>{art.lemail}</span>:&nbsp;<a href="mailto:{art.email}" target="_blank">{art.email}</a>{/art:email}<br />
+	{art:alloy_rating}<span>{art.lrating}</span>:&nbsp;<img src="{art.rating_image}" class="article_rating_image" />({art.rating_num_votes}){/art:alloy_rating}
+</div>
+{art:alloy_rating}
+<form action="{art.addvote_url}" method="POST">
+<div class="article_read_rating">{art.lvote}:&nbsp;{art.votes}{art.addvotesubm}</div>
+</form>
+{/art:alloy_rating}
+
+{page:enabled_comments}<br /><br />
+<a name="comments"></a><div class="Subtitle">Комментарии</div>{/page:enabled_comments}
+
+{comments_navigation}{/comments_navigation}
+{article_comments}{/article_comments}
+{comments_navigation}{/comments_navigation}
+{article_comments_form}{/article_comments_form}
+{/article}

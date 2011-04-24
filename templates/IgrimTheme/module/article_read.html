@@ -1,0 +1,61 @@
+{article}
+<table align="center" class="read_article">
+	<tr>
+		<td>
+			<h1>{art.title}</h1>
+		</td>
+	</tr>
+	<tr>
+		<td class="read_art_info_td">
+			<table>
+				<tr>
+					<td align="left" class="read_art_info">
+						<!--
+						<span class="art_info">Категория:</span>&nbsp;<a href="{art.catlink}">{art.cat}</a>
+						-->
+						{art:author}
+							<span class="read_art_info">{art.lauthor}:</span>&nbsp;{art.author}
+						{/art:author}
+						{art:site}
+							<span class="read_art_info">{art.lurl}:</span>&nbsp;<a href="{art.site_url}" target="_blank">{art.site}</a>
+						{/art:site}
+						{art:email}
+							<span class="read_art_info">{art.lemail}:</span>&nbsp;<a href="mailto:{art.email}" target="_blank">{art.email}</a>
+						{/art:email}
+					</td>
+				</tr>
+				<tr>
+					<td align="left" class="read_art_info">
+						<span class="read_art_info">{art.lpublic}:</span>&nbsp;{art.public}
+						<span class="read_art_info">{art.lhits}:</span>&nbsp;{art.hits}
+						<span class="read_art_info">{art.lcomments}:</span>&nbsp;{art.comments}
+						{art:alloy_rating}<span class="read_art_info">{art.lrating}:</span>&nbsp;<img src="{art.rating_image}" class="article_rating_image" />({art.rating_num_votes}){/art:alloy_rating}
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td class="read_art_text read_font">{article.article}</td>
+	</tr>
+	{art:allow_votes}
+	<tr>
+		<td align="center" valign="top" class="read_art_vote">
+			<form action="{art.addvote_url}" method="POST">
+			<table cellpadding="0" cellspacing="0" border="0" width="70%">
+				<tr>
+					<td align="center">{art.lvote}:</td>
+					<td align="center">{art.votes}</td>
+					<td align="center">{art.addvotesubm}</td>
+				</tr>
+			</table>
+			</form>
+		</td>
+	</tr>
+	{/art:allow_votes}
+</table>
+{comments_navigation}{/comments_navigation}
+{article_comments}{/article_comments}
+{comments_navigation}{/comments_navigation}
+{article_comments_form}{/article_comments_form}
+{/article}

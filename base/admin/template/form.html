@@ -1,0 +1,22 @@
+{content.form_open}
+<table class="formtable">
+	{rows}
+		{row:title}
+		<tr>
+			<td align="left" class="formtabletitle"><b>{row.caption}</b></td>
+		</tr>
+		{/row:title}
+		{row:row}
+		<tr>
+			<th align="left">{row.caption}</th>
+		</tr>
+		<tr>
+			<td align="left" class="formtabletd">{row.control}</td>
+		</tr>
+		{/row:row}
+	{/rows}
+	<tr>
+		<td align="right" class="fsubmit">{content.form_submit}</td>
+	</tr>
+</table>
+</form>

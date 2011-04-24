@@ -1,0 +1,173 @@
+{user_form}
+<form name="{form.form_name}" action="{form.url}" method="post" enctype="{form.enctype}">
+<table cellspacing="2" cellpadding="2" border="0" align="center">
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.llogin}:</td>
+		<td width="220" valign="top">
+			<input type="text" name="login" value="{form.login}" style="width: 100px;" maxlength="15" />
+		</td>
+	</tr>
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lpass}:</td>
+		<td width="220" valign="top">
+			{page:is_member_or_guest}
+			<input type="password" name="pass" value="{form.pass}" style="width: 100px;" maxlength="15" />
+			{/page:is_member_or_guest}
+			{page:is_admin}
+				Администраторы могут изменить пароль только из админ-панели.
+			{/page:is_admin}
+		</td>
+	</tr>
+	{page:is_member_or_guest}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lrpass}:</td>
+		<td width="220" valign="top">
+			<input type="password" name="rpass" value="{form.rpass}" style="width: 100px;" maxlength="15" />
+		</td>
+	</tr>
+	{/page:is_member_or_guest}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lnikname}:</td>
+		<td width="220" valign="top">
+			<input type="text" name="nikname" value="{form.nikname}" style="width: 210px;" maxlength="50" />
+		</td>
+	</tr>
+{form:use_realname}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lrealname}:</td>
+		<td width="220" valign="top">
+			<input type="text" name="realname" value="{form.realname}" style="width: 210px;" maxlength="250" />
+		</td>
+	</tr>
+{/form:use_realname}
+{form:use_email}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lemail}:</td>
+		<td width="220" valign="top">
+			{page:is_member_or_guest}
+			<input type="text" name="email" value="{form.email}" style="width: 210px;" maxlength="250" {page:is_admin}disabled="disabled"{/page:is_admin} />
+			{/page:is_member_or_guest}
+			{page:is_admin}
+				Администраторы могут изменить email только из админ-панели.
+			{/page:is_admin}
+		</td>
+	</tr>
+	{page:is_member_or_guest}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lhideemail}:</td>
+		<td width="220" valign="top">
+			<input type="checkbox" name="hideemail"{form.hideemail} />
+		</td>
+	</tr>
+	{/page:is_member_or_guest}
+{/form:use_email}
+{form:use_age}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lage}:</td>
+		<td width="220" valign="top">
+			<input type="text" name="age" value="{form.age}" style="width: 40px;" maxlength="3" />
+		</td>
+	</tr>
+{/form:use_age}
+{form:use_homepage}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lhomepage}:</td>
+		<td width="220" valign="top">
+			http:// <input type="text" name="homepage" value="{form.homepage}" style="width: 160px;" maxlength="250" />
+		</td>
+	</tr>
+{/form:use_homepage}
+{form:use_icq}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.licq}:</td>
+		<td width="220" valign="top">
+			<input type="text" name="icq" value="{form.icq}" style="width: 140px;" maxlength="15" />
+		</td>
+	</tr>
+{/form:use_icq}
+{form:use_city}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lcity}:</td>
+		<td width="220" valign="top">
+			<input type="text" name="city" value="{form.city}" style="width: 140px;" maxlength="100" />
+		</td>
+	</tr>
+{/form:use_city}
+{form:use_avatar}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lavatar}:</td>
+		<td width="220" valign="top">
+			<table cellspacing="0" cellpadding="0" border="0" width="100%">
+				<tr>
+					<td valign="middle">
+						<select name="avatar" onchange="{form.avatar_onchange_func}">
+						{avatars}
+						<option value="{avatar.name}" {avatar:selected} selected="selected"{/avatar:selected}> {avatar.caption} </option>
+						{/avatars}
+						</select>
+					</td>
+					<td align="center" width="100%">
+						<img id="avatarview" src="{form.av_selected}" border="0" width="64" />
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lload_avatar}:</td>
+		<td width="220" valign="top">
+			<input type="file" name="upavatar" />
+		</td>
+	</tr>
+{/form:use_avatar}
+{form:use_gmt}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lgmt}:</td>
+		<td width="220" valign="top">
+			<select name="gmt">
+			{gmt_data}
+			<option value="{gmt.name}" {gmt:selected}selected="selected"{/gmt:selected} >{gmt.caption}</option>
+			{/gmt_data}
+			</select>
+		</td>
+	</tr>
+{/form:use_gmt}
+{form:use_about}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.labout}:</td>
+		<td width="220" valign="top">
+			<textarea name="about" style="width: 220px; height: 120px;">{form.about}</textarea>
+		</td>
+	</tr>
+{/form:use_about}
+{form:use_snews}
+	<tr class="userform_bg1">
+		<td width="220" valign="top">{form.lsnews}:</td>
+		<td width="220" valign="top">
+			<input type="checkbox" name="snews" {form.snews} />
+		</td>
+	</tr>
+{/form:use_snews}
+{page:is_guest}
+	<tr class="userform_bg1">
+		<td></td>
+		<td>
+			<img src="{form.kaptcha_url}" height="{form.kaptcha_height}" width="{form.kaptcha_width}" id="codeimage" />
+			<br />
+			<a href="#" onclick="document.getElementById('codeimage').src = '{form.kaptcha_url}&amp;time=' + Date(); return false;">Показать другую</a>
+		</td>
+	</tr>
+	<tr class="userform_bg1">
+		<td align="left">Введите код с картинки:</td>
+		<td><input type="text" name="keystr" /></td>
+	</tr>
+{/page:is_guest}
+	<tr class="userform_bg1">
+		<td colspan="2" align="center" style="padding: 4px;">
+			<input type="hidden" name="usersave" value="{form.action}" />
+			<input type="submit" value="{form.laction}" />
+		</td>
+	</tr>
+</table>
+</form>
+{/user_form}

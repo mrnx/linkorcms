@@ -1,0 +1,28 @@
+{gallery_image}
+<table border="0" cellpadding="0" cellspacing="0" width="100%" align="center" class="gallery">
+	<tr>
+		<td valign="top" align="center" class="gallery_image">
+			{img.title}
+			<br />
+			<br />
+			<a href="{img.image_view_full}" target="_blank"><img width="500" src="{img.image_src}" /></a>
+			<br />
+			{img:description}
+			<br />
+			<table border="0" cellpadding="0" cellspacing="0" width="100%" align="center">
+				<tr>
+					<td valign="top" align="center" class="gallery_desc read_font">
+						{img.description}
+					</td>
+				</tr>
+			</table>
+			{/img:description}
+		</td>
+	</tr>
+</table>
+<br />
+{comments_navigation}{/comments_navigation}
+{gallery_comments}{/gallery_comments}
+{comments_navigation}{/comments_navigation}
+{gallery_comments_form}{/gallery_comments_form}
+{/gallery_image}

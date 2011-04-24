@@ -1,0 +1,55 @@
+{navigation}{/navigation}
+{articles}
+<table align="center" class="article" width="100%">
+	<tr>
+		<td align="left" colspan="2" class="article_title">
+			{art:catlink}<a href="{art.catlink}">{art.cat}</a>:{/art:catlink}&nbsp;<b><a href="{art.link2}">{art.title}</a></b>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" class="article_info_td">
+			<table width="100%">
+				<tr>
+					<td class="article_time" align="left">
+						{art.lpublic}:&nbsp;{art.public}
+					</td>
+					{art:author}
+					<td class="article_info" align="center">
+						{art.lauthor}:&nbsp;{art.author}
+					</td>
+					{/art:author}
+					{art:email}
+					<td class="article_info" align="center">
+						{art.lemail}:&nbsp;<a href="mailto:{art.email}" target="_blank">{art.email}</a>
+					</td>
+					{/art:email}
+					{art:site}
+					<td class="article_info" align="center">
+						{art.lurl}:&nbsp;<a href="{art.site_url}" target="_blank">{art.site}</a>
+					</td>
+					{/art:site}
+				</tr>
+			</table>
+		</td>
+	</tr>
+	{art:description}
+	<tr>
+		<td class="article_text read_font" valign="top" colspan="2" width="100%" height="100%">
+			{art:image}<a href="{art.image}" target="_blank"><img src="{art.thumb_image}" align="left" class="article_image" /></a>{/art:image}
+			{art.description}
+		</td>
+	</tr>
+	{/art:description}
+	<tr>
+		<td align="left" class="article_link_td" valign="top" align="left">
+			<div>
+				<span class="article_link">{art.link}</span>
+				<span class="article_link">{art.lhits}:&nbsp;{art.hits}</span>
+				<span class="article_link">{art.lcomments}:&nbsp;{art.comments}</span>
+				{art:alloy_rating}<span class="article_link">{art.lrating}:&nbsp;<img src="{art.rating_image}" class="article_rating_image" />({art.rating_num_votes})</span>{/art:alloy_rating}
+			</div>
+		</td>
+	</tr>
+</table>
+{/articles}
+{navigation}{/navigation}

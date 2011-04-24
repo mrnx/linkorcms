@@ -1,0 +1,33 @@
+<form action="{block.form_action}" method="post">
+<table align="center" class="user_block_form">
+	<tr>
+		<th colspan="2">{block.llogin}</th>
+	</tr>
+	<tr>
+		<td colspan="2"><input type="text" name="login" /></td>
+	</tr>
+	<tr>
+		<th colspan="2">{block.lpass}</th>
+	</tr>
+	<tr>
+		<td colspan="2"><input type="password" name="pass" /></td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<input type="hidden" name="login_form" value="1" />
+			<label><input type="checkbox" name="remember" /> {block.lremember}</label>
+		</td>
+	</tr>
+	<tr>
+		<td align="left">
+			{block:registration}<a href="{block.registration_url}">{block.lregistration}</a>{/block:registration}
+		</td>
+		<td align="right">
+			<input type="submit" value="{block.lsubmit}" />
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center"><a href="<?=Ufu('index.php?name=user&op=forgotpass', 'user/{op}/')?>">Забыли пароль?</a></td>
+	</tr>
+</table>
+</form>

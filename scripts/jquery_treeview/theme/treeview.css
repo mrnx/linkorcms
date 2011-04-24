@@ -1,0 +1,120 @@
+
+.treeview, .treeview ol{
+	text-align: left;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	padding-left: 20px;
+}
+
+.toplevel{
+	padding: 5px;
+	width: 98%;
+	border: 1px #cccccc solid;
+	border-top-width: 2px;
+	background-color: #fcfcfc;
+}
+
+.treeview .placeholder{
+	border: 1px #cccccc dashed;
+	margin-left: 16px;
+}
+
+.treeview .nest_error{
+	border: 1px #cc5555 solid;
+	background-color: #ffcccc;
+}
+
+.treeview LI{
+	padding: 0;
+}
+
+.treeview LI.item_drag{
+	padding: 0;
+	background-color: #fcfcfc;
+}
+
+.treeview .item{
+	padding: 2px 1px 1px 2px;
+/*	border: 1px #cccccc solid;
+	background-color: #fcfcfc;*/
+	border-top: none;
+	margin-left: 16px;
+}
+
+.treeview .item:hover{
+	background-color: #DDEAF7;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.treeview .node_button{
+	margin-top: 3px;
+	width: 16px;
+	height: 16px;
+	display: block;
+	float: left;
+}
+
+.treeview .node_close{
+	background-image: url("bullet_toggle_plus.png");
+}
+
+.treeview .node_open{
+	background-image: url("bullet_toggle_minus.png");
+}
+
+.treeview .node_none{
+
+}
+
+.treeview .item_icon{
+	padding: 1px;
+	margin: 0 2px 0 2px;
+	cursor: move;
+	display: inline-block;
+	vertical-align: top;
+}
+.treeview .item_icon img{
+	margin: 0;
+	padding: 0;
+}
+
+.treeview .item_title{
+	display: inline-block;
+	vertical-align: top;
+	padding-top: 3px;
+}
+
+.treeview .item_func_bar{
+	vertical-align: top;
+	text-align: left;
+	display: inline-block;
+	float: right;
+	width: 200px;
+}
+
+.treeview .item_info{
+	display: none;
+	position: relative;
+	margin: 2px 0 0 5px;
+	background-image: url("info.png");
+	width: 16px;
+	height: 16px;
+}
+
+.treeview .item_info .tooltip{
+	display: none;
+	position: absolute;
+	z-index: 10000;
+	background: #EFF2F7;
+	border: 1px #D8DFEA solid;
+	padding: 10px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	white-space: nowrap;
+	box-shadow: 2px 2px 2px #ccc;
+	-webkit-box-shadow: 2px 2px 2px #ccc;
+	-moz-box-shadow: 2px 2px 2px #ccc;
+}

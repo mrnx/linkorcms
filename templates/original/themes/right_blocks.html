@@ -1,0 +1,117 @@
+<?php
+	$site->Doctype = '<!DOCTYPE html>';
+	$site->AddCSSFile('style.css');
+	$site->AddJSFile('functions.js', false, true);
+?>
+{template}
+<body>
+	<div class="header">
+		<div id="logo_image"></div>
+		<div id="user_block">
+			{page:is_guest}
+				<form action="index.php?name=plugins&p=login&a=login&back=main" method="post">
+					<table align="center" width="75%" id="userblock_form">
+						<tr>
+							<td colspan="2" align="left"><b>Вход для пользователей</b></td>
+						</tr>
+						<tr>
+							<td align="left">
+								<input style="width: 130px;" type="text" name="login" value="Имя пользователя"  onfocus="this.value='';this.className=''" class="fade"/>
+							</td>
+							<td align="right">
+								<input style="width: 130px;" type="text" name="pass" value="Пароль" onfocus="this.value='';this.type='password';this.className=''" class="fade" />
+							</td>
+						</tr>
+						<tr>
+							<td align="left"><label><input type="checkbox" name="remember" />&nbsp;Запомнить меня</label></td>
+							<td align="right"><input type="submit" value="Войти" /></td>
+						</tr>
+						<tr>
+							<td colspan="2" align="left"><a href="<?=Ufu('index.php?name=user&op=forgotpass', 'user/{op}/')?>">Забыли пароль?</a>&nbsp;&nbsp;&nbsp;<a href="<?=Ufu('index.php?name=user&op=registration', 'user/{op}/')?>">Регистрация</a></td>
+						</tr>
+					</table>
+					<input type="hidden" name="login_form" value="1" />
+				</form>
+			{/page:is_guest}
+			{page:is_member_or_admin}
+				<table align="center" width="90%" id="userblock_info">
+					<tr>
+						<td rowspan="2" width="64" valign="top"><img src="{page.u_avatar_small}" style="vertical-align: bottom; margin-top: 2px;" /></td>
+						<td valign="top" align="left" colspan="2"><b>Здравствуйте {page.u_name}!</b><br /></td>
+					</tr>
+					<tr>
+						<td width="120" align="left">
+							<ul>
+								<li><a href="<?=Ufu('index.php?name=user&op=userinfo', 'user/{op}/')?>">Личные данные</a></li>
+								<li><a href="<?=Ufu('index.php?name=user&op=editprofile', 'user/{op}/')?>">Редактировать</a></li>
+							</ul>
+						</td>
+						<td align="left">
+							<ul>
+								{page:is_admin}<li><a href="admin.php">Админ - панель</a></li>{/page:is_admin}
+								<li><a href="index.php?name=plugins&p=login&a=exit">Выход</a></li>
+							</ul>
+						</td>
+					</tr>
+				</table>
+			{/page:is_member_or_admin}
+		</div>
+	</div>
+
+	<div class="clear"></div>
+	<div class="topmenu">
+		<div class="menu_links">
+			<a href="<?=Ufu('index.php')?>">Главная</a>
+			<a href="<?=Ufu('index.php?name=news&op=topics', 'news/{op}/')?>">Новости</a>
+			<a href="<?=Ufu('index.php?name=gallery', '{name}/')?>">Фото</a>
+			<a href="<?=Ufu('index.php?name=downloads', '{name}/')?>">Скачать</a>
+			<a href="<?=Ufu('index.php?name=articles', '{name}/')?>">Статьи</a>
+			<a href="<?=Ufu('index.php?name=forum', '{name}/')?>">Форум</a>
+		</div>
+		<div class="search_block">
+			<form name="{form.form_name}" action="index.php" method="get">
+				<input type="hidden" name="name" value="search" />
+				<input type="hidden" name="op" value="search" />
+				<input type="text" name="searchstr" value="Поиск" onfocus="this.value='';this.className=''" class="fade" maxlength="250" />&nbsp;<input type="submit" value="Найти"/>
+			</form>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="content"><div class="text_rightblocks">{content_box}{/content_box}</div></div>
+		<div class="right">{tblocks}{/tblocks}</div>
+		<div class="clear"></div>
+	</div>
+
+	<div class="topmenu bottommenu">
+		<div class="menu_links">
+			<a href="<?=Ufu('index.php')?>">Главная</a>
+			<a href="<?=Ufu('index.php?name=news&op=topics', 'news/{op}/')?>">Новости</a>
+			<a href="<?=Ufu('index.php?name=gallery', '{name}/')?>">Фото</a>
+			<a href="<?=Ufu('index.php?name=downloads', '{name}/')?>">Скачать</a>
+			<a href="<?=Ufu('index.php?name=articles', '{name}/')?>">Статьи</a>
+			<a href="<?=Ufu('index.php?name=forum', '{name}/')?>">Форум</a>
+		</div>
+	</div>
+
+	<div class="info">
+		<div>
+			<table cellpadding="0" cellspacing="0" border="0" width="100%" class="info_table">
+				<tr>
+					<td align="left" width="180">
+						{page.powered}
+					</td>
+					<td align="center">{page.copyright}</td>
+					<td width="180">&nbsp;</td>
+				</tr>
+				<tr>
+					<td align="left">{page:site_email}Эл. почта: <a href="mailto:{page.site_email}">{page.site_email}</a>{/page:site_email}</td>
+					<td align="center"><span class="fade">{page.info}</span></td>
+					<td width="180">&nbsp;</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+</body>
+{/template}

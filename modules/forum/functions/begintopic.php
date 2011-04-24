@@ -1,0 +1,15 @@
+<?php
+
+function IndexFroumBeginTopic() {
+	global $db, $site;
+	$topic_id = SafeEnv($_GET['topic'], 11, int);
+	$topic_id = SafeEnv($_GET['topic'], 11, int);
+	$db->Select('forum_topics',"`id`='$topic_id'");
+	$topic = $db->FetchRow();
+	// Форум
+	$forum_id = SafeDB($topic['forum_id'],11,int) ;
+	$db->Update('forum_topics', "`close_topics`='0'", "`id`='$topic_id'");
+	GO('index.php?name=forum&op=showforum&forum='.$forum_id);
+}
+
+?>

@@ -1,0 +1,57 @@
+{login}
+<br />
+<table cellspacing="0" cellpadding="10" border="0" align="center" width="90%">
+	{login:message}
+	<tr>
+		<td><span class="login_message">{login.message}</span></td>
+	</tr>
+	{/login:message}
+	<tr>
+		<td>
+			<form action="{login.form_action}" method="post">
+			<table cellspacing="0" cellpadding="0" border="0" align="left">
+				<tr>
+					<td colspan="2">
+						{login.llogin}:
+						<br />
+						<input style="width: 160px;" type="text" name="login">
+						<br />
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						{login.lpass}:
+						<br />
+						<input style="width: 160px;" type="password" name="pass">
+						<br />
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<input type="checkbox" name="remember" checked="checked">{login.lremember}
+						<br />
+						<br />
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+						{login:registration}<a href="{login.registration_url}">{login.lregistration}</a>{/login:registration}
+					</td>
+					<td align="right">
+						<input type="hidden" name="login_form" value="1">
+						<input type="submit" value="{login.lsubmit}">
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" align="center">
+						<br />
+						<a href="<?=Ufu('index.php?name=user&op=forgotpass', 'user/{op}/')?>">Забыли логин или пароль?</a>
+					</td>
+				</tr>
+			</table>
+			</form>
+		</td>
+	</tr>
+</table>
+<br />
+{/login}

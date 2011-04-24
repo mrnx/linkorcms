@@ -1,0 +1,199 @@
+.tcat2
+{
+background:#CFD3DA ;
+color: #3B3D4B;
+font: bold 9pt verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif;
+}
+.alt1, .alt1Active
+{
+background: #F5F4E2;
+color: #000000;
+font: 12px;
+}
+.bigusername {
+font-size: 18px;
+font-style: italic;
+cursor: help;
+text-decoration: underline;
+}
+.smalusername {
+font-size: 11px;
+font-weight: lighter;
+}
+.bigusername a {
+color: #4C5B90;
+text-decoration: none;
+font-size: 20px;
+}
+.alt2, .alt2Active
+{
+background: #F1EFE1;
+color: #000000;
+font: 12px;
+}
+.alt3, .alt3Active
+{
+background: #F2DCD1;
+color: #000000;
+font: 12px;
+}
+.tborder
+{
+background: #B2B9BF;
+color: #000000;
+border: 1px solid #656565;
+}
+.tfoot
+{
+background: #B8BFC4 ;
+color: #DDDDE0;
+}
+.inlinemod
+{
+background: #FFFFCC;
+color: #000000;
+}
+.smallfont
+{
+font: 12px verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif;
+background-color: transparent;
+background-image: none;
+}
+.time
+{
+color: #666686;
+font: 11px;
+}
+.highlight
+{
+color: #FF0000;
+font-weight: bold;
+}
+.panel
+{
+background: #F4F4F4;
+color: #000000;
+padding: 4px;
+border: 2px outset;
+}
+.panelsurround
+{
+color: #000000;
+background: #D6DADE;
+padding: 3px;
+}
+legend
+{
+color: #22229C;
+font: 12px tahoma, verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif;
+}
+.legend3
+{
+color: #919191;
+font: 11px ;
+}
+.legend4
+{
+color: #58A063;
+font: 11px ;
+font-weight: bold;
+}
+.legend5
+{
+color: #E29700;
+font: 11px ;
+font-weight: bold;
+}
+.fieldset {
+margin-bottom: 6px;
+}
+.fieldset, .fieldset td, .fieldset p, .fieldset li {
+font-size: 12px;
+}
+.shade, a.shade:link, a.shade:visited {
+color: #777777;
+text-decoration: none;
+}
+a.shade:active, a.shade:hover {
+color: #FF4400;
+text-decoration: underline;
+}
+.tcat .shade, .thead .shade, .tfoot .shade {
+color: #DDDDDD;
+}
+
+.fieldset {
+margin-bottom: 6px;
+}
+.fieldset, .fieldset td, .fieldset p, .fieldset li {
+font-size: 11px;
+}
+fieldset form, div.fieldsetpad {
+display: block;
+padding: 2px;
+}
+.userlist_title {
+font-weight: bold;
+}
+.userlist_description {
+margin-bottom: 6px;
+}
+.avatar_toggle {
+text-align: right;
+}
+div.checkbox_ctrls {
+margin-bottom: 6px;
+}
+label.show_avatars_ctrl {
+float: left;
+}
+label.check_all_ctrl {
+float: right;
+}
+div.submitrow {
+text-align: right;
+}
+div.submitrow #incomingreqs_action {
+float: left;
+text-align: left;
+}
+ul.userlist {
+list-style: none;
+padding: 0px;
+margin: 0px;
+}
+ul.userlist li {
+float: left;
+margin-right: 6px;
+margin-bottom: 6px;
+width: 240px;
+
+}
+ul.userlist hr {
+display: none;
+}
+/* avatars */
+ul.userlist_showavatars li {
+position: relative;
+width: 240px;
+
+border: solid 1px silver;
+padding: 2px;
+font-size: 12px;
+
+}
+ul.userlist_showavatars div.username a {
+padding-left: 2px;
+vertical-align: top;
+font-weight: bold;
+}
+ul.userlist_showavatars div.username input {
+position: absolute;
+left: 4px;
+top: 4px;
+}
+ul.userlist_showavatars div.friend label {
+position: absolute;
+right: 4px;
+bottom: 4px;
+}

@@ -1,0 +1,51 @@
+.newstable {
+	margin: 5px 0px 5px 0px;
+	border: 1px #BCD6E9 solid;
+	border-bottom: none;
+	border-right: none;
+}
+
+.newstable th { /* ячейки заголовков таблиц */
+	background-color: #E1E1E1;
+	border-bottom: 1px #ABC5D8 solid;
+	border-right: 1px #ABC5D8 solid;
+	height: 16px;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+
+.newstable td { /* ячейки дл€ обычных таблиц*/
+	font-size: 11px;
+	padding: 2px;
+	border: 1px #ABC5D8 solid;
+	border-top: none;
+	border-left: none;
+	background-color: #F5F5F5;
+	text-align: center;
+}
+
+.newspreview {
+	width: 70%;
+	border: 1px #ABC5D8 solid;
+	padding: 5px;
+}
+
+.newspreview td {
+	text-align: left;
+}
+
+.actionpanel td {
+	border-bottom: none;
+}
+
+.topics_view {
+	border: none;
+	width: 100%;
+	background-color: #FFF;
+}
+
+.topics_view td {
+	border: 1px #ABC5D8 solid;
+	padding-bottom: 4px;
+	padding-top: 4px;
+}

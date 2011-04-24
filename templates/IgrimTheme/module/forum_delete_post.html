@@ -1,0 +1,32 @@
+{delete_form}
+<form name="forum_delete" action="{form.url}" method="post" onsubmit="return (CheckTopicForm(this))">
+<table cellpadding="0" cellspacing="0" border="0" width="95%" align="center" class="commform">
+	
+	<tr> 
+		<td align="left" id="view_comform" style="padding-left: 20px; padding-right: 10px;">
+			{form:basket}
+			<table border="0" cellpadding="0" cellspacing="0" class="msgclient" width="100%">
+				<tr>
+					<td align="left" nowrap><b>Причина удаления</b><BR>
+					<FONT SIZE="1">Можно не заполнять - но во избежания недоразумений - рекомендуется заполнить:</FONT>
+					<script>BBCodeToolBar('reason_text');</script>	
+					</td>
+					 </tr>
+				<tr>
+					<td width="100%">
+						<textarea name="text" id="reason_text" style="width: 100%;height:100px"></textarea>
+					</td>
+				</tr>	
+				</table>
+		 {/form:basket}
+				<tr>
+					<td colspan="2" align="center">
+						<input type="submit" value="Удалить" title="Удалить" class="submit" />
+					</td>
+				</tr>
+			
+		</td>
+	</tr>
+</table>
+</form>
+{/delete_form}

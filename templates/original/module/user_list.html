@@ -1,0 +1,23 @@
+<table cellspacing="0" cellpadding="0" border="0" width="100%" align="center" class="userlist">
+{userlist_th}
+	<tr>
+		<th align="center" colspan="2">{title.name}</th>
+		<th align="center">{title.email}</th>
+		<th align="center">{title.date}</th>
+		<th align="center">{title.last}</th>
+		<th align="center">{title.rank}</th>
+	</tr>
+{/userlist_th}
+{userlist}
+	<tr>
+		<td><img src="{user.avatar_smallest}" /></td>
+		<td align="center"><a href="{user.url}">{user.name}</a></td>
+		<td align="center">{user.email}</td>
+		<td align="center">{user.date}</td>
+		<td align="center">{user.lastdate}</td>
+		<td align="center">{user.rank}</td>
+	</tr>
+{/userlist}
+</table>
+<br />
+{navigation}{/navigation}

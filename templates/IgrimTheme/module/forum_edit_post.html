@@ -1,0 +1,63 @@
+{forum_editpost_form}
+<form name="editpost" action="{form.url}" method="post" enctype="multipart/form-data">
+	<table cellpadding="0" cellspacing="0" border="0" align="center" width="100%">
+		<tr>
+			<td>
+				<table cellpadding="0" cellspacing="0" border="0"  align="center" class="forum">
+					<tr>
+						<td class="forum_table_title" align="left">
+							<a href="#" onclick="ShowHide('view_comform'); return false;">{form.title}</a>
+						</td>
+					</tr>
+					<tr>
+						<td id="view_comform" align="center" class="forum_status2" style="{form:add}visibility: hidden; display: none; {/form:add}">
+							<table align="center" width="100%" style="max-width:600px">
+								<tr>
+									<td>
+										<table border="0" cellpadding="4" cellspacing="0" class="forum_status1" width="100%" align="center" >
+											{form:edit_title}
+											<tr>
+												<td align="left">
+													<b>Заголовок темы</b><br />
+													<input type="text" name="title" style="width: 98%;" value="{form.text_title}">
+												</td>
+											</tr>
+											{/form:edit_title}
+											<tr>
+												<td align="left">
+													<div style="padding-top: 5px;"><b>Сообщение</b>*:</div>
+													<script>BBCodeToolBar('post_text');</script>
+													<div class="clear"></div>
+													<div style="padding-top: 5px;"><textarea name="text" id="post_text" style="width: 98%; max-width: 700px; height: 165px;">{form.text_value}</textarea></div>
+												</td>
+											</tr>
+											<tr>
+												<td align="left" width="100%">
+													<div align="left" style="max-width:700px; width:auto !important; width:500px">
+														<fieldset>
+															<legend><a href="#" onclick="ShowHide('smilies'); return false;">Смайлики</a></legend>
+															<div  style="visibility: hidden; display: none;padding-left: 4px; padding-right: 4px;"  id="smilies" >
+																<div>{smilies}<img src="{smile.file}" title="{smile.desc}" onclick="smilies('post_text','{smile.code}')" /> {/smilies}</div>
+															</div>
+														</fieldset>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td align="center" >
+													{form:edit}<input type="button" value="Отмена" title="Вернуться к теме без сохранения изменений" class="submit" onclick="history.go(-1);" />{/form:edit}
+													<input type="submit" value="{form.lsubmit}" title="{form.lsubmit_title}" class="submit" />
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</form>
+{/forum_editpost_form}

@@ -1,0 +1,17 @@
+{block_online}
+Администраторы:
+<b>{online.num_admins}</b>
+<br />
+Пользователи:
+<b>{online.num_members}</b>
+<br />
+Гости:
+<b>{online.num_guests}</b>
+<br />
+Всего:
+<b>{online.num_online}</b>
+<br />
+<br />
+<a href="<?=Ufu('index.php?name=user&op=userslist', 'user/{op}/')?>">Список пользователей</a>
+<br />
+{/block_online}

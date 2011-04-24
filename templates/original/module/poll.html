@@ -1,0 +1,48 @@
+{poll}
+<center><a href="{poll.back_url}">{poll.back_caption}</a></center>
+<br />
+<br />
+<form action="{poll.form_action}" method="post">
+<table width="50%" align="center">
+	<tr>
+		<td align="center"><b>{poll.title}</b></td>
+	</tr>
+	<tr>
+		<td class="poll_block_variants">
+			{poll_block_variants}
+			<div><label>{variant.control}&nbsp;{variant:color}<font color="{variant.color}">{/variant:color}{variant.title}{variant:color}</font>{/variant:color}</label></div>
+			{/poll_block_variants}
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<table cellspacing="0" cellspadding="0" border="0" align="center" width="100%">
+				<tr>
+					<td align="center" style="padding-bottom: 10px;">
+						<input type="submit" value="Ответить" />
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+						{poll.lnum_voices}: {poll.num_voices}<br />
+						{poll.lcomments}: {poll.comments}<br />
+					</td>
+				</tr>
+				<tr>
+					<td align="center" style="padding: 10px;">
+						{poll:poll_showresults} <a href="{poll.showresults_url}">Результаты</a>
+						{/poll:poll_showresults}
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</form>
+<br />
+{page:enabled_comments}<a name="comments"></a><div class="Subtitle">Комментарии</div>{/page:enabled_comments}
+{comments_navigation}{/comments_navigation}
+{poll_comments}{/poll_comments}
+{comments_navigation}{/comments_navigation}
+{poll_comments_form}{/poll_comments_form}
+{/poll}
