@@ -16,31 +16,17 @@ if(!defined("DATABASE")){
 	define("DATABASE", true);
 }
 
-$db = 0;
+$db = null;
 IncludeSystemPluginsGroup('database', 'layer');
-if(!method_exists($db, 'Connect')){ // Боремся с кешированием раньше времени
-	$pcache = LmFileCache::Instance();
-	$pcache->Clear('system');
-	IncludeSystemPluginsGroup('database', 'layer');
-	unset($pcache);
-}
-
 if(method_exists($db, 'Connect')){
 	$db->ErrorReporting = $config["db_errors"];
 	$db->Prefix = $config['db_pref'];
 	$db->Connect($config["db_host"], $config["db_user"], $config["db_pass"], $config["db_name"]);
 	if(!$db->Connected){
-		exit('<html>'."\n"
-		.'<head>'."\n"
-		.'	<title>'.CMS_NAME.' - !!!Ошибка!!!</title>'."\n"
-		.'</head>'."\n"
-		.'<body>'."\n"
-		.'	<center>Проблемы с базой данных, проверьте настройки базы данных.</center>'."\n"
-		.'</body>'."\n"
-		.'</html>');
+		exit("<html><head><title>Ошибка</title></head><body><center>Проблемы с базой данных, проверьте настройки базы данных.</center></body></html>");
 	}
 }else{
-	exit("<center><h2><span style=\"color: #FF0000;\">Ошибка! Данный тип базы данных не поддерживается!</span></h2></center>");
+	exit("<html><head><title>Ошибка</title></head><body><center>Проблема с подключением драйвера базы данных.</center></body></html>");
 }
 
 ?>

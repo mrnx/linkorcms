@@ -14,7 +14,7 @@ class CacheOptions{
 	function  __construct() {
 		global $config;
 		$this->path = $config['cache_dir'];
-		$this->enabled = (USE_CACHE && is_dir($this->path) && is_writable($this->path));
+		$this->enabled = (USE_CACHE && is_dir($this->path) && is_writable($this->path) && !defined('SETUP_SCRIPT'));
 	}
 
 }

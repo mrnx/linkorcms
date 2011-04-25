@@ -100,8 +100,6 @@ if(is_file('config/db_config.php')){ // Система установлена
 }elseif(!defined('SETUP_SCRIPT')){ // Система не установлена
 	Header("Location: setup.php");
 	exit();
-}else{ // Идет установка
-
 }
 
 ?>
