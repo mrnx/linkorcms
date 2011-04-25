@@ -64,7 +64,7 @@ if($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && $user->Al
 		System::admin()->TEcho();
 	}else{
 		System::admin()->AddAdminMenu();
-		AddTextBox('Админ панель - Ошибка', '<div style="text-align: center;">Модуль "'.$exe.'" не найден!</div>');
+		AddTextBox('Админ панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$exe.'" не найден!</div>');
 		System::admin()->TEcho();
 	}
 }else{
