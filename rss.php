@@ -13,9 +13,9 @@ define('VALID_RUN', true);
 @header("Pragma: no-cache");
 
 include_once ('config/init.php'); // Конфигурация и инициализация
-include_once ($config['inc_dir'].'system_plugins.inc.php'); // Плагины
+include_once ($config['inc_dir'].'system_plugins.inc.php'); // Системные плагины
 include_once ($config['inc_dir'].'system.php'); // Функции
-include_once ($config['db_dir'].'database.php'); // Настройки базы данных и класс для работы с базой данных
+include_once ($config['inc_dir'].'database.php'); // Подключение к базе данных
 
 LoadSiteConfig($config); // Загрузка конфигурации сайта
 LoadSiteConfig($plug_config, 'plugins_config', 'plugins_config_groups'); // Загрузка конфигурации плагинов

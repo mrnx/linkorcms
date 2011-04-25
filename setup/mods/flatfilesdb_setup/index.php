@@ -41,7 +41,7 @@ switch($p){
 		$text = '<table width="80%">
 			<tr>
 				<td id="l">Папка с базами ( должна существовать ):</td>
-				<td><input type="text" name="db_host" value="db/dbs/"></td>
+				<td><input type="text" name="db_host" value="db/"></td>
 			</tr>
 			<tr>
 				<td id="l">'._SQLCONF_4.' ( папка с файлами ):</td>

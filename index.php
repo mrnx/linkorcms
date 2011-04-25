@@ -13,7 +13,7 @@ define('VALID_RUN', true);
 include_once('config/init.php'); // Конфигурация и инициализация
 include_once($config['inc_dir'].'system_plugins.inc.php'); // Системные плагины
 include_once($config['inc_dir'].'system.php'); // Функции
-include_once($config['db_dir'].'database.php'); // Подключение к базе данных
+include_once($config['inc_dir'].'database.php'); // Подключение к базе данных
 
 // Загрузка конфигурации сайта
 LoadSiteConfig($config);
