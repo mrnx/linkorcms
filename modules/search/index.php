@@ -9,8 +9,7 @@ $search_results = array();
 $searchstr = '';
 $site->Title = 'Поиск по сайту';
 
-function IndexSearchMain()
-{
+function IndexSearchMain(){
 	global $site;
 	if(isset($_GET['mod'])){
 		$mods = $_GET['mod'];
@@ -43,8 +42,7 @@ function IndexSearchMain()
 	return $mods;
 }
 
-function IndexSearchSearch( $mods, $search_text )
-{
+function IndexSearchSearch( $mods, $search_text ){
 	global $search_results;
 	$search_results = array();
 	foreach($mods as $mod){
@@ -56,8 +54,13 @@ function IndexSearchSearch( $mods, $search_text )
 	return $search_results;
 }
 
-function IndexSearchResults()
-{
+// Функция для сортировки результатов поиска
+function IndexSearchSortResults($a, $b){
+	global $searchstr;
+	return stripos($a['title'], $searchstr) !== false ? -1 : 1;
+}
+
+function IndexSearchResults(){
 	global $site, $searchstr;
 	$mods = IndexSearchMain();
 	$mods_str = '';
@@ -77,7 +80,10 @@ function IndexSearchResults()
 		$page = 1;
 	}
 	$results = IndexSearchSearch($mods, $searchstr);
-	SortArray($results, 'public', true);
+
+	// Сортируем результаты поиска
+	usort($results, 'IndexSearchSortResults');
+
 	if(count($results) > 0){
 		$num = 10; //Количество результатов на страницу
 		$si = ($num * ($page-1));
