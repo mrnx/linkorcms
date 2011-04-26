@@ -80,12 +80,13 @@ function IndexSearchResults()
 	SortArray($results, 'public', true);
 	if(count($results) > 0){
 		$num = 10; //Количество результатов на страницу
+		$si = ($num * ($page-1));
 		$navigation = new Navigation($page);
 		$navigation->GenNavigationMenu($results, $num, 'index.php?name=search&op=search&searchstr='.$searchstr.$mods_str);
 		$site->AddTemplatedBox('Результаты поиска', 'module/search_results.html');
 		$site->AddBlock('search_results', true, true, 'result');
 		foreach($results as $i=>$result){
-			$result['no'] = $i+1;
+			$result['no'] = $si+$i+1;
 			$site->AddSubBlock('search_results', true, $result);
 		}
 	}else{
