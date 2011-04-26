@@ -38,7 +38,18 @@ if(version_compare(phpversion(), '5.0.0', '<')){
 // Ёмул€ци€ register_globals = off;
 if(ini_get('register_globals') == 1){
 	foreach($GLOBALS as $key=>$value){
-		if($key != 'GLOBALS' and $key != 'key' and $key != '_REQUEST' and $key != '_GET' and $key != '_POST' and $key != '_COOKIE' and $key != '_SESSION' and $key != '_FILES' and $key != '_ENV' and $key != '_SERVER'){
+		if($key != 'GLOBALS'
+		   and $key != 'key'
+		       and $key != '_REQUEST'
+		           and $key != '_GET'
+		               and $key != '_POST'
+		                   and $key != '_COOKIE'
+		                       and $key != '_SESSION'
+		                           and $key != '_FILES'
+		                               and $key != '_ENV'
+		                                   and $key != '_SERVER'
+		                                       and $key != 'script_start_time')
+		{
 			unset($GLOBALS[$key]);
 		}
 	}
