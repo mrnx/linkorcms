@@ -127,7 +127,7 @@ function AdminFormsSave()
 	$view = ViewLevelToInt($_POST['view']);
 	$active = EnToInt($_POST['active']);
 	if(isset($_GET['id'])){
-		$set = "hname='$hname',name='$name',desc='$desc',view='$view',active='$active',action='$form_action',email='$email',send_ok_msg='$msg_ok'";
+		$set = "`hname`='$hname',`name`='$name',`desc`='$desc',`view`='$view',`active`='$active',`action`='$form_action',`email`='$email',`send_ok_msg`='$msg_ok'";
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Update('forms', $set, "`id`='$id'");
 		GO($config['admin_file'].'?exe=forms');
