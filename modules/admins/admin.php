@@ -374,11 +374,11 @@ function Admins()
 			AdminsDeleteGroup();
 			break;
 		case 'editadmin':
-			include_once ($config['apanel_dir'].'members.php');
+			include_once ($config['inc_dir'].'members.php');
 			AdminUserEditor('admins&a=adminsave', 'edit', SafeEnv($_GET['id'], 11, int), true);
 			break;
 		case 'adminsave':
-			include_once ($config['apanel_dir'].'members.php');
+			include_once ($config['inc_dir'].'members.php');
 			AdminUserEditSave('admins', 'update', SafeEnv($_GET['id'], 11, int), true);
 			break;
 		case 'deladmin':

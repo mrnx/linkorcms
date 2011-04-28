@@ -13,7 +13,7 @@ function AdminShowLogin( $AuthMessage = '', $AuthTitle = 'Авторизация администра
 	$site->InitPageTemplate();
 	$site->Title = $AuthTitle;
 	$site->Doctype = '<!doctype html>';
-	$root = $config['apanel_dir'].'template/';
+	$root = $config['inc_dir'].'template/';
 	$site->SetRoot($root);
 	$site->SetTempVar('head', 'body', 'login.html');
 	$site->AddBlock('template', true, false, 'login');

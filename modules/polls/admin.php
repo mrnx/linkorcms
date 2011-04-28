@@ -215,7 +215,7 @@ if(isset($_GET['a'])){
 	$action = 'main';
 }
 
-include_once ($config['apanel_dir'].'configuration/functions.php');
+include_once ($config['inc_dir'].'configuration/functions.php');
 
 function AdminPolls()
 {

@@ -146,7 +146,7 @@ if(isset($_GET['a'])){
 	$action = 'main';
 }
 
-include_once ($config['apanel_dir'].'configuration/functions.php');
+include_once ($config['inc_dir'].'configuration/functions.php');
 $conf_config_table = 'plugins_config';
 $conf_config_groups_table = 'plugins_config_groups';
 

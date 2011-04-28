@@ -63,7 +63,7 @@ class AdminPage extends PageTemplate{
 	public function InitPage(){
 		$this->InitPageTemplate(ADMIN_AJAX);
 		$this->SetGZipCompressionEnabled(System::$config['general']['gzip_status'] == '1');
-		$template_dir = System::$config['apanel_dir'].'template/';
+		$template_dir = System::$config['inc_dir'].'template/';
 
 		if(ADMIN_AJAX){ // «агрузка страницы посредством AJAX запроса
             $this->InitStarkyt($template_dir, 'theme_ajax.html');

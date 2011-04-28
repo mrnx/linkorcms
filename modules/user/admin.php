@@ -401,7 +401,7 @@ function AdminUserAvatarsGallery()
 			}else{
 				$funcs = '&nbsp;';
 			}
-			
+
 			$text .= '
 			<td align="center">
 				<table cellspacing="0" cellpadding="0" align="center">
@@ -493,7 +493,7 @@ function AdminUserDeleteAvatar()
 		AddTextBox("Внимание!", $text);
 	}
 }
-include_once ($config['apanel_dir'].'configuration/functions.php');
+include_once ($config['inc_dir'].'configuration/functions.php');
 
 function AdminUser( $action )
 {
@@ -519,28 +519,28 @@ function AdminUser( $action )
 			break;
 		case 'add':
 			if($editing){
-				include_once ($config['apanel_dir'].'members.php');
+				include_once ($config['inc_dir'].'members.php');
 				AdminUserEditor('user&a=addsave', 'add', 0, false);
 				return true;
 			}
 			break;
 		case 'addsave':
 			if($editing){
-				include_once ($config['apanel_dir'].'members.php');
+				include_once ($config['inc_dir'].'members.php');
 				AdminUserEditSave('user', 'addsave', 0, false);
 				return true;
 			}
 			break;
 		case 'edituser':
 			if($editing){
-				include_once ($config['apanel_dir'].'members.php');
+				include_once ($config['inc_dir'].'members.php');
 				AdminUserEditor('user&a=editsave', 'edit', SafeEnv($_GET['id'], 11, int), false);
 				return true;
 			}
 			break;
 		case 'editsave':
 			if($editing){
-				include_once ($config['apanel_dir'].'members.php');
+				include_once ($config['inc_dir'].'members.php');
 				AdminUserEditSave('user', 'update', SafeEnv($_GET['id'], 11, int), false);
 				return true;
 			}
@@ -593,7 +593,7 @@ function AdminUser( $action )
 		case 'config':
 			if($confedit){
 				global $config, $site;
-				include_once ($config['apanel_dir'].'configuration/functions.php');
+				include_once ($config['inc_dir'].'configuration/functions.php');
 				AdminConfigurationEdit('user', 'user', true, false, 'Конфигурация модуля "Пользователи"');
 				return true;
 			}
@@ -601,7 +601,7 @@ function AdminUser( $action )
 		case 'configsave':
 			if($confedit){
 				global $config;
-				include_once ($config['apanel_dir'].'configuration/functions.php');
+				include_once ($config['inc_dir'].'configuration/functions.php');
 				AdminConfigurationSave('user&a=config', 'user', true);
 				return true;
 			}

@@ -50,8 +50,8 @@ if($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && $user->Al
 	define('ADMIN_AJAX_LINKS', System::$config['admin_panel']['enable_ajax'] ? 'true' : 'false'); // Говорит скрипту что админ-панель работает в режиме AJAX
 
 	// Шаблонизатор и функции
-	include_once $config['apanel_dir'].'template.php';
-	include_once $config['apanel_dir'].'functions.php';
+	include_once $config['inc_dir'].'admin_template.class.php';
+	include_once $config['inc_dir'].'functions.php';
 
 	$db->Select('modules', "`enabled`='1' and `folder`='$exe'");
 	if($db->NumRows() > 0){
@@ -77,11 +77,11 @@ if($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && $user->Al
 			GoRefererUrl($_GET['_back']);
 		}else{
 			$user->UnsetCookie('admin');
-			include_once $config['apanel_dir'].'template.login.php';
+			include_once $config['inc_dir'].'template.login.php';
 			AdminShowLogin('Неверные логин или пароль');
 		}
 	}else{ // Форма авторизации
-		include_once $config['apanel_dir'].'template.login.php';
+		include_once $config['inc_dir'].'template.login.php';
 		AdminShowLogin();
 	}
 }

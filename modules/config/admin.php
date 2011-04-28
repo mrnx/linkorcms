@@ -12,7 +12,7 @@ if(!$user->CheckAccess2('config', 'config')){
 	return;
 }
 
-include_once ($config['apanel_dir'].'configuration/functions.php');
+include_once ($config['inc_dir'].'configuration/functions.php');
 
 // Проверяет работаем ли мы с настройками плагинов
 function AdminConfigPlugins()

@@ -14,7 +14,7 @@ if(!$user->CheckAccess2('pages', 'pages')){
 
 $text = '';
 include_once ($config['inc_dir'].'tree.class.php');
-include_once ($config['apanel_dir'].'configuration/functions.php');
+include_once ($config['inc_dir'].'configuration/functions.php');
 
 if(isset($_GET['a'])){
 	AdminPages($_GET['a']);
