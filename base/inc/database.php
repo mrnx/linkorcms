@@ -17,7 +17,7 @@ if(!defined("DATABASE")){
 }
 
 $db = null;
-IncludeSystemPluginsGroup('database', 'layer');
+IncludeSystemPluginsGroup('database', 'layer'); // Подключаем драйверы баз данных
 if(method_exists($db, 'Connect')){
 	$db->ErrorReporting = $config["db_errors"];
 	$db->Prefix = $config['db_pref'];
