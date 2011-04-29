@@ -12,7 +12,6 @@ define('VALID_RUN', true);
 
 include_once('config/init.php'); // Конфигурация и инициализация
 
-
 // ЧПУ
 if($config['general']['ufu'] && isset($_GET['ufu'])){
 	$_GET = UfuRewrite($_GET['ufu']);

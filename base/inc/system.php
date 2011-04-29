@@ -2820,6 +2820,201 @@ function IncludePluginsGroup($group, $function = '', $return = false){
 	return $result;
 }
 
+/**
+ * Возвращает имена шаблонов блоков, которые имеет текущий шаблон сайта
+ * @return Array
+ */
+function GetBlockTemplates(){
+	global $config, $db;
+	$TemplateDir = $config['tpl_dir'].$config['general']['site_template'].'/block/';
+	return GetFiles($TemplateDir, false, true, '.html.htm.tpl', true);
+}
+
+/**
+ * Генерирует данные уровня доступа для Html::Select
+ * @param  $view
+ * @return array
+ */
+function GetUserTypesFormData($view){
+	global $site;
+	$visdata = array();
+	$site->DataAdd($visdata, 'all', 'Все', $view['4']);
+	$site->DataAdd($visdata, 'members', 'Только пользователи', $view['2']);
+	$site->DataAdd($visdata, 'guests', 'Только гости', $view['3']);
+	$site->DataAdd($visdata, 'admins', 'Только администраторы', $view['1']);
+	return $visdata;
+}
+
+/**
+ * Возвращает цифровой уровень из строки HTML форм
+ * @param  $level
+ * @return string
+ */
+function ViewLevelToInt($level){
+	switch($level){
+		case 'admins':
+			$vi = '1';
+			break;
+		case 'members':
+			$vi = '2';
+			break;
+		case 'guests':
+			$vi = '3';
+			break;
+		case 'all':
+			$vi = '4';
+			break;
+		default:
+			$vi = '4';
+	}
+	return $vi;
+}
+
+/**
+ * Переводит строку значения переключателя в число
+ * @param  $onoff
+ * @return int
+ */
+function EnToInt($onoff){
+	switch($onoff){
+		case 'on':
+			$r = 1;
+			break;
+		case 'off':
+			$r = 0;
+			break;
+		default:
+			$r = 1;
+	}
+	return $r;
+}
+
+/**
+ * Генерирует данные "Да", "Нет" для Html::Select
+ * @param bool $selected
+ * @param string $on
+ * @param string $off
+ * @return array
+ */
+function GetEnData($selected = true, $on = 'Да', $off = 'Нет'){
+	global $site;
+	$data = array();
+	$site->DataAdd($data, 'on', $on, $selected);
+	$site->DataAdd($data, 'off', $off, !$selected);
+	return $data;
+}
+
+/**
+ * Подсчитывает количество главных администраторов
+ * @return int
+ */
+function GetSystemAdminsCount(){
+	global $db;
+	$atypes = $db->Select('usertypes', '');
+	foreach($atypes as $type){
+		$types[$type['id']] = $type['system'];
+	}
+	unset($atypes);
+	$admins = $db->Select('users', "`type`='1'");
+	//Подсчитываем количество главных администраторов
+	$system = 0;
+	for($i = 0, $c = count($admins); $i < $c; $i++){
+		if($types[$admins[$i]['access']] == '1'){
+			$system++;
+		}
+	}
+	return $system;
+}
+
+/**
+ * Проверяет системная ли группа по id группы
+ * @param  $access
+ * @return bool
+ */
+function groupIsSystem($access){
+	global $db;
+	if($access == -1){
+		return false;
+	}
+	$db->Select('usertypes', "`id`='$access'");
+	if($db->NumRows() > 0){
+		$access = $db->FetchRow();
+		return $access['system'] == '1';
+	} else{
+		return false;
+	}
+}
+
+/**
+ * Возвращает данные формы(select) с выделенными значениями соответсвенно timestamp
+ * @param  $daydata
+ * @param  $mondata
+ * @param  $yeardata
+ * @param  $hourdata
+ * @param  $mindata
+ * @param  $timestamp
+ * @param bool $last_years
+ * @return void
+ */
+function GetDateFormData(&$daydata, &$mondata, &$yeardata, &$hourdata, &$mindata, $timestamp, $last_years = true){
+	global $site;
+	$data = getdate($timestamp);
+	for($i = 1; $i <= 31; $i++){
+		$site->DataAdd($daydata, $i, $i, ($data['mday'] == $i));
+	}
+	for($i = 1; $i <= 12; $i++){
+		$site->DataAdd($mondata, $i, $i, ($data['mon'] == $i));
+	}
+	if($last_years){
+		$min = 1970;
+	} else{
+		$min = date('Y');
+	}
+	$max = date('Y')+40;
+	for($i = $min; $i <= $max; $i++){
+		$site->DataAdd($yeardata, $i, $i, ($data['year'] == $i));
+	}
+	for($i = 0; $i <= 23; $i++){
+		if($i < 10){
+			$cap = '0'.$i;
+		} else{
+			$cap = $i;
+		}
+		$site->DataAdd($hourdata, $i, $cap, ($data['hours'] == $i));
+	}
+	$site->DataAdd($mindata, '0', '00', ($data['minutes'] == 0));
+	$site->DataAdd($mindata, '5', '05', ($data['minutes'] == 0));
+	for($i = 10; $i <= 55; $i = $i+5){
+		$site->DataAdd($mindata, $i, $i, ($data['minutes'] == $i));
+	}
+}
+
+/**
+ * Вывод адреса электронной почты в админке
+ * @param  $email
+ * @param string $nik
+ * @return string
+ * @deprecated
+ */
+function PrintEmail($email, $nik = ''){
+	global $config, $site;
+	$email = SafeDB($email, 50, str);
+	$nik = SafeDB($nik, 50, str);
+	static $incjs = false;
+	if($email == ''){
+		return '&nbsp;';
+	} else{
+		if(!$incjs){
+			$site->AddJS("
+			function MailTo(email,nik){
+				window.open('index.php?name=plugins&p=mail&email='+email+'&toname='+nik,'MaiL','resizable=yes,scrollbars=no,menubar=no,status=no,location=no,width=500,height=420,screenX=300,screenY=200');
+			}");
+			$incjs = true;
+		}
+		return "<a onclick=\"MailTo('$email','$nik');\">$email</a>";
+	}
+}
+
 // Пожключение системных плагинов
 $plugins = IncludeSystemPluginsGroup('system', '', true);
 foreach($plugins as $plugin){

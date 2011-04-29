@@ -9,25 +9,6 @@ define('ADMIN_SCRIPT', true);
 define('VALID_RUN', true);
 
 include_once('config/init.php'); // Конфигурация и инициализация
-include_once($config['inc_dir'].'system_plugins.inc.php'); // Системные плагины
-include_once($config['inc_dir'].'system.php'); // Функции
-include_once($config['inc_dir'].'database.php'); // Подключение к базе данных
-
-// Загрузка конфигурации сайта
-LoadSiteConfig($config);
-LoadSiteConfig($plug_config, 'plugins_config', 'plugins_config_groups');
-
-// Автообновление
-include('config/autoupdate.php');
-
-// Устанавливаем временную зону по умолчанию
-SetDefaultTimezone();
-
-// Сессии
-include_once($config['inc_dir'].'user.class.php');
-
-// Плагины
-include_once($config['inc_dir'].'plugins.inc.php');
 
 // Проверка пользователя
 if($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && $user->AllowCookie('admin', true)){ // Пользователь авторизован в админ-панели
@@ -49,9 +30,7 @@ if($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && $user->Al
 	define('ADMIN_AJAX', IsAjax()); // Говорит скрипту, что данные запрошены c помощью ajax
 	define('ADMIN_AJAX_LINKS', System::$config['admin_panel']['enable_ajax'] ? 'true' : 'false'); // Говорит скрипту что админ-панель работает в режиме AJAX
 
-	// Шаблонизатор и функции
 	include_once $config['inc_dir'].'admin_template.class.php';
-	include_once $config['inc_dir'].'functions.php';
 
 	$db->Select('modules', "`enabled`='1' and `folder`='$exe'");
 	if($db->NumRows() > 0){
