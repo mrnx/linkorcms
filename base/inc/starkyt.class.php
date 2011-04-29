@@ -18,7 +18,7 @@ define("STARKYT_OPENKEY", '{');
 define("STARKYT_CLOSEKEY", '}');
 
 //include (System::$config['inc_dir'].'html.class.php'); //class HTML
-include ($config['inc_dir'].'html.class.php'); //class HTML
+
 
 class Starkyt extends HTML{
 

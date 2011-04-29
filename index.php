@@ -11,34 +11,18 @@ define('MAIN_SCRIPT', true);
 define('VALID_RUN', true);
 
 include_once('config/init.php'); // Конфигурация и инициализация
-include_once($config['inc_dir'].'database.php'); // Подключение к базе данных
 
-// Загрузка конфигурации сайта
-LoadSiteConfig($config);
-LoadSiteConfig($plug_config, 'plugins_config', 'plugins_config_groups');
-
-// Автообновление
-include('config/autoupdate.php');
 
 // ЧПУ
 if($config['general']['ufu'] && isset($_GET['ufu'])){
 	$_GET = UfuRewrite($_GET['ufu']);
 }
 
-// Устанавливаем временную зону по умолчанию
-SetDefaultTimezone();
-
-// Сессии
-include_once($config['inc_dir'].'user.class.php');
-
 // Закрыть сайт для пользователей
 if($config['general']['private_site'] && $user->AccessLevel() != 1){
 	include_once($config['inc_dir'].'template.login.php');
 	AdminShowLogin('Сайт закрыт для пользователей');
 }
-
-// Плагины
-include_once($config['inc_dir'].'plugins.inc.php');
 
 // Получаем имя модуля
 $ModuleName = '';
@@ -50,6 +34,7 @@ if(!isset($_GET['name'])){
 	$ModuleName = SafeEnv($_GET['name'], 255, str);
 }
 $db->Select('modules', "`enabled`='1' and `folder`='$ModuleName'"); // Проверяем доступен ли данный модуль
+
 if($db->NumRows() > 0){
 	$mod = $db->FetchRow();
 	if($user->AccessIsResolved($mod['view'], $userAccess)){

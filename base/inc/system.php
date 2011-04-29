@@ -54,6 +54,9 @@ include $config['inc_dir'].'logi.class.php';
 include $config['inc_dir'].'navigation.class.php';
 include $config['inc_dir'].'LmFileCache.php';
 include $config['inc_dir'].'LmEmailExtended.php';
+include $config['inc_dir'].'user.class.php';
+include $config['inc_dir'].'html.class.php';
+include $config['inc_dir'].'starkyt.class.php';
 
 abstract class System{
 
@@ -330,11 +333,7 @@ function ConfigSetValue( $group, $cname, $newValue ){
  * Устанавливает временную зону указанную в настройках сайта
  */
 function SetDefaultTimezone(){
-	global $config;
-	$tz = $config['general']['default_timeone'];
-	if(!empty($tz)){
-		@date_default_timezone_set($tz);
-	}
+	@date_default_timezone_set(System::$config['general']['default_timeone']);
 }
 
 function SafeXSS( &$var ){
@@ -2316,16 +2315,32 @@ function BbCodePrepare( $text ){
 	return $text;
 }
 
+/**
+ * Включить вывод ошибок
+ * @return void
+ */
 function ErrorsOn(){
 	global $SITE_ERRORS;
 	$SITE_ERRORS = true;
 }
 
+/**
+ * Временно отключить вывод ошибок
+ * @return void
+ */
 function ErrorsOff(){
 	global $SITE_ERRORS;
 	$SITE_ERRORS = false;
 }
 
+/**
+ * Обработчик ошибок
+ * @param  $No
+ * @param  $Error
+ * @param  $File
+ * @param  $Line
+ * @return void
+ */
 function ErrorHandler($No, $Error, $File, $Line = -1){
 	global $ErrorsLog, $SITE_ERRORS;
 	$errortype = array(
@@ -2342,6 +2357,10 @@ function ErrorHandler($No, $Error, $File, $Line = -1){
 	}
 }
 
+/**
+ * Очищает кэш плагинов
+ * @return void
+ */
 function PluginsClearCache(){
 	$cache = LmFileCache::Instance();
 	$cache->Delete('system', 'plugins');
@@ -2350,6 +2369,11 @@ function PluginsClearCache(){
 	$cache->Delete('system', 'plugins_load');
 }
 
+/**
+ * Выполняет поиск плагинов в папке plug_dir
+ * @param bool $ClearCache
+ * @return null|string
+ */
 function LoadPlugins($ClearCache = false){
 	global $config;
 	static $resultcache = null;
@@ -2410,8 +2434,14 @@ function LoadPlugins($ClearCache = false){
 	return $result;
 }
 
-// Подключает группу плагинов
-# $function - это просто метка для подгруппы плагинов
+/**
+ * Подключает группу системных плагинов
+ * @param  $group группа
+ * @param string $function подгруппа(если есть)
+ * @param bool $return возвратить имена файлов плагинов вместо их автоматического подключения
+ * @param bool $return_full возвращать вместо имен файлов массив с полной информацией по плагинам
+ * @return array
+ */
 function IncludeSystemPluginsGroup($group, $function = '', $return = false, $return_full = false){
 	global $config;
 	$plugins = LoadPlugins();
@@ -2438,7 +2468,199 @@ function IncludeSystemPluginsGroup($group, $function = '', $return = false, $ret
 	return $result;
 }
 
-// Системные плагины
+/**
+ * Возвращает все группы настроек плагинов
+ * @return array
+ */
+function PluginsConfigsGroups(){
+	global $db;
+	$result = array(
+	);
+	$db->Select('plugins_config_groups', '');
+	while($group = $db->FetchRow()){
+		$result[$group['name']] = $group;
+	}
+	return $result;
+}
+
+/**
+ * Возвращает информацию по найденным в системе плагинам
+ * @param bool $ClearCache Инициировать новый поиск
+ * @return null|string
+ */
+function GetPlugins($ClearCache = false){
+	global $config, $db;
+	static $resultcache = null;
+
+	if($ClearCache){
+		$resultcache = null;
+		PluginsClearCache();
+	}
+
+	if($resultcache != null)
+		return $resultcache;
+	$cache = LmFileCache::Instance();
+	if($cache->HasCache('system', 'plugins')){
+		$resultcache = $cache->Get('system', 'plugins');
+		return $resultcache;
+	}
+
+	$install_plugins = array(
+	); // Установленные плагины
+	$install_groups = array(
+	); // Установленные группы
+
+	$plugins = $db->Select('plugins', '');
+	foreach($plugins as $temp){
+		if($temp['type'] == PLUG_MANUAL || $temp['type'] == PLUG_MANUAL_ONE){
+			$install_groups[$temp['group']][$temp['name']] = true;
+		} else{
+			$install_plugins[$temp['name']] = true;
+		}
+	}
+
+	$result = LoadPlugins($ClearCache);
+	$groups = &$result['groups'];
+	$plugins = &$result['plugins'];
+	foreach($plugins as $name => $plugin){
+		if(isset($plugins['type']) && $plugins['type'] == PLUG_SYSTEM){
+			unset($plugins[$name]);
+		} else{
+			$plugins[$name]['installed'] = isset($install_plugins[$name]);
+		}
+	}
+	foreach($groups as $name => $group){
+		if(isset($groups[$name]['type']) && $groups[$name]['type'] == PLUG_SYSTEM){
+			unset($groups[$name]);
+		} else{
+			foreach($group['plugins'] as $pname => $plugin){
+				$groups[$name]['plugins'][$pname]['installed'] = isset($install_groups[$name][$pname]);
+			}
+		}
+	}
+	$resultcache = &$result;
+	$cache->Write('system', 'plugins', $result);
+	return $result;
+}
+
+/**
+ * Удаляет плагин из базы данных
+ * @param  $plugin_name
+ * @param string $group
+ * @return void
+ */
+function UninstallPlugin($plugin_name, $group = ''){
+	global $config, $db;
+	$name = $plugin_name;
+	$plugins = GetPlugins();
+	if($group != ''){
+		if(isset($plugins['groups'][$group]['plugins'][$name]) && $plugins['groups'][$group]['plugins'][$name]['installed'] == true){
+			$p = &$plugins['groups'][$group]['plugins'][$name];
+			$uninstall_file = RealPath2($config['plug_dir'].$group.'/'.$name.'/'.'uninstall.php');
+			if(file_exists($uninstall_file)){
+				include_once ($uninstall_file);
+			}
+			$db->Delete('plugins', "`name`='$name' and `group`='$group'");
+			PluginsClearCache();
+		}
+	} else{
+		if(isset($plugins['plugins'][$name]) && $plugins['plugins'][$name]['installed'] == true){
+			$p = &$plugins['plugins'][$name];
+			$uninstall_file = RealPath2($config['plug_dir'].$name.'/'.'uninstall.php');
+			if(file_exists($uninstall_file)){
+				include_once ($uninstall_file);
+			}
+			$db->Delete('plugins', "`name`='".$name."'");
+			PluginsClearCache();
+		}
+	}
+}
+
+/**
+ * Удаляет группу плагинов из базы данных
+ * @param  $group
+ * @return void
+ */
+function UninstallGroup($group){
+	global $db;
+	$db->Delete('plugins', "`group`='$group'");
+	PluginsClearCache();
+}
+
+/**
+ * Устанавливает плагин или группу плагинов в базу данных
+ * @param  $plugin_name
+ * @param string $group
+ * @return void
+ */
+function InstallPlugin($plugin_name, $group = ''){
+	global $config, $db;
+	$name = $plugin_name;
+	$plugins = GetPlugins();
+	if($group != ''){
+		if(isset($plugins['groups'][$group]['plugins'][$name]) && $plugins['groups'][$group]['plugins'][$name]['installed'] == false){
+			$p = &$plugins['groups'][$group]['plugins'][$name];
+			if(!isset($p['config'])){
+				$p['config'] = '';
+			}
+			if(($plugins['groups'][$group]['type'] == PLUG_MANUAL_ONE || $p['type'] == PLUG_MANUAL_ONE)){
+				UninstallGroup($group);
+			}
+			$install_file = RealPath2($config['plug_dir'].$group.'/'.$name.'/'.'install.php');
+			if(file_exists($install_file)){
+				include_once ($install_file);
+			}
+			$vals = Values('', $name, SafeEnv($p['config'], 0, str), SafeEnv($p['type'], 1, int), $group);
+			$db->Insert('plugins', $vals);
+			PluginsClearCache();
+		}
+	} else{
+		if(isset($plugins['plugins'][$name]) && $plugins['plugins'][$name]['installed'] == false){
+			$p = &$plugins['plugins'][$name];
+			if(!isset($p['config'])){
+				$p['config'] = '';
+			}
+			$install_file = RealPath2($config['plug_dir'].$name.'/'.'install.php');
+			if(file_exists($install_file)){
+				include_once ($install_file);
+			}
+			$vals = Values('', SafeEnv($name, 250, str), SafeEnv($p['config'], 0, str), SafeEnv($p['type'], 1, int), SafeEnv($group, 250, str));
+			$db->Insert('plugins', $vals);
+			PluginsClearCache();
+		}
+	}
+}
+
+/**
+ * Подключает группу плагинов
+ * @param $group группа
+ * @param string $function подгруппа
+ * @param bool $return возвратить имена файлов плагинов вместо автоматического подкочения
+ * @return array
+ */
+function IncludePluginsGroup($group, $function = '', $return = false){
+	global $config, $db;
+	$plugins = GetPlugins();
+	$result = array(
+	);
+	if(isset($plugins['groups'][$group])){
+		$plugins = $plugins['groups'][$group]['plugins'];
+		foreach($plugins as $plugin){
+			if(($plugin['installed'] && $function == '') || ($plugin['installed'] && isset($plugin['function']) && $function == $plugin['function'])){
+				global $include_plugin_path; // эта переменная будет доступна из плагина
+				$include_plugin_path = RealPath2($config['plug_dir'].$group.'/'.$plugin['name'].'/');
+				if($return){
+					$result[] = $include_plugin_path;
+				} else{
+					include ($include_plugin_path.'index.php');
+				}
+			}
+		}
+	}
+	return $result;
+}
+
+// Пожключение системных плагинов
 $plugins = IncludeSystemPluginsGroup('system', '', true);
 foreach($plugins as $plugin){
 	include($plugin.'index.php');

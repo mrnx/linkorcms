@@ -5,12 +5,6 @@
 # Файл: page_template.class.php
 # Назначение: Общий шаблонизатор
 
-if(!defined('VALID_RUN')){
-	header("HTTP/1.1 404 Not Found");
-	exit;
-}
-
-include_once ($config['inc_dir'].'starkyt.class.php'); //class Starkyt
 
 class PageTemplate extends Starkyt{
 

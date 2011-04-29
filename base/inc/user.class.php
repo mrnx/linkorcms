@@ -5,11 +5,6 @@
 # Файл: user.class.php
 # Назначение: Пользовательский класс для аутентификации пользователей
 
-if(!defined('VALID_RUN')){
-	header("HTTP/1.1 404 Not Found");
-	exit;
-}
-
 if(!defined("USER")){
 	define("USER", true);
 	define("EXTRA_ADMIN_COOKIE", '3794y7v387o3');
@@ -493,9 +488,5 @@ class User{
 		$db->Delete('online', $where);
 	}
 }
-
-$user = new User();
-$userAuth = IntVal($user->Get('u_auth'));
-$userAccess = IntVal($user->Get('u_level'));
 
 ?>
