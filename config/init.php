@@ -86,7 +86,6 @@ $userAuth = false;
 $userAccess = 4;
 
 require 'config/name_config.php'; // Конфигурация расположений
-require $config['inc_dir'].'system_plugins.inc.php'; // Системные плагины
 require $config['inc_dir'].'system.php'; // Функции
 
 // Обработка ошибок

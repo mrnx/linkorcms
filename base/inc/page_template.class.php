@@ -387,7 +387,7 @@ class PageTemplate extends Starkyt{
 		}
 		if(!defined('SETUP_SCRIPT') && System::$config['general']['show_script_time']){
 			$end_time = GetMicroTime();
-			$end_time = $end_time - $GLOBALS['script_start_time'];
+			$end_time = $end_time - SCRIPT_START_TIME;
 			$php_time = $end_time - System::db()->QueryTotalTime;
 			$persent = 100 / $end_time;
 			$memory = memory_get_peak_usage(true);

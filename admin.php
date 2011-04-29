@@ -8,27 +8,31 @@
 define('ADMIN_SCRIPT', true);
 define('VALID_RUN', true);
 
-include_once 'config/init.php'; // Конфигурация и инициализация
+require 'config/init.php'; // Конфигурация и инициализация
 define('ADMIN_FILE', System::$config['admin_file']); // Ссылка на админ-панель
 
+// Шаблонизатор
+include_once $config['inc_dir'].'admin_template.class.php';
+$site = new AdminPage();
+
 // Проверка пользователя
-if(!($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && $user->AllowCookie('admin', true))){
+if(!($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && System::user()->AllowCookie('admin', true))){
 	if(isset($_POST['admin_login'])){ // Проверка логина-пароля
 		$admin_name = SafeEnv($_POST['admin_name'], 255, str);
 		$admin_password = SafeEnv($_POST['admin_password'], 255, str);
-		$a = $user->Login($admin_name, $admin_password, false, true);
-		if($a === true && $user->SecondLoginAdmin){
-			$user->SetAdminCookie($admin_name, $admin_password);
+		$a = System::user()->Login($admin_name, $admin_password, false, true);
+		if($a === true && System::user()->SecondLoginAdmin){
+			System::user()->SetAdminCookie($admin_name, $admin_password);
 		}else{
-			$user->UnsetCookie('admin');
-			include_once $config['inc_dir'].'template.login.php';
-			AdminShowLogin('Неверные логин или пароль'); // exit
+			System::user()->UnsetCookie('admin');
+			System::admin()->Login('Неверные логин или пароль'); // exit
 		}
 	}else{ // Форма авторизации
-		include_once $config['inc_dir'].'template.login.php';
-		AdminShowLogin(); // exit
+		System::admin()->Login(); // exit
 	}
 }
+
+System::admin()->InitPage();
 
 // Получаем имя модуля
 $ModuleName = '';
@@ -43,28 +47,26 @@ if(!isset($_GET['exe'])){
 		GO(Ufu('index.php'));
 	}
 }
-$db->Select('modules', "`enabled`='1' and `folder`='$ModuleName'");
+System::db()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'");
 
 // Установлен такой модуль?
-if($db->NumRows() == 0){
+if(System::db()->NumRows() == 0){
 	System::admin()->AddAdminMenu();
-	System::admin()->AddTextBox('Админ панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$exe.'" не найден!</div>');
+	System::admin()->AddTextBox('Админ панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$ModuleName.'" не найден!</div>');
 	System::admin()->TEcho();
 	exit;
 }
 
 // Проверка на доступ
-if($user->CheckAccess2($ModuleName, $ModuleName)){
-	AddTextBox('Ошибка', $config['general']['admin_accd']);
-	return;
+if(!$user->CheckAccess2($ModuleName, $ModuleName)){
+	System::admin()->AddTextBox('Ошибка', 'Доступ закрыт!');
+	System::admin()->TEcho();
+	exit;
 }
 
 // Вспомогательные константы
-define('MOD_DIR', $config['mod_dir'].$ModuleName.'/');
+define('MOD_DIR', System::$config['mod_dir'].$ModuleName.'/');
 define('MOD_FILE', MOD_DIR.'admin.php');
-
-// Шаблонизатор
-include_once $config['inc_dir'].'admin_template.class.php';
 
 // Подключаем модуль
 if(is_file(MOD_FILE)){

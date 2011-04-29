@@ -8,7 +8,7 @@
 define('RSS_SCRIPT', true);
 define('VALID_RUN', true);
 
-include_once 'config/init.php'; // Конфигурация и инициализация
+require 'config/init.php'; // Конфигурация и инициализация
 
 @header("Content-Type: text/xml");
 @header("Cache-Control: no-cache");

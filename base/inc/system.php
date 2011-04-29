@@ -2515,6 +2515,7 @@ function ErrorHandler($No, $Error, $File, $Line = -1){
 	}
 	if($SITE_ERRORS && isset(System::$config['debug']['php_errors']) && System::$config['debug']['php_errors'] == '1'){
 		System::$Errors[] = $Error."\n";
+		echo $Error;
 	}
 }
 

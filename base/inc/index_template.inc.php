@@ -12,13 +12,13 @@ if(!defined('VALID_RUN')){
 
 include ($config['inc_dir'].'page_template.class.php'); //class PageTemplate
 
-class Page extends PageTemplate
-{
+class Page extends PageTemplate{
 
-	public function InitPage()
-	{
+	public function InitPage(){
 		global $config, $user;
+
 		$this->InitPageTemplate();
+		$this->SetGZipCompressionEnabled($config['general']['gzip_status'] == '1');
 
 		$TemplateDir = $config['tpl_dir'].$config['general']['site_template'].'/';
 		$DefaultTemplateDir = $config['tpl_dir'].$config['general']['default_template'].'/';
@@ -29,20 +29,20 @@ class Page extends PageTemplate
 			$ThemeFile = 'theme.html';
 		}
 
-		$this->SetGZipCompressionEnabled($config['general']['gzip_status'] == '1');
-
 		$this->SetRoot($TemplateDir);
 		$this->DefaultRoot = $DefaultTemplateDir;
 
 		$this->SetTableTemplate('table/table_open.html', 'table/table_close.html', 'table/table_cell_open.html', 'table/table_cell_close.html');
 		$this->SetTempVar('head', 'body', $ThemeFile);
 
+		// Создаем блоки и добавляем переменные
 		$this->AddBlock('template', true, false, 'page');
 		$this->SetVar('template', 'powered', '<a href="http://linkorcms.ru/" target="_blank">Сайт работает на LinkorCMS</a>');
 		$this->SetVar('template', 'dir', $TemplateDir);
 		$this->SetVar('template', 'default_dir', $DefaultTemplateDir);
-		if(defined('MOD_DIR'))
+		if(defined('MOD_DIR')){
 			$this->SetVar('template', 'mdir', MOD_DIR);
+		}
 		$this->SetVar('template', 'site_name', $config['general']['site_name']);
 		$this->SetVar('template', 'site_slogan', $config['general']['site_slogan']);
 		$this->SetVar('template', 'site_email', $config['general']['site_email']);
@@ -215,13 +215,13 @@ class Page extends PageTemplate
 		$uris = unserialize($uris);
 		if(in_array($ModuleName, $mods)){
 			$r = true;
-		} elseif($_SERVER['REQUEST_URI'] <> '' && in_array($_SERVER['REQUEST_URI'], $uris)){
+		}elseif($_SERVER['REQUEST_URI'] <> '' && in_array($_SERVER['REQUEST_URI'], $uris)){
 			$r = true;
-		} elseif($_SERVER['REQUEST_URI'] <> '' && $this->BloksCheckViewpos($uris)){
+		}elseif($_SERVER['REQUEST_URI'] <> '' && $this->BloksCheckViewpos($uris)){
 			$r = true;
-		} elseif(INDEX_PHP == true && in_array('INDEX', $mods)){
+		}elseif(INDEX_PHP == true && in_array('INDEX', $mods)){
 			$r = true;
-		} else{
+		}else{
 			$r = false;
 		}
 		if(in_array('ALL_EXCEPT', $mods)){

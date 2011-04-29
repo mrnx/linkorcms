@@ -61,26 +61,31 @@ class AdminPage extends PageTemplate{
 	public $BlockAdminBlocks;
 
 	public function InitPage(){
-		$this->InitPageTemplate(ADMIN_AJAX);
+		$ajax = IsAjax();
+		$this->InitPageTemplate($ajax);
 		$this->SetGZipCompressionEnabled(System::$config['general']['gzip_status'] == '1');
-		$template_dir = System::$config['inc_dir'].'template/';
 
-		if(ADMIN_AJAX){ // Загрузка страницы посредством AJAX запроса
-            $this->InitStarkyt($template_dir, 'theme_ajax.html');
+		// Папка с шаблоном
+		$Template = 'default_admin'; // fixme: Вынести в конфигурацию сата
+		$TemplateDir = System::$config['tpl_dir'].$Template.'/';
+		//$DefaultTemplateDir = System::$config['tpl_dir'].System::$config['general']['default_admin_template'].'/';
+
+		if($ajax){ // Загрузка страницы посредством AJAX запроса
+            $this->InitStarkyt($TemplateDir, 'theme_ajax.html');
 		}else{
-			$this->SetRoot($template_dir);
-			$this->SetTempVar('head', 'body', 'theme.html');
+			$this->SetRoot($TemplateDir);
+			//$this->DefaultRoot = $DefaultTemplateDir;
+			$this->SetTempVar('head', 'body', 'theme_admin.html');
 			$this->Title = 'Админ-панель';
 		}
 
+		// Добавляем блоки и переменные
 		$this->BlockTemplate = $this->NewBlock('template', true, false, 'page');
 		$this->BlockContentBox = $this->NewBlock('content_box', true, true, '', 'content_box.html');
 		$this->BlockAdminBlocks = $this->NewBlock('admin_blocks', true, true, 'block');
-
 		$vars = array();
 		$vars['dir']                    = $this->Root;
 		$vars['admin_file']             = ADMIN_FILE;
-		$vars['ajax_links']             = ADMIN_AJAX_LINKS;
 		$vars['admin_name']             = System::user()->Get('u_name');
 		$vars['admin_avatar']           = System::user()->Get('u_avatar');
 		$vars['admin_avatar_small']     = System::user()->Get('u_avatar_small');
@@ -95,6 +100,23 @@ class AdminPage extends PageTemplate{
 		$vars['tool_menu_block']        = false;
 		$vars['content_block']          = false;
 		$this->BlockTemplate->vars = $vars;
+	}
+
+	public function Login($AuthMessage = '', $AuthTitle = 'Авторизация администратора'){
+		global $config, $site;
+		$site->InitPageTemplate();
+		$site->Title = $AuthTitle;
+		$root = $config['inc_dir'].'template/';
+		$site->SetRoot($root);
+		$site->SetTempVar('head', 'body', 'login.html');
+		$site->AddBlock('template', true, false, 'login');
+
+		$site->Blocks['template']['vars'] = array(
+			'action' => '', 'dir' => $root, 'auth_message' => $AuthMessage, 'auth_title' => $AuthTitle
+		);
+		$site->AddCSSFile('login.css', false, true);
+		$site->EchoAll();
+		exit();
 	}
 
 	/**
@@ -280,7 +302,7 @@ class AdminPage extends PageTemplate{
 	 * @return
 	 */
 	function AddAdminMenu(){
-		if(ADMIN_AJAX) return;
+		if(IsAjax()) return;
 		$menu = System::db()->Select('admin_menu', "`enabled`='1'");
 		SortArray($menu, 'order');
 		$items = array(); // Элементы меню по родительским индексам
@@ -381,7 +403,7 @@ class AdminPage extends PageTemplate{
 		global $script_start_time;
 		System::user()->OnlineProcess($this->Title);
 		$this->BlockTemplate->vars['showinfo'] = System::$config['general']['show_script_time'];
-		if(ADMIN_AJAX){
+		if(IsAjax()){
 			$this->BlockTemplate->vars['head_items'] = $this->GenerateHead();
 		}
 		$this->BlockTemplate->vars['errors_text'] = implode(System::$Errors);
@@ -390,11 +412,7 @@ class AdminPage extends PageTemplate{
 
 }
 
-$site = new AdminPage();
-$site->InitPage();
-
 // Поддержка старого API
-// Запустить без старого API. Ядро должно быть переписано с поддержкой нового API.
 function AddCenterBox( $title ){System::admin()->AddCenterBox($title);}
 function AddText( $text ){System::admin()->AddText($text);}
 function AddTextBox( $title, $text ){System::admin()->AddTextBox($title, $text);}

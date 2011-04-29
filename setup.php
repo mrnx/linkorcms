@@ -9,7 +9,7 @@ define("SETUP_SCRIPT", true);
 define("VALID_RUN", true);
 
 @set_time_limit(600);
-include_once('config/init.php');
+require 'config/init.php';
 
 $default_prefix = 'table';
 $bases_path = 'setup/bases/';
