@@ -100,6 +100,20 @@ if(is_file('config/db_config.php')){ // Система установлена
 	require 'config/db_config.php';
 	require 'config/salt.php';
 
+	// Подключение к базе данных
+	define("DATABASE", true);
+	IncludeSystemPluginsGroup('database', 'layer');
+	if(method_exists($db, 'Connect')){
+		$db->ErrorReporting = $config["db_errors"];
+		$db->Prefix = $config['db_pref'];
+		$db->Connect($config["db_host"], $config["db_user"], $config["db_pass"], $config["db_name"]);
+		if(!$db->Connected){
+			exit("<html><head><title>Ошибка</title></head><body><center>Проблемы с базой данных, проверьте настройки базы данных.</center></body></html>");
+		}
+	} else{
+		exit("<html><head><title>Ошибка</title></head><body><center>Проблема с подключением драйвера базы данных.</center></body></html>");
+	}
+
 	// Проверяем версию базы данных
 	if(!defined('SETUP_SCRIPT') && substr($config['db_version'], 0, 3) != substr(CMS_VERSION, 0, 3)){
 		exit('<html>
