@@ -57,6 +57,7 @@ include $config['inc_dir'].'LmEmailExtended.php';
 include $config['inc_dir'].'user.class.php';
 include $config['inc_dir'].'html.class.php';
 include $config['inc_dir'].'starkyt.class.php';
+include $config['inc_dir'].'rss.class.php';
 
 abstract class System{
 

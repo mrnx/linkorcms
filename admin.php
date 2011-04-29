@@ -8,7 +8,7 @@
 define('ADMIN_SCRIPT', true);
 define('VALID_RUN', true);
 
-include_once('config/init.php'); // Конфигурация и инициализация
+include_once 'config/init.php'; // Конфигурация и инициализация
 define('ADMIN_FILE', System::$config['admin_file']); // Ссылка на админ-панель
 
 // Проверка пользователя
