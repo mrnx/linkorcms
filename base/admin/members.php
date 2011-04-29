@@ -5,8 +5,6 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-IncludeFunction('user');
-
 function AdminUserEditor( $save_link, $a = 'adduser', $id = 0, $isadmin = false )
 {
 	global $config, $db, $site, $user;

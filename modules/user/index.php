@@ -5,7 +5,6 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-IncludeFunction('user');
 $site->SetTitle('Пользователи');
 
 if(isset($_GET['op'])){

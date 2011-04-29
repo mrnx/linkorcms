@@ -102,14 +102,7 @@ if(is_file('config/db_config.php')){ // Система установлена
 
 	// Проверяем версию базы данных
 	if(!defined('SETUP_SCRIPT') && substr($config['db_version'], 0, 3) != substr(CMS_VERSION, 0, 3)){
-		exit('<html>
-			<head>
-				<title>'.CMS_NAME.' - Ошибка!</title>
-			</head>
-			<body>
-				<center><h2>'.CMS_NAME.': Требуется обновление базы данных.</h2></center>
-			</body>
-			</html>');
+		exit('<html><head><title>Ошибка</title></head><body><center><h2>Требуется обновление базы данных.</h2></center></body></html>');
 	}
 
 	// Подключение к базе данных
@@ -120,10 +113,10 @@ if(is_file('config/db_config.php')){ // Система установлена
 		$db->Prefix = $config['db_pref'];
 		$db->Connect($config["db_host"], $config["db_user"], $config["db_pass"], $config["db_name"]);
 		if(!$db->Connected){
-			exit("<html><head><title>Ошибка</title></head><body><center>Проблемы с базой данных, проверьте настройки базы данных.</center></body></html>");
+			exit('<html><head><title>Ошибка</title></head><body><center>Проблемы с базой данных, проверьте настройки базы данных.</center></body></html>');
 		}
 	} else{
-		exit("<html><head><title>Ошибка</title></head><body><center>Проблема с подключением драйвера базы данных.</center></body></html>");
+		exit('<html><head><title>Ошибка</title></head><body><center>Проблема с подключением драйвера базы данных.</center></body></html>');
 	}
 
 	// Загрузка конфигурации сайта
@@ -164,7 +157,7 @@ if(is_file('config/db_config.php')){ // Система установлена
 		foreach($plugins as $plugin){
 			$PluginName = $config['plug_dir'].SafeDB(RealPath2($plugin['name']), 255, str);
 			if(file_exists($PluginName.'/index.php') && is_dir($PluginName)){
-				include_once ($PluginName.'/index.php');
+				include $PluginName.'/index.php';
 			} else{
 				UninstallPlugin($plugin['name']);
 			}

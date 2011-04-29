@@ -8,7 +8,6 @@
 class EmailOptions{
 
 	public $XMailer;
-
 	public $SmtpSend = false; // Использовать SMTP для отправки писем?
 	public $SmtpHost = ''; // Имя сервера
 	public $SmtpPort = 25; // Порт

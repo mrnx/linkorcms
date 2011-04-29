@@ -7,8 +7,7 @@ if(!defined('VALID_RUN')){
 
 $msgs = $db->Select('messages', "`active`='1'");
 
-function MessagesCheckView( &$id, &$mods, &$uris, &$view )
-{
+function MessagesCheckView( &$id, &$mods, &$uris, &$view ){
 	global $ModuleName, $s_m, $user;
 	if(!$user->AccessIsResolved($view)){
 		return false;
@@ -34,8 +33,7 @@ function MessagesCheckView( &$id, &$mods, &$uris, &$view )
 $disableMsg = false;
 $bottomMessages = array();
 
-function MessagesRender( $msg )
-{
+function MessagesRender( $msg ){
 	global $site, $userAccess, $config;
 	$disableMsg = '';
 	$total = TotalTime(time(), $msg['date'] + (Day2Sec * $msg['expire']));
