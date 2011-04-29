@@ -3,8 +3,7 @@
 /*
  * LinkorCMS 1.3.5
  * © 2011 Александр Галицкий (linkorcms@yandex.ru)
- * and LinkorCMS Development Group
- *
+ * и LinkorCMS Development Group
  */
 
 define('MAIN_SCRIPT', true);
@@ -34,54 +33,69 @@ if(!isset($_GET['name'])){
 }
 $db->Select('modules', "`enabled`='1' and `folder`='$ModuleName'"); // Проверяем доступен ли данный модуль
 
-if($db->NumRows() > 0){
-	$mod = $db->FetchRow();
-	if($user->AccessIsResolved($mod['view'], $userAccess)){
-		define('MOD_DIR', $config['mod_dir'].$ModuleName.'/');
-		define('MOD_FILE', MOD_DIR.'index.php');
-		define('MOD_INIT', MOD_DIR.'init.php');
-		define('MOD_THEME', RealPath2(SafeDB($mod['theme'], 255, str)));
-		$valid_init = file_exists(MOD_INIT);
-		// Инициализация модуля
-		if($valid_init){
-			include MOD_INIT;
-			if(function_exists('mod_initialization')){
-				mod_initialization();
-			}
-		}
-		// Шаблонизатор
-		if(!$system['no_templates']){
-			include_once($config['inc_dir'].'index_template.inc.php');
-		}
-		// Сообщения
-		if(!$system['no_messages']){
-			include_once($config['inc_dir'].'messages.inc.php');
-		}
-		// Модуль
-		require MOD_FILE;
-		// Сообщения внизу
-		if(!$system['no_messages']){
-			BottomMessages();
-		}
-		// Вывод данных пользователю
-		if(!$system['no_echo']){
-			System::site()->TEcho();
-		}
-		// Финализация модуля
-		if($valid_init){
-			if(function_exists('mod_finalization')){
-				mod_finalization();
-			}
-		}
-	}else{
-		include $config['inc_dir'].'index_template.inc.php';
-		System::site()->AddTextBox('Ошибка', '<center>Доступ запрещен.</center>');
-		System::site()->TEcho();
-	}
-}else{
+// Установлен такой модуль?
+if($db->NumRows() == 0){
 	include $config['inc_dir'].'index_template.inc.php';
 	System::site()->AddTextBox('Ошибка', '<center>Данная страница ('.SafeDB($ModuleName, 255, str).') не существует или не доступна в данный момент.</center>');
 	System::site()->TEcho();
+	exit;
+}
+
+// Проверка на доступ
+$mod = $db->FetchRow();
+if(!$user->AccessIsResolved($mod['view'], $userAccess)){
+	include $config['inc_dir'].'index_template.inc.php';
+	System::site()->AddTextBox('Ошибка', '<center>Доступ запрещен.</center>');
+	System::site()->TEcho();
+	exit;
+}
+
+// Вспомогательные константы
+define('MOD_DIR', $config['mod_dir'].$ModuleName.'/');
+define('MOD_FILE', MOD_DIR.'index.php');
+
+define('MOD_INIT', MOD_DIR.'init.php');
+define('MOD_THEME', RealPath2(SafeDB($mod['theme'], 255, str)));
+
+// Подключаем модуль
+$valid_init = file_exists(MOD_INIT);
+
+// Инициализация модуля
+if($valid_init){
+	include MOD_INIT;
+	if(function_exists('mod_initialization')){
+		mod_initialization();
+	}
+}
+
+// Шаблонизатор
+if(!$system['no_templates']){
+	include_once($config['inc_dir'].'index_template.inc.php');
+}
+
+// Сообщения
+if(!$system['no_messages']){
+	include_once($config['inc_dir'].'messages.inc.php');
+}
+
+// Модуль
+require MOD_FILE;
+
+// Сообщения внизу
+if(!$system['no_messages']){
+	BottomMessages();
+}
+
+// Вывод данных пользователю
+if(!$system['no_echo']){
+	System::site()->TEcho();
+}
+
+// Финализация модуля
+if($valid_init){
+	if(function_exists('mod_finalization')){
+		mod_finalization();
+	}
 }
 
 ?>

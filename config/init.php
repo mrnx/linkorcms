@@ -82,6 +82,8 @@ $system = array('no_templates'=>false, 'no_messages'=>false, 'no_echo'=>false, '
 $SiteLog = null;
 $ErrorsLog = null;
 $SITE_ERRORS = true;
+$userAuth = false;
+$userAccess = 4;
 
 require 'config/name_config.php'; // Конфигурация расположений
 require $config['inc_dir'].'system_plugins.inc.php'; // Системные плагины
@@ -126,7 +128,6 @@ if(is_file('config/db_config.php')){ // Система установлена
 	// Автообновление
 	include('config/autoupdate.php');
 
-
 	// Устанавливаем временную зону сайта по умолчанию
 	SetDefaultTimezone();
 
@@ -163,10 +164,9 @@ if(is_file('config/db_config.php')){ // Система установлена
 			}
 		}
 	}
-
 }elseif(!defined('SETUP_SCRIPT')){ // Система не установлена
 	Header("Location: setup.php");
 	exit();
-}
+} // else идёт установка
 
 ?>
