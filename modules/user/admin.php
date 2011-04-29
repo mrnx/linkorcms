@@ -533,14 +533,12 @@ function AdminUser( $action )
 			break;
 		case 'edituser':
 			if($editing){
-				include_once ($config['inc_dir'].'members.php');
 				AdminUserEditor('user&a=editsave', 'edit', SafeEnv($_GET['id'], 11, int), false);
 				return true;
 			}
 			break;
 		case 'editsave':
 			if($editing){
-				include_once ($config['inc_dir'].'members.php');
 				AdminUserEditSave('user', 'update', SafeEnv($_GET['id'], 11, int), false);
 				return true;
 			}
