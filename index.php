@@ -39,12 +39,6 @@ if($config['general']['private_site'] && $user->AccessLevel() != 1){
 	AdminShowLogin('Сайт закрыт для пользователей');
 }
 
-// Статистика
-$stats_alloy = $config['general']['statistika'];
-if($stats_alloy){
-	include_once($config['inc_dir'].'statistika.inc.php');
-}
-
 // Плагины
 include_once($config['inc_dir'].'plugins.inc.php');
 
@@ -90,11 +84,6 @@ if($db->NumRows() > 0){
 		// Вывод данных пользователю
 		if(!$system['no_echo']){
 			System::site()->TEcho();
-		}
-		// Статистика просмотров
-		if(!$system['stop_hit'] && $stats_alloy){
-			HitStatisticProcess();
-			StatisticProcess();
 		}
 		// Финализация модуля
 		if($valid_init){

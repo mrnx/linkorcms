@@ -405,16 +405,13 @@ class PageTemplate extends Starkyt{
 			$info = '';
 		}
 		$contents = str_replace('%info%', $info, $contents);
-
-
-		$gzip = $this->GZipCompressPage && $this->SupportGZip;
-		if($gzip){
+		if($this->GZipCompressPage && $this->SupportGZip){
 			@Header('Content-Encoding: gzip');
 			ob_start('ob_gzhandler');
-		}
-		echo $contents;
-		if($gzip){
+			echo $contents;
 			ob_end_flush();
+		}else{
+			echo $contents;
 		}
 	}
 

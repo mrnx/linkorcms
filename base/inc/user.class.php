@@ -307,7 +307,6 @@ class User{
 				}
 			}
 		}
-
 	}
 
 	// ƒобавл€ет или отнимает пункты у пользовател€.
@@ -475,12 +474,6 @@ class User{
 		$this->Def('u_access', '-1');
 		$this->Def('u_ip', getip());
 		$this->Def('u_avatar', GetGalleryAvatar('guest.gif'));
-		$this->Def('u_hits', 1);
-		//—татистика хостов
-		if(!$this->Get('u_stats_host')){
-			$this->host = true;
-			$this->Def('u_stats_host', true);
-		}
 	}
 
 	// ¬ыполн€ет выход из системы и удал€ет все данные сессии.
