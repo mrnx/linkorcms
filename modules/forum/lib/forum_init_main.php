@@ -8,7 +8,6 @@ if(!defined('VALID_RUN')) {
 $site->AddCSSFile($config['tpl_dir'].$config['general']['site_template'].'/style/forum.css', true);
 
 include_once $config['inc_dir'].'LmFileCache.php';
-include_once($config['inc_dir'].'bbcode.inc.php');
 include_once('scripts/bbcode_editor/index.php');
 include_once($forum_lib_dir.'forum_add.php');
 include_once($forum_lib_dir.'forum_cache.php');

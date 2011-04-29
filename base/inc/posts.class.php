@@ -10,8 +10,6 @@
 
 global $config, $site;
 
-include_once($config['inc_dir'].'bbcode.inc.php');
-
 /**
  * Движок комментариев Posts
  */
