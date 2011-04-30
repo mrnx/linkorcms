@@ -71,6 +71,7 @@ if(isset($_GET['clean'])){
 			$content = str_replace($replace, "\r\n", $content);
 
 			file_put_contents($href, $content);
+			chmod($href, 0666);
 			echo '<span style="color: green;">'.$i.': Обработан: '.$href.'</span><br />';
 		}else{
 			echo '<span style="color: red;">'.$i.': Нет прав на запись: '.$href.'</span><br />';
@@ -112,7 +113,7 @@ if(isset($_GET['reinstall'])){
 
 if(isset($_GET['permissions'])){
 	$allfiles = GetFiles('./', true, true, '.php,.html,.FRM,.MYD', true);
-	$text = '';
+	$text = 'Права на файлы и папки:<br />';
 	$text .= '<table>';
 	$text .= '<tr><th>Файл</th><th>Права на запись</th><th>Права</th><th>Группа</th><th>Владелец</th></tr>';
 	foreach($allfiles as $file){
@@ -133,6 +134,11 @@ if(isset($_GET['permissions'])){
 if(isset($_GET['destroy'])){
 	echo 'Удаление всех файлов.';
 	RmDirRecursive('.');
+}
+
+if(isset($_GET['umask'])){
+	echo 'Текущая umask: '.sprintf('%o', umask())
+	     .'<br />Системная umask: ', exec('umask'), "\n";
 }
 
 ?>

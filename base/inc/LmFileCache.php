@@ -77,19 +77,11 @@ class LmFileCache{
 		// Кэширование включено только если папка кэша и папка группы существуют и доступны для записи.
 		if($this->Enabled){
 			$files = $this->GetFiles($Group, $Key);
-			$umask = umask();
-			umask(0000);
-			$existed = is_file($files[0]);
 			if($Expiry != 0){
 				$Expiry = time() + $Expiry;
 			}
 			file_put_contents($files[0], Serialize($Value), LOCK_SH);
 			file_put_contents($files[1], $Expiry, LOCK_SH);
-			if(!$existed){
-				@chmod($files[0], 0666);
-				@chmod($files[1], 0666);
-			}
-			umask($umask);
 		}
 	}
 

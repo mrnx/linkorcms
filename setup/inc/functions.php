@@ -1,11 +1,9 @@
 <?php
 
-function WriteConfigFile( $filename, $db_type, $host, $user, $pass, $name, $pref, $version )
-{
-	$cfgf = fopen($filename, "w");
-	$content = "<?php\n"
-	."		#--Файл сгенерирован инсталлятором.--\n"
-	."		#Настройки базы данных\n"
+function WriteConfigFile( $filename, $db_type, $host, $user, $pass, $name, $pref, $version ){
+	file_put_contents($filename ,"<?php\n"
+	."// Файл сгенерирован инсталлятором\n"
+	."// Настройки базы данных\n"
 	."\n"
 	."\$config['db_errors'] = false;\n"
 	."\$config['db_type'] = '$db_type';\n"
@@ -16,23 +14,17 @@ function WriteConfigFile( $filename, $db_type, $host, $user, $pass, $name, $pref
 	."\$config['db_pref'] = '$pref';\n"
 	."\$config['db_version'] = '$version';\n"
 	."\n"
-	."?>";
-	fwrite($cfgf, $content);
-	fclose($cfgf);
+	."?>");
 }
 
-function WriteSaltFile( $filename )
-{
-	$cfgf = fopen($filename, "w");
+function WriteSaltFile( $filename ){
 	$salt = GenRandomString(64);
-	$content = "<?php\n"
-	."		#--Файл сгенерирован инсталлятором.--\n"
+	file_put_contents($filename, "<?php\n"
+	."// Файл сгенерирован инсталлятором\n"
 	."\n"
 	."\$config['salt'] = '$salt';\n"
 	."\n"
-	."?>";
-	fwrite($cfgf, $content);
-	fclose($cfgf);
+	."?>");
 }
 
 ?>

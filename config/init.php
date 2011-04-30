@@ -15,6 +15,8 @@ if(!defined('VALID_RUN')){
 @ini_set('html_errors', false);
 @ini_set('error_reporting', E_ALL);
 
+umask(0); // По умолчанию файлы будут создаваться с правами 0666, папки с правами 0777
+
 // Засекаем время начала выполнения скрипта
 define('SCRIPT_START_TIME', microtime(true));
 
