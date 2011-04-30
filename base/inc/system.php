@@ -2033,7 +2033,7 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 		if(in_array($_FILES[$PostName]['type'], $alloy_mime) && in_array(strtolower(GetFileExt($_FILES[$PostName]['name'])), $alloy_exts)) {
 			$file_name = Translit($_FILES[$PostName]['name'], true);
 			if(!is_dir($Dir)) {
-				mkdir($Dir, 0755);
+				mkdir($Dir, 0777);
 			}
 			$ext = GetFileExt($file_name);
 			$name = GetFileName($file_name);
@@ -2051,7 +2051,7 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 			}
 			if($CreateThumbs) {
 				if(!is_dir($ThumbsDir)) {
-					mkdir($ThumbsDir, 0755);
+					mkdir($ThumbsDir, 0777);
 				}
 				CreateThumb($FileName, $ThumbFileName, $MaxWidth, $MaxHeight);
 			}

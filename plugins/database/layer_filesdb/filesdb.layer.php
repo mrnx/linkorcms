@@ -273,7 +273,7 @@ class LcDatabaseFilesDB
 				$this->DropDb($ShortName);
 			}
 		}
-		$flag = mkdir($name, 0755);
+		$flag = mkdir($name, 0777);
 		if(!$flag){
 			$this->Error('Не удалось создать базу данных');
 			return false;
