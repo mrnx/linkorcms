@@ -11,10 +11,6 @@ define('VALID_RUN', true);
 require 'config/init.php'; // Конфигурация и инициализация
 define('ADMIN_FILE', System::$config['admin_file']); // Ссылка на админ-панель
 
-// Шаблонизатор
-include_once $config['inc_dir'].'admin_template.class.php';
-$site = new AdminPage();
-
 // Проверка пользователя
 if(!($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && System::user()->AllowCookie('admin', true))){
 	if(isset($_POST['admin_login'])){ // Проверка логина-пароля

@@ -53,14 +53,11 @@ if(!$user->AccessIsResolved($mod['view'], $userAccess)){
 // Вспомогательные константы
 define('MOD_DIR', $config['mod_dir'].$ModuleName.'/');
 define('MOD_FILE', MOD_DIR.'index.php');
-
 define('MOD_INIT', MOD_DIR.'init.php');
 define('MOD_THEME', RealPath2(SafeDB($mod['theme'], 255, str)));
 
-// Подключаем модуль
-$valid_init = file_exists(MOD_INIT);
-
 // Инициализация модуля
+$valid_init = file_exists(MOD_INIT);
 if($valid_init){
 	include MOD_INIT;
 	if(function_exists('mod_initialization')){
@@ -70,15 +67,19 @@ if($valid_init){
 
 // Шаблонизатор
 if(!$system['no_templates']){
-	include_once($config['inc_dir'].'index_template.inc.php');
+	System::site()->InitPage();
+	$initfile = System::site()->Root.'init.php';
+	if(file_exists($initfile)){
+		include $initfile;
+	}
 }
 
 // Сообщения
 if(!$system['no_messages']){
-	include_once($config['inc_dir'].'messages.inc.php');
+	include_once(System::$config['inc_dir'].'messages.inc.php');
 }
 
-// Модуль
+// Подключаем модуль
 require MOD_FILE;
 
 // Сообщения внизу

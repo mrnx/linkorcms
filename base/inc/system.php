@@ -50,14 +50,26 @@ define('PLUG_MANUAL', 5); //Нужен для работы определённого модуля и подключается
 define('PLUG_MANUAL_ONE', 7); //Подключается один какой-то плагин из группы. Использует группы.
 define('PLUG_SYSTEM', 8); //Системный плагин, не трабует инсталляции, вызывается только вручную и может использоваться практически из всех компонентов системы
 
+// Подключаем классы
 include $config['inc_dir'].'logi.class.php';
-include $config['inc_dir'].'navigation.class.php';
 include $config['inc_dir'].'LmFileCache.php';
 include $config['inc_dir'].'LmEmailExtended.php';
 include $config['inc_dir'].'user.class.php';
+include $config['inc_dir'].'rss.class.php';
+include $config['inc_dir'].'picture.class.php';
+
 include $config['inc_dir'].'html.class.php';
 include $config['inc_dir'].'starkyt.class.php';
-include $config['inc_dir'].'rss.class.php';
+include $config['inc_dir'].'page_template.class.php';
+include $config['inc_dir'].'index_template.inc.php';
+include $config['inc_dir'].'admin_template.class.php';
+
+include $config['inc_dir'].'navigation.class.php';
+include $config['inc_dir'].'tree.class.php';
+include $config['inc_dir'].'tree_a.class.php';
+include $config['inc_dir'].'tree_b.class.php';
+include $config['inc_dir'].'posts.class.php';
+
 
 abstract class System{
 
@@ -94,6 +106,9 @@ abstract class System{
 	 * @return Page
 	 */
 	static public function site(){
+		if($GLOBALS['site'] == null){
+			$GLOBALS['site'] = new Page();
+		}
 		return $GLOBALS['site'];
 	}
 
@@ -102,6 +117,9 @@ abstract class System{
 	 * @return AdminPage
 	 */
 	static public function admin(){
+		if($GLOBALS['site'] == null){
+			$GLOBALS['site'] = new AdminPage();
+		}
 		return $GLOBALS['site'];
 	}
 

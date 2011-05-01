@@ -17,9 +17,6 @@ define('STARKYT_SPEED_COND', 9);
 define("STARKYT_OPENKEY", '{');
 define("STARKYT_CLOSEKEY", '}');
 
-//include (System::$config['inc_dir'].'html.class.php'); //class HTML
-
-
 class Starkyt extends HTML{
 
 	public $Root = ''; // Имя папки с используемыми шаблонами, с последним слешем
