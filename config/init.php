@@ -1,9 +1,9 @@
 <?php
 
-# LinkorCMS
-# © 2006-2010 Галицкий Александр Николаевич (linkorcms@yandex.ru)
-# Файл: init.php
-# Назначение: Файл инициализации
+// LinkorCMS
+// © 2006-2010 Галицкий Александр Николаевич (linkorcms@yandex.ru)
+// Файл: init.php
+// Назначение: Файл инициализации
 
 if(!defined('VALID_RUN')){
 	header("HTTP/1.1 404 Not Found");
@@ -102,6 +102,11 @@ if(is_file('config/db_config.php')){ // Система установлена
 	// Загружаем конфигурацию
 	require 'config/db_config.php';
 	require 'config/salt.php';
+
+	// Блокируем инсталлятор, если он не заблокирован
+	if(!is_file('config/setup_lock.php')){
+		file_put_contents('config/setup_lock.php', "\n");
+	}
 
 	// Проверяем версию базы данных
 	if(!defined('SETUP_SCRIPT') && substr($config['db_version'], 0, 3) != substr(CMS_VERSION, 0, 3)){

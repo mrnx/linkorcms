@@ -9,6 +9,15 @@ define("SETUP_SCRIPT", true);
 define("VALID_RUN", true);
 
 @set_time_limit(600);
+
+// Блокировка инсталлятора
+if(is_file('config/setup_lock.php') && !is_file('dev.php')){
+	exit('<html><head><title>Ошибка!</title></head><body><center><h2>Система уже установлена.</h2><br />
+		Инсталлятор заблокирован.<br />
+		Для переустановки системы удалите файлы <strong>config/db_config.php</strong> и <strong>config/setup_lock.php</strong>.</center>
+	</body></html>');
+}
+
 require 'config/init.php';
 
 $default_prefix = 'table';

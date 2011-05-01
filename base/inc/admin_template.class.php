@@ -9,24 +9,6 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-// Проверка присутствует ли setup.php на сервере
-if(is_file('setup.php') && !is_file('dev.php')){
-	exit('<html>'."\n"
-	.'<head>'."\n"
-	.'	<title>'.CMS_NAME.' - !!!Ошибка!!!</title>'."\n"
-	.'</head>'."\n"
-	.'<body>'."\n"
-	.'	<center><h2>Удалите setup.php с сервера.</h2>
-		<br />
-		Админ панель заблокирована.
-		<br />
-		Присутствие <b>setup.php</b> на сервере делает сайт<br />
-		уязвимым, поэтому, перед тем как начать работу,<br />
-		рекомендуется его <strong>удалить</strong>.</center>'."\n"
-	.'</body>'."\n"
-	.'</html>');
-}
-
 include_once System::$config['inc_dir'].'page_template.class.php';
 
 class AdminPage extends PageTemplate{

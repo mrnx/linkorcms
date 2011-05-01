@@ -1,7 +1,7 @@
 <?php
 
 function WriteConfigFile( $filename, $db_type, $host, $user, $pass, $name, $pref, $version ){
-	file_put_contents($filename ,"<?php\n"
+	file_put_contents($filename, "<?php\n"
 	."// Файл сгенерирован инсталлятором\n"
 	."// Настройки базы данных\n"
 	."\n"

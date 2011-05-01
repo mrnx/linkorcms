@@ -32,6 +32,17 @@ if(!($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && System:
 	}
 }
 
+// Проверка присутствует ли setup.php на сервере
+if(is_file('setup.php') && !is_file('dev.php')){
+	exit('<html>'."\n".'<head>'."\n".'	<title>'.CMS_NAME.' - !!!Ошибка!!!</title>'."\n".'</head>'."\n".'<body>'."\n".'	<center><h2>Удалите setup.php с сервера.</h2>
+		<br />
+		Админ панель заблокирована.
+		<br />
+		Присутствие <b>setup.php</b> на сервере делает сайт<br />
+		уязвимым, поэтому, перед тем как начать работу,<br />
+		рекомендуется его <strong>удалить</strong>.</center>'."\n".'</body>'."\n".'</html>');
+}
+
 System::admin()->InitPage();
 
 // Получаем имя модуля
