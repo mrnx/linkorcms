@@ -42,7 +42,12 @@ class AdminPage extends PageTemplate{
 	 */
 	public $BlockAdminBlocks;
 
-	public function InitPage(){
+	/**
+	 * Инициализация класса
+	 * @param  $PageTemplate Шаблон используемый в качестве главного(body)
+	 * @return void
+	 */
+	public function Init( $PageTemplate ){
 		$ajax = IsAjax();
 		$this->InitPageTemplate($ajax);
 		$this->SetGZipCompressionEnabled(System::$config['general']['gzip_status'] == '1');
@@ -50,16 +55,25 @@ class AdminPage extends PageTemplate{
 		// Папка с шаблоном
 		$Template = 'default_admin'; // fixme: Вынести в конфигурацию сата
 		$TemplateDir = System::$config['tpl_dir'].$Template.'/';
-		//$DefaultTemplateDir = System::$config['tpl_dir'].System::$config['general']['default_admin_template'].'/';
+		$DefaultTemplateDir = System::$config['tpl_dir'].'default_admin'.'/'; // fixme: доработать
 
 		if($ajax){ // Загрузка страницы посредством AJAX запроса
-            $this->InitStarkyt($TemplateDir, 'theme_ajax.html');
-		}else{
+			$this->InitStarkyt($TemplateDir, $PageTemplate);
+		} else{
 			$this->SetRoot($TemplateDir);
-			//$this->DefaultRoot = $DefaultTemplateDir;
-			$this->SetTempVar('head', 'body', 'theme_admin.html');
+			$this->DefaultRoot = $DefaultTemplateDir;
+			$this->SetTempVar('head', 'body', $PageTemplate);
 			$this->Title = 'Админ-панель';
 		}
+	}
+
+	public function InitPage(){
+		if(IsAjax()){
+			$PageTemplate = 'theme_ajax.html';
+		}else{
+			$PageTemplate = 'theme_admin.html';
+		}
+		$this->Init($PageTemplate);
 
 		// Добавляем блоки и переменные
 		$this->BlockTemplate = $this->NewBlock('template', true, false, 'page');
@@ -85,19 +99,18 @@ class AdminPage extends PageTemplate{
 	}
 
 	public function Login($AuthMessage = '', $AuthTitle = 'Авторизация администратора'){
-		global $config, $site;
-		$site->InitPageTemplate();
-		$site->Title = $AuthTitle;
-		$root = $config['inc_dir'].'template/';
-		$site->SetRoot($root);
-		$site->SetTempVar('head', 'body', 'login.html');
-		$site->AddBlock('template', true, false, 'login');
+		$this->Init('login.html');
 
-		$site->Blocks['template']['vars'] = array(
-			'action' => '', 'dir' => $root, 'auth_message' => $AuthMessage, 'auth_title' => $AuthTitle
+		$this->SetTempVar('head', 'body', 'login.html');
+		$this->AddBlock('template', true, false, 'login');
+		$this->Blocks['template']['vars'] = array(
+			'action' => '',
+			'dir' => $this->Root,
+			'auth_message' => $AuthMessage,
+			'auth_title' => $AuthTitle
 		);
-		$site->AddCSSFile('login.css', false, true);
-		$site->EchoAll();
+		$this->AddCSSFile('login.css', false, true);
+		$this->EchoAll();
 		exit();
 	}
 

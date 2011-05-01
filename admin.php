@@ -55,7 +55,7 @@ if(!isset($_GET['exe'])){
 	$ModuleName = SafeEnv($_GET['exe'], 255, str);
 	if($ModuleName == 'exit'){ // Выход
 		$user->UnsetCookie('admin');
-		GO(Ufu('index.php'));
+		GO(Ufu('index.php')); // exit
 	}
 }
 System::db()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'");
@@ -69,8 +69,8 @@ if(System::db()->NumRows() == 0){
 }
 
 // Проверка на доступ
-if(!$user->CheckAccess2($ModuleName, $ModuleName)){
-	System::admin()->AddTextBox('Ошибка', 'Доступ закрыт!');
+if(!System::user()->CheckAccess2($ModuleName, $ModuleName)){
+	System::admin()->AddTextBox('Ошибка', $ModuleName.' Доступ закрыт!');
 	System::admin()->TEcho();
 	exit;
 }
