@@ -593,10 +593,11 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 					}
 					break;
 				case(STARKYT_START):
+
 					$SBlocks[$line[4]+2][1] = $Blocks[$level][$line[1]];
 
 					// Óñòàðåâøàÿ ïîääåðæêà òàáëèö
-					if($Blocks[$level][$line]['type'] == STARKYT_TABLE){
+					if($Blocks[$level][$line[1]]['type'] == STARKYT_TABLE){
 						$tcopen = str_replace('{colspan}', '', $starkyt->TableCellOpen);
 						$tcopen = str_replace('{rowspan}', '', $tcopen);
 						$result .= '<!-- ÍÀ×ÀËÎ ÒÀÁËÈÖÛ -->'.$starkyt->TableOpen.'<tr>'.$tcopen."\n";
@@ -647,6 +648,9 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 			continue;
 		}
 		if(isset($Blocks[$level][$line])){ // Íàøëè íîâûé áëîê
+			if($line == 'poll:color'){
+				var_dump($Blocks[$level][$line]);
+			}
 			$name = $line;
 			$closename = '/'.$line;
 			$findClose = $start;
@@ -746,8 +750,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 		$line = array(STARKYT_TEXT, $line);
 
 	}
-	$result = str_replace(array('&#123;', '&#125;'), array('{', '}'), $result);
-	return $result;
+	return str_replace(array('&#123;', '&#125;'), array('{', '}'), $result);
 }
 
 ?>

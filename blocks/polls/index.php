@@ -8,7 +8,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-global $config, $db;
+global $config, $db, $site;
 
 $pid = $config['polls']['default_vote'];
 $db->Select('polls', "`showinblock`='1' and `active`='1' and `id`='".$pid."'");

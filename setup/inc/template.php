@@ -5,9 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-include ($config['inc_dir'].'page_template.class.php'); //class PageTemplate
-
-class Page extends PageTemplate{
+class SetupPage extends PageTemplate{
 
 	public function InitPage(){
 		global $config;
@@ -29,7 +27,7 @@ class Page extends PageTemplate{
 	}
 }
 
-$site = new Page();
+$site = new SetupPage();
 $site->InitPage();
 
 ?>

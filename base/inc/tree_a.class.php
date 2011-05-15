@@ -11,7 +11,6 @@ if(!defined('VALID_RUN')){
 }
 
 $AdminTreeText = '';
-include ($config['inc_dir'].'tree.class.php'); //class Tree
 
 class AdminTree extends Tree
 {
