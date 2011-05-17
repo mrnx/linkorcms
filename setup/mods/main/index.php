@@ -23,7 +23,7 @@ switch($p){
 		$this->OpenForm('check');
 		global $setup_types;
 		$setup_types = array();
-		Plugins('setup_types');
+		SetupPlugins('setup_types');
 		$text = '<p>Выберите действие:</p>';
 		global $site;
 		$text .= $site->Select('setup_type', $setup_types);

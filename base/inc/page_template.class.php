@@ -5,12 +5,6 @@
 # Файл: page_template.class.php
 # Назначение: Общий шаблонизатор
 
-if(!defined('VALID_RUN')){
-	header("HTTP/1.1 404 Not Found");
-	exit;
-}
-
-include_once ($config['inc_dir'].'starkyt.class.php'); //class Starkyt
 
 class PageTemplate extends Starkyt{
 
@@ -393,7 +387,7 @@ class PageTemplate extends Starkyt{
 		}
 		if(!defined('SETUP_SCRIPT') && System::$config['general']['show_script_time']){
 			$end_time = GetMicroTime();
-			$end_time = $end_time - $GLOBALS['script_start_time'];
+			$end_time = $end_time - SCRIPT_START_TIME;
 			$php_time = $end_time - System::db()->QueryTotalTime;
 			$persent = 100 / $end_time;
 			$memory = memory_get_peak_usage(true);
@@ -405,16 +399,13 @@ class PageTemplate extends Starkyt{
 			$info = '';
 		}
 		$contents = str_replace('%info%', $info, $contents);
-
-
-		$gzip = $this->GZipCompressPage && $this->SupportGZip;
-		if($gzip){
+		if($this->GZipCompressPage && $this->SupportGZip){
 			@Header('Content-Encoding: gzip');
 			ob_start('ob_gzhandler');
-		}
-		echo $contents;
-		if($gzip){
+			echo $contents;
 			ob_end_flush();
+		}else{
+			echo $contents;
 		}
 	}
 

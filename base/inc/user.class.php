@@ -5,11 +5,6 @@
 # Файл: user.class.php
 # Назначение: Пользовательский класс для аутентификации пользователей
 
-if(!defined('VALID_RUN')){
-	header("HTTP/1.1 404 Not Found");
-	exit;
-}
-
 if(!defined("USER")){
 	define("USER", true);
 	define("EXTRA_ADMIN_COOKIE", '3794y7v387o3');
@@ -307,7 +302,6 @@ class User{
 				}
 			}
 		}
-
 	}
 
 	// Добавляет или отнимает пункты у пользователя.
@@ -475,12 +469,6 @@ class User{
 		$this->Def('u_access', '-1');
 		$this->Def('u_ip', getip());
 		$this->Def('u_avatar', GetGalleryAvatar('guest.gif'));
-		$this->Def('u_hits', 1);
-		//Статистика хостов
-		if(!$this->Get('u_stats_host')){
-			$this->host = true;
-			$this->Def('u_stats_host', true);
-		}
 	}
 
 	// Выполняет выход из системы и удаляет все данные сессии.
@@ -500,9 +488,5 @@ class User{
 		$db->Delete('online', $where);
 	}
 }
-
-$user = new User();
-$userAuth = IntVal($user->Get('u_auth'));
-$userAccess = IntVal($user->Get('u_level'));
 
 ?>

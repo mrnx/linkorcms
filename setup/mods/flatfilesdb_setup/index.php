@@ -161,9 +161,7 @@ switch($p){
 				}
 				if(!is_file($info2)){
 					copy($info, $info2);
-					chmod($info2, 0777);
 					copy($data, $data2);
-					chmod($data2, 0777);
 				}
 			}
 			$this->SetContent("База данных создана успешно!<br />Нажмите \"Далее\" для создания учетной записи главного администратора.");

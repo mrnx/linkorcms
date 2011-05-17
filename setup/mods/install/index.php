@@ -20,7 +20,7 @@ if(isset($_GET['p'])){
 switch($p){
 	case 1: // Заставка
 		$this->SetTitle(_STEP1);
-		Plugins('license');
+		SetupPlugins('license');
 		$this->AddButton('Назад', 'main&p=2');
 		$this->AddButton('Принимаю', 'install&p=2');
 		break;
@@ -29,7 +29,7 @@ switch($p){
 		$this->OpenForm('install&p=3');
 		global $db_types;
 		$db_types = array();
-		Plugins('db_types');
+		SetupPlugins('db_types');
 		$text = '<p>Выберите тип Базы данных:</p>';
 		global $site;
 		$text .= $site->Select('db_type', $db_types);

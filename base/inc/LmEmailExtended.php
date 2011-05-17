@@ -6,9 +6,7 @@
 # Назначение: Класс для организации рассылки электронных писем.
 
 class EmailOptions{
-
 	public $XMailer;
-
 	public $SmtpSend = false; // Использовать SMTP для отправки писем?
 	public $SmtpHost = ''; // Имя сервера
 	public $SmtpPort = 25; // Порт
@@ -29,11 +27,9 @@ class EmailOptions{
 			$this->SmtpPassword = $config['smtp']['password'];
 		}
 	}
-
 }
 
-class LmEmailExtended
-{
+class LmEmailExtended{
 	static protected $_instance;
 
 	public $From;
@@ -388,7 +384,6 @@ class LmEmailExtended
 		self::$_instance->Subject = '';
 		return self::$_instance;
 	}
-
 }
 
 ?>

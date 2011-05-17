@@ -1,7 +1,7 @@
 <?php
 
 # LinkorCMS
-# © 2006-2010 Галицкий Александр Николаевич (linkorcms@yandex.ru)
+# © 2006-2010 Александр Галицкий (linkorcms@yandex.ru)
 # Файл:       index_template.inc.php
 # Назначение: Шаблонизатор
 
@@ -10,18 +10,14 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-include ($config['inc_dir'].'page_template.class.php'); //class PageTemplate
+class Page extends PageTemplate{
 
-class Page extends PageTemplate
-{
-
-	public function InitPage()
-	{
-		global $config, $user;
+	public function InitPage(){
 		$this->InitPageTemplate();
+		$this->SetGZipCompressionEnabled(System::$config['general']['gzip_status'] == '1');
 
-		$TemplateDir = $config['tpl_dir'].$config['general']['site_template'].'/';
-		$DefaultTemplateDir = $config['tpl_dir'].$config['general']['default_template'].'/';
+		$TemplateDir = System::$config['tpl_dir'].System::$config['general']['site_template'].'/';
+		$DefaultTemplateDir = System::$config['tpl_dir'].System::$config['general']['default_template'].'/';
 
 		if(defined('MOD_THEME') && MOD_THEME != '' && (is_file($TemplateDir.'themes/'.MOD_THEME) || is_file($DefaultTemplateDir.'themes/'.MOD_THEME))){
 			$ThemeFile = 'themes/'.MOD_THEME;
@@ -29,27 +25,27 @@ class Page extends PageTemplate
 			$ThemeFile = 'theme.html';
 		}
 
-		$this->SetGZipCompressionEnabled($config['general']['gzip_status'] == '1');
-
 		$this->SetRoot($TemplateDir);
 		$this->DefaultRoot = $DefaultTemplateDir;
 
 		$this->SetTableTemplate('table/table_open.html', 'table/table_close.html', 'table/table_cell_open.html', 'table/table_cell_close.html');
 		$this->SetTempVar('head', 'body', $ThemeFile);
 
+		// Создаем блоки и добавляем переменные
 		$this->AddBlock('template', true, false, 'page');
 		$this->SetVar('template', 'powered', '<a href="http://linkorcms.ru/" target="_blank">Сайт работает на LinkorCMS</a>');
 		$this->SetVar('template', 'dir', $TemplateDir);
 		$this->SetVar('template', 'default_dir', $DefaultTemplateDir);
-		if(defined('MOD_DIR'))
+		if(defined('MOD_DIR')){
 			$this->SetVar('template', 'mdir', MOD_DIR);
-		$this->SetVar('template', 'site_name', $config['general']['site_name']);
-		$this->SetVar('template', 'site_slogan', $config['general']['site_slogan']);
-		$this->SetVar('template', 'site_email', $config['general']['site_email']);
-		$this->SetVar('template', 'copyright', $config['general']['_copyright']);
+		}
+		$this->SetVar('template', 'site_name', System::$config['general']['site_name']);
+		$this->SetVar('template', 'site_slogan', System::$config['general']['site_slogan']);
+		$this->SetVar('template', 'site_email', System::$config['general']['site_email']);
+		$this->SetVar('template', 'copyright', System::$config['general']['_copyright']);
 
-		$ac = $user->AccessLevel();
-		$this->SetVar('template', 'is_system_admin', $user->isSuperUser()); // Системный администратор
+		$ac = System::user()->AccessLevel();
+		$this->SetVar('template', 'is_system_admin', System::user()->isSuperUser()); // Системный администратор
 		$this->SetVar('template', 'is_admin', $ac == 1); // Любой Администратор
 		$this->SetVar('template', 'is_member', $ac == 2); // Пользователь, но не администратор
 		$this->SetVar('template', 'is_member_or_admin', $ac == 1 || $ac == 2); // Пользователь или Администратор
@@ -58,11 +54,11 @@ class Page extends PageTemplate
 		$this->SetVar('template', 'is_guest_or_admin', $ac == 1 || $ac == 3 || $ac == 4); // Гость или Администратор
 
 		//Информация о пользователе
-		$this->SetVar('template', 'u_id', $user->Get('u_id'));
-		$this->SetVar('template', 'u_name', $user->Get('u_name'));
-		$this->SetVar('template', 'u_avatar', $user->Get('u_avatar'));
-		$this->SetVar('template', 'u_avatar_small', $user->Get('u_avatar_small'));
-		$this->SetVar('template', 'u_avatar_smallest', $user->Get('u_avatar_smallest'));
+		$this->SetVar('template', 'u_id', System::user()->Get('u_id'));
+		$this->SetVar('template', 'u_name', System::user()->Get('u_name'));
+		$this->SetVar('template', 'u_avatar', System::user()->Get('u_avatar'));
+		$this->SetVar('template', 'u_avatar_small', System::user()->Get('u_avatar_small'));
+		$this->SetVar('template', 'u_avatar_smallest', System::user()->Get('u_avatar_smallest'));
 
 		$this->AddBlock('lblocks', true, true, 'block');
 		$this->AddBlock('rblocks', true, true, 'block');
@@ -117,13 +113,14 @@ class Page extends PageTemplate
 	}
 
 	public function ViewBlocks(){
-		global $db, $config, $userAccess, $userAuth, $user, $site;
+		global $site, $db, $user; // для совместимости
+
 		$where = "`enabled`='1'";
 		$w2 = GetWhereByAccess('view');
 		if($w2 != ''){
 			$where .= ' and ('.$w2.')';
 		}
-		$blocks = $db->Select('blocks', $where);
+		$blocks = System::db()->Select('blocks', $where);
 		SortArray($blocks, 'place');
 		foreach($blocks as $block){
 			$block_config = $block['config'];
@@ -140,7 +137,7 @@ class Page extends PageTemplate
 				$tempvars = array();
 				$childs = array();
 				if($enabled){
-					include(RealPath2($config['blocks_dir'].$block['type']).'/index.php'); // => $vars
+					include(RealPath2(System::$config['blocks_dir'].$block['type']).'/index.php'); // => $vars
 				}
 				if($enabled){
 					$this->AddUserBlock($area, $vars, $tempvars, $childs, SafeDB(RealPath2($block['template']), 255, str));
@@ -150,7 +147,6 @@ class Page extends PageTemplate
 	}
 
 	public function Login( $message = '' ){
-		global $config;
 		$this->AddTemplatedBox('Авторизация', 'login.html');
 		$this->AddBlock('login', true, false, 'lf');
 		$vars = array();
@@ -159,7 +155,7 @@ class Page extends PageTemplate
 		$vars['llogin'] = 'Логин';
 		$vars['lpass'] = 'Пароль';
 		$vars['lremember'] = 'Запомнить меня';
-		$vars['registration'] = $config['user']['registration'] == 'on';
+		$vars['registration'] = System::$config['user']['registration'] == 'on';
 		$vars['lregistration'] = 'Регистрация';
 		$vars['registration_url'] = Ufu('index.php?name=user&op=registration', 'user/{op}/');
 		$vars['lsubmit'] = 'Вход';
@@ -167,15 +163,14 @@ class Page extends PageTemplate
 	}
 
 	public function TEcho(){
-		global $db, $config, $user;
 		if(defined('INDEX_PHP') && INDEX_PHP == true){
 			$title = 'Главная';
 		}else{
 			$title = $this->Title;
 		}
-		$user->OnlineProcess($title);
-		if($user->Auth){
-			$user->ChargePoints($config['points']['browsing']);
+		System::user()->OnlineProcess($title);
+		if(System::user()->Auth){
+			System::user()->ChargePoints(System::$config['points']['browsing']);
 		}
 		$this->ViewBlocks();
 		//Добавляем информацию к странице
@@ -215,13 +210,13 @@ class Page extends PageTemplate
 		$uris = unserialize($uris);
 		if(in_array($ModuleName, $mods)){
 			$r = true;
-		} elseif($_SERVER['REQUEST_URI'] <> '' && in_array($_SERVER['REQUEST_URI'], $uris)){
+		}elseif($_SERVER['REQUEST_URI'] <> '' && in_array($_SERVER['REQUEST_URI'], $uris)){
 			$r = true;
-		} elseif($_SERVER['REQUEST_URI'] <> '' && $this->BloksCheckViewpos($uris)){
+		}elseif($_SERVER['REQUEST_URI'] <> '' && $this->BloksCheckViewpos($uris)){
 			$r = true;
-		} elseif(INDEX_PHP == true && in_array('INDEX', $mods)){
+		}elseif(INDEX_PHP == true && in_array('INDEX', $mods)){
 			$r = true;
-		} else{
+		}else{
 			$r = false;
 		}
 		if(in_array('ALL_EXCEPT', $mods)){
@@ -230,15 +225,5 @@ class Page extends PageTemplate
 		return $r;
 	}
 }
-
-$site = new Page();
-$site->InitPage();
-$initfile = $site->Root.'init.php';
-
-if(file_exists($initfile)){
-	include ($initfile);
-}
-
-unset($initfile);
 
 ?>

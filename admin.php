@@ -8,82 +8,80 @@
 define('ADMIN_SCRIPT', true);
 define('VALID_RUN', true);
 
-include_once('config/init.php'); // Конфигурация и инициализация
-include_once($config['inc_dir'].'system_plugins.inc.php'); // Системные плагины
-include_once($config['inc_dir'].'system.php'); // Функции
-include_once($config['inc_dir'].'database.php'); // Подключение к базе данных
-
-// Загрузка конфигурации сайта
-LoadSiteConfig($config);
-LoadSiteConfig($plug_config, 'plugins_config', 'plugins_config_groups');
-
-// Автообновление
-include('config/autoupdate.php');
-
-// Устанавливаем временную зону по умолчанию
-SetDefaultTimezone();
-
-// Сессии
-include_once($config['inc_dir'].'user.class.php');
-
-// Плагины
-include_once($config['inc_dir'].'plugins.inc.php');
+require 'config/init.php'; // Конфигурация и инициализация
+define('ADMIN_FILE', System::$config['admin_file']); // Ссылка на админ-панель
 
 // Проверка пользователя
-if($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && $user->AllowCookie('admin', true)){ // Пользователь авторизован в админ-панели
-	if(isset($_GET['exe'])){
-		$exe = SafeEnv($_GET['exe'], 255, str);
-	}else{
-		$exe = 'adminpanel';
-	}
-
-	if($exe == 'exit'){ // Выход
-		$user->UnsetCookie('admin');
-		GO(Ufu('index.php'));
-	}
-
-	// Вспомогательные константы
-	define('MOD_DIR', $config['mod_dir'].$exe.'/');
-	define('MOD_FILE', MOD_DIR.'admin.php');
-	define('ADMIN_FILE', System::$config['admin_file']); // Ссылка на админ-панель
-	define('ADMIN_AJAX', IsAjax()); // Говорит скрипту, что данные запрошены c помощью ajax
-	define('ADMIN_AJAX_LINKS', System::$config['admin_panel']['enable_ajax'] ? 'true' : 'false'); // Говорит скрипту что админ-панель работает в режиме AJAX
-
-	// Шаблонизатор и функции
-	include_once $config['apanel_dir'].'template.php';
-	include_once $config['apanel_dir'].'functions.php';
-
-	$db->Select('modules', "`enabled`='1' and `folder`='$exe'");
-	if($db->NumRows() > 0){
-		// Подключаем модуль
-		if(is_file(MOD_FILE)){
-			System::admin()->AddAdminMenu();
-			include MOD_FILE;
-		}
-		// Вывод данных
-		System::admin()->TEcho();
-	}else{
-		System::admin()->AddAdminMenu();
-		AddTextBox('Админ панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$exe.'" не найден!</div>');
-		System::admin()->TEcho();
-	}
-}else{
+if(!($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && System::user()->AllowCookie('admin', true))){
 	if(isset($_POST['admin_login'])){ // Проверка логина-пароля
 		$admin_name = SafeEnv($_POST['admin_name'], 255, str);
 		$admin_password = SafeEnv($_POST['admin_password'], 255, str);
-		$a = $user->Login($admin_name, $admin_password, false, true);
-		if($a === true && $user->SecondLoginAdmin){
-			$user->SetAdminCookie($admin_name, $admin_password);
-			GoRefererUrl($_GET['_back']);
+		$a = System::user()->Login($admin_name, $admin_password, false, true);
+		if($a === true && System::user()->SecondLoginAdmin){
+			System::user()->SetAdminCookie($admin_name, $admin_password);
 		}else{
-			$user->UnsetCookie('admin');
-			include_once $config['apanel_dir'].'template.login.php';
-			AdminShowLogin('Неверные логин или пароль');
+			System::user()->UnsetCookie('admin');
+			System::admin()->Login('Неверные логин или пароль'); // exit
 		}
 	}else{ // Форма авторизации
-		include_once $config['apanel_dir'].'template.login.php';
-		AdminShowLogin();
+		System::admin()->Login(); // exit
 	}
 }
+
+// Проверка присутствует ли setup.php на сервере
+if(is_file('setup.php') && !is_file('dev.php')){
+	exit('<html>'."\n".'<head>'."\n".'	<title>'.CMS_NAME.' - !!!Ошибка!!!</title>'."\n".'</head>'."\n".'<body>'."\n".'	<center><h2>Удалите setup.php с сервера.</h2>
+		<br />
+		Админ панель заблокирована.
+		<br />
+		Присутствие <b>setup.php</b> на сервере делает сайт<br />
+		уязвимым, поэтому, перед тем как начать работу,<br />
+		рекомендуется его <strong>удалить</strong>.</center>'."\n".'</body>'."\n".'</html>');
+}
+
+System::admin()->InitPage();
+
+// Получаем имя модуля
+$ModuleName = '';
+if(!isset($_GET['exe'])){
+	define('INDEX_PHP', true); // модуль на главной странице
+	$ModuleName = 'adminpanel';
+}else{
+	define('INDEX_PHP', false);
+	$ModuleName = SafeEnv($_GET['exe'], 255, str);
+	if($ModuleName == 'exit'){ // Выход
+		$user->UnsetCookie('admin');
+		GO(Ufu('index.php')); // exit
+	}
+}
+System::db()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'");
+
+// Установлен такой модуль?
+if(System::db()->NumRows() == 0){
+	System::admin()->AddAdminMenu();
+	System::admin()->AddTextBox('Админ панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$ModuleName.'" не найден!</div>');
+	System::admin()->TEcho();
+	exit;
+}
+
+// Проверка на доступ
+if(!System::user()->CheckAccess2($ModuleName, $ModuleName)){
+	System::admin()->AddTextBox('Ошибка', $ModuleName.' Доступ закрыт!');
+	System::admin()->TEcho();
+	exit;
+}
+
+// Вспомогательные константы
+define('MOD_DIR', System::$config['mod_dir'].$ModuleName.'/');
+define('MOD_FILE', MOD_DIR.'admin.php');
+
+// Подключаем модуль
+if(is_file(MOD_FILE)){
+	System::admin()->AddAdminMenu();
+	require MOD_FILE;
+}
+
+// Вывод данных
+System::admin()->TEcho();
 
 ?>

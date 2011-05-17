@@ -430,7 +430,7 @@ function AdminMailDeleteEmail()
 	}
 }
 
-include_once ($config['apanel_dir'].'configuration/functions.php');
+include_once ($config['inc_dir'].'configuration/functions.php');
 
 if(isset($_GET['a'])){
 	AdminMail($_GET['a']);

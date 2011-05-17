@@ -18,7 +18,7 @@ $site->Doctype = '<!doctype html>';
 
 $site->Title = 'Подготовка писем';
 
-$site->SetRoot($config['apanel_dir'].'template/');
+$site->SetRoot($config['inc_dir'].'template/');
 $site->SetTempVar('head', 'body', 'form_page.html');
 
 $vars = array();

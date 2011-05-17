@@ -10,8 +10,6 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-include ($config['inc_dir'].'tree.class.php'); //class Tree
-
 class IndexTree extends Tree
 {
 	public $catTemplate = 'module/cat.html';
@@ -45,14 +43,14 @@ class IndexTree extends Tree
 				$vars['url'] = Ufu('index.php?name='.$this->moduleName.'&'.$this->id_par_name.'='.$id, $this->moduleName.'/{'.$this->id_par_name.'}/');
 				$vars['title2'] = SafeDB($cats[$i]['title'], 255, str);
 				$vars['title'] = '<a href="'.$vars['url'].'">'.$vars['title2'].'</a>';
-				
+
 				if(file_exists($cats[$i]['icon'])){
 					$vars['icon_url'] = SafeDB(RealPath2($cats[$i]['icon']), 255, str);
 				}else{
 					$vars['icon_url'] = 'images/cat.gif';
 				}
 				$vars['icon'] = '<img border="0" src="'.$vars['icon_url'].'" />';
-				
+
 				$vars['description'] = $cats[$i]['description'];
 
 				$counters = $this->GetCountersRecursive($id);

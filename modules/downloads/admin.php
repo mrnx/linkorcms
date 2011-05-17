@@ -24,7 +24,7 @@ $tree->del_met = 'delcat';
 $tree->action_par_name = 'a';
 $tree->id_par_name = 'id';
 
-include_once ($config['apanel_dir'].'configuration/functions.php');
+include_once ($config['inc_dir'].'configuration/functions.php');
 
 function AdminDownloadsMain()
 {

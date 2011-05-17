@@ -17,9 +17,6 @@ define('STARKYT_SPEED_COND', 9);
 define("STARKYT_OPENKEY", '{');
 define("STARKYT_CLOSEKEY", '}');
 
-//include (System::$config['inc_dir'].'html.class.php'); //class HTML
-include ($config['inc_dir'].'html.class.php'); //class HTML
-
 class Starkyt extends HTML{
 
 	public $Root = ''; // Имя папки с используемыми шаблонами, с последним слешем
@@ -596,10 +593,11 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 					}
 					break;
 				case(STARKYT_START):
+
 					$SBlocks[$line[4]+2][1] = $Blocks[$level][$line[1]];
 
 					// Устаревшая поддержка таблиц
-					if($Blocks[$level][$line]['type'] == STARKYT_TABLE){
+					if($Blocks[$level][$line[1]]['type'] == STARKYT_TABLE){
 						$tcopen = str_replace('{colspan}', '', $starkyt->TableCellOpen);
 						$tcopen = str_replace('{rowspan}', '', $tcopen);
 						$result .= '<!-- НАЧАЛО ТАБЛИЦЫ -->'.$starkyt->TableOpen.'<tr>'.$tcopen."\n";
@@ -649,24 +647,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 			}
 			continue;
 		}
-		if(isset($Blocks[$level][$line])){ // Нашли новый блок
-			$name = $line;
-			$closename = '/'.$line;
-			$findClose = $start;
-			$cols = 1;
-
-			// Устаревшая поддержка таблиц
-			if($Blocks[$level][$line]['type'] == STARKYT_TABLE){
-				$cols = $Blocks[$level][$line]['cols'];
-				$tcopen = str_replace('{colspan}', '', $starkyt->TableCellOpen);
-				$tcopen = str_replace('{rowspan}', '', $tcopen);
-				$result .= '<!-- НАЧАЛО ТАБЛИЦЫ -->'.$starkyt->TableOpen.'<tr>'.$tcopen."\n";
-			}
-
-			$line = array(STARKYT_START, $name, $closename, $cols);
-			continue;
-		}
-		if(strpos($line, ':') !== false){
+		if(strpos($line, ':') !== false){ // Условный блок
 			$m = explode(':', $line);
 			$block_name = $m[0];
 			$inv = false;
@@ -718,7 +699,24 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 				continue;
 			}
 		}
-		if(strpos($line, '[') !== false){
+		if(isset($Blocks[$level][$line])){ // Нашли новый блок
+			$name = $line;
+			$closename = '/'.$line;
+			$findClose = $start;
+			$cols = 1;
+
+			// Устаревшая поддержка таблиц
+			if($Blocks[$level][$line]['type'] == STARKYT_TABLE){
+				$cols = $Blocks[$level][$line]['cols'];
+				$tcopen = str_replace('{colspan}', '', $starkyt->TableCellOpen);
+				$tcopen = str_replace('{rowspan}', '', $tcopen);
+				$result .= '<!-- НАЧАЛО ТАБЛИЦЫ -->'.$starkyt->TableOpen.'<tr>'.$tcopen."\n";
+			}
+
+			$line = array(STARKYT_START, $name, $closename, $cols);
+			continue;
+		}
+		if(strpos($line, '[') !== false){ // Блок таблица
 			$m = explode('[', $line);
 			$m[1] = substr($m[1], 0, -1);
 			if(isset($Blocks[$level][$m[0]])){
@@ -730,7 +728,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 				continue;
 			}
 		}
-		if(strpos($line, '.') !== false){
+		if(strpos($line, '.') !== false){ // Переменная
 			$m = explode('.', $line);
 			if(isset($OpenedBlocks[$level][$m[0]]['tempvars'][$m[1]])){
 				$result .= StarkytCompile($OpenedBlocks[$level][$m[0]]['tempvars'][$m[1]], $Blocks, $OpenedBlocks, $level, $starkyt)
@@ -749,8 +747,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 		$line = array(STARKYT_TEXT, $line);
 
 	}
-	$result = str_replace(array('&#123;', '&#125;'), array('{', '}'), $result);
-	return $result;
+	return str_replace(array('&#123;', '&#125;'), array('{', '}'), $result);
 }
 
 ?>

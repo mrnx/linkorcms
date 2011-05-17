@@ -8,10 +8,6 @@
 // Это новый и расширенный движок комментариев Posts.
 // Версия 0.9
 
-global $config, $site;
-
-include_once($config['inc_dir'].'bbcode.inc.php');
-
 /**
  * Движок комментариев Posts
  */
@@ -138,29 +134,27 @@ class Posts{
 
 
 	function __construct( $PostsTable, $AlloyComments = true ){
-		global $config, $site;
 		$this->PostsTable = $PostsTable;
 		$this->AlloyComments = $AlloyComments;
 
-		if(isset($config['comments'])){
-			$this->FloodTime = $config['comments']['floodtime'];
-			$this->PostMaxLength = $config['comments']['maxlength'];
-			$this->GuestPost = $config['comments']['guestpost'];
-			$this->Answers = $config['comments']['answers'];
-			$this->MaxTreeLevel = $config['comments']['maxtreelevel'];
-			$this->EnNavigation = $config['comments']['ennav'];
-			$this->MessagesOnPage = $config['comments']['onpage'];
-			$this->DecreaseSort = $config['comments']['decreasesort'];
-			$this->DisableComments = $config['comments']['disable_posts_engine'];
-			$this->ShowKaptchaForMembers = $config['comments']['show_kaptcha_for_members'];
+		if(isset(System::$config['comments'])){
+			$config = System::$config['comments'];
+			$this->FloodTime = $config['floodtime'];
+			$this->PostMaxLength = $config['maxlength'];
+			$this->GuestPost = $config['guestpost'];
+			$this->Answers = $config['answers'];
+			$this->MaxTreeLevel = $config['maxtreelevel'];
+			$this->EnNavigation = $config['ennav'];
+			$this->MessagesOnPage = $config['onpage'];
+			$this->DecreaseSort = $config['decreasesort'];
+			$this->DisableComments = $config['disable_posts_engine'];
+			$this->ShowKaptchaForMembers = $config['show_kaptcha_for_members'];
 		}
-		$site->SetVar('template', 'enabled_comments', !$this->DisableComments);
-		$site->SetVar('template', 'disabled_comments', $this->DisableComments);
+		System::site()->SetVar('template', 'enabled_comments', !$this->DisableComments);
+		System::site()->SetVar('template', 'disabled_comments', $this->DisableComments);
 	}
 
-	private function RenderPost($ObjectId, &$Posts, $BlockName, $Level)
-	{
-		global $user, $site;
+	private function RenderPost($ObjectId, &$Posts, $BlockName, $Level){
 		if(count($Posts) == 0){
 			return false;
 		}
@@ -239,15 +233,15 @@ class Posts{
 			}
 			$vars['post_date'] = TimeRender($vars['post_date']);
 
-			if($user->Auth){
-				$vars['editing'] = ($user->Get('u_id') == $user_id || $user->isAdmin());
+			if(System::user()->Auth){
+				$vars['editing'] = (System::user()->Get('u_id') == $user_id || System::user()->isAdmin());
 			}else{
 				$vars['editing'] = ($user_id == '0' && $vars['user_ip'] == getip());
 			}
 
 
-			$vars['answers'] = $this->Answers != '0' || $user->isAdmin();
-			if(!$user->Auth && !$this->GuestPost){
+			$vars['answers'] = $this->Answers != '0' || System::user()->isAdmin();
+			if(!System::user()->Auth && !$this->GuestPost){
 				$vars['answers'] = false;
 			}
 			if(!$this->AlloyComments){
@@ -261,7 +255,7 @@ class Posts{
 			$vars['parent_post_url'] = $_SERVER['REQUEST_URI'].'#post_'.SafeDB($post['post_parent_id'], 11, int);
 			$vars['post_url'] = $_SERVER['REQUEST_URI'].'#post_'.$post_id;
 
-			$site->AddSubBlock($BlockName, true, $vars, array(), $this->PostTemplate);
+			System::site()->AddSubBlock($BlockName, true, $vars, array(), $this->PostTemplate);
 			if(isset($this->PostsTree[$post_id])){
 				if($this->MaxTreeLevel > $Level){
 					$newLevel = $Level + 1;
@@ -283,16 +277,13 @@ class Posts{
 	 * @param int $Page Номер страницы комментариев
 	 * @param str $ExWhere Свой Where запрос. Используйте, если вам необходим особый способ выбора комментариев.
 	 */
-	public function RenderPosts( $ObjectId, $PostsBlockName = 'posts', $NavigationBlockName = 'navigation', $LastPage = false, &$Page = 0, $ExWhere = '' )
-	{
-		global $site, $db, $config, $user;
-
+	public function RenderPosts( $ObjectId, $PostsBlockName = 'posts', $NavigationBlockName = 'navigation', $LastPage = false, &$Page = 0, $ExWhere = '' ){
 		if($this->DisableComments){
-			$site->AddBlock($PostsBlockName, false, false, 'post');
-			$site->AddBlock($NavigationBlockName, true, false);
+			System::site()->AddBlock($PostsBlockName, false, false, 'post');
+			System::site()->AddBlock($NavigationBlockName, true, false);
 			return;
 		}else{
-			$site->AddBlock($PostsBlockName, true, true, 'post');
+			System::site()->AddBlock($PostsBlockName, true, true, 'post');
 		}
 
 		if($this->EditPageUrl == ''){
@@ -313,7 +304,7 @@ class Posts{
 		}else{
 			$where = ''; // Вся таблица
 		}
-		$posts = $db->Select($this->PostsTable, $where);
+		$posts = System::db()->Select($this->PostsTable, $where);
 
 		// Сортировка
 		SortArray($posts, 'post_date', $this->DecreaseSort);
@@ -332,7 +323,7 @@ class Posts{
 
 		// Инициализируем навигацию
 		$comm_nav_obj = new Navigation($Page, $NavigationBlockName);
-		$comm_nav_obj->FrendlyUrl = $config['general']['ufu'];
+		$comm_nav_obj->FrendlyUrl = System::$config['general']['ufu'];
 		if(!isset($this->PostsTree[0])){
 			$comm_nav_obj->DisableNavigation();
 		}else{
@@ -348,13 +339,11 @@ class Posts{
 		}
 	}
 
-	protected function Alert($Block, $Message)
-	{
-		global $site;
-		$site->AddBlock($Block, true, false, 'alert', 'alert_message.html');
+	protected function Alert($Block, $Message){
+		System::site()->AddBlock($Block, true, false, 'alert', 'alert_message.html');
 		$vars = array();
 		$vars['message'] = $Message;
-		$site->Blocks[$Block]['vars'] = $vars;
+		System::site()->Blocks[$Block]['vars'] = $vars;
 	}
 
 	/**
@@ -362,16 +351,12 @@ class Posts{
 	 * @param bool $Edit Метод редактирования
 	 * @param str $PostFormBlockName Имя блока для вывода формы
 	 */
-	public function RenderForm( $Edit = false, $PostFormBlockName = 'postsform' )
-	{
-		global $site, $db, $config, $user;
-
-
+	public function RenderForm( $Edit = false, $PostFormBlockName = 'postsform' ){
 		if($this->DisableComments){
-			$site->AddBlock($PostFormBlockName, false, false, 'form', $this->PostFormTemplate);
+			System::site()->AddBlock($PostFormBlockName, false, false, 'form', $this->PostFormTemplate);
 			return;
 		}else{
-			$site->AddBlock($PostFormBlockName, true, false, 'form', $this->PostFormTemplate);
+			System::site()->AddBlock($PostFormBlockName, true, false, 'form', $this->PostFormTemplate);
 		}
 
 		if($Edit && isset($_GET['post_id'])){
@@ -385,29 +370,29 @@ class Posts{
 			return;
 		}
 
-		if(!$Edit && !$user->Auth && !$this->GuestPost){ // Гость
+		if(!$Edit && !System::user()->Auth && !$this->GuestPost){ // Гость
 			$this->Alert($PostFormBlockName, 'Гости не могут добавлять комментарии, войдите или зарегистрируйтесь.');
 			return;
 		}
 
-		$site->SetVar('template', 'lang_posts_username', 'Имя');
-		$site->SetVar('template', 'lang_posts_useremail', 'E-mail');
-		$site->SetVar('template', 'lang_posts_hideemail', 'Скрыть E-mail');
-		$site->SetVar('template', 'lang_posts_userhomepage', 'Сайт');
+		System::site()->SetVar('template', 'lang_posts_username', 'Имя');
+		System::site()->SetVar('template', 'lang_posts_useremail', 'E-mail');
+		System::site()->SetVar('template', 'lang_posts_hideemail', 'Скрыть E-mail');
+		System::site()->SetVar('template', 'lang_posts_userhomepage', 'Сайт');
 
-		$site->SetVar('template', 'lang_posts_posttitle', 'Заголовок');
-		$site->SetVar('template', 'lang_posts_postmessage', 'Сообщение');
+		System::site()->SetVar('template', 'lang_posts_posttitle', 'Заголовок');
+		System::site()->SetVar('template', 'lang_posts_postmessage', 'Сообщение');
 
-		$site->SetVar('template', 'lang_posts_cancel', 'Отмена');
-		$site->SetVar('template', 'lang_posts_canceltitle', 'Вернуться к теме без сохранения изменений');
+		System::site()->SetVar('template', 'lang_posts_cancel', 'Отмена');
+		System::site()->SetVar('template', 'lang_posts_canceltitle', 'Вернуться к теме без сохранения изменений');
 
 		$vars = array();
 		if($Edit){
-			$db->Select($this->PostsTable, "`id`='$post_id'");
-			$post = $db->FetchRow();
+			System::db()->Select($this->PostsTable, "`id`='$post_id'");
+			$post = System::db()->FetchRow();
 
-			if($user->Auth){
-				$access = ($user->Get('u_id') == $post['user_id'] || $user->isAdmin());
+			if(System::user()->Auth){
+				$access = (System::user()->Get('u_id') == $post['user_id'] || System::user()->isAdmin());
 			}else{
 				$access = ($post['user_id'] == '0' && $post['user_ip'] == getip());
 			}
@@ -423,8 +408,8 @@ class Posts{
 
 			$vars['edit'] = true;
 
-			$site->SetVar('template','lang_posts_submit', 'Сохранить');
-			$site->SetVar('template','lang_posts_submittitle', 'Сохранить изменения и вернуться');
+			System::site()->SetVar('template','lang_posts_submit', 'Сохранить');
+			System::site()->SetVar('template','lang_posts_submittitle', 'Сохранить изменения и вернуться');
 
 			$vars['visibility'] = 'visible';
 
@@ -437,46 +422,44 @@ class Posts{
 
 			$vars['edit'] = false;
 
-			$site->SetVar('template','lang_posts_submit', 'Добавить');
-			$site->SetVar('template','lang_posts_submittitle', 'Добавить новое сообщение');
+			System::site()->SetVar('template','lang_posts_submit', 'Добавить');
+			System::site()->SetVar('template','lang_posts_submittitle', 'Добавить новое сообщение');
 
 			$vars['visibility'] = 'hidden';
 		}
 
 		$vars['add'] = !$vars['edit'];
-		$vars['add_guest'] = ($user->AccessLevel() == 3 || $user->AccessLevel() == 4) && $vars['add'];
+		$vars['add_guest'] = (System::user()->AccessLevel() == 3 || System::user()->AccessLevel() == 4) && $vars['add'];
 
-		$vars['show_kaptcha'] = $vars['add_guest'] || (!$user->isAdmin() && $this->ShowKaptchaForMembers);
+		$vars['show_kaptcha'] = $vars['add_guest'] || (!System::user()->isAdmin() && $this->ShowKaptchaForMembers);
 		$vars['kaptcha_url'] = 'index.php?name=plugins&amp;p=antibot';
 		$vars['kaptcha_width'] = '120';
 		$vars['kaptcha_height'] = '40';
 
-		$site->Blocks[$PostFormBlockName]['vars'] = $vars;
+		System::site()->Blocks[$PostFormBlockName]['vars'] = $vars;
 
 		// JavaScript
 		include_once('scripts/bbcode_editor/index.php');
 
 		// Смайлики для формы
-		$smilies = $db->Select('smilies', "`enabled`='1'");
-		if($db->NumRows() == 0){
-			$site->AddBlock('smilies', true, false, 'smile', '','Смайликов пока нет.');
+		$smilies = System::db()->Select('smilies', "`enabled`='1'");
+		if(System::db()->NumRows() == 0){
+			System::site()->AddBlock('smilies', true, false, 'smile', '','Смайликов пока нет.');
 		}else{
-			$site->AddBlock('smilies', true, true, 'smile');
+			System::site()->AddBlock('smilies', true, true, 'smile');
 			foreach($smilies as $smile){
-				$smile['file'] = $config['general']['smilies_dir'].$smile['file'];
+				$smile['file'] = System::$config['general']['smilies_dir'].$smile['file'];
 				$smile['code'] = SafeDB($smile['code'], 255, str);
 				$sub_codes = explode(',', $smile['code']);
 				$smile['code'] = $sub_codes[0];
-				$site->AddSubBlock('smilies', true, $smile);
+				System::site()->AddSubBlock('smilies', true, $smile);
 			}
 		}
 	}
 
-	public function CheckFlood()
-	{
-		global $db, $config;
-		$db->Select($this->PostsTable, "`user_ip`='".getip()."' and `post_date`>'".(time() - $this->FloodTime)."'");
-		if($db->NumRows() > 0){
+	public function CheckFlood(){
+		System::db()->Select($this->PostsTable, "`user_ip`='".getip()."' and `post_date`>'".(time() - $this->FloodTime)."'");
+		if(System::db()->NumRows() > 0){
 			return true;
 		}else{
 			return false;
@@ -484,19 +467,15 @@ class Posts{
 	}
 
 	// Обрабатывает и добавляет сообщение
-	public function SavePost( $ObjectId, $Edit = false )
-	{
-		global $db, $config, $user;
-
+	public function SavePost( $ObjectId, $Edit = false ){
 		$errors = array();
-
 		if($Edit){
 			if(!isset($_GET['post_id'])){
 				$errors[] = 'post_id не инициализирована в GET.';
 			}else{
 				$post_id = SafeEnv($_GET['post_id'], 11,int);
-				$db->Select($this->PostsTable, "`id`='$post_id'");
-				$post = $db->FetchRow();
+				System::db()->Select($this->PostsTable, "`id`='$post_id'");
+				$post = System::db()->FetchRow();
 			}
 		}else{
 			if(!$this->AlloyComments){
@@ -507,26 +486,20 @@ class Posts{
 				$errors[] = 'Система комментариев отключена. Вы не сможете добавить комментарий.';
 			}
 		}
-
 		$post_message = '';
 		$post_parent_id = 0;
-
-		if($user->Auth){ // Авторизованный пользователь, добавляет комментарий
-
+		if(System::user()->Auth){ // Авторизованный пользователь, добавляет комментарий
 			if(!isset($_POST['post_message']) || !isset($_POST['parent_id'])){
 				$errors[] = 'Данные не инициализированы.';
 			}
-
-			$user_id = $user->Get('u_id');
-			$user_name = $user->Get('u_name');
-			$user_email = $user->Get('u_email');
-			$user_hideemail = $user->Get('u_hideemail');
-			$user_homepage = $user->Get('u_homepage');
-
-			if($Edit && !$user->isAdmin() && $post['user_id'] != $user->Get('u_id')){
+			$user_id = System::user()->Get('u_id');
+			$user_name = System::user()->Get('u_name');
+			$user_email = System::user()->Get('u_email');
+			$user_hideemail = System::user()->Get('u_hideemail');
+			$user_homepage = System::user()->Get('u_homepage');
+			if($Edit && !System::user()->isAdmin() && $post['user_id'] != System::user()->Get('u_id')){
 				$errors[] = 'У вас недостаточно прав для редактирования этого сообщения.';
 			}
-
 		}else{ // Гость, добавляет или редактирует комментарий
 			if($Edit && ($post['user_id'] != '0' || $post['user_ip'] != getip())){
 				$errors[] = 'У вас недостаточно прав для редактирования этого сообщения.';
@@ -541,41 +514,36 @@ class Posts{
 							$errors[] = 'Данные не инициализированы.';
 						}else{
 							$user_id = 0;
-
 							$user_name = SafeEnv($_POST['user_name'], 255, str, true);
 							CheckNikname($user_name, $er, true);
-							$user->Def('u_name', $user_name);
-
+							System::user()->Def('u_name', $user_name);
 							$user_email = SafeEnv($_POST['user_email'], 255, str, true);
 							if($user_email != ''){
 								if(!CheckEmail($user_email)){
 									$errors[] = 'Формат E-mail не правильный. Он должен быть вида: <b>domain@host.ru</b> .';
 								}
 							}
-							$user->Def('u_email', $user_email);
-
+							System::user()->Def('u_email', $user_email);
 							if(isset($_POST['hideemail'])){
 								$user_hideemail = '1';
 							}else{
 								$user_hideemail = '0';
 							}
-							$user->Def('u_hideemail', $user_hideemail);
+							System::user()->Def('u_hideemail', $user_hideemail);
 
 							$user_homepage = Url(SafeEnv($_POST['user_homepage'], 250, str, true));
-							$user->Def('u_homepage', $user_homepage);
+							System::user()->Def('u_homepage', $user_homepage);
 						}
 					}else{
 						if(!isset($_POST['post_message']) || !isset($_POST['parent_id'])){
 							$errors[] = 'Данные не инициализированы.';
 						}
-
 						$user_id = SafeDB($post['user_id'], 11, int);
 						$user_name = SafeDB($post['user_name'], 255, str);
 						$user_email = SafeDB($post['user_email'], 255, str);
 						$user_hideemail = SafeDB($post['user_hideemail'], 1, int);
 						$user_homepage = SafeDB($post['user_homepage'], 255, str);
 					}
-
 				}else{
 					$errors[] = 'Чтобы оставлять сообщения, вам необходимо зарегистрироваться.';
 				}
@@ -595,8 +563,8 @@ class Posts{
 		}
 
 		// Проверяем капчу
-		if(!$user->Auth || (!$user->isAdmin() && $this->ShowKaptchaForMembers)){
-			if(!$user->isDef('captcha_keystring') || $user->Get('captcha_keystring') != $_POST['keystr']){
+		if(!System::user()->Auth || (!System::user()->isAdmin() && $this->ShowKaptchaForMembers)){
+			if(!System::user()->isDef('captcha_keystring') || System::user()->Get('captcha_keystring') != $_POST['keystr']){
 				$errors[] = 'Вы ошиблись при вводе кода с картинки.';
 			}
 		}
@@ -604,7 +572,7 @@ class Posts{
 		if(!isset($_POST['parent_id'])){
 			$errors[] = 'parent_id не инициализирована в POST.';
 		}else{
-			if($this->Answers == '1' || $user->isAdmin()){
+			if($this->Answers == '1' || System::user()->isAdmin()){
 				$parent = $_POST['parent_id'];
 				$parent = explode('_', $parent, 2);
 				$post_parent_id = SafeEnv($parent[1],11,int);
@@ -618,14 +586,13 @@ class Posts{
 		}
 
 		$this->LastSaveErrors = $errors;
-
 		if(count($errors) == 0){
 			if(!$Edit){
 				$vals = Values('', $ObjectId, $user_id, $user_name, $user_homepage, $user_email, $user_hideemail, getip(), time(), $post_message, $post_parent_id);
 				$cols = array('id', 'object_id', 'user_id', 'user_name', 'user_homepage', 'user_email', 'user_hideemail', 'user_ip', 'post_date', 'post_message', 'post_parent_id');
-				$db->Insert($this->PostsTable, $vals, $cols);
+				System::db()->Insert($this->PostsTable, $vals, $cols);
 			}else{
-				$db->Update($this->PostsTable, "`post_message`='$post_message'", "`id`='$post_id'");
+				System::db()->Update($this->PostsTable, "`post_message`='$post_message'", "`id`='$post_id'");
 			}
 			return true;
 		}else{
@@ -633,57 +600,50 @@ class Posts{
 		}
 	}
 
-	public function DeletePost( $post_id = null, $first = true )
-	{
-		global $db, $site, $user;
-
+	public function DeletePost( $post_id = null, $first = true ){
 		if($post_id == null){
 			if(isset($_GET['post_id'])){
 				$post_id = $_GET['post_id'];
 			}
 		}
-
 		if($post_id != null){
-			$db->Select($this->PostsTable, "`id`='$post_id'");
-			$post = $db->FetchRow();
+			System::db()->Select($this->PostsTable, "`id`='$post_id'");
+			$post = System::db()->FetchRow();
 		}else{
 			$text = 'post_id нигде не инициализирована.';
-			$site->AddTextBox('Ошибка.', '<center>'.$text.'</center>');
+			System::site()->AddTextBox('Ошибка.', '<center>'.$text.'</center>');
 			return 0;
 		}
-
 		if($first){
-			if($user->Auth){
-				$editing = ($user->Get('u_id') == $post['user_id'] || $user->isAdmin());
+			if(System::user()->Auth){
+				$editing = (System::user()->Get('u_id') == $post['user_id'] || System::user()->isAdmin());
 			}else{
 				$editing = ($post['user_id'] == '0' && $post['user_ip'] == getip());
 			}
 			if(!$editing){
 				$text = 'У вас недостаточно прав для удаления этого сообщения.';
-				$site->AddTextBox('Ошибка.', '<center>'.$text.'</center>');
+				System::site()->AddTextBox('Ошибка.', '<center>'.$text.'</center>');
 				return 0;
 			}
 		}
-
 		if(!$first || isset($_GET['ok'])){
 			$del_count = 1;
-			$parent_posts = $db->Select($this->PostsTable, "`post_parent_id`='$post_id'");
+			$parent_posts = System::db()->Select($this->PostsTable, "`post_parent_id`='$post_id'");
 			foreach($parent_posts as $post){
 				$del_count += $this->DeletePost(SafeDB($post['id'], 11, int), false);
 			}
-			$db->Delete($this->PostsTable, "`id`='$post_id'");
+			System::db()->Delete($this->PostsTable, "`id`='$post_id'");
 			return $del_count;
 		}else{
 			$text = '<br />Удалить сообщение?<br /><br />'
 			. '<a href="'.$this->DeletePageUrl.'&amp;post_id='.$post_id.'&amp;ok=1">Да</a> &nbsp;
 			&nbsp;&nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a><br /><br />';
-			$site->AddTextBox('', '<center>'.$text.'</center>');
+			System::site()->AddTextBox('', '<center>'.$text.'</center>');
 			return 0;
 		}
 	}
 
-	public function PrintErrors()
-	{
+	public function PrintErrors(){
 		$text = 'Ваше сообщение не сохранено по следующим причинам:<br /><ul>';
 		foreach($this->LastSaveErrors as $error){
 			$text .= '<li>'.$error;

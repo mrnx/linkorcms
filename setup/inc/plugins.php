@@ -12,8 +12,7 @@ if(!defined('VALID_RUN')){
 
 define('SETUP_PLUGINS_SUPPORT', true);
 
-function GetPlugins()
-{
+function SetupGetPlugins(){
 	global $config;
 	static $Cache = false;
 	static $resultcache = array();
@@ -42,10 +41,9 @@ function GetPlugins()
 	return $plugin_groups;
 }
 
-function Plugins( $group )
-{
+function SetupPlugins( $group ){
 	global $config;
-	$plugins = GetPlugins();
+	$plugins = SetupGetPlugins();
 	if(isset($plugins[$group])){
 		$plugins = $plugins[$group];
 		foreach($plugins as $plugin){

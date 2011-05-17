@@ -125,7 +125,7 @@ function AdminPollsEditor()
 	);
 	FormRow('Разрешить комментарии', $site->Select('allow_comments', GetEnData($allow_comments, 'Да', 'Нет')));
 	FormRow('Включить', $site->Select('active', GetEnData($active, 'Да', 'Нет')));
-	FormRow('Кто может отвечать', $site->Select('view', GetViewData($view)));
+	FormRow('Кто может отвечать', $site->Select('view', GetUserTypesFormData($view)));
 	AddCenterBox($title);
 	AddForm('<form action="'.$config['admin_file'].'?exe=polls&a=save'.$uid.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($btitle));
 }
@@ -215,7 +215,7 @@ if(isset($_GET['a'])){
 	$action = 'main';
 }
 
-include_once ($config['apanel_dir'].'configuration/functions.php');
+include_once ($config['inc_dir'].'configuration/functions.php');
 
 function AdminPolls()
 {

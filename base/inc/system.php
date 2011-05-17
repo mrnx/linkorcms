@@ -26,9 +26,50 @@ define('obj', 'object');
 define('nil', 'null');
 define('system_cache', 'system');
 
-include($config['inc_dir'].'navigation.class.php');
-include($config['inc_dir'].'LmFileCache.php');
-include($config['inc_dir'].'LmEmailExtended.php');
+// Ошибки
+define('ERROR_HANDLER', true);
+define('ERROR', 1);
+define('WARNING', 2);
+define('PARSE', 4);
+define('NOTICE', 8);
+define('CORE_ERROR', 16);
+define('CORE_WARNING', 32);
+define('COMPILE_ERROR', 64);
+define('COMPILE_WARNING', 128);
+define('USER_ERROR', 256);
+define('USER_WARNING', 512);
+define('USER_NOTICE', 1024);
+
+// Плагины
+define('PLUGINS', true);
+define('PLUG_AUTORUN', 1); //Автозапуск
+define('PLUG_ADMIN_AUTORUN', 2); //Автозапуск только в админке
+define('PLUG_MAIN_AUTORUN', 3); //Автозапуск только на главной
+define('PLUG_CALLEE', 4); //Вызываемый отдельно через index.php&name=plugins&p=plugin_name
+define('PLUG_MANUAL', 5); //Нужен для работы определённого модуля и подключается вручную. Использует группы.
+define('PLUG_MANUAL_ONE', 7); //Подключается один какой-то плагин из группы. Использует группы.
+define('PLUG_SYSTEM', 8); //Системный плагин, не трабует инсталляции, вызывается только вручную и может использоваться практически из всех компонентов системы
+
+// Подключаем классы
+include $config['inc_dir'].'logi.class.php';
+include $config['inc_dir'].'LmFileCache.php';
+include $config['inc_dir'].'LmEmailExtended.php';
+include $config['inc_dir'].'user.class.php';
+include $config['inc_dir'].'rss.class.php';
+include $config['inc_dir'].'picture.class.php';
+
+include $config['inc_dir'].'html.class.php';
+include $config['inc_dir'].'starkyt.class.php';
+include $config['inc_dir'].'page_template.class.php';
+include $config['inc_dir'].'index_template.inc.php';
+include $config['inc_dir'].'admin_template.class.php';
+
+include $config['inc_dir'].'navigation.class.php';
+include $config['inc_dir'].'tree.class.php';
+include $config['inc_dir'].'tree_a.class.php';
+include $config['inc_dir'].'tree_b.class.php';
+include $config['inc_dir'].'posts.class.php';
+
 
 abstract class System{
 
@@ -65,6 +106,9 @@ abstract class System{
 	 * @return Page
 	 */
 	static public function site(){
+		if($GLOBALS['site'] == null){
+			$GLOBALS['site'] = new Page();
+		}
 		return $GLOBALS['site'];
 	}
 
@@ -73,6 +117,9 @@ abstract class System{
 	 * @return AdminPage
 	 */
 	static public function admin(){
+		if($GLOBALS['site'] == null){
+			$GLOBALS['site'] = new AdminPage();
+		}
 		return $GLOBALS['site'];
 	}
 
@@ -305,11 +352,7 @@ function ConfigSetValue( $group, $cname, $newValue ){
  * Устанавливает временную зону указанную в настройках сайта
  */
 function SetDefaultTimezone(){
-	global $config;
-	$tz = $config['general']['default_timeone'];
-	if(!empty($tz)){
-		@date_default_timezone_set($tz);
-	}
+	@date_default_timezone_set(System::$config['general']['default_timeone']);
 }
 
 function SafeXSS( &$var ){
@@ -371,8 +414,7 @@ function SafeXSS( &$var ){
  * @param Bool $addsl // Добавить обратные слэши перед всеми спецсимволами
  * @return Variable
  */
-function SafeEnv( $Var, $maxlength, $type, $strip_tags = false, $addsl = true, $safexss = true )
-{
+function SafeEnv( $Var, $maxlength, $type, $strip_tags = false, $addsl = true, $safexss = true ){
 	global $db;
 	if(is_array($Var)){
 		foreach($Var as $i=>$v){
@@ -431,8 +473,7 @@ function SafeEnv( $Var, $maxlength, $type, $strip_tags = false, $addsl = true, $
  * @param <type> $safexss
  * @return <type>
  */
-function SafeDB( $Var, $maxlength, $type, $strip_tags = true, $specialchars=true, $safexss = true )
-{
+function SafeDB( $Var, $maxlength, $type, $strip_tags = true, $specialchars=true, $safexss = true ){
 	if(is_array($Var)){
 		for($i=0, $cnt=count($Var); $i<$cnt; $i++){
 			if($maxlength > 0){
@@ -505,8 +546,7 @@ $Parser_UseCache = true;
 #Строка: 	$set="name='name',login='root',pass=''";
 #Результат: array('name','login','pass');-Упорядоченный массив
 #в row должен быть упорядоченный массив из значений поля таблицы
-function Parser_ParseSetStr( &$set, &$row, &$info )//:Array;
-{
+function Parser_ParseSetStr( &$set, &$row, &$info ){
 	$s = str_replace("\\'",'<&#39;>',$set);
 	$maxlength=count($info['cols']);
 	for($i=0;$i<$maxlength;$i++){
@@ -544,8 +584,7 @@ function Parser_ParseSetStr( &$set, &$row, &$info )//:Array;
 #Пример использования:
 #Строка: 	$values="'name','root',''";
 #Результат: array('name','root','');
-function Parser_ParseValuesStr(&$values, &$Info, $isUpdateMethod = false, $lastvals = false)//:Array;
-{
+function Parser_ParseValuesStr(&$values, &$Info, $isUpdateMethod = false, $lastvals = false){
 	$values2 = str_replace("\\'",'<&#39;>',$values);
 	$values2 = trim($values2);
 	$maxlength = Count($Info['cols']);
@@ -579,8 +618,7 @@ function Parser_ParseValuesStr(&$values, &$Info, $isUpdateMethod = false, $lastv
 #Запросы должны соответствовать синтаксису SQL запросов
 #в row должен быть упорядоченный массив из значений поля таблицы
 #Результат: true если условие выполнено и false если нет
-function Parser_ParseWhereStr( $where, $row, $info, $index = 0 )//:Boolean;
-{
+function Parser_ParseWhereStr( $where, $row, $info, $index = 0 ){
 	if($where == ''){ return true; };
 	global $Parser_UseCache, $Parser_WhereCache;
 	$vars = array();
@@ -627,16 +665,14 @@ function Parser_ParseWhereStr( $where, $row, $info, $index = 0 )//:Boolean;
 	return Parser_ParseWhereStr2($where2, $vars);
 }
 
-function Parser_ParseWhereStr2()
-{
+function Parser_ParseWhereStr2(){
 	extract(func_get_arg(1), EXTR_OVERWRITE);
 	eval('if('.func_get_arg(0).'){$result = true;}else{$result = false;}');
 	return $result;
 }
 
 // Возвращает массив с информацией о ячейке, который понимают классы для работы с БД.
-function GetCollDescription( $cname, $type, $length, $auto_increment=false, $default='', $attributes='', $notnull=true, $primary=false, $index=false, $unique=false, $fulltext=false )
-{
+function GetCollDescription( $cname, $type, $length, $auto_increment=false, $default='', $attributes='', $notnull=true, $primary=false, $index=false, $unique=false, $fulltext=false ){
 	$newcoll = array(
 		'name'=>$cname,
 		'type'=>$type,
@@ -669,22 +705,12 @@ function GetCollDescription( $cname, $type, $length, $auto_increment=false, $def
 	return $newcoll;
 }
 
-#Кодирует/Декодирует строку
-function XorEncode($str,$n=24)
-{
-	for($i=0;$i<strlen($str);$i++){
-		$str[$i] = chr(ord($str[$i]) ^ $n);
-	}
-	return $str;
-}
-
 function AntispamEmail($email, $addjava=true){
 	global $site;
 	static $javaAdd = false;
 	if(!$javaAdd && $addjava){
 		$site->AddJS('
-		function email(login,domain)
-		{
+		function email(login,domain){
 			mail = login+"@"+domain;
 			mail = \'<a href="mailto:\'+mail+\'" target="_blank">\'+mail+\'</a>\';
 			document.write(mail);
@@ -769,8 +795,7 @@ function GetUserTypes(){
 #Возвращает полную информацию о пользователе
 #Включая ранг, картинку ранга, статус онлайн, имя файла аватара для вывода.
 #Вся информация кэшируется.
-function GetUserInfo($user_id)
-{
+function GetUserInfo($user_id){
 	global $db, $user, $config;
 	$system_users_cache = GetUsers();
 	if(isset($system_users_cache[$user_id])){
@@ -792,13 +817,11 @@ function GetUserInfo($user_id)
 	}
 }
 
-function GetUserAvatar( $user_id )
-{
+function GetUserAvatar( $user_id ){
 	return GetPersonalAvatar($user_id);
 }
 
-function GetSmallUserAvatar( $user_id, $avatar = '' )
-{
+function GetSmallUserAvatar( $user_id, $avatar = '' ){
 	global $config;
 	if($avatar == ''){
 		$avatar = GetPersonalAvatar($user_id);
@@ -817,8 +840,7 @@ function GetSmallUserAvatar( $user_id, $avatar = '' )
 	}
 }
 
-function GetSmallestUserAvatar( $user_id, $avatar = '' )
-{
+function GetSmallestUserAvatar( $user_id, $avatar = '' ){
 	global $config;
 	if($avatar == ''){
 		$avatar = GetPersonalAvatar($user_id);
@@ -837,8 +859,7 @@ function GetSmallestUserAvatar( $user_id, $avatar = '' )
 	}
 }
 
-function GetPersonalAvatar($user_id)
-{
+function GetPersonalAvatar($user_id){
 	global $db, $config;
 	if($user_id == 0){
 		return GetGalleryAvatar('guest.gif');
@@ -869,8 +890,7 @@ function GetPersonalAvatar($user_id)
 	}
 }
 
-function GetGalleryAvatar($filename)
-{
+function GetGalleryAvatar($filename){
 	global $config;
 	if(!defined('SETUP_SCRIPT')){
 		if(trim($filename)==''){
@@ -886,8 +906,9 @@ function GetGalleryAvatar($filename)
 	}
 }
 
-function GetUserRank($points, $type, $access) // Возвращает название, картинку и ид ранга
-{
+
+// Возвращает название, картинку и идентификатор ранга
+function GetUserRank($points, $type, $access){
 	global $config, $db;
 	static $admintypes = null;
 	if($type == '2'){ // Пользователь
@@ -918,9 +939,208 @@ function GetUserRank($points, $type, $access) // Возвращает название, картинку и
 	}
 }
 
+function UserSendActivationMail($username, $user_mail, $login, $pass, $code, $regtime){
+	global $config;
+	$time = $regtime+604800;
+	$time = date("d.m.Y", $time);
+
+	$text = $config['user']['mail_template'];
+
+	$sr = array(
+		'{sitename}', '{siteurl}', '{username}', '{date}', '{login}', '{pass}', '{link}'
+	);
+	$rp = array(
+		$config['general']['site_name'], $config['general']['site_url'], $username, $time, $login, $pass, $config['general']['site_url'].'index.php?name=plugins&p=activate&code='.$code
+	);
+
+	$text = str_replace($sr, $rp, $text);
+
+	SendMail($username, $user_mail, 'Регистрация на '.$config['general']['site_name'], $text);
+}
+
+function UserSendEndRegMail($user_mail, $name, $login, $pass, $regtime){
+	global $config;
+	$text = 'Здравствуйте, ['.$name.']!
+
+Вы были успешно зарегистрированы на сайте
+'.$config['general']['site_url'].'
+
+Дата регистрации: '.date("d.m.Y", $regtime).'
+Имя: '.$name.'
+
+Для входа на сайт используйте:
+логин: '.$login.'
+пароль: '.$pass.'
+
+Надеемся, наш сайт будет Вам полезен.
+С уважением, администрация сайта '.$config['general']['site_url'].'.';
+	SendMail($name, $user_mail, '['.$config['general']['site_url'].'] Регистрация', $text);
+}
+
+function UserSendForgotPassword($user_mail, $name, $login, $pass){
+	global $config;
+	$ip = getip();
+	$text = 'Здравствуйте, ['.$name.']!
+
+На сайте '.$config['general']['site_url'].'
+было запрошено напоминание пароля.
+
+Имя: '.$name.'
+
+Ваш логин и новый пароль:
+логин: '.$login.'
+пароль: '.$pass.'
+
+Изменить данные аккаунта можете по адресу:
+'.GetSiteUrl().Ufu('index.php?name=user&op=editprofile', 'user/{op}/').'
+
+IP-адрес, с которого был запрошен пароль: '.$ip.'
+
+С уважением, администрация сайта '.$config['general']['site_url'].'.';
+	SendMail($name, $user_mail, '['.$config['general']['site_url'].'] Напоминание пароля', $text);
+}
+
+function GetGmtArray(){
+	$tlist = timezone_identifiers_list();
+	$gmt = array(
+	);
+	foreach($tlist as $timezone){
+		$gmt[] = array(
+			$timezone, $timezone
+		);
+	}
+	return $gmt;
+}
+
+function GetGmtData($val){
+	global $site;
+	$tlist = timezone_identifiers_list();
+	$gmt = array(
+	);
+	foreach($tlist as $timezone){
+		$site->DataAdd($gmt, $timezone, $timezone, $val == $timezone);
+	}
+	return $gmt;
+}
+
+function GetGalleryAvatarsData($avatar, $personal){
+	global $config, $site;
+	$avatars = GetFiles($config['general']['avatars_dir'], false, true, '.gif.jpg.jpeg.png');
+	$selindex = 0;
+	$avd = array(
+	);
+	if($personal == '1'){
+		$site->DataAdd($avd, '', 'Персональный', true);
+	}
+	for($i = 0, $c = count($avatars); $i < $c; $i++){
+		if($avatar == $avatars[$i]){
+			$sel = true;
+			$selindex = $i;
+		} else{
+			$sel = false;
+		}
+		$site->DataAdd($avd, $avatars[$i], $avatars[$i], $sel);
+	}
+	return array(
+		$avd, $avatars[$selindex]
+	);
+}
+
+function GetGalleryAvatars($avatar, $personal){
+	global $config, $site;
+	$avatars = GetFiles($config['general']['avatars_dir'], false, true, '.gif.jpg.jpeg.png');
+	$selindex = 0;
+	$avd = array(
+	);
+	if($personal == '1'){
+		$site->DataAdd($avd, '', 'Персональный', true);
+	}
+	for($i = 0, $c = count($avatars); $i < $c; $i++){
+		if($avatar == $avatars[$i]){
+			$sel = true;
+			$selindex = $i;
+		} else{
+			$sel = false;
+		}
+		$vars['name'] = $avatars[$i];
+		$vars['selected'] = $sel;
+		$vars['caption'] = $avatars[$i];
+	}
+	return $vars;
+}
+
+/**
+ * Функция управляет загрузкой аватар ($_FILES['upavatar])
+ */
+function UserLoadAvatar(&$errors, &$avatar, &$a_personal, $oldAvatarName, $oldAvatarPersonal, $editmode){
+	global $config;
+
+	$alloy_mime = array(
+		'image/gif' => '.gif', 'image/jpeg' => '.jpg', 'image/pjpeg' => '.jpg', 'image/png' => '.png', 'image/x-png' => '.png'
+	);
+	include_once($config['inc_dir'].'picture.class.php');
+
+	$asize = getimagesize($_FILES['upavatar']['tmp_name']);
+
+	//Проверка формата файла
+	$alloy_mime = array(
+		'image/gif', 'image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png'
+	);
+	$alloy_exts = array(
+		'.gif', '.jpg', '.jpeg', '.png'
+	);
+	if(in_array($_FILES['upavatar']['type'], $alloy_mime) && in_array(strtolower(GetFileExt($_FILES['upavatar']['name'])), $alloy_exts)){
+		// Удаляем старый аватар
+		if($editmode && $oldAvatarPersonal == '1'){
+			UnlinkUserAvatarFiles($oldAvatarName);
+		}
+
+		//Выполняем ресайз, если нужно, и сохраняем аватар в папку персональных аватар
+		$NewName = GenRandomString(8, 'qwertyuiopasdfghjklzxcvbnm');
+		$ext = strtolower(GetFileExt($_FILES['upavatar']['name']));
+
+		if($asize[0] > $config['user']['max_avatar_width'] || $asize[1] > $config['user']['max_avatar_height']){
+			$thumb = new TPicture($_FILES['upavatar']['tmp_name']);
+			$thumb->SetImageSize($config['user']['max_avatar_width'], $config['user']['max_avatar_height']);
+			$thumb->SaveToFile($config['general']['personal_avatars_dir'].$NewName.$ext);
+		} else{
+			copy($_FILES['upavatar']['tmp_name'], $config['general']['personal_avatars_dir'].$NewName.$ext);
+		}
+
+		// Создаем стандартные уменьшенные копии 24х24 и 64х64
+		$thumb = new TPicture($_FILES['upavatar']['tmp_name']);
+		$thumb->SetImageSize(64, 64);
+		$thumb->SaveToFile($config['general']['personal_avatars_dir'].$NewName.'_64x64'.$ext);
+		$thumb = new TPicture($_FILES['upavatar']['tmp_name']);
+		$thumb->SetImageSize(24, 24);
+		$thumb->SaveToFile($config['general']['personal_avatars_dir'].$NewName.'_24x24'.$ext);
+
+		$avatar = $NewName.$ext;
+		$a_personal = '1';
+	} else{
+		$errors[] = 'Неправильный формат аватара. Ваш аватар должен быть формата GIF, JPEG или PNG.';
+		$a_personal = '0';
+	}
+}
+
+function UnlinkUserAvatarFiles($AvatarFileName){
+	global $config;
+	$AvatarFileName = RealPath2($config['general']['personal_avatars_dir'].$AvatarFileName);
+	if(is_file($AvatarFileName)){
+		unlink($AvatarFileName);
+		$_name = GetFileName($AvatarFileName);
+		$_ext = GetFileExt($AvatarFileName);
+		if(is_file($config['general']['personal_avatars_dir'].$_name.'_24x24'.$_ext)){
+			unlink($config['general']['personal_avatars_dir'].$_name.'_24x24'.$_ext);
+		}
+		if(is_file($config['general']['personal_avatars_dir'].$_name.'_64x64'.$_ext)){
+			unlink($config['general']['personal_avatars_dir'].$_name.'_64x64'.$_ext);
+		}
+	}
+}
+
 // Изменяет поле счетчика у объекта
-function CalcCounter($objTable, $whereObj, $objCounterColl, $calcVal)
-{
+function CalcCounter($objTable, $whereObj, $objCounterColl, $calcVal){
 	global $db;
 	$objCounterColl = SafeEnv($objCounterColl, 255, str);
 	$db->Select($objTable, $whereObj);
@@ -931,16 +1151,14 @@ function CalcCounter($objTable, $whereObj, $objCounterColl, $calcVal)
 }
 
 #Регистрирует таблицу комментариев
-function RegisterCommentTable($name, $objTable, $ObjIdColl, $objCounterColl, $objCounterCollIndex)
-{
+function RegisterCommentTable($name, $objTable, $ObjIdColl, $objCounterColl, $objCounterCollIndex){
 	global $db;
 	$name = SafeEnv($name, 64, str);
 	$db->Insert('comments', Values('', $name, $objTable, $ObjIdColl, $objCounterColl, $objCounterCollIndex));
 }
 
 #Освобождает таблицу комментариев
-function UnRegisterCommentTable($name, $delete=false)
-{
+function UnRegisterCommentTable($name, $delete=false){
 	global $db;
 	$name = SafeEnv($name, 64, str);
 	$db->Delete('comments', "`table`='$name'");
@@ -973,8 +1191,12 @@ function UpdateUserComments($uid, $newUid, $Name, $email, $hEmail, $homePage, $u
 	}
 }
 
-function DeleteAllUserComments( $uid )
-{
+/**
+ * Удаляет все коментарии пользователя
+ * @param  $uid
+ * @return void
+ */
+function DeleteAllUserComments( $uid ){
 	global $db;
 	$uid = SafeEnv($uid, 11, int);
 	$where = "`user_id`='$uid'";
@@ -1003,27 +1225,8 @@ function DeleteAllUserComments( $uid )
 }
 
 #Разрезает слова, которые длиннее заданного параметра, на части
-function DivideWord( $text, $maxWordLength='30' )
-{
+function DivideWord( $text, $maxWordLength='30' ){
 	return wordwrap($text, $maxWordLength, chr(13), 1);
-}
-
-/**
- * Подключает функцию или набор функций
- *
- * @param String $name // Имя файла функции без пути и расширения
- */
-function IncludeFunction($name)
-{
-	global $config;
-	$fname = $config['inc_dir'].'functions/'.$name.'.php';
-	$fname = RealPath2($fname);
-	if(file_exists($fname)){
-		include_once($fname);
-		return true;
-	}else{
-		return false;
-	}
 }
 
 /**
@@ -1848,7 +2051,7 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 		if(in_array($_FILES[$PostName]['type'], $alloy_mime) && in_array(strtolower(GetFileExt($_FILES[$PostName]['name'])), $alloy_exts)) {
 			$file_name = Translit($_FILES[$PostName]['name'], true);
 			if(!is_dir($Dir)) {
-				mkdir($Dir, 0755);
+				mkdir($Dir, 0777);
 			}
 			$ext = GetFileExt($file_name);
 			$name = GetFileName($file_name);
@@ -1866,7 +2069,7 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 			}
 			if($CreateThumbs) {
 				if(!is_dir($ThumbsDir)) {
-					mkdir($ThumbsDir, 0755);
+					mkdir($ThumbsDir, 0777);
 				}
 				CreateThumb($FileName, $ThumbFileName, $MaxWidth, $MaxHeight);
 			}
@@ -2200,7 +2403,1031 @@ function ObjectCp1251ToUtf8( &$var ){
 	return $var;
 }
 
-// Системные плагины
+function BbCodeTag( $tag, $part ){
+	static $first_run = true;
+	if($first_run){
+		$first_run = false;
+		ini_set('highlight.string', '#008800');
+		ini_set('highlight.comment', '#969696');
+		ini_set('highlight.keyword', '#0000DD');
+		ini_set('highlight.default', '#444444');
+		ini_set('highlight.html', '#0000FF');
+	}
+	switch($tag){
+		case 'php':
+			$part = str_replace('<br />', '', $part);
+			$part = htmlspecialchars_decode($part);
+			if(substr($part, 0, 2) != '<?'){
+				$part = "<?\n".$part."\n?>";
+			}
+			$part = '<div class="bbcode_php">'.highlight_string($part, true).'</div>';
+			break;
+	}
+	return $part;
+}
+
+/**
+ * Парсер ББ кодов
+ * @param  $text
+ * @return
+ */
+function BbCodePrepare( $text ){
+	$preg =
+		array
+		(
+			'~\[s\](.*?)\[\/s\]~si' => '<del>$1</del>',
+			'~\[b\](.*?)\[\/b\]~si' => '<strong>$1</strong>',
+			'~\[i\](.*?)\[\/i\]~si' => '<em>$1</em>',
+			'~\[u\](.*?)\[\/u\]~si' => '<u>$1</u>',
+			'~\[color=(.*?)\](.*?)\[\/color\]~si' => '<span style="color:$1;">$2</span>',
+			'~\[size=(.*?)\](.*?)\[\/size\]~si' => '<span style="font-size:$1px;">$2</span>',
+			'~\[div=(.*?)\](.*?)\[\/div\]~si' => '<div style="$1">$2</div>',
+			'~\[p=(.*?)\](.*?)\[\/p\]~si' => '<p style="$1">$2</p>',
+			'~\[span=(.*?)\](.*?)\[\/span\]~si' => '<span style="$1">$2</span>',
+			'~\[left (.*?)\](.*?)\[\/left\]~si' => '<div style="text-align: left; $1">$2</div>',
+			'~\[left\](.*?)\[\/left\]~si' => '<div style="text-align: left;">$1</div>',
+			'~\[right (.*?)\](.*?)\[\/right\]~si' => '<div style="text-align: right; $1">$2</div>',
+			'~\[right\](.*?)\[\/right\]~si' => '<div style="text-align: right;">$1</div>',
+			'~\[center (.*?)\](.*?)\[\/center\]~si' => '<div style="text-align: center; $1">$2</div>',
+			'~\[center\](.*?)\[\/center\]~si' => '<div style="text-align: center;">$1</div>',
+			'~\[justify\](.*?)\[\/justify\]~si' => '<p style="text-align: justify;">$1</p>',
+			'~\[pleft\](.*?)\[\/pleft\]~si' => '<p style="text-align: left;">$1</p>',
+			'~\[pright\](.*?)\[\/pright\]~si' => '<p style="text-align: right;">$1</p>',
+			'~\[pcenter\](.*?)\[\/pcenter\]~si' => '<p style="text-align: center;">$1</p>',
+			'~\[br\]~si' => '<br clear="all">',
+			'~\[hr\]~si' => '<hr color="#B5B5B5">',
+			'~\[line\]~si' => '<hr>',
+			'~\[table\]~si' => '<div><table border="1" cellspacing="1" cellpadding="1" width="50%" style="margin:10px;  float:left;" >',
+			'~\[\/table\]~si' => '</table></div>',
+			'~\[tr\]~si' => '<tr>',
+			'~\[\/tr\]~si' => '</tr>',
+			'~\[td\]~si' => '<td style="padding:10px;">',
+			'~\[\/td\]~si' => '</td>',
+			'~\[th\]~si' => '<th>',
+			'~\[\/th\]~si' => '</th>',
+			'~\[\*\](.*?)\[\/\*\]~si' => '<li>$1</li>',
+			'~\[\*\]~si' => '<li>',
+			'~\[ul\](.*?)\[\/ul\]~si' => "<ul>$1</li></ul>",
+			'~\[list\](.*?)\[\/list\]~si' => "<ul>$1</li></ul>",
+			'~\[ol\](.*?)\[\/ol\]~si' => '<ol>$1</li></ol>',
+			'~\[php\](.*?)\[\/php\]~sei' => "'<span>'.BbCodeTag('php', '$1').'</span>'",
+			'~\[hide\](.*?)\[\/hide\]~sei' => "'<div class=\"bbcode_hide\"><a href=\"javascript:onclick=ShowHide(\''.strlen(md5('$1')).substr(md5('$1'),0,3).'\')\">Скрытый текст</a><div id=\"'.strlen(md5('$1')).substr(md5('$1'),0,3).'\" style=\"visibility: hidden; display: none;\">$1</div></div>'",
+			'~\[h1\](.*?)\[\/h1\]~si' => '<h1>$1</h1>',
+			'~\[h2\](.*?)\[\/h2\]~si' => '<h2>$1</h2>',
+			'~\[h3\](.*?)\[\/h3\]~si' => '<h3>$1</h3>',
+			'~\[h4\](.*?)\[\/h4\]~si' => '<h4>$1</h4>',
+			'~\[h5\](.*?)\[\/h5\]~si' => '<h5>$1</h5>',
+			'~\[h6\](.*?)\[\/h6\]~si' => '<h6>$1</h6>',
+			'~\[video\](.*?)\[\/video\]~sei' => "'<CENTER><div>'.strip_tags(htmlspecialchars_decode('$1'), '<object><param><embed>').'</div></CENTER>'",
+			'~\[code\](.*?)\[\/code\]~si' => '<div class="bbcode_code"><code>$1</code></div>',
+			'~\[email\](.*?)\[\/email\]~sei' => "AntispamEmail('$1')",
+			'~\[email=(.*?)\](.*?)\[\/email\]~sei' => "'<a rel=\"noindex\" href=\"mailto:'.str_replace('@', '.at.','$1').'\">$2</a>'",
+			'~\[url\](.*?)\[\/url\]~sei' => "'<a href=\"'.UrlRender('$1').'\" target=\"_blank\">$1</a>'",
+			'~\[url=(.*?)?\](.*?)\[\/url\]~sei' => "'<a href=\"'.UrlRender('$1').'\"target=\"_blank\">$2</a>'",
+			'~\[img=(.*?)x(.*?)\](.*?)\[\/img\]~si' => '<img src="$3" style="width: $1px; height: $2px" >',
+			'~\[img (.*?)\](.*?)\[\/img\]~si' => '<img src="$2" title="$1" alt="$1">',
+			'~\[img\](.*?)\[\/img\]~si' => '<a href="$1" target="_blank"><img src="$1"></a>',
+			'~\[quote\](.*?)\[\/quote\]~si' => '<div class="bbcode_quote">$1</div>',
+			'~\[quote=(?:&quot;|"|\')?(.*?)["\']?(?:&quot;|"|\')?\](.*?)\[\/quote\]~si' => '<div class="bbcode_quote"><strong>$1:</strong>$2</div>',
+		);
+	$text = preg_replace(array_keys($preg), array_values($preg), $text);
+	return $text;
+}
+
+/**
+ * Включить вывод ошибок
+ * @return void
+ */
+function ErrorsOn(){
+	global $SITE_ERRORS;
+	$SITE_ERRORS = true;
+}
+
+/**
+ * Временно отключить вывод ошибок
+ * @return void
+ */
+function ErrorsOff(){
+	global $SITE_ERRORS;
+	$SITE_ERRORS = false;
+}
+
+/**
+ * Обработчик ошибок
+ * @param  $No
+ * @param  $Error
+ * @param  $File
+ * @param  $Line
+ * @return void
+ */
+function ErrorHandler($No, $Error, $File, $Line = -1){
+	global $ErrorsLog, $SITE_ERRORS;
+	$errortype = array(
+		1 => 'Ошибка', 2 => 'Предупреждение!', 4 => 'Ошибка разборщика', 8 => 'Замечание', 16 => 'Ошибка ядра', 32 => 'Предупреждение ядра!', 64 => 'Ошибка компиляции',
+		128 => 'Предупреждение компиляции!', 256 => 'Пользовательская Ошибка', 512 => 'Пользовательскаое Предупреждение!', 1024 => 'Пользовательскаое Замечание', 2048 => 'Небольшое замечание',
+		8192 => 'Устаревший код'
+	);
+	$Error = '<br /><b>'.$errortype[$No].'</b>: '.$Error.' в <b>'.$File.($Line > -1 ? '</b> на линии <b>'.$Line.'</b>' : '').'.<br />';
+	if(!defined('SETUP_SCRIPT') && System::$config['debug']['log_errors'] == '1'){
+		$ErrorsLog->Write($Error);
+	}
+	if($SITE_ERRORS && isset(System::$config['debug']['php_errors']) && System::$config['debug']['php_errors'] == '1'){
+		System::$Errors[] = $Error."\n";
+	}
+	if(PRINT_ERRORS){
+		print $Error;
+	}
+}
+
+/**
+ * Очищает кэш плагинов
+ * @return void
+ */
+function PluginsClearCache(){
+	$cache = LmFileCache::Instance();
+	$cache->Delete('system', 'plugins');
+	$cache->Delete('system', 'plugins_auto_main');
+	$cache->Delete('system', 'plugins_auto_admin');
+	$cache->Delete('system', 'plugins_load');
+}
+
+/**
+ * Выполняет поиск плагинов в папке plug_dir
+ * @param bool $ClearCache
+ * @return null|string
+ */
+function LoadPlugins($ClearCache = false){
+	global $config;
+	static $resultcache = null;
+
+	if($ClearCache){
+		$resultcache = null;
+		PluginsClearCache();
+	}
+
+	if($resultcache != null){
+		return $resultcache;
+	}
+
+	$cache = LmFileCache::Instance();
+	if($cache->HasCache('system', 'plugins_load')){
+		$resultcache = $cache->Get('system', 'plugins_load');
+		return $resultcache;
+	}
+
+	$plugins = array(
+	);
+	$folder = $config['plug_dir'];
+	$dir = @opendir($folder);
+	while($file = @readdir($dir)){
+		if($file != '.' && $file != '..' && is_dir($folder.$file) && is_file($folder.$file.'/info.php')){
+			include(RealPath2($folder.$file.'/info.php'));
+		}
+	}
+
+	// Плагины (добавляем информацию)
+	foreach($plugins as $name => $plugin){
+		$plugins[$name]['group'] = '';
+		$plugins[$name]['name'] = $name;
+	}
+	$result['plugins'] = $plugins;
+
+	// Группы (поиск плагинов группы) $groups загружается из файлов info.php
+	foreach($groups as $name => $group){
+		$plugins = array(
+		);
+		$folder = $config['plug_dir'].$name.'/';
+		$dir = opendir($folder);
+		while($file = readdir($dir)){
+			if($file != '.' && $file != '..' && is_dir($folder.$file) && is_file($folder.$file.'/info.php')){
+				include(RealPath2($folder.$file.'/info.php'));
+			}
+		}
+		foreach($plugins as $pname => $plugin){
+			$plugins[$pname]['group'] = $name;
+			$plugins[$pname]['name'] = $pname;
+		}
+		$groups[$name]['plugins'] = $plugins;
+	}
+	$result['groups'] = $groups;
+
+	$resultcache = &$result;
+	$cache->Write('system', 'plugins_load', $result, Day2Sec);
+	return $result;
+}
+
+/**
+ * Подключает группу системных плагинов
+ * @param  $group группа
+ * @param string $function подгруппа(если есть)
+ * @param bool $return возвратить имена файлов плагинов вместо их автоматического подключения
+ * @param bool $return_full возвращать вместо имен файлов массив с полной информацией по плагинам
+ * @return array
+ */
+function IncludeSystemPluginsGroup($group, $function = '', $return = false, $return_full = false){
+	global $config;
+	$plugins = LoadPlugins();
+	$result = array();
+	if(isset($plugins['groups'][$group])){
+		$plugins = $plugins['groups'][$group]['plugins'];
+		foreach($plugins as $plugin){
+			if(($function == '') || (isset($plugin['function']) && $function == $plugin['function'])){
+				global $include_plugin_path; // эта переменная будет доступна из плагина
+				$include_plugin_path = RealPath2($config['plug_dir'].$group.'/'.$plugin['name'].'/');
+				if($return){
+					if($return_full){
+						$plugin['path'] = $include_plugin_path;
+						$result[] = $plugin;
+					} else{
+						$result[] = $include_plugin_path;
+					}
+				} else{
+					include ($include_plugin_path.'index.php');
+				}
+			}
+		}
+	}
+	return $result;
+}
+
+/**
+ * Возвращает все группы настроек плагинов
+ * @return array
+ */
+function PluginsConfigsGroups(){
+	global $db;
+	$result = array(
+	);
+	$db->Select('plugins_config_groups', '');
+	while($group = $db->FetchRow()){
+		$result[$group['name']] = $group;
+	}
+	return $result;
+}
+
+/**
+ * Возвращает информацию по найденным в системе плагинам
+ * @param bool $ClearCache Инициировать новый поиск
+ * @return null|string
+ */
+function GetPlugins($ClearCache = false){
+	global $config, $db;
+	static $resultcache = null;
+
+	if($ClearCache){
+		$resultcache = null;
+		PluginsClearCache();
+	}
+
+	if($resultcache != null)
+		return $resultcache;
+	$cache = LmFileCache::Instance();
+	if($cache->HasCache('system', 'plugins')){
+		$resultcache = $cache->Get('system', 'plugins');
+		return $resultcache;
+	}
+
+	$install_plugins = array(
+	); // Установленные плагины
+	$install_groups = array(
+	); // Установленные группы
+
+	$plugins = $db->Select('plugins', '');
+	foreach($plugins as $temp){
+		if($temp['type'] == PLUG_MANUAL || $temp['type'] == PLUG_MANUAL_ONE){
+			$install_groups[$temp['group']][$temp['name']] = true;
+		} else{
+			$install_plugins[$temp['name']] = true;
+		}
+	}
+
+	$result = LoadPlugins($ClearCache);
+	$groups = &$result['groups'];
+	$plugins = &$result['plugins'];
+	foreach($plugins as $name => $plugin){
+		if(isset($plugins['type']) && $plugins['type'] == PLUG_SYSTEM){
+			unset($plugins[$name]);
+		} else{
+			$plugins[$name]['installed'] = isset($install_plugins[$name]);
+		}
+	}
+	foreach($groups as $name => $group){
+		if(isset($groups[$name]['type']) && $groups[$name]['type'] == PLUG_SYSTEM){
+			unset($groups[$name]);
+		} else{
+			foreach($group['plugins'] as $pname => $plugin){
+				$groups[$name]['plugins'][$pname]['installed'] = isset($install_groups[$name][$pname]);
+			}
+		}
+	}
+	$resultcache = &$result;
+	$cache->Write('system', 'plugins', $result);
+	return $result;
+}
+
+/**
+ * Удаляет плагин из базы данных
+ * @param  $plugin_name
+ * @param string $group
+ * @return void
+ */
+function UninstallPlugin($plugin_name, $group = ''){
+	global $config, $db;
+	$name = $plugin_name;
+	$plugins = GetPlugins();
+	if($group != ''){
+		if(isset($plugins['groups'][$group]['plugins'][$name]) && $plugins['groups'][$group]['plugins'][$name]['installed'] == true){
+			$p = &$plugins['groups'][$group]['plugins'][$name];
+			$uninstall_file = RealPath2($config['plug_dir'].$group.'/'.$name.'/'.'uninstall.php');
+			if(file_exists($uninstall_file)){
+				include_once ($uninstall_file);
+			}
+			$db->Delete('plugins', "`name`='$name' and `group`='$group'");
+			PluginsClearCache();
+		}
+	} else{
+		if(isset($plugins['plugins'][$name]) && $plugins['plugins'][$name]['installed'] == true){
+			$p = &$plugins['plugins'][$name];
+			$uninstall_file = RealPath2($config['plug_dir'].$name.'/'.'uninstall.php');
+			if(file_exists($uninstall_file)){
+				include_once ($uninstall_file);
+			}
+			$db->Delete('plugins', "`name`='".$name."'");
+			PluginsClearCache();
+		}
+	}
+}
+
+/**
+ * Удаляет группу плагинов из базы данных
+ * @param  $group
+ * @return void
+ */
+function UninstallGroup($group){
+	global $db;
+	$db->Delete('plugins', "`group`='$group'");
+	PluginsClearCache();
+}
+
+/**
+ * Устанавливает плагин или группу плагинов в базу данных
+ * @param  $plugin_name
+ * @param string $group
+ * @return void
+ */
+function InstallPlugin($plugin_name, $group = ''){
+	global $config, $db;
+	$name = $plugin_name;
+	$plugins = GetPlugins();
+	if($group != ''){
+		if(isset($plugins['groups'][$group]['plugins'][$name]) && $plugins['groups'][$group]['plugins'][$name]['installed'] == false){
+			$p = &$plugins['groups'][$group]['plugins'][$name];
+			if(!isset($p['config'])){
+				$p['config'] = '';
+			}
+			if(($plugins['groups'][$group]['type'] == PLUG_MANUAL_ONE || $p['type'] == PLUG_MANUAL_ONE)){
+				UninstallGroup($group);
+			}
+			$install_file = RealPath2($config['plug_dir'].$group.'/'.$name.'/'.'install.php');
+			if(file_exists($install_file)){
+				include_once ($install_file);
+			}
+			$vals = Values('', $name, SafeEnv($p['config'], 0, str), SafeEnv($p['type'], 1, int), $group);
+			$db->Insert('plugins', $vals);
+			PluginsClearCache();
+		}
+	} else{
+		if(isset($plugins['plugins'][$name]) && $plugins['plugins'][$name]['installed'] == false){
+			$p = &$plugins['plugins'][$name];
+			if(!isset($p['config'])){
+				$p['config'] = '';
+			}
+			$install_file = RealPath2($config['plug_dir'].$name.'/'.'install.php');
+			if(file_exists($install_file)){
+				include_once ($install_file);
+			}
+			$vals = Values('', SafeEnv($name, 250, str), SafeEnv($p['config'], 0, str), SafeEnv($p['type'], 1, int), SafeEnv($group, 250, str));
+			$db->Insert('plugins', $vals);
+			PluginsClearCache();
+		}
+	}
+}
+
+/**
+ * Подключает группу плагинов
+ * @param $group группа
+ * @param string $function подгруппа
+ * @param bool $return возвратить имена файлов плагинов вместо автоматического подкочения
+ * @return array
+ */
+function IncludePluginsGroup($group, $function = '', $return = false){
+	global $config, $db;
+	$plugins = GetPlugins();
+	$result = array(
+	);
+	if(isset($plugins['groups'][$group])){
+		$plugins = $plugins['groups'][$group]['plugins'];
+		foreach($plugins as $plugin){
+			if(($plugin['installed'] && $function == '') || ($plugin['installed'] && isset($plugin['function']) && $function == $plugin['function'])){
+				global $include_plugin_path; // эта переменная будет доступна из плагина
+				$include_plugin_path = RealPath2($config['plug_dir'].$group.'/'.$plugin['name'].'/');
+				if($return){
+					$result[] = $include_plugin_path;
+				} else{
+					include ($include_plugin_path.'index.php');
+				}
+			}
+		}
+	}
+	return $result;
+}
+
+/**
+ * Возвращает имена шаблонов блоков, которые имеет текущий шаблон сайта
+ * @return Array
+ */
+function GetBlockTemplates(){
+	global $config, $db;
+	$TemplateDir = $config['tpl_dir'].$config['general']['site_template'].'/block/';
+	return GetFiles($TemplateDir, false, true, '.html.htm.tpl', true);
+}
+
+/**
+ * Генерирует данные уровня доступа для Html::Select
+ * @param  $view
+ * @return array
+ */
+function GetUserTypesFormData($view){
+	global $site;
+	$visdata = array();
+	$site->DataAdd($visdata, 'all', 'Все', $view['4']);
+	$site->DataAdd($visdata, 'members', 'Только пользователи', $view['2']);
+	$site->DataAdd($visdata, 'guests', 'Только гости', $view['3']);
+	$site->DataAdd($visdata, 'admins', 'Только администраторы', $view['1']);
+	return $visdata;
+}
+
+/**
+ * Возвращает цифровой уровень из строки HTML форм
+ * @param  $level
+ * @return string
+ */
+function ViewLevelToInt($level){
+	switch($level){
+		case 'admins':
+			$vi = '1';
+			break;
+		case 'members':
+			$vi = '2';
+			break;
+		case 'guests':
+			$vi = '3';
+			break;
+		case 'all':
+			$vi = '4';
+			break;
+		default:
+			$vi = '4';
+	}
+	return $vi;
+}
+
+/**
+ * Переводит строку значения переключателя в число
+ * @param  $onoff
+ * @return int
+ */
+function EnToInt($onoff){
+	switch($onoff){
+		case 'on':
+			$r = 1;
+			break;
+		case 'off':
+			$r = 0;
+			break;
+		default:
+			$r = 1;
+	}
+	return $r;
+}
+
+/**
+ * Генерирует данные "Да", "Нет" для Html::Select
+ * @param bool $selected
+ * @param string $on
+ * @param string $off
+ * @return array
+ */
+function GetEnData($selected = true, $on = 'Да', $off = 'Нет'){
+	global $site;
+	$data = array();
+	$site->DataAdd($data, 'on', $on, $selected);
+	$site->DataAdd($data, 'off', $off, !$selected);
+	return $data;
+}
+
+/**
+ * Подсчитывает количество главных администраторов
+ * @return int
+ */
+function GetSystemAdminsCount(){
+	global $db;
+	$atypes = $db->Select('usertypes', '');
+	foreach($atypes as $type){
+		$types[$type['id']] = $type['system'];
+	}
+	unset($atypes);
+	$admins = $db->Select('users', "`type`='1'");
+	//Подсчитываем количество главных администраторов
+	$system = 0;
+	for($i = 0, $c = count($admins); $i < $c; $i++){
+		if($types[$admins[$i]['access']] == '1'){
+			$system++;
+		}
+	}
+	return $system;
+}
+
+/**
+ * Проверяет системная ли группа по id группы
+ * @param  $access
+ * @return bool
+ */
+function groupIsSystem($access){
+	global $db;
+	if($access == -1){
+		return false;
+	}
+	$db->Select('usertypes', "`id`='$access'");
+	if($db->NumRows() > 0){
+		$access = $db->FetchRow();
+		return $access['system'] == '1';
+	} else{
+		return false;
+	}
+}
+
+/**
+ * Возвращает данные формы(select) с выделенными значениями соответсвенно timestamp
+ * @param  $daydata
+ * @param  $mondata
+ * @param  $yeardata
+ * @param  $hourdata
+ * @param  $mindata
+ * @param  $timestamp
+ * @param bool $last_years
+ * @return void
+ */
+function GetDateFormData(&$daydata, &$mondata, &$yeardata, &$hourdata, &$mindata, $timestamp, $last_years = true){
+	global $site;
+	$data = getdate($timestamp);
+	for($i = 1; $i <= 31; $i++){
+		$site->DataAdd($daydata, $i, $i, ($data['mday'] == $i));
+	}
+	for($i = 1; $i <= 12; $i++){
+		$site->DataAdd($mondata, $i, $i, ($data['mon'] == $i));
+	}
+	if($last_years){
+		$min = 1970;
+	} else{
+		$min = date('Y');
+	}
+	$max = date('Y')+40;
+	for($i = $min; $i <= $max; $i++){
+		$site->DataAdd($yeardata, $i, $i, ($data['year'] == $i));
+	}
+	for($i = 0; $i <= 23; $i++){
+		if($i < 10){
+			$cap = '0'.$i;
+		} else{
+			$cap = $i;
+		}
+		$site->DataAdd($hourdata, $i, $cap, ($data['hours'] == $i));
+	}
+	$site->DataAdd($mindata, '0', '00', ($data['minutes'] == 0));
+	$site->DataAdd($mindata, '5', '05', ($data['minutes'] == 0));
+	for($i = 10; $i <= 55; $i = $i+5){
+		$site->DataAdd($mindata, $i, $i, ($data['minutes'] == $i));
+	}
+}
+
+/**
+ * Вывод адреса электронной почты в админке
+ * @param  $email
+ * @param string $nik
+ * @return string
+ * @deprecated
+ */
+function PrintEmail($email, $nik = ''){
+	global $config, $site;
+	$email = SafeDB($email, 50, str);
+	$nik = SafeDB($nik, 50, str);
+	static $incjs = false;
+	if($email == ''){
+		return '&nbsp;';
+	} else{
+		if(!$incjs){
+			$site->AddJS("
+			function MailTo(email,nik){
+				window.open('index.php?name=plugins&p=mail&email='+email+'&toname='+nik,'MaiL','resizable=yes,scrollbars=no,menubar=no,status=no,location=no,width=500,height=420,screenX=300,screenY=200');
+			}");
+			$incjs = true;
+		}
+		return "<a onclick=\"MailTo('$email','$nik');\">$email</a>";
+	}
+}
+
+/**
+ * Генерирует форму редактирования пользователя в админ-панели
+ * @param  $save_link
+ * @param string $a
+ * @param int $id
+ * @param bool $isadmin
+ * @return
+ */
+function AdminUserEditor($save_link, $a = 'adduser', $id = 0, $isadmin = false){
+	global $config, $db, $site, $user;
+	$active = array(
+		false, false, false
+	);
+	$db->Select('usertypes', '');
+	if($user->isSuperUser()){
+		$types = array(
+			array(
+				'member', 'Пользователь', false
+			)
+		);
+		while($type = $db->FetchRow()){
+			$types[$type['id']] = array(
+				$type['id'], $type['name'], false
+			);
+		}
+	}
+	if($a == 'edit'){
+		$db->Select('users', "`id`='$id'".($isadmin ? " and `type`='1'" : " and `type`='2'"));
+		if($db->NumRows() == 0){
+			AddTextBox('Ошибка', '<p><center>Пользователь не найден, либо у вас не достаточно прав для редактирования администраторов.</center></p>');
+			return;
+		}
+		$usr = $db->FetchRow();
+		$SystemUser = false;
+		$editStatus = false;
+
+		if($isadmin){
+			$SystemUser = groupIsSystem(SafeEnv($usr['access'], 11, int));
+			//пользователь - последний системный администратор
+			if($SystemUser && GetSystemAdminsCount() <= 1){
+				$editStatus = false;
+			} else{ //Если он не системный или системных больше 1
+				$editStatus = true;
+			}
+		} else{ // Если пользователь, то, если у нас есть права создавать админов
+			$editStatus = true;
+		}
+
+		$login = SafeDB($usr['login'], 30, str);
+		$mail = SafeDB($usr['email'], 50, str);
+		$hideemail = ($usr['hideemail'] == 1 ? true : false);
+		$snews = ($usr['servernews'] == 1 ? true : false);
+		$name = SafeDB($usr['name'], 50, str);
+		$tname = SafeDB($usr['truename'], 250, str);
+		$age = SafeDB($usr['age'], 11, str);
+		$city = SafeDB($usr['city'], 100, str);
+		$url = SafeDB($usr['url'], 250, str);
+		$icq = SafeDB($usr['icq'], 15, str);
+		$gmt = SafeDB($usr['timezone'], 255, str);
+		$about = SafeDB($usr['about'], 0, str);
+		$avatar = SafeDB($usr['avatar'], 250, str);
+		$apersonal = SafeDB($usr['a_personal'], 1, int);
+
+		if($usr['type'] == '1'){
+			$types[$usr['access']][2] = true;
+		} else{
+			$types[0][2] = true; //пользователь
+		}
+
+		if($usr['active'] == '1'){
+			$active[0] = true;
+		} elseif($usr['active'] == '0' && $usr['activate'] == ''){
+			$active[1] = true;
+		} elseif($usr['active'] == '0' && $usr['activate'] != ''){
+			$active[2] = true;
+		}
+
+		$caption = 'Сохранить';
+		$title = 'Редактирование пользователя';
+	} else{
+		$login = '';
+		$mail = '';
+		$snews = false;
+		$hideemail = false;
+		$name = '';
+		$tname = '';
+		$age = '';
+		$city = '';
+		$url = '';
+		$icq = '';
+		$gmt = '';
+		$about = '';
+		$avatar = '';
+		$apersonal = '0';
+		$active[0] = true;
+		$types[0][2] = true;
+		$caption = 'Добавить';
+		$title = 'Добавить пользователя';
+		$editStatus = true;
+	}
+	FormRow('Логин', $site->Edit('login', $login, false, 'style="width:400px;"'));
+	FormRow('Пароль', $site->Edit('pass', '', true, 'style="width:400px;"'));
+	FormRow('Повторите пароль<br /><small>(для проверки)</small>', $site->Edit('rpass', '', true, 'style="width:400px;"'));
+	FormRow('E-mail', $site->Edit('email', $mail, false, 'style="width:300px;"').' <label for="hideemail">Скрыть</label>&nbsp;'.$site->Check('hideemail', '1', $hideemail, 'id="hideemail"'));
+	FormRow('<label for="snews">Рассылка</label>', $site->Check('snews', '1', $snews, 'id="snews"'));
+	FormRow('Ник', $site->Edit('nikname', $name, false, 'style="width:400px;"'));
+	FormRow('Настоящее имя', $site->Edit('realname', $tname, false, 'style="width:400px;"'));
+	FormRow('Возраст', $site->Edit('age', $age, false, 'style="width:400px;"'));
+	FormRow('Город', $site->Edit('city', $city, false, 'style="width:400px;"'));
+	FormRow('Сайт', $site->Edit('homepage', $url, false, 'style="width:400px;"'));
+	FormRow('ICQ', $site->Edit('icq', $icq, false, 'style="width:400px;"'));
+	$gmt = GetGmtData($gmt);
+	FormRow('Часовой пояс', $site->Select('gmt', $gmt, false, 'style="width:400px;"'));
+	FormRow('О себе', $site->TextArea('about', $about, 'style="width:400px; height:200px;"'));
+	$avatars = GetGalleryAvatarsData($avatar, $apersonal);
+	if($apersonal == '1'){
+		$selected = GetPersonalAvatar($id);
+	} else{
+		$selected = GetGalleryAvatar($avatars[1]);
+	}
+	$site->AddJS('
+	function ShowAvatar(){
+		if(document.userform.avatar.value==\'\'){
+			document.userform.avatarview.src = \''.(
+	$config['user']['secure_avatar_upload'] == '1' ? 'index.php?name=plugins&p=avatars_render&user='.$id : $config['general']['personal_avatars_dir'].$avatar).'\';
+		}else{
+			document.userform.avatarview.src = \''.($config['user']['secure_avatar_upload'] == '1' ? 'index.php?name=plugins&p=avatars_render&aname=' : $config['general']['avatars_dir']).'\'+document.userform.avatar.value;
+		}
+	}');
+	FormRow('Аватар', '<center>'.$site->Select('avatar', $avatars[0], false, 'onchange="ShowAvatar();"').'</center>');
+	FormRow('', '<center><img id="avatarview" src="'.$selected.'" border="0" width="64" /></center>');
+	FormRow('Загрузить аватар', $site->FFile('upavatar'));
+	if($editStatus){
+		FormRow('Активация', $site->Radio('activate', 'auto', $active[0]).'Активировать'.$site->Radio('activate', 'manual', $active[1]).'Не активировать'.(!$isadmin ? $site->Radio('activate', 'mail',
+			$active[2]).'По E-mail' : ''));
+	}
+	if($user->SuperUser && $editStatus){
+		$usertypes = array(
+		);
+		foreach($types as $type){
+			$site->DataAdd($usertypes, $type[0], $type[1], $type[2]);
+		}
+		FormRow('Статус', $site->Select('status', $usertypes));
+	}
+	TAddSubTitle($title);
+	AddCenterBox($title);
+	AddForm('<form name="userform" action="'.
+	        $config['admin_file'].'?exe='.$save_link.'&id='.$id.'" method="post"  enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit($caption));
+}
+
+/**
+ * Сохраняет изменения данных пользователя в БД из функции AdminUserEditor
+ * @param  $back_link
+ * @param string $a
+ * @param int $id
+ * @param bool $isadmin
+ * @return void
+ */
+function AdminUserEditSave($back_link, $a = 'insert', $id = 0, $isadmin = false){
+	global $db, $config, $site, $user;
+
+	if($a == 'update'){
+		$edit = true;
+		$db->Select('users', "`id`='".$id."'");
+		$usr = $db->FetchRow();
+		if($isadmin){
+			$SystemUser = groupIsSystem($usr['access']);
+			//пользователь - последний системный администратор
+			if($SystemUser && GetSystemAdminsCount() <= 1){
+				$editStatus = false;
+			} else{ //Если он не системный или системных больше 1
+				$editStatus = true;
+			}
+		} else{ // Если пользователь, то, если у нас есть права создавать админов
+			$editStatus = true;
+		}
+	} else{
+		$edit = false;
+		$editStatus = true;
+	}
+
+	$errors = array(
+	);
+
+	//Обрабатываем некоторые приходящие данные
+	// Логин
+	if(isset($_POST['login']) && CheckLogin($_POST['login'], $errors, !$edit)){
+		$login = SafeEnv($_POST['login'], 15, str);
+	} else{
+		$login = '';
+	}
+	// Пароль
+	$pass = '';
+	if(!$edit || $_POST['pass'] != ''){
+		$passmsg = '';
+		if(isset($_POST['pass']) && CheckPass($_POST['pass'], $errors)){
+			$pass = SafeEnv($_POST['pass'], 30, str);
+			if(!isset($_POST['rpass']) || SafeEnv($_POST['rpass'], 30, str) != $pass){
+				$errors[] = 'Пароли не совпадают.';
+			}
+		} else{
+			$pass = '';
+		}
+		if(isset($_POST['pass']) && $_POST['pass'] == ''){
+			srand(time());
+			$pass = GenBPass(rand($config['user']['pass_min_length'], 15));
+			$passmsg = '<br />Так как вы не указали пароль, он был сгенерирован автоматически и выслан Вам на E-mail.';
+		}
+		$pass2 = md5($pass);
+	}
+	// e-mail
+	if(isset($_POST['email']) && $_POST['email'] != ''){
+		if(!CheckEmail($_POST['email'])){
+			$errors[] = 'Не правильный формат E-mail. Он должен быть вида: <b>domain@host.ru</b> .';
+		}
+		$email = SafeEnv($_POST['email'], 50, str, true);
+	} else{
+		$email = '';
+		$errors[] = 'Вы не ввели E-mail.';
+	}
+	// Скрыть e-mail
+	if(isset($_POST['hideemail'])){
+		$hideemail = '1';
+	} else{
+		$hideemail = '0';
+	}
+	// Никнейм
+	if(isset($_POST['nikname']) && CheckNikname($_POST['nikname'], $errors, !$edit)){
+		$nikname = SafeEnv($_POST['nikname'], 50, str, true);
+	} else{
+		$nikname = '';
+	}
+	// Полное имя
+	if(isset($_POST['realname'])){
+		$realname = SafeEnv($_POST['realname'], 250, str, true);
+	} else{
+		$realname = '';
+	}
+	// Возраст (в годах)
+	if(isset($_POST['age'])){
+		if($_POST['age'] == '' || is_numeric($_POST['age'])){
+			$age = SafeEnv($_POST['age'], 3, int);
+		} else{
+			$errors[] = 'Ваш возраст должен быть числом!';
+		}
+	} else{
+		$age = '';
+	}
+	// Домашняя страница
+	if(isset($_POST['homepage'])){
+		if($_POST['homepage'] != '' && substr($_POST['homepage'], 0, 7) == 'http://'){
+			$_POST['homepage'] = substr($_POST['homepage'], 7);
+		}
+		$homepage = SafeEnv($_POST['homepage'], 250, str, true);
+	} else{
+		$homepage = '';
+	}
+	// Номер ICQ
+	if(isset($_POST['icq'])){
+		if($_POST['icq'] == '' || is_numeric($_POST['icq'])){
+			$icq = SafeEnv($_POST['icq'], 15, str, true);
+		} else{
+			$errors[] = 'Номер ICQ должен содержать только числа!';
+		}
+	} else{
+		$icq = '';
+	}
+	// Город
+	if(isset($_POST['city'])){
+		$city = SafeEnv($_POST['city'], 100, str, true);
+	} else{
+		$city = '';
+	}
+	// Часовой пояс
+	if(isset($_POST['gmt'])){
+		$gmt = SafeEnv($_POST['gmt'], 255, str);
+	} else{
+		$gmt = 'Europe/Moscow';
+	}
+	// О себе
+	if(isset($_POST['about'])){
+		$about = SafeEnv($_POST['about'], $config['user']['about_max_length'], str, true);
+	} else{
+		$about = '';
+	}
+	// Подписка на новости
+	if(isset($_POST['snews'])){
+		$snews = '1';
+	} else{
+		$snews = '0';
+	}
+	//Обрабатываем аватар
+	$alloy_mime = array(
+		'image/gif' => '.gif', 'image/jpeg' => '.jpg', 'image/pjpeg' => '.jpg', 'image/png' => '.png', 'image/x-png' => '.png'
+	);
+	$updateAvatar = true;
+	if(isset($_POST['avatar'])){
+		if($config['user']['avatar_transfer'] == '1' && isset($_FILES['upavatar']) && file_exists($_FILES['upavatar']['tmp_name'])){
+			UserLoadAvatar($errors, $avatar, $a_personal, $usr['avatar'], $usr['a_personal'] == '1', $edit);
+		} elseif($_POST['avatar'] == ''){
+			$updateAvatar = false;
+		} elseif(file_exists(RealPath2($config['general']['avatars_dir'].$_POST['avatar']))){
+			if($edit){
+				if($usr['a_personal'] == '1'){
+					UnlinkUserAvatarFiles($usr['avatar']);
+				}
+			}
+			$a_personal = '0';
+			$avatar = $_POST['avatar'];
+		} else{
+			$avatar = '';
+			$a_personal = '0';
+		}
+	} else{
+		$avatar = '';
+		$a_personal = '0';
+	}
+
+	if($editStatus){
+		$activate = $_POST['activate'];
+		switch($activate){
+			case 'manual':
+				$active = '0';
+				$code = '';
+				$SendActivation = false;
+				break;
+			case 'auto':
+				$active = '1';
+				$code = '';
+				$SendActivation = false;
+				break;
+			case 'mail':
+				$active = '0';
+				$code = GenRandomString(8, 'qwertyuiopasdfghjklzxcvbnm');
+				$SendActivation = true;
+				break;
+		}
+	} else{
+		$active = '1';
+		$code = '';
+		$SendActivation = false;
+	}
+
+	if($edit && !$editStatus){
+		$status = $usr['type'];
+		$access = $usr['access'];
+	} elseif($_POST['status'] == 'member' || !$user->SuperUser){
+		$status = 2;
+		$access = -1;
+	} else{
+		$status = 1;
+		$access = SafeEnv($_POST['status'], 11, int);
+	}
+
+	$regdate = time();
+	$lastvisit = time();
+	$ip = getip();
+	$points = 0;
+	$visits = 0;
+	if($SendActivation){
+		UserSendActivationMail($nikname, $email, $login, $pass, $code, $regdate);
+	} elseif(!$edit){
+		UserSendEndRegMail($email, $nikname, $login, $pass, $regdate);
+	}
+
+	if(!$edit){
+		$vals = Values('', $login, $pass2, $nikname, $realname, $age, $email, $hideemail, $city, $icq, $homepage, $gmt, $avatar, $about, $snews, $regdate, $lastvisit, $ip, $points, $visits, $active, $code, $status, $access, $a_personal);
+		$db->Insert('users', $vals);
+	} else{
+		$set = "login='$login',email='$email',hideemail='$hideemail',name='$nikname',truename='$realname',age='$age',url='$homepage',icq='$icq',city='$city',timezone='$gmt'".($updateAvatar == true ? ",avatar='$avatar',a_personal='$a_personal'" : '').",about='$about',servernews='$snews'".($pass != '' ? ",pass='$pass2'" : '').",type='$status',access='$access',active='$active'";
+		$db->Update('users', $set, "`id`='".$id."'");
+		$user->UpdateMemberSession();
+		UpdateUserComments($id, $id, $nikname, $email, $hideemail, $homepage);
+	}
+
+	if(count($errors) > 0){
+		$text = 'Аккаунт сохранен, но имели место следующие ошибки:<br /><ul>';
+		foreach($errors as $error){
+			$text .= '<li>'.$error;
+		}
+		$text .= '</ul>';
+		AddTextBox('Внимание', $text);
+	} else{
+		// Очищаем кэш пользователей
+		$cache = LmFileCache::Instance();
+		$cache->Delete(system_cache, 'users');
+		GO($config['admin_file'].'?exe='.$back_link);
+	}
+}
+
+// Пожключение системных плагинов
 $plugins = IncludeSystemPluginsGroup('system', '', true);
 foreach($plugins as $plugin){
 	include($plugin.'index.php');

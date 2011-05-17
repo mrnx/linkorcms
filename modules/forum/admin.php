@@ -23,7 +23,7 @@ $admin_forum_url = $config['admin_file'].'?exe=forum';
 include_once('forum_init.php');
 include_once($forum_lib_dir.'forum_init_admin.php');
 
-include_once($config['apanel_dir'].'configuration/functions.php');
+include_once($config['inc_dir'].'configuration/functions.php');
 
 function AdminForum( $action ){
 	global $config;
