@@ -113,6 +113,8 @@ class Page extends PageTemplate{
 	}
 
 	public function ViewBlocks(){
+		global $site, $db, $user; // הכÿ סמגלוסעטלמסעט
+
 		$where = "`enabled`='1'";
 		$w2 = GetWhereByAccess('view');
 		if($w2 != ''){
