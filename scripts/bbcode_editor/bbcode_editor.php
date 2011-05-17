@@ -12,12 +12,12 @@ if(!defined('VALID_RUN')){
 }
 
 // Подключаем css редактора bb-кода
-$bb_cssfile = $site->Root.'/style/bbcode.css';
+$bb_cssfile = System::site()->Root.'/style/bbcode.css';
 if(file_exists($bb_cssfile)){
-	$site->AddCSSFile('bbcode.css');
+	System::site()->AddCSSFile('bbcode.css');
 }else{
-	$site->AddCSSFile('scripts/bbcode_editor/style.css', true);
+	System::site()->AddCSSFile('scripts/bbcode_editor/style.css', true);
 }
-$site->AddJSFile('scripts/bbcode_editor/bbcode_editor.js', true, false);
+System::site()->AddJSFile('scripts/bbcode_editor/bbcode_editor.js', true, false);
 
 ?>
