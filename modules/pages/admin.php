@@ -13,7 +13,6 @@ if(!$user->CheckAccess2('pages', 'pages')){
 }
 
 $text = '';
-include_once ($config['inc_dir'].'tree.class.php');
 include_once ($config['inc_dir'].'configuration/functions.php');
 
 if(isset($_GET['a'])){
@@ -22,21 +21,20 @@ if(isset($_GET['a'])){
 	AdminPages('main');
 }
 
-function AdminPages( $action )
-{
+function AdminPages( $action ){
 	TAddToolLink('Страницы', 'main', 'pages');
-	//TAddToolLink('Ajax структура', 'ajaxtree', 'pages&a=ajaxtree');
 	TAddToolLink('Добавить страницу', 'editor', 'pages&a=editor');
 	TAddToolLink('Добавить ссылку', 'link', 'pages&a=link');
 	TAddToolLink('Настройки', 'config', 'pages&a=config');
 	TAddToolBox($action);
 	switch($action){
 		case 'main':
-			AdminPagesMain();
-			break;
 		case 'ajaxtree':
 		case 'ajaxnode':
 			AdminPagesAjaxTree();
+			break;
+		case 'ajaxmove':
+			AdminPagesAjaxMove();
 			break;
 		case 'editor':
 			if(isset($_POST['action']) && $_POST['action'] != 'preview'){
@@ -79,8 +77,7 @@ function AdminPages( $action )
 	}
 }
 
-function AdminPagesClearCache()
-{
+function AdminPagesClearCache(){
 	$bcache = LmFileCache::Instance();
 	$bcache->Delete('block', 'menu1');
 	$bcache->Delete('block', 'menu2');
@@ -89,15 +86,13 @@ function AdminPagesClearCache()
 	$bcache->Delete('tree', 'pages'); // Нестандартное дерево, используем апи при построении но не используем его при редактировании
 }
 
-function AdminPagesNewOrder( $parent_id )
-{
+function AdminPagesNewOrder( $parent_id ){
 	global $db;
 	$db->Select('pages', "`parent`='$parent_id'");
 	return $db->NumRows();
 }
 
-function AdminPagesRender( $row, $level )
-{
+function AdminPagesRender( $row, $level ){
 	global $config, $text, $pages_tree;
 	$vi = ViewLevelToStr(SafeDB($row['view'], 1, int));
 	$pid = SafeDB($row['id'], 11, int);
@@ -158,11 +153,9 @@ function AdminPagesRender( $row, $level )
 	$text .= '<tr><td>'.$move_menu.'</td><td>'.$levs.'</td><td>'.$type.'</td><td><a href="'.$link.'" target="_blank">'.SafeDB($row['link'], 255, str).'</a></td><td>'.$counter.'</td><td>'.$vi.'</td><td>'.$menu.'</td><td>'.$st.'</td><td>'.$func.'</td></tr>';
 }
 
-function AdminPagesMain()
-{
+function AdminPagesMain(){
 	global $config, $db, $text;
 	global $pages_tree;
-
 	$pages = $db->Select('pages');
 	SortArray($pages, 'order');
 	$pages_tree = new Tree($pages);
@@ -184,7 +177,7 @@ function AdminPagesAjaxTree(){
 	}
 
 	include_once('scripts/jquery/jquery.php');
-	include_once('scripts/jquery_ui/ui.php');
+	include_once('scripts/jquery_ui/jquery-ui.php');
 	include_once('scripts/jquery_plugins/plugins.php');
 	include_once('scripts/jquery_nestedSortable/nestedSortable.php');
 	include_once('scripts/jquery_treeview/treeview.php');
@@ -248,7 +241,7 @@ function AdminPagesAjaxTree(){
 		$elements[] = array(
 			'id'=>$id,
 			'icon'=>$icon,
-			'title'=>'<b><a href="#" onclick="return Admin(\''.$editlink.'\', '.ADMIN_AJAX_LINKS.');">'.SafeDB($page['title'], 255, str).'</a></b>',
+			'title'=>'<b><a href="'.$editlink.'" onclick="return Admin.CheckButton(2, event);" onmousedown="return Admin.LoadPage(\''.$editlink.'\', event);">'.SafeDB($page['title'], 255, str).' ('.$id.' - '.$page['order'].')</a></b>',
 			'info'=>$info,
 			'func'=>$func,
 			'isnode'=>isset($pages_tree->Cats[$id]),
@@ -264,15 +257,14 @@ function AdminPagesAjaxTree(){
 	}
 
 	if($parent == 0){
-		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("div#tree_container").lTreeView({}, '.JsonEncode($tree).');</script>');
+		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("div#tree_container").lTreeView({moveHandler: \''.ADMIN_FILE.'?exe=pages&a=ajaxmove\'}, '.JsonEncode($tree).');</script>');
 	}else{
 		echo JsonEncode($tree);
 		exit;
 	}
 }
 
-function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$auto_br, &$info, &$view, &$enabled, &$seo_title, &$seo_keywords, &$seo_description, &$showinmenu )
-{
+function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$auto_br, &$info, &$view, &$enabled, &$seo_title, &$seo_keywords, &$seo_description, &$showinmenu ){
 	$link = htmlspecialchars($_POST['link']);
 	$parent_id = htmlspecialchars($_POST['parent_id']);
 	$title = htmlspecialchars($_POST['title']);
@@ -319,8 +311,7 @@ function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$a
 	//
 }
 
-function AdminPagesRenderPage( $title, $pagetext, $copy, $auto_br, $info )
-{
+function AdminPagesRenderPage( $title, $pagetext, $copy, $auto_br, $info ){
 	$text = '<table cellspacing="0" cellpadding="0" boreder="0" width="100%" style="font-size:10pt;">';
 	$text .= '<tr><td align="center"><h1>'.$title.'</h1></td></tr>';
 	if($auto_br){
@@ -332,10 +323,8 @@ function AdminPagesRenderPage( $title, $pagetext, $copy, $auto_br, $info )
 	AddTextBox('Предпросмотр страницы', $text);
 }
 
-function AdminPagesEditor()
-{
+function AdminPagesEditor(){
 	global $config, $db, $site;
-
 	$link = '';
 	$parent_id = -1;
 	$id = -1;
@@ -450,8 +439,7 @@ function AdminPagesEditor()
 	AddForm('<form action="'.$config['admin_file'].'?exe=pages&a=editor'.$url.'" method="post">', $site->Hidden('method', $met).$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Select('action', $acts).$site->Submit('Выполнить'));
 }
 
-function AdminPagesSave()
-{
+function AdminPagesSave(){
 	global $db, $config;
 	$link = SafeEnv($_POST['link'], 255, str);
 	$parent_id = SafeEnv($_POST['parent_id'], 11, int);
@@ -518,8 +506,7 @@ function AdminPagesSave()
 	GO($config['admin_file'].'?exe=pages');
 }
 
-function AdminPagesLinkEditor()
-{
+function AdminPagesLinkEditor(){
 	global $config, $db, $site;
 	$link = '';
 	$id = -1;
@@ -575,8 +562,7 @@ function AdminPagesLinkEditor()
 	AddForm('<form action="'.$config['admin_file'].'?exe=pages&a=savelink'.($id != -1 ? '&id='.$id : '').'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($submit));
 }
 
-function AdminPagesLinkSave()
-{
+function AdminPagesLinkSave(){
 	global $db, $config;
 	$parent_id = SafeEnv($_POST['parent_id'], 11, int);
 	$title = SafeEnv($_POST['title'], 255, str);
@@ -608,8 +594,7 @@ function AdminPagesLinkSave()
 	GO($config['admin_file'].'?exe=pages');
 }
 
-function AdminPagesChangeStatus()
-{
+function AdminPagesChangeStatus(){
 	global $config, $db;
 	$db->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	$r = $db->FetchRow();
@@ -628,8 +613,7 @@ function AdminPagesChangeStatus()
 	}
 }
 
-function AdminPagesChangeMenu()
-{
+function AdminPagesChangeMenu(){
 	global $config, $db;
 	$db->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	$r = $db->FetchRow();
@@ -648,8 +632,7 @@ function AdminPagesChangeMenu()
 	}
 }
 
-function AdminPagesDelete()
-{
+function AdminPagesDelete(){
 	global $config, $db;
 	if(!isset($_GET['id'])){
 		GO($config['admin_file'].'?exe=pages');
@@ -666,22 +649,19 @@ function AdminPagesDelete()
 	}
 }
 
-function AdminPagesResetCounter()
-{
+function AdminPagesResetCounter(){
 	global $config, $db;
 	$db->Update('pages', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	GO($config['admin_file'].'?exe=pages');
 }
 
-function AdminPagesBSort( $a, $b )
-{
+function AdminPagesBSort( $a, $b ){
 	if($a['order'] == $b['order'])
 		return 0;
 	return ($a['order'] < $b['order']) ? -1 : 1;
 }
 
-function AdminPagesMove()
-{
+function AdminPagesMove(){
 	global $config, $db;
 	$move = SafeEnv($_GET['to'], 4, str); // up, down
 	$id = SafeEnv($_GET['id'], 11, int);
@@ -723,6 +703,48 @@ function AdminPagesMove()
 	}
 	AdminPagesClearCache();
 	GO($config['admin_file'].'?exe=pages');
+}
+
+function AdminPagesAjaxMove(){
+
+	$itemId = SafeEnv($_POST['item_id'], 11, int);
+	$parentId = SafeEnv($_POST['target_id'], 11, int);
+	$Position = SafeEnv($_POST['item_new_position'], 11, int);
+
+	// Перемещаемый элемент
+	System::db()->Select('pages',"`id`='$itemId'");
+	if(System::db()->NumRows() == 0){
+		// Error
+		exit;
+	}
+	$item = System::db()->FetchRow();
+
+	// Изменяем его родителя, если нужно
+	if($item['parent'] != $parentId){
+		System::db()->Update('pages', "`parent`='$parentId'", "`id`='$itemId'");
+	}
+
+	// Обноеление индексов элементов
+	$indexes = array(); // соотвествие индексов и id элементов
+	$items = System::db()->Select('pages',"`parent`='$parentId'");
+	SortArray($items, 'order');
+	$i = 0;
+	foreach($items as $p){
+		if($i != $Position && $p['id'] != $itemId){
+			$indexes[$p['id']] = $i;
+		}
+		$i++;
+	}
+	$indexes[$itemId] = $Position;
+
+	// Обновляем индексы
+	foreach($indexes as $id=>$order){
+		System::db()->Update('pages', "`order`='$order'", "`id`='$id'");
+	}
+
+	echo "Success! ".$itemId.' - '.$parentId.' - '.$Position;
+	exit;
+
 }
 
 ?>

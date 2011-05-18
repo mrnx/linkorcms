@@ -45,7 +45,7 @@
 		};
 
 		var default_options = {
-			topnest: false // Можно ли сортировать элементы верхнего уровня
+			moveHandler: '' // Адрес страницы обработчика перемещения элементов
 		};
 
 		if(arguments.length <= 2){
@@ -54,18 +54,27 @@
 		nestedSortableOtions = $.extend({}, default_nestedSortableOptions, nestedSortableOtions);
 		options = $.extend({}, default_options, options);
 
-		// Показать кнопку информации
+		/**
+		 * Показать кнопку информации
+		 * @param item_id
+		 */
 		function ShowInfoButton( item_id ){
 			$("#item_info_"+item_id).show().css('display', 'inline-block');
 		}
 
-		// Скрыть кнопку информации
+		/**
+		 * Скрыть кнопку информации
+		 * @param item_id
+		 */
 		function HideInfoButton( item_id ){
 			$("#item_info_"+item_id).hide();
 		}
 
-		// Открытие - закрытие элемента содержащего дочерние элементы
-		// end_toggle - событие по окончанию открытия элемента
+		/**
+		 * Открытие - закрытие элемента содержащего дочерние элементы
+		 * @param item_id Объект элемента списка или его атрибут id
+		 * @param end_toggle Обработчик события при показе элемента (окончанию загрузки)
+		 */
 		function ToggleNode( item_id, end_toggle ){
 			if(typeof item_id != 'object'){
 				var $element = $('li#item_'+item_id);
@@ -108,13 +117,16 @@
 			}
 		}
 
+		/**
+		 * Обновление статусов кнопок
+		 */
 		function UpdateBullets(){
 			$tree.find('li').each(function(){
 				var $obj = $(this);
 				var opt = $obj.data('options');
 				var $bullet = $obj.find('.node_button:first');
 				var $child = $obj.find('ol:first');
-				if(($child.length > 0 && $child.children('li').length > 0) || opt.isnode){ // есть дочерние элементы
+				if(($child.length > 0 && $child.find('li').length > 0) || opt.isnode){ // есть дочерние элементы
 					//opt.isnode = true;
 					if($child.is(':visible')){ // Виден
 						$bullet.removeClass('node_close');
@@ -147,7 +159,10 @@
 			});
 		}
 
-		// Функция обработчик начала загрузки дочерних элементов
+		/**
+		 * Обработчик события начала загрузки дочерних элементов
+		 * @param $element
+		 */
 		function LoadingStart( $element ){
 			return $("<ol>", {
 				"class": 'treeview',
@@ -155,21 +170,43 @@
 			}).appendTo($element);
 		}
 
-		// Функция обработчик окончания загрузки дочерних элементов
+		/**
+		 * Обработчик события окончания загрузки дочерних элементов
+		 * @param $element
+		 * @param $list
+		 * @param $placeholder
+		 */
 		function LoadingEnd( $element, $list, $placeholder ){
 			$placeholder.remove();
 			$list.show();
 		}
 
-		// Произошло перемещение элемента
+		/**
+		 * Обработчик события перемещения элемента
+		 * @param event
+		 * @param ui
+		 */
 		function Sort(event, ui){
 			var $item = $(ui.item); // Перемещаемый элемент
 			var $target = $(ui.item).parents('li:first'); // Куда переместили
 
-			var opt = $target.data('options');
+			var item_opt = $item.data('options');
+			var target_opt = $target.data('options');
 
-			if(opt.isnode && !opt.opened){
-				// Сюда пишем код вырезания вставки и загрузки
+			// Посылаем POST запрос перемещения элементов
+			if(options.moveHandler != ''){
+				var index = $(ui.item).parent().find('li').index(ui.item);
+				$.ajax({
+					type: "POST",
+					url: options.moveHandler,
+					data: 'item_id='+item_opt.id+'&target_id='+target_opt.id+'&item_new_position='+index,
+					cache: false,
+					success: function(resp){ console.log(resp); }
+				});
+				// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
+			}
+
+			if(target_opt.isnode && !target_opt.opened){ // Вырезание и загрузка
 				var $li = $item.detach();
 				$target.children('ol').remove();
 				ToggleNode($target, function(){
@@ -181,6 +218,10 @@
 			}
 		}
 
+		/**
+		 * Создание нового элемента списка с использованием пользовательских параметров
+		 * @param opt
+		 */
 		function GenerateElement(opt){
 			opt = $.extend({}, default_item_options, opt);
 
@@ -262,7 +303,12 @@
 			return $element; // <li>
 		}
 
-		// Загрузка и добавление удаленного списка узлов
+		/**
+		 * Загрузка и добавление удаленного списка узлов
+		 * @param $parentElement Родительский элемент
+		 * @param loadUrl Адрес, откуда загружать элементы (данные в формате json)
+		 * @param endLoad Обработчик окончания загрузки
+		 */
 		function LoadList( $parentElement, loadUrl, endLoad ){
 			var $placeholder = LoadingStart($parentElement);
 			$.ajax({
@@ -277,6 +323,13 @@
 			});
 		}
 
+		/**
+		 * Генерация списка (OL)
+		 * @param $parentElement Родительский элемент (контейнер)
+		 * @param elements Данные для создания списка
+		 * @param _toplevel Список верхнего уровня
+		 * @param hidden Скрыть список после создания (например если элемент свернут)
+		 */
 		function GenerateList( $parentElement, elements, _toplevel, hidden ){
 			if(arguments.length > 2 && _toplevel == true){
 				var classname = "treeview toplevel";
@@ -307,7 +360,7 @@
 		}
 
 		var $tree = GenerateList(this, tree, true).nestedSortable(nestedSortableOtions);
-		// Можем ссылаться на список с помощью $tree
+		// Можем ссылаться на список с помощью $tree в коде плагина
 		return this;
 	};
 

@@ -5,6 +5,11 @@
 
 	var document = window.document;
 
+	/**
+	 * @class AdminFn
+	 * @param AdminFile Относительное имя файла админ-панели
+	 * @param Ajax Использовать ajax при загрузке страниц
+	 */
 	window.AdminFn = function( AdminFile, Ajax ){
 		this.AdminFile = AdminFile;
 		this.Ajax = Ajax;
@@ -12,12 +17,21 @@
 
 	window.AdminFn.prototype = {
 
+		/**
+		 * Проверка нажатой кнопки мыши
+		 * @param BtnNo Номер кнопки: 1 - левая, 2 - средняя, 3 - правая
+		 * @param event Событие (необязательно)
+		 */
 		CheckButton: function( BtnNo, event ){
-			e = event || window.event || window.Event;
+			var e = event || window.event || window.Event;
 			return (e.which == BtnNo);
 		},
 
-		// Загрузка страницы Админ-панели
+		/**
+		 * Загрузка страницы Админ-панели
+		 * @param Url
+		 * @param event
+		 */
 		LoadPage: function( Url, event ){
 			if(this.CheckButton(1, event)){ // Только левая кнопка мыши
 				document.location = Url;
@@ -27,7 +41,12 @@
 			}
 		},
 
-		// Переход по внешней ссылке
+		/**
+		 * Переход по внешней ссылке
+		 * @param Url
+		 * @param Blank
+		 * @param event
+		 */
 		Leave: function( Url, Blank, event ){
 			if(Blank){
 				window.open(Url);

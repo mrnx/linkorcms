@@ -204,7 +204,7 @@ function IndexArticlesShow( $cat )
 	}
 	$arts = $db->Select('articles', $where);
 	SortArray($arts, 'public', true);
-	
+
 
 	// Постраничная навигация
 	$num = $config['articles']['articles_on_page'];
@@ -250,7 +250,7 @@ function IndexArticlesRead()
 	if($config['articles']['show_catnav'] == '1'){
 		$tree->ShowPath($art['cat_id'], true, SafeDB($art['title'], 255, str));
 	}
-	
+
 	$site->AddTemplatedBox('', 'module/article_read.html');
 	$site->SetTitle(SafeDB($art['title'], 255, str));
 	$site->SeoTitle = SafeDB($art['seo_title'], 255, str);
@@ -269,7 +269,7 @@ function IndexArticlesRead()
 	$posts->EditPageUrl = "index.php?name=articles&op=editpost&art=$id";
 	$posts->DeletePageUrl = "index.php?name=articles&op=deletepost&art=$id";
 	$posts->PostFormAction = "index.php?name=articles&op=addpost&art=$id&cat=$cat&page=$page";
-	
+
 	$posts->NavigationUrl = Ufu("index.php?name=articles&op=read&art=$id&cat=$cat", 'articles/{cat}/{art}/page{page}/', true);
 	$posts->RenderPosts($id, 'article_comments', 'comments_navigation', false, $page);
 	$posts->RenderForm(false, 'article_comments_form');

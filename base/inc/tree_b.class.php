@@ -19,8 +19,7 @@ class IndexTree extends Tree
 	public $NumItemsCaption = '';
 	public $TopCatName = 'Начало архива';
 
-	public function Catalog( $cat_id = 0, $CallBackNumItems = '' )
-	{
+	public function Catalog( $cat_id = 0, $CallBackNumItems = '' ){
 		$this->NumItems = $CallBackNumItems;
 		if($cat_id != 0){
 			$this->ShowPath($cat_id);
