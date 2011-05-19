@@ -12,6 +12,22 @@ body {
 	height: 100%;
 	padding: 5px;
 }
+#ajaxsplashscreen{
+	width: 180px;
+	height: 30px;
+	padding-top: 10px;
+	text-align: center;
+	border: 1px #A5C0D4 solid;
+	background-color: #fff;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -100px;
+	margin-top: -30px;
+	display: none;
+}
 #wrapper {
 	text-align: left;
 	max-width: 1200px;

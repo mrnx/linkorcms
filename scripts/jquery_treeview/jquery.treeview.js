@@ -197,12 +197,14 @@
 			if(options.moveHandler != ''){
 				var index = $(ui.item).parent().children().index(ui.item);
 				//console.log(index);
+				Admin.ShowSplashScreen();
 				$.ajax({
 					type: "POST",
 					url: options.moveHandler,
 					data: 'item_id='+item_opt.id+'&target_id='+target_opt.id+'&item_new_position='+index,
 					cache: false
 					//,success: function(resp){ console.log(resp); }
+					,success: Admin.HideSplashScreen
 				});
 				// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
 			}

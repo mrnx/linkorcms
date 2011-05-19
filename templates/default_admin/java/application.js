@@ -54,10 +54,26 @@
 				location = Url;
 			}
 			return false;
+		},
+
+		/**
+		 * Показать Splash Screen при Ajax запросе
+		 */
+		ShowSplashScreen: function(){
+			$('div#wrapper').fadeTo(500, 0.5);
+			$('div#ajaxsplashscreen').fadeIn('fast');
+		},
+
+		/**
+		 * Скрыть Splash Screen
+		 */
+		HideSplashScreen: function(){
+			$('div#wrapper').fadeTo(0, 1);
+			$('div#ajaxsplashscreen').fadeOut('fast');
 		}
 	};
 
-	window.Admin = new AdminFn('admin.php');
+	window.Admin = new AdminFn('admin.php', false); // FIXME: admin.php, ajax ?
 
 })(window, jQuery);
 
@@ -87,7 +103,7 @@ function SpeedStatusButtonClick( EnabledTitle, DisabledTitle, EnabledImage, Disa
 	$(img).attr("src", 'images/ajax-loader.gif');
 	$(img).attr("title", 'Обновление статуса');
 
-	$(".ajax_indicator").ajaxStart(GlobalAjaxStart).ajaxStop(GlobalAjaxStop);
+	//$(".ajax_indicator").ajaxStart().ajaxStop(Admin.HideSplashScreen);
 	$.ajax({
 		url: AjaxQueryUrl,
 		dataType: "text",
