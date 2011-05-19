@@ -195,13 +195,14 @@
 
 			// Посылаем POST запрос перемещения элементов
 			if(options.moveHandler != ''){
-				var index = $(ui.item).parent().find('li').index(ui.item);
+				var index = $(ui.item).parent().children().index(ui.item);
+				//console.log(index);
 				$.ajax({
 					type: "POST",
 					url: options.moveHandler,
 					data: 'item_id='+item_opt.id+'&target_id='+target_opt.id+'&item_new_position='+index,
-					cache: false,
-					success: function(resp){ console.log(resp); }
+					cache: false
+					//,success: function(resp){ console.log(resp); }
 				});
 				// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
 			}

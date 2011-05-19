@@ -4,13 +4,6 @@
 # © 2011 Александр Галицкий (linkorcms@yandex.ru)
 # Назначение: Шаблонизатор для админ-панели
 
-if(!defined('VALID_RUN')){
-	header("HTTP/1.1 404 Not Found");
-	exit;
-}
-
-include_once System::$config['inc_dir'].'page_template.class.php';
-
 class AdminPage extends PageTemplate{
 
 	public $SideBarMenuLinks = array();
