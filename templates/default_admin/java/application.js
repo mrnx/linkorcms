@@ -69,7 +69,57 @@
 		 */
 		HideSplashScreen: function(){
 			$('div#wrapper').fadeTo(0, 1);
-			$('div#ajaxsplashscreen').fadeOut('fast');
+			$('div#ajaxsplashscreen').hide();
+		},
+
+		/**
+		 * Функции быстрых кнопок
+		 */
+		Buttons: {
+
+			/**
+			 * Кнопка с подтверждением действия
+			 * @param Confirm
+			 * @param Object
+			 */
+			Confirm: function( Confirm, Object ){
+				return confirm(Confirm);
+			},
+
+			/**
+			 * Кнопка смены какого-либо статуса объекта
+			 * @param EnabledTitle
+			 * @param DisabledTitle
+			 * @param EnabledImage
+			 * @param DisabledImage
+			 * @param AjaxQueryUrl
+			 * @param Object
+			 */
+			Status: function( EnabledTitle, DisabledTitle, EnabledImage, DisabledImage, AjaxQueryUrl, Object ){
+				var img = $(Object).children("img:first").get(0);
+				var src, title;
+				if($(img).attr("src") == EnabledImage){
+					src = DisabledImage;
+					title = DisabledTitle;
+				}else{
+					src = EnabledImage;
+					title = EnabledTitle;
+				}
+				$(img).attr("src", 'images/ajax-loader.gif');
+				$(img).attr("title", 'Обновление статуса');
+
+				//$(".ajax_indicator").ajaxStart().ajaxStop(Admin.HideSplashScreen);
+				$.ajax({
+					url: AjaxQueryUrl,
+					dataType: "text",
+					success: function(){
+						$(img).attr("src", src);
+						$(img).attr("title", title);
+					},
+					cache: false
+				});
+				return false;
+			}
 		}
 	};
 
@@ -83,35 +133,5 @@ function MailToMenu(){
 		'Mail',
 		'resizable=yes,scrollbars=yes,menubar=no,status=no,location=no,width=700,height=580,screenX=300,screenY=50'
 	);
-	return false;
-}
-
-function SpeedConfirmButtonClick( Confirm, Object ){
-	return confirm(Confirm);
-}
-
-function SpeedStatusButtonClick( EnabledTitle, DisabledTitle, EnabledImage, DisabledImage, AjaxQueryUrl, Object ){
-	var img = $(Object).children("img:first").get(0);
-	var src, title;
-	if($(img).attr("src") == EnabledImage){
-		src = DisabledImage;
-		title = DisabledTitle;
-	}else{
-		src = EnabledImage;
-		title = EnabledTitle;
-	}
-	$(img).attr("src", 'images/ajax-loader.gif');
-	$(img).attr("title", 'Обновление статуса');
-
-	//$(".ajax_indicator").ajaxStart().ajaxStop(Admin.HideSplashScreen);
-	$.ajax({
-		url: AjaxQueryUrl,
-		dataType: "text",
-		success: function(){
-			$(img).attr("src", src);
-			$(img).attr("title", title);
-		},
-		cache: false
-	});
 	return false;
 }

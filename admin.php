@@ -54,10 +54,10 @@ if(!isset($_GET['exe'])){
 		GO(Ufu('index.php')); // exit
 	}
 }
-System::db()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'");
+System::database()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'");
 
 // Установлен такой модуль?
-if(System::db()->NumRows() == 0){
+if(System::database()->NumRows() == 0){
 	System::admin()->AddAdminMenu();
 	System::admin()->AddTextBox('Админ панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$ModuleName.'" не найден!</div>');
 	System::admin()->TEcho();

@@ -81,7 +81,7 @@ abstract class System{
 	 * Объект для работы с базой данных
 	 * @return LcDatabaseFilesDB
 	 */
-	static public function db(){
+	static public function database(){
 		return $GLOBALS['db'];
 	}
 

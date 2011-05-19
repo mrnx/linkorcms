@@ -202,7 +202,7 @@ function AdminPagesAjaxTree(){
 	include_once('scripts/jquery_nestedSortable/nestedSortable.php');
 	include_once('scripts/jquery_treeview/treeview.php');
 
-	$pages = System::db()->Select('pages');
+	$pages = System::database()->Select('pages');
 	SortArray($pages, 'order');
 	$pages_tree = new Tree($pages);
 
@@ -707,20 +707,12 @@ function AdminPagesChangeMenu(){
  * @return void
  */
 function AdminPagesDelete(){
-	global $config, $db;
 	if(!isset($_GET['id'])){
 		GO($config['admin_file'].'?exe=pages');
 	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$db->Delete('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		AdminPagesClearCache();
-		GO($config['admin_file'].'?exe=pages');
-	}else{
-		$r = $db->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		// FIXME Одинаково удаляет ссылки на модули, страницы и просто ссылки...
-		$text = 'Вы действительно хотите удалить страницу <a href="'.Ufu('index.php?name=pages&file='.SafeDB($r[0]['link'], 255, str), 'pages/{file}.html').'" target="_blank">"'.SafeDB($r[0]['title'], 255, str).'"</a><br />'.'<a href="'.$config['admin_file'].'?exe=pages&a=del&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
-	}
+	System::database()->Delete('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	AdminPagesClearCache();
+	GO($config['admin_file'].'?exe=pages');
 }
 
 /**
@@ -798,21 +790,21 @@ function AdminPagesAjaxMove(){
 	$position = SafeEnv($_POST['item_new_position'], 11, int);
 
 	// Перемещаемый элемент
-	System::db()->Select('pages',"`id`='$itemId'");
-	if(System::db()->NumRows() == 0){
+	System::database()->Select('pages',"`id`='$itemId'");
+	if(System::database()->NumRows() == 0){
 		// Error
 		exit;
 	}
-	$item = System::db()->FetchRow();
+	$item = System::database()->FetchRow();
 
 	// Изменяем его родителя, если нужно
 	if($item['parent'] != $parentId){
-		System::db()->Update('pages', "`parent`='$parentId'", "`id`='$itemId'");
+		System::database()->Update('pages', "`parent`='$parentId'", "`id`='$itemId'");
 	}
 
 	// Обноеление индексов элементов
 	$indexes = array(); // соотвествие индексов и id элементов
-	$items = System::db()->Select('pages',"`parent`='$parentId'");
+	$items = System::database()->Select('pages',"`parent`='$parentId'");
 	SortArray($items, 'order');
 	$i = 0;
 	foreach($items as $p){
@@ -829,7 +821,7 @@ function AdminPagesAjaxMove(){
 
 	// Обновляем индексы
 	foreach($indexes as $id=>$order){
-		System::db()->Update('pages', "`order`='$order'", "`id`='$id'");
+		System::database()->Update('pages', "`order`='$order'", "`id`='$id'");
 	}
 
 	exit;

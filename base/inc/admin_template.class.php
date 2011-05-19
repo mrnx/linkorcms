@@ -178,7 +178,7 @@ class AdminPage extends PageTemplate{
 	 * @return string
 	 */
 	public function SpeedConfirm( $Title, $Url, $ImgSrc, $Confirm = '”верены?' ){
-		$OnClick = "SpeedConfirmButtonClick('$Confirm', this)";
+		$OnClick = "return Admin.Buttons.Confirm('$Confirm', this)";
 		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
 	}
 
@@ -291,7 +291,7 @@ class AdminPage extends PageTemplate{
 	 */
 	function AddAdminMenu(){
 		if(IsAjax()) return;
-		$menu = System::db()->Select('admin_menu', "`enabled`='1'");
+		$menu = System::database()->Select('admin_menu', "`enabled`='1'");
 		SortArray($menu, 'order');
 		$items = array(); // Ёлементы меню по родительским индексам
 		foreach($menu as &$item){

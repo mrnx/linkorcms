@@ -388,13 +388,13 @@ class PageTemplate extends Starkyt{
 		if(!defined('SETUP_SCRIPT') && System::$config['general']['show_script_time']){
 			$end_time = GetMicroTime();
 			$end_time = $end_time - SCRIPT_START_TIME;
-			$php_time = $end_time - System::db()->QueryTotalTime;
+			$php_time = $end_time - System::database()->QueryTotalTime;
 			$persent = 100 / $end_time;
 			$memory = memory_get_peak_usage(true);
 			$MB = $memory / 1024 / 1024;
 			$info = 'Страница сгенерирована за '.sprintf("%01.4f", $end_time).' сек. Шаблонизатор: '.sprintf("%01.4f", $end - $start).' сек.<br>'
 					.'Память: '.sprintf("%01.2f", $MB).'М./'.get_cfg_var('memory_limit').'. '
-			        .'БД: '.System::db()->NumQueries.' запросов за '.sprintf("%01.4f", System::db()->QueryTotalTime).' сек. ( PHP: '.round($persent * $php_time).'% БД: '.round($persent * System::db()->QueryTotalTime).'% )';
+			        .'БД: '.System::database()->NumQueries.' запросов за '.sprintf("%01.4f", System::database()->QueryTotalTime).' сек. ( PHP: '.round($persent * $php_time).'% БД: '.round($persent * System::database()->QueryTotalTime).'% )';
 		}else{
 			$info = '';
 		}

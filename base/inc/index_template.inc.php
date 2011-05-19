@@ -120,7 +120,7 @@ class Page extends PageTemplate{
 		if($w2 != ''){
 			$where .= ' and ('.$w2.')';
 		}
-		$blocks = System::db()->Select('blocks', $where);
+		$blocks = System::database()->Select('blocks', $where);
 		SortArray($blocks, 'place');
 		foreach($blocks as $block){
 			$block_config = $block['config'];
