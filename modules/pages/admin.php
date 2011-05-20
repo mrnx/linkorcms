@@ -250,7 +250,8 @@ function AdminPagesAjaxTree(){
 		$func .= System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=pages&a=changestatus&id='.$id.'&ajax', $page['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-		$func .= System::admin()->SpeedConfirm('Удалить', System::$config['admin_file'].'?exe=pages&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
+		//$func .= System::admin()->SpeedConfirm('Удалить', System::$config['admin_file'].'?exe=pages&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
+		$func .= System::admin()->
 
 		$view = ViewLevelToStr(SafeDB($page['view'], 1, int));
 		$info = "<b>Тип</b>: $type<br />
@@ -784,6 +785,8 @@ function AdminPagesMove(){
  * @return void
  */
 function AdminPagesAjaxMove(){
+
+	//sleep(3);
 
 	$itemId = SafeEnv($_POST['item_id'], 11, int);
 	$parentId = SafeEnv($_POST['target_id'], 11, int);

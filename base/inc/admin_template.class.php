@@ -126,7 +126,8 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет в блок обычный текст
-	 * @param <type> $text
+	 * @param string $text
+	 * @return void
 	 */
 	public function AddText( $text ){
 		$this->BlockContents->NewSubBlock(true, array(), array(), '', $text);
@@ -208,6 +209,15 @@ class AdminPage extends PageTemplate{
 	 */
 	public function SpeedFunction( $Title, $ImgSrc, $OnClickJavaScript ){
 		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClickJavaScript.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+	}
+
+	public function SpeedAjax($Title, $Icon, $AjaxUrl, $ConfirmMessage = '', $OnStart = '', $OnSuccess = '', $OnEnd = '', $Method = 'post', $Params = ''){
+		$AjaxUrl = addslashes($AjaxUrl);
+		$Method = addslashes($Method);
+		$Params = addslashes($Params);
+		$ConfirmMessage = addslashes($ConfirmMessage);
+		$OnClick = "return Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, function(link){ $OnEnd }, '$Method', '$Params', '$ConfirmMessage',  this)";
+		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
 	}
 
 	/**

@@ -119,6 +119,21 @@
 					cache: false
 				});
 				return false;
+			},
+
+			Ajax: function( AjaxUrl, Start, Success, End, Method, Params, Confirm, link ){
+				if(Confirm != '' && confirm(Confirm)){
+					Start(link);
+					$.ajax({
+						type: Method,
+						url: AjaxUrl,
+						data: Params,
+						success: Success,
+						cache: false
+					});
+					End(link);
+				}
+
 			}
 		}
 	};
