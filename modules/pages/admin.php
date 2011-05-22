@@ -251,7 +251,14 @@ function AdminPagesAjaxTree(){
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
 		//$func .= System::admin()->SpeedConfirm('Удалить', System::$config['admin_file'].'?exe=pages&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
-		$func .= System::admin()->
+		$func .= System::admin()->SpeedAjax(
+			'Удалить',
+			'images/admin/delete.png',
+			ADMIN_FILE.'?exe=pages&a=ajaxdelete&id='.$id,
+			'Уверены что хотите удалить? Все дочерние страницы и ссылки так-же будут удалены.',
+			'Admin.ShowSplashScreen();',
+			'Admin.HideSplashScreen(); $(\'#item_'.$id.'\').fadeOut(\'slow\', function(){ $(\'#item_'.$id.'\').remove(); }); '
+		);
 
 		$view = ViewLevelToStr(SafeDB($page['view'], 1, int));
 		$info = "<b>Тип</b>: $type<br />

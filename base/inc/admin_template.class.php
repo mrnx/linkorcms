@@ -211,13 +211,13 @@ class AdminPage extends PageTemplate{
 		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClickJavaScript.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
 	}
 
-	public function SpeedAjax($Title, $Icon, $AjaxUrl, $ConfirmMessage = '', $OnStart = '', $OnSuccess = '', $OnEnd = '', $Method = 'post', $Params = ''){
+	public function SpeedAjax($Title, $Icon, $AjaxUrl, $ConfirmMessage = '', $OnStart = '', $OnSuccess = '', $Method = 'post', $Params = ''){
 		$AjaxUrl = addslashes($AjaxUrl);
 		$Method = addslashes($Method);
 		$Params = addslashes($Params);
 		$ConfirmMessage = addslashes($ConfirmMessage);
-		$OnClick = "return Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, function(link){ $OnEnd }, '$Method', '$Params', '$ConfirmMessage',  this)";
-		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMessage',  this); return false;";
+		return '<a title="'.$Title.'" href="#" class="button" onclick="return false;" onmousedown="'.$OnClick.'"><img src="'.$Icon.'" alt="'.$Title.'" /></a>';
 	}
 
 	/**

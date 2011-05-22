@@ -19,8 +19,8 @@ body {
 	text-align: center;
 	border: 1px #A5C0D4 solid;
 	background-color: #fff;
-	border-radius: 3px;
-	-moz-border-radius: 3px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
 	position: absolute;
 	left: 50%;
 	top: 25%;

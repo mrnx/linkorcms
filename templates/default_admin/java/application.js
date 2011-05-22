@@ -121,7 +121,7 @@
 				return false;
 			},
 
-			Ajax: function( AjaxUrl, Start, Success, End, Method, Params, Confirm, link ){
+			Ajax: function( AjaxUrl, Start, Success, Method, Params, Confirm, link ){
 				if(Confirm != '' && confirm(Confirm)){
 					Start(link);
 					$.ajax({
@@ -131,7 +131,6 @@
 						success: Success,
 						cache: false
 					});
-					End(link);
 				}
 
 			}
