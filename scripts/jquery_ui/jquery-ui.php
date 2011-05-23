@@ -5,7 +5,9 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-System::site()->JQueryPlugin('scripts/jquery_ui/jquery-ui-1.8.11.custom.min.js');
+// Подключение JQuery
+System::site()->JQuery('scripts/jquery/jquery.min.js');
+System::site()->JQueryPlugin('scripts/jquery_ui/jquery-ui.min.js');
 System::site()->AddCSSFile('scripts/jquery_ui/themes/aristo/jquery-ui-1.8.7.custom.css', true);
 
 ?>

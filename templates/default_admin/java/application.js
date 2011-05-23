@@ -13,9 +13,15 @@
 	window.AdminFn = function( AdminFile, Ajax ){
 		this.AdminFile = AdminFile;
 		this.Ajax = Ajax;
+		this.components = [];
 	}
 
 	window.AdminFn.prototype = {
+
+		/**
+		 * Массив для регистрации компонентов на странице
+		 */
+		components: [],
 
 		/**
 		 * Проверка нажатой кнопки мыши
