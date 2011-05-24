@@ -13,80 +13,27 @@
  *
  */
 
-(function($){
+(function( $, undefined ){
 
-	lTreeView = function(options, tree, nestedSortableOtions, parentComponent){
-		var ThisObj = this;
-		/**
-		 * Ссылка на компонент в DOM
-		 */
-		this.tree = null;
+	$.widget( "ui.lTreeView", {
+		options: {
+			move: '',   // Адрес страницы обработчика перемещения элементов
+			nestedSortableOptions: {
+				forcePlaceholderSize: true,
+				handle: '.item_icon img',
+				items: 'li',
+				opacity: .6,
+				placeholder: 'placeholder',
+				tolerance: 'intersect',
+				toleranceElement: '> div',
+				tabSize: 25,
+				disableNesting: 'no-nest',
+				errorClass: 'nest_error'
+			},
+			tree: {}
+		},
 
-		/**
-		 * Настройки компонента по умолчанию
-		 */
-		var default_options = {
-			moveHandler: '' // Адрес страницы обработчика перемещения элементов
-		};
-		this.options = $.extend({}, default_options, options);
-
-		/**
-		 * Настройки по умолчанию для плагина NestedSortable
-		 */
-		var default_nestedSortableOptions = {
-			forcePlaceholderSize: true,
-			handle: '.item_icon img',
-			items: 'li',
-			opacity: .6,
-			placeholder: 'placeholder',
-			tolerance: 'intersect',
-			toleranceElement: '> div',
-			tabSize: 25,
-			disableNesting: 'no-nest',
-			errorClass: 'nest_error',
-			update: function(event, ui){
-				var $item = $(ui.item); // Перемещаемый элемент
-				var $target = $(ui.item).parents('li:first'); // Куда переместили
-
-				var item_opt = $item.data('options');
-				var target_opt = $target.data('options');
-
-				// Посылаем POST запрос перемещения элементов
-				if(ThisObj.options.moveHandler != ''){
-					var index = $(ui.item).parent().children().index(ui.item);
-					window.Admin.ShowSplashScreen();
-					$.ajax({
-						type: "POST",
-						url: ThisObj.options.moveHandler,
-						data: 'item_id='+item_opt.id+'&target_id='+target_opt.id+'&item_new_position='+index,
-						cache: false,
-						success: window.Admin.HideSplashScreen
-					});
-					// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
-				}
-
-				if(target_opt.isnode && !target_opt.opened){ // Вырезание и загрузка
-					var $li = $item.detach();
-					$target.children('ol').remove();
-					ThisObj.ToggleNode($target, function(){
-						$target.children('ol').append($li);
-						ThisObj.UpdateBullets();
-					});
-				} else{
-					ThisObj.UpdateBullets();
-				}
-			}
-		};
-
-		if(nestedSortableOtions != undefined){ // Кол-во аргументов перед. в конструктор меньше двух
-			nestedSortableOtions = {};
-		}
-		nestedSortableOtions = $.extend({}, default_nestedSortableOptions, nestedSortableOtions);
-
-		/**
-		 * Данные элемента дерева по умолчанию
-		 */
-		this.default_item_options = {
+		default_item_options: {
 			id: '0', // Уникальный идентификатор объекта
 			icon: 'scripts/jquery_treeview/theme/icon.png', // Имя файла иконки элемента
 			title: 'NodeTitle', // Секция с заголовком элемента
@@ -97,21 +44,66 @@
 			isnode: false, // Есть ли дочерние элемены - нужно когда они не загружены
 			child_url: '', // Адрес для подгрузки узлов
 			childs: [] // Дочерние элементы в таком-же формате
-		};
+		},
 
-		// Генерируем список
-		this.tree = this.GenerateList($(parentComponent), tree, true);
-		// Делаем дерево сортируемым
-		$(this.tree).nestedSortable(nestedSortableOtions);
-	};
+		tree: null, // Ссылка на список верхнего уровня
 
-	lTreeView.prototype = {
+	/* PRIVATE */
+
+		_create: function(){
+			var self = this;
+			var o = this.options;
+			var ns = o.nestedSortableOptions;
+
+			if(ns.update){
+				ns._update = ns.update;
+			}
+			ns.update = function(event, ui){
+				var $item = $(ui.item); // Перемещаемый элемент
+				var $target = $(ui.item).parents('li:first'); // Куда переместили
+				var item_opt = $item.data('options');
+				var target_opt = $target.data('options');
+				// Посылаем POST запрос перемещения элементов
+				if(o.move != ''){
+					var index = $(ui.item).parent().children().index(ui.item);
+					window.Admin.ShowSplashScreen();
+					$.ajax({
+						type: "POST",
+						url: o.move,
+						data: 'item_id='+item_opt.id+'&target_id='+target_opt.id+'&item_new_position='+index,
+						cache: false,
+						success: window.Admin.HideSplashScreen
+					});
+					// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
+				}
+				if(target_opt.isnode && !target_opt.opened){ // Вырезание и загрузка
+					var $li = $item.detach();
+					$target.children('ol').remove();
+					self._toggleNode($target, function(){
+						$target.children('ol').append($li);
+						self._updateBullets();
+					});
+				}else{
+					self._updateBullets();
+				}
+				if(ns._update){
+					ns._update(event, ui);
+				}
+			}
+
+			this.tree = this._generateList(this.element, o.tree, true);// Генерируем список
+			$(this.tree).nestedSortable(ns);// Делаем дерево сортируемым
+		},
+
+		_destroy: function(){
+			this.element.find('ul:first-child').remove();
+		},
 
 		/**
 		 * Показать кнопку информации
 		 * @param item_id
 		 */
-		ShowInfoButton: function(item_id){
+		_showInfoButton: function(item_id){
 			$("#item_info_"+item_id).show().css('display', 'inline-block');
 		},
 
@@ -119,7 +111,7 @@
 		 * Скрыть кнопку информации
 		 * @param item_id
 		 */
-		HideInfoButton: function(item_id){
+		_hideInfoButton: function(item_id){
 			$("#item_info_"+item_id).hide();
 		},
 
@@ -128,7 +120,7 @@
 		 * @param item_id Объект элемента списка или его атрибут id
 		 * @param end_toggle Обработчик события при показе элемента (окончанию загрузки)
 		 */
-		ToggleNode: function(item_id, end_toggle){
+		_toggleNode: function(item_id, end_toggle){
 			if(typeof item_id != 'object'){
 				var $element = $('li#item_'+item_id);
 			} else{
@@ -154,7 +146,7 @@
 						}
 					} else{
 						if('child_url' in opt && opt.child_url != ''){
-							this.LoadList($element, opt.child_url, end_toggle);
+							this._loadList($element, opt.child_url, end_toggle);
 						}
 					}
 				} else{
@@ -175,8 +167,8 @@
 		/**
 		 * Обновление статусов кнопок
 		 */
-		UpdateBullets: function(){
-			var ThisObj = this;
+		_updateBullets: function(){
+			var self = this;
 			this.tree.find('li').each(function(){
 				var $obj = $(this);
 				var opt = $obj.data('options');
@@ -200,7 +192,7 @@
 					// Обновляем событие
 					$bullet.unbind();
 					$bullet.bind('click', function(){
-						ThisObj.ToggleNode(opt.id);
+						self._toggleNode(opt.id);
 					});
 				} else{
 					if($child.length > 0){ // пустой список
@@ -219,7 +211,7 @@
 		 * Обработчик события начала загрузки дочерних элементов
 		 * @param $element
 		 */
-		LoadingStart: function($element){
+		_loadingStart: function($element){
 			return $("<ol>", {
 				"class": 'treeview',
 				html: '<li><img src="images/ajax-loader.gif" style="vertical-align: middle;" /></li>'
@@ -232,7 +224,7 @@
 		 * @param $list
 		 * @param $placeholder
 		 */
-		LoadingEnd: function($element, $list, $placeholder){
+		_loadingEnd: function($element, $list, $placeholder){
 			$placeholder.remove();
 			$list.show();
 		},
@@ -241,9 +233,9 @@
 		 * Создание нового элемента списка с использованием пользовательских параметров
 		 * @param opt
 		 */
-		GenerateElement: function(opt){
+		_generateElement: function(opt){
 			opt = $.extend({}, this.default_item_options, opt);
-			var ThisObj = this;
+			var self = this;
 
 			// Элемент
 			var element_options = {id: "item_"+opt.id};
@@ -258,10 +250,10 @@
 				id: "item_div_"+opt.id,
 				"class": "item",
 				mouseenter: function(){
-					ThisObj.ShowInfoButton(opt.id);
+					self._showInfoButton(opt.id);
 				},
 				mouseleave : function(){
-					ThisObj.HideInfoButton(opt.id);
+					self._hideInfoButton(opt.id);
 				}
 			}).appendTo($div_helper);
 
@@ -275,13 +267,13 @@
 				if(opt.opened){
 					$.extend(bullet_options, {
 						"class": "node_button node_open", click: function(){
-							ThisObj.ToggleNode(opt.id);
+							self._toggleNode(opt.id);
 						}
 					});
 				} else{
 					$.extend(bullet_options, {
 						"class": "node_button node_close", click: function(){
-							ThisObj.ToggleNode(opt.id);
+							self._toggleNode(opt.id);
 						}
 					});
 				}
@@ -301,7 +293,7 @@
 				var $info = $('<div id="item_info_'+opt.id+'" class="item_info"><span class="tooltip">'+opt.info+'</span></div>').appendTo($div);
 				$info.lPopUp({
 					             show: function(options){
-						             $(ThisObj).children(options.popupObject).fadeIn("fast");
+						             $(self).children(options.popupObject).fadeIn("fast");
 					             }
 				             });
 			}
@@ -314,10 +306,10 @@
 			// Дочерние элементы
 			if('opened' in opt && opt.opened){
 				if('childs' in opt && opt.childs.length > 0){
-					this.GenerateList($element, opt.childs);
+					this._generateList($element, opt.childs);
 				} else{
 					if('child_url' in opt && opt.child_url != ''){
-						this.LoadList($element, opt.child_url);
+						this._loadList($element, opt.child_url);
 					}
 				}
 			}
@@ -331,14 +323,14 @@
 		 * @param loadUrl Адрес, откуда загружать элементы (данные в формате json)
 		 * @param endLoad Обработчик окончания загрузки
 		 */
-		LoadList: function($parentElement, loadUrl, endLoad){
-			var $placeholder = this.LoadingStart($parentElement);
-			var ThisObj = this;
+		_loadList: function($parentElement, loadUrl, endLoad){
+			var $placeholder = this._loadingStart($parentElement);
+			var self = this;
 			$.ajax({
 				       url: loadUrl,
 				       dataType: "json",
 				       success: function(data){
-					       ThisObj.LoadingEnd($parentElement, ThisObj.GenerateList($parentElement, data, false, true), $placeholder);
+					       self._loadingEnd($parentElement, self._generateList($parentElement, data, false, true), $placeholder);
 					       if(endLoad != undefined){
 						       endLoad.call($parentElement);
 					       }
@@ -353,7 +345,7 @@
 		 * @param _toplevel Список верхнего уровня
 		 * @param hidden Скрыть список после создания (например если элемент свернут)
 		 */
-		GenerateList: function($parentElement, elements, _toplevel, hidden){
+		_generateList: function($parentElement, elements, _toplevel, hidden){
 			if(arguments.length > 2 && _toplevel == true){
 				var classname = "treeview toplevel";
 			} else{
@@ -377,18 +369,24 @@
 
 			// Добавляем элементы списка
 			for(var i = 0; i < elements.length; i++){
-				$ol.append(this.GenerateElement(elements[i]));
+				$ol.append(this._generateElement(elements[i]));
 			}
 			if(hide_list){
 				$ol.hide();
 			}
 			return $ol;
+		},
+
+	/* PUBLIC */
+
+		deleteNode: function( nodeId ){
+			var self = this;
+		  this.tree.find('#item_'+nodeId)
+				  .fadeOut('slow', function(){
+			                     self.tree.find('#item_'+nodeId).remove();
+		                     });
 		}
 
-	}
-
-	$.fn.lTreeView = function(options, tree, nestedSortableOtions){
-		return new lTreeView(options, tree, nestedSortableOtions, this);
-	};
+	});
 
 })(jQuery);

@@ -196,7 +196,6 @@ function AdminPagesAjaxTree(){
 		$parent = 0;
 	}
 
-	include_once('scripts/jquery/jquery.php');
 	include_once('scripts/jquery_ui/jquery-ui.php');
 	include_once('scripts/jquery_plugins/plugins.php');
 	include_once('scripts/jquery_nestedSortable/nestedSortable.php');
@@ -257,7 +256,7 @@ function AdminPagesAjaxTree(){
 			ADMIN_FILE.'?exe=pages&a=ajaxdelete&id='.$id,
 			'Уверены что хотите удалить? Все дочерние страницы и ссылки так-же будут удалены.',
 			'Admin.ShowSplashScreen();',
-			'Admin.HideSplashScreen(); $(\'#item_'.$id.'\').fadeOut(\'slow\', function(){ $(\'#item_'.$id.'\').remove(); }); '
+			'Admin.HideSplashScreen(); $(\'#tree_container\').lTreeView(\'deleteNode\', '.$id.');'
 		);
 
 		$view = ViewLevelToStr(SafeDB($page['view'], 1, int));
@@ -285,7 +284,7 @@ function AdminPagesAjaxTree(){
 	}
 
 	if($parent == 0){
-		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("div#tree_container").lTreeView({moveHandler: \''.ADMIN_FILE.'?exe=pages&a=ajaxmove\'}, '.JsonEncode($tree).');</script>');
+		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("#tree_container").lTreeView({move: \''.ADMIN_FILE.'?exe=pages&a=ajaxmove\', tree: '.JsonEncode($tree).'});</script>');
 	}else{
 		echo JsonEncode($tree);
 		exit;

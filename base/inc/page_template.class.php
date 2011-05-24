@@ -315,7 +315,6 @@ class PageTemplate extends Starkyt{
 			}
 		}
 		// Подключаем JQuery и плагины
-		include_once 'scripts/jquery/jquery.php';
 		if($this->JQueryFile != ''){
 			$Head .= '<script src="'.$this->JQueryFile.'" type="text/javascript"></script>'."\n";
 			foreach($this->JQueryPlugins as $filename){
