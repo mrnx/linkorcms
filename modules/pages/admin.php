@@ -36,6 +36,9 @@ function AdminPages( $action ){
 		case 'ajaxmove':
 			AdminPagesAjaxMove();
 			break;
+		case 'delete':
+			AdminPagesDelete();
+			break;
 		case 'editor':
 			if(isset($_POST['action']) && $_POST['action'] != 'preview'){
 				AdminPagesSave();
@@ -54,9 +57,6 @@ function AdminPages( $action ){
 			break;
 		case 'changemenu':
 			AdminPagesChangeMenu();
-			break;
-		case 'del':
-			AdminPagesDelete();
 			break;
 		case 'resetcounter':
 			AdminPagesResetCounter();
@@ -255,8 +255,8 @@ function AdminPagesAjaxTree(){
 			'images/admin/delete.png',
 			ADMIN_FILE.'?exe=pages&a=ajaxdelete&id='.$id,
 			'Уверены что хотите удалить? Все дочерние страницы и ссылки так-же будут удалены.',
-			'Admin.ShowSplashScreen();',
-			'Admin.HideSplashScreen(); $(\'#tree_container\').lTreeView(\'deleteNode\', '.$id.');'
+			'',
+			'$(\'#tree_container\').lTreeView(\'deleteNode\', '.$id.');'
 		);
 
 		$view = ViewLevelToStr(SafeDB($page['view'], 1, int));
@@ -284,7 +284,7 @@ function AdminPagesAjaxTree(){
 	}
 
 	if($parent == 0){
-		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("#tree_container").lTreeView({move: \''.ADMIN_FILE.'?exe=pages&a=ajaxmove\', tree: '.JsonEncode($tree).'});</script>');
+		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("#tree_container").lTreeView({move: \''.ADMIN_FILE.'?exe=pages&a=ajaxmove\', del: \''.ADMIN_FILE.'?exe=pages&a=delete\', tree: '.JsonEncode($tree).'});</script>');
 	}else{
 		echo JsonEncode($tree);
 		exit;
@@ -709,17 +709,27 @@ function AdminPagesChangeMenu(){
 	}
 }
 
+function _DeletePage($id){
+	$sub_items = System::database()->Select('pages', "`parent`='$id'");
+	foreach($sub_items as $item){
+		_DeletePage(SafeEnv($item['id'], 11, int));
+	}
+	System::database()->Delete('pages', "`id`='$id'");
+}
+
 /**
  * Удаление страницы или ссылки
  * @return void
  */
 function AdminPagesDelete(){
-	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=pages');
+	if(!isset($_POST['id'])){
+		exit("ERROR");
 	}
-	System::database()->Delete('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	sleep(3);
+	exit;
+	_DeletePage(SafeEnv($_POST['id'], 11, int));
 	AdminPagesClearCache();
-	GO($config['admin_file'].'?exe=pages');
+	exit("OK");
 }
 
 /**
@@ -791,13 +801,9 @@ function AdminPagesMove(){
  * @return void
  */
 function AdminPagesAjaxMove(){
-
-	//sleep(3);
-
 	$itemId = SafeEnv($_POST['item_id'], 11, int);
 	$parentId = SafeEnv($_POST['target_id'], 11, int);
 	$position = SafeEnv($_POST['item_new_position'], 11, int);
-
 	// Перемещаемый элемент
 	System::database()->Select('pages',"`id`='$itemId'");
 	if(System::database()->NumRows() == 0){
@@ -805,12 +811,10 @@ function AdminPagesAjaxMove(){
 		exit;
 	}
 	$item = System::database()->FetchRow();
-
 	// Изменяем его родителя, если нужно
 	if($item['parent'] != $parentId){
 		System::database()->Update('pages', "`parent`='$parentId'", "`id`='$itemId'");
 	}
-
 	// Обноеление индексов элементов
 	$indexes = array(); // соотвествие индексов и id элементов
 	$items = System::database()->Select('pages',"`parent`='$parentId'");
@@ -825,16 +829,11 @@ function AdminPagesAjaxMove(){
 			$i++;
 		}
 	}
-
-	//print_r($indexes);
-
 	// Обновляем индексы
 	foreach($indexes as $id=>$order){
 		System::database()->Update('pages', "`order`='$order'", "`id`='$id'");
 	}
-
 	exit;
-
 }
 
 ?>

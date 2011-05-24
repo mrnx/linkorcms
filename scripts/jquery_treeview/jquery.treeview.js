@@ -18,6 +18,7 @@
 	$.widget( "ui.lTreeView", {
 		options: {
 			move: '',   // Адрес страницы обработчика перемещения элементов
+			del: '',  // Адрес страницы обработчика удаления элементов
 			nestedSortableOptions: {
 				forcePlaceholderSize: true,
 				handle: '.item_icon img',
@@ -66,13 +67,15 @@
 				// Посылаем POST запрос перемещения элементов
 				if(o.move != ''){
 					var index = $(ui.item).parent().children().index(ui.item);
-					window.Admin.ShowSplashScreen();
+					if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
 					$.ajax({
 						type: "POST",
 						url: o.move,
 						data: 'item_id='+item_opt.id+'&target_id='+target_opt.id+'&item_new_position='+index,
 						cache: false,
-						success: window.Admin.HideSplashScreen
+						success: function(){
+							if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
+						}
 					});
 					// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
 				}
@@ -381,10 +384,21 @@
 
 		deleteNode: function( nodeId ){
 			var self = this;
-		  this.tree.find('#item_'+nodeId)
-				  .fadeOut('slow', function(){
-			                     self.tree.find('#item_'+nodeId).remove();
+			var $item = this.tree.find('#item_'+nodeId);
+			var item_opt = $item.data('options');
+			if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
+			$.ajax({
+				type: "POST",
+				url: self.options.del,
+				data: 'id='+item_opt.id,
+				cache: false,
+				success: function(){
+					if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
+					$item.fadeOut('slow', function(){
+			                     $item.remove();
 		                     });
+				}
+			});
 		}
 
 	});
