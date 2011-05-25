@@ -35,14 +35,15 @@
 		},
 
 		default_item_options: {
-			id: '0', // Уникальный идентификатор объекта
+			id: '0', // Уникальный идентификатор
 			icon: 'scripts/jquery_treeview/theme/icon.png', // Имя файла иконки элемента
 			title: 'NodeTitle', // Секция с заголовком элемента
 			info: '', // Секция с информацией для всплывающей подсказки в формате HTML
 			func: '', // Секция с функциональными кнопками и ссылками
-			opened: false, // Статус open/close
+			opened: false, // Развернуть
 			nonest: false, // Запретить ли в этот элемент кидать дочерние элементы
 			isnode: false, // Есть ли дочерние элемены - нужно когда они не загружены
+			loaded: false, // Были ли загружены дочерние элементы (в childs)
 			child_url: '', // Адрес для подгрузки узлов
 			childs: [] // Дочерние элементы в таком-же формате
 		},
@@ -66,7 +67,13 @@
 				var target_opt = $target.data('options');
 				// Посылаем POST запрос перемещения элементов
 				if(o.move != ''){
-					var index = $(ui.item).parent().children().index(ui.item);
+					if(target_opt.isnode && !target_opt.loaded){
+						var index = '-1';
+						$item.remove();
+						$target.find('ol').remove();
+					}else{
+						var index = $(ui.item).parent().children().index(ui.item);
+					}
 					if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
 					$.ajax({
 						type: "POST",
@@ -78,16 +85,19 @@
 						}
 					});
 					// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
-				}
-				if(target_opt.isnode && !target_opt.opened){ // Вырезание и загрузка
-					var $li = $item.detach();
-					$target.children('ol').remove();
-					self._toggleNode($target, function(){
-						$target.children('ol').append($li);
-						self._updateBullets();
-					});
-				}else{
 					self._updateBullets();
+				}else{
+					// Вырезание и загрузка
+					if(target_opt.isnode && !target_opt.opened){  // Переместили в закрытый элемент
+						var $li = $item.detach();
+						$target.find('ol').remove();
+						self._toggleNode($target, function(){
+							$target.find('ol').append($li);
+							self._updateBullets();
+						});
+					}else{  // Переместили в открытый элемент, просто обновляем буллеты
+						self._updateBullets();
+					}
 				}
 				if(ns._update){
 					ns._update(event, ui);
@@ -168,7 +178,7 @@
 		},
 
 		/**
-		 * Обновление статусов кнопок
+		 * Обновление статусов кнопок и опций
 		 */
 		_updateBullets: function(){
 			var self = this;
@@ -176,36 +186,42 @@
 				var $obj = $(this);
 				var opt = $obj.data('options');
 				var $bullet = $obj.find('.node_button:first');
-				var $child = $obj.find('ol:first');
-				if(($child.length > 0 && $child.find('li').length > 0) || opt.isnode){ // есть дочерние элементы
-					//opt.isnode = true;
-					if($child.is(':visible')){ // Виден
+				var $OL = $obj.find('ol:first');
+
+				var issub = ($OL.length > 0 && $OL.find('li').length > 0);
+				if(issub){
+					opt.isnode = true;
+					opt.loaded = true;
+					opt.opened = !!$OL.is(':visible');
+					// обновляем стили
+					if(opt.opened){
 						$bullet.removeClass('node_close');
 						if(!$bullet.hasClass('node_open')){
 							$bullet.addClass('node_open');
 						}
-						opt.opened = true;
-					} else{ // Скрыт
+					}else{
 						$bullet.removeClass('node_open');
 						if(!$bullet.hasClass('node_close')){
 							$bullet.addClass('node_close');
 						}
-						opt.opened = false;
 					}
 					// Обновляем событие
 					$bullet.unbind();
 					$bullet.bind('click', function(){
 						self._toggleNode(opt.id);
 					});
-				} else{
-					if($child.length > 0){ // пустой список
-						$child.remove();
+				}else{
+					if(opt.isnode){
+						if(!opt.loaded){
+							opt,opened = false;
+						}else{
+							opt.opened = false;
+							opt,isnode = false;
+							// скрываем буллет и удаляем обработчики событий
+							$bullet.removeClass('node_close node_open').addClass('node_none');
+							$bullet.unbind();
+						}
 					}
-					$bullet.removeClass('node_close node_open').addClass('node_none');
-					opt.isnode = false;
-					opt.opened = true;
-					// Удаляем события
-					$bullet.unbind();
 				}
 			});
 		},
@@ -296,7 +312,7 @@
 				var $info = $('<div id="item_info_'+opt.id+'" class="item_info"><span class="tooltip">'+opt.info+'</span></div>').appendTo($div);
 				$info.lPopUp({
 					             show: function(options){
-						             $(self).children(options.popupObject).fadeIn("fast");
+						             $(this).children(options.popupObject).fadeIn("fast");
 					             }
 				             });
 			}
@@ -310,14 +326,21 @@
 			if('opened' in opt && opt.opened){
 				if('childs' in opt && opt.childs.length > 0){
 					this._generateList($element, opt.childs);
-				} else{
+				}else{
 					if('child_url' in opt && opt.child_url != ''){
 						this._loadList($element, opt.child_url);
 					}
 				}
 			}
+
+			if(opt.isnode && !opt.childs.length){
+				opt.loaded = false;
+			}else{
+				opt.loaded = true;
+			}
+
 			$element.data('options', opt);
-			return $element; // <li>
+			return $element; // HtmlLiElement
 		},
 
 		/**
@@ -334,6 +357,7 @@
 				       dataType: "json",
 				       success: function(data){
 					       self._loadingEnd($parentElement, self._generateList($parentElement, data, false, true), $placeholder);
+					       $parentElement.data('options').loaded = true;
 					       if(endLoad != undefined){
 						       endLoad.call($parentElement);
 					       }
@@ -395,8 +419,9 @@
 				success: function(){
 					if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
 					$item.fadeOut('slow', function(){
-			                     $item.remove();
-		                     });
+						$item.remove();
+						self._updateBullets();
+					});
 				}
 			});
 		}

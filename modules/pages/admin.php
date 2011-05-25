@@ -725,8 +725,6 @@ function AdminPagesDelete(){
 	if(!isset($_POST['id'])){
 		exit("ERROR");
 	}
-	sleep(3);
-	exit;
 	_DeletePage(SafeEnv($_POST['id'], 11, int));
 	AdminPagesClearCache();
 	exit("OK");
@@ -804,6 +802,7 @@ function AdminPagesAjaxMove(){
 	$itemId = SafeEnv($_POST['item_id'], 11, int);
 	$parentId = SafeEnv($_POST['target_id'], 11, int);
 	$position = SafeEnv($_POST['item_new_position'], 11, int);
+
 	// Перемещаемый элемент
 	System::database()->Select('pages',"`id`='$itemId'");
 	if(System::database()->NumRows() == 0){
@@ -818,6 +817,9 @@ function AdminPagesAjaxMove(){
 	// Обноеление индексов элементов
 	$indexes = array(); // соотвествие индексов и id элементов
 	$items = System::database()->Select('pages',"`parent`='$parentId'");
+	if($position == -1){
+		$position = count($items);
+	}
 	SortArray($items, 'order');
 	$i = 0;
 	foreach($items as $p){
