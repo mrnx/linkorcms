@@ -25,20 +25,18 @@
 	background-color: #ffcccc;
 }
 
-.treeview LI{
+.treeview li{
 	padding: 0;
 }
 
-.treeview LI.item_drag{
+.treeview li.item_drag{
 	padding: 0;
 	background-color: #fcfcfc;
 }
 
 .treeview .item{
-	padding: 2px 1px 1px 2px;
-/*	border: 1px #cccccc solid;
-	background-color: #fcfcfc;*/
-	border-top: none;
+	padding: 1px 0 0 0;
+	height: 23px;
 	margin-left: 16px;
 }
 
@@ -70,11 +68,10 @@
 }
 
 .treeview .item_icon{
-	padding: 1px;
-	margin: 0 2px 0 2px;
+	margin: 2px 5px 0 5px;
 	cursor: move;
 	display: inline-block;
-	vertical-align: top;
+	/*background-color: #88f;*/
 }
 .treeview .item_icon img{
 	margin: 0;
@@ -83,12 +80,12 @@
 
 .treeview .item_title{
 	display: inline-block;
+	line-height: 22px;
 	vertical-align: top;
-	padding-top: 3px;
+	/*background-color: #f88;*/
 }
 
 .treeview .item_func_bar{
-	vertical-align: top;
 	text-align: left;
 	display: inline-block;
 	float: right;
@@ -98,10 +95,11 @@
 .treeview .item_info{
 	display: none;
 	position: relative;
-	margin: 2px 0 0 5px;
+	margin: 3px 0 0 5px;
 	background-image: url("info.png");
 	width: 16px;
 	height: 16px;
+	vertical-align: top;
 }
 
 .treeview .item_info .tooltip{

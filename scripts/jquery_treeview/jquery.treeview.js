@@ -256,15 +256,15 @@
 			opt = $.extend({}, this.default_item_options, opt);
 			var self = this;
 
-			// Элемент
+			// Элемент списка с вложенным дивом
 			var element_options = {id: "item_"+opt.id};
 			if(opt.nonest){
-				$.extend(element_options, {"class": "no-nest"});
+				element_options.class = "no-nest";
 			}
 			var $element = $('<li>', element_options);
 			var $div_helper = $('<div>').appendTo($element); // Вспомогательный див в который отдельно будут помещены и элементы и кнопка узла
 
-			// Контейнер
+			// Контейнер div.item
 			var $div = $('<div>', {
 				id: "item_div_"+opt.id,
 				"class": "item",
@@ -299,15 +299,15 @@
 			}
 			$('<div>', bullet_options).prependTo($div_helper);
 
-			// Иконка
+			// Иконка div.item_icon img
 			if('icon' in opt && opt.icon != ''){
 				$('<div class="item_icon" id="item_icon_'+opt.id+'"><img src="'+opt.icon+'" title="Переместить" /></div>').appendTo($div);
 			}
 
-			//Заголовок
+			//Заголовок div.item_title
 			$('<div class="item_title" id="item_title_'+opt.id+'">'+opt.title+'<a name="item_'+opt.id+'" /></div>').appendTo($div);
 
-			// Всплывающая информация об элементе
+			// Всплывающая информация об элементе div.item_info
 			if('info' in opt && opt.info != ''){
 				var $info = $('<div id="item_info_'+opt.id+'" class="item_info"><span class="tooltip">'+opt.info+'</span></div>').appendTo($div);
 				$info.lPopUp({
@@ -317,7 +317,7 @@
 				             });
 			}
 
-			// Функциональные ссылки
+			// Функциональные ссылки div.item_func_bar
 			if('func' in opt && opt.func != ''){
 				$('<div class="item_func_bar" id="item_func_'+opt.id+'">'+opt.func+'</div>').appendTo($div);
 			}
