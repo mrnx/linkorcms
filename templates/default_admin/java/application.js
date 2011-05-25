@@ -13,15 +13,11 @@
 	window.AdminFn = function( AdminFile, Ajax ){
 		this.AdminFile = AdminFile;
 		this.Ajax = Ajax;
-		this.components = [];
+		this.splashShows = 0;
+		this.splashShowsMax = 0;
 	}
 
 	window.AdminFn.prototype = {
-
-		/**
-		 * Массив для регистрации компонентов на странице
-		 */
-		components: [],
 
 		/**
 		 * Проверка нажатой кнопки мыши
@@ -66,16 +62,29 @@
 		 * Показать Splash Screen при Ajax запросе
 		 */
 		ShowSplashScreen: function(){
-			$('div#wrapper').fadeTo(500, 0.5);
-			$('div#ajaxsplashscreen').fadeIn('fast');
+			if(this.splashShows == 0){
+				$('div#wrapper').fadeTo(500, 0.5);
+				$('div#ajaxsplashscreen').fadeIn('fast');
+			}
+			this.splashShows++;
+			this.splashShowsMax++;
+			$("#ajaxsplashscreen_progress").text((this.splashShowsMax - this.splashShows + 1)+'/'+this.splashShowsMax);
 		},
 
 		/**
 		 * Скрыть Splash Screen
 		 */
 		HideSplashScreen: function(){
-			$('div#wrapper').fadeTo(0, 1);
-			$('div#ajaxsplashscreen').hide();
+			if(this.splashShows == 1){
+				$('div#wrapper').fadeTo(0, 1);
+				$('div#ajaxsplashscreen').hide();
+			}
+			this.splashShows--;
+			$("#ajaxsplashscreen_progress").text((this.splashShowsMax - this.splashShows + 1)+'/'+this.splashShowsMax);
+			if(this.splashShows <= 0){
+				this.splashShows = 0;
+				this.splashShowsMax = 0;
+			}
 		},
 
 		/**
@@ -102,8 +111,7 @@
 			 * @param Object
 			 */
 			Status: function( EnabledTitle, DisabledTitle, EnabledImage, DisabledImage, AjaxQueryUrl, Object ){
-				var img = $(Object).children("img:first").get(0);
-				var src, title;
+				var img = $(Object).children("img:first").get(0), src, title;
 				if($(img).attr("src") == EnabledImage){
 					src = DisabledImage;
 					title = DisabledTitle;
@@ -111,16 +119,15 @@
 					src = EnabledImage;
 					title = EnabledTitle;
 				}
-				$(img).attr("src", 'images/ajax-loader.gif');
-				$(img).attr("title", 'Обновление статуса');
 
-				//$(".ajax_indicator").ajaxStart().ajaxStop(Admin.HideSplashScreen);
+				Admin.ShowSplashScreen();
 				$.ajax({
 					url: AjaxQueryUrl,
 					dataType: "text",
 					success: function(){
 						$(img).attr("src", src);
 						$(img).attr("title", title);
+						Admin.HideSplashScreen();
 					},
 					cache: false
 				});
@@ -140,7 +147,9 @@
 				}
 
 			}
-		}
+		},
+
+		end: {}
 	};
 
 	window.Admin = new AdminFn('admin.php', false); // FIXME: admin.php, ajax ?

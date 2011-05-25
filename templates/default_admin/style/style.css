@@ -17,10 +17,11 @@ body {
 	padding: 12px;
 	padding-bottom: 0;
 	text-align: center;
-	border: 1px #A5C0D4 solid;
 	background-color: #fff;
-	border-radius: 5px;
-	-moz-border-radius: 5px;
+	border: 3px #A5C0D4 solid;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+
 	position: absolute;
 	left: 50%;
 	top: 25%;
@@ -28,9 +29,9 @@ body {
 	margin-top: -30px;
 	display: none;
 
-	box-shadow: 0 0 4px 5px #C5E0F4;
-	-webkit-box-shadow: 0 0 4px 5px #C5E0F4;
-	-moz-box-shadow: 0 0 4px 5px #C5E0F4;
+	box-shadow: 2px 2px 2px #DDD;
+	-webkit-box-shadow: 2px 2px 2px #DDD;
+	-moz-box-shadow: 2px 2px 2px #DDD;
 }
 #wrapper {
 	text-align: left;

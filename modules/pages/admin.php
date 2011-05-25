@@ -668,18 +668,17 @@ function AdminPagesLinkSave(){
  * @return void
  */
 function AdminPagesChangeStatus(){
-	global $config, $db;
-	$db->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	$r = $db->FetchRow();
+	System::database()->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	$r = System::database()->FetchRow();
 	if($r['enabled'] == 1){
 		$en = '0';
 	}else{
 		$en = '1';
 	}
-	$db->Update('pages', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	System::database()->Update('pages', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	AdminPagesClearCache();
 	if(!isset($_GET['ajax'])){
-		GO($config['admin_file'].'?exe=pages');
+		GO(ADMIN_FILE.'?exe=pages');
 	}else{
 		echo 'OK';
 		exit;

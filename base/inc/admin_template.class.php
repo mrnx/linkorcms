@@ -194,10 +194,17 @@ class AdminPage extends PageTemplate{
 	 * @return string
 	 */
 	public function SpeedStatus( $EnabledTitle, $DisabledTitle, $AjaxUrl, $Status, $EnabledImage, $DisabledImage ){
+		$EnabledTitle = addslashes($EnabledTitle);
+		$DisabledTitle = addslashes($DisabledTitle);
+		$AjaxUrl = addslashes($AjaxUrl);
+		$EnabledImage = addslashes($EnabledImage);
+		$DisabledImage = addslashes($DisabledImage);
 		$ImgSrc = ($Status ? $EnabledImage : $DisabledImage);
 		$Title = ($Status ? $EnabledTitle : $DisabledTitle);
-		$OnClick = "SpeedStatusButtonClick('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); return false;";
-		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); return false;";
+		$s = '<a title="'.$Title.'" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+		//echo $s."\n\n";
+		return $s;
 	}
 
 	/**
