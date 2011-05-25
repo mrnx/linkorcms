@@ -469,7 +469,7 @@
 	padding: 0;
 	margin-right: .1em;
 	text-decoration: none !important;
-	cursor: pointer;
+	cursor: default;
 	text-align: center;
 	zoom: 1;
 	overflow: visible;

@@ -190,6 +190,7 @@ div.admin_logo {
 #sidebar .sideNav li a:hover {
 	background: #fdfcf6;
 	color: #222;
+	cursor: default;
 }
 #sidebar .sideNav li a.activate {
 	background: #DDEAF7;
@@ -201,6 +202,7 @@ div.admin_logo {
 #sidebar .sideNav li a.active:hover {
 	background: #DDEAF7;
 	color: #c66653;
+	cursor: default;
 }
 
 
@@ -465,6 +467,7 @@ a.button:hover{
 	box-shadow: 0 0 2px #aaa;
 	-webkit-box-shadow: 0 0 2px #aaa;
 	-moz-box-shadow: 0 0 2px #aaa;
+	cursor: default;
 }
 a.button:active{
 	background-image: -webkit-gradient(
