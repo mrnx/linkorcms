@@ -51,30 +51,28 @@ define('PLUG_MANUAL_ONE', 7); //Подключается один какой-то плагин из группы. Исп
 define('PLUG_SYSTEM', 8); //Системный плагин, не трабует инсталляции, вызывается только вручную и может использоваться практически из всех компонентов системы
 
 // Подключаем классы
-include $config['inc_dir'].'logi.class.php';
-include $config['inc_dir'].'LmFileCache.php';
-include $config['inc_dir'].'LmEmailExtended.php';
-include $config['inc_dir'].'user.class.php';
-include $config['inc_dir'].'rss.class.php';
-include $config['inc_dir'].'picture.class.php';
+include_once $config['inc_dir'].'logi.class.php';
+include_once $config['inc_dir'].'LmFileCache.php';
+include_once $config['inc_dir'].'LmEmailExtended.php';
+include_once $config['inc_dir'].'user.class.php';
+include_once $config['inc_dir'].'rss.class.php';
+include_once $config['inc_dir'].'picture.class.php';
 
-include $config['inc_dir'].'html.class.php';
-include $config['inc_dir'].'starkyt.class.php';
-include $config['inc_dir'].'page_template.class.php';
-include $config['inc_dir'].'index_template.inc.php';
-include $config['inc_dir'].'admin_template.class.php';
+include_once $config['inc_dir'].'html.class.php';
+include_once $config['inc_dir'].'starkyt.class.php';
+include_once $config['inc_dir'].'page_template.class.php';
+include_once $config['inc_dir'].'index_template.inc.php';
+include_once $config['inc_dir'].'admin_template.class.php';
 
-include $config['inc_dir'].'navigation.class.php';
-include $config['inc_dir'].'tree.class.php';
-include $config['inc_dir'].'tree_a.class.php';
-include $config['inc_dir'].'tree_b.class.php';
-include $config['inc_dir'].'posts.class.php';
+include_once $config['inc_dir'].'navigation.class.php';
+include_once $config['inc_dir'].'tree.class.php';
+include_once $config['inc_dir'].'tree_a.class.php';
+include_once $config['inc_dir'].'tree_b.class.php';
+include_once $config['inc_dir'].'posts.class.php';
 
 
 abstract class System{
 
-	static public $config;
-	static public $plug_config;
 	static public $Errors = array();
 
 	/**
@@ -123,10 +121,38 @@ abstract class System{
 		return $GLOBALS['site'];
 	}
 
-}
+	/**
+	 * Прочитать значение настройки или установить новое значение
+	 * @static
+	 * @param  $Path Группа и название настройки разделенные прямым слэшем
+	 * @param null $SetValue Установить новое значение настройки (запись в БД)
+	 * @return mixed При установке нового значения настройки, возвращает старое значение
+	 */
+	static public function config( $Path, $SetValue = null ){
+		$Path = explode('/', $Path);
+		if(isset($Path[1])){
+			if(isset($SetValue)){
+				$old_value = $GLOBALS['config'][$Path[0]][$Path[1]];
+				$GLOBALS['config'][$Path[0]][$Path[1]] = $SetValue;
+				ConfigSetValue($Path[0], $Path[1], $SetValue);
+				return $old_value;
+			}else{
+				if(isset($GLOBALS['config'][$Path[0]][$Path[1]])){
+					return $GLOBALS['config'][$Path[0]][$Path[1]];
+				}else{
+					return false;
+				}
+			}
+		}else{
+			if(isset($GLOBALS['config'][$Path[0]])){
+				return $GLOBALS['config'][$Path[0]];
+			}else{
+				return false;
+			}
+		}
+	}
 
-System::$config = &$config;
-System::$plug_config = &$plug_config;
+}
 
 function SmiliesReplace( &$text ){
 	global $db, $config;
@@ -352,7 +378,7 @@ function ConfigSetValue( $group, $cname, $newValue ){
  * Устанавливает временную зону указанную в настройках сайта
  */
 function SetDefaultTimezone(){
-	@date_default_timezone_set(System::$config['general']['default_timeone']);
+	@date_default_timezone_set(System::config('general/default_timeone'));
 }
 
 function SafeXSS( &$var ){
@@ -2528,10 +2554,10 @@ function ErrorHandler($No, $Error, $File, $Line = -1){
 		8192 => 'Устаревший код'
 	);
 	$Error = '<br /><b>'.$errortype[$No].'</b>: '.$Error.' в <b>'.$File.($Line > -1 ? '</b> на линии <b>'.$Line.'</b>' : '').'.<br />';
-	if(!defined('SETUP_SCRIPT') && System::$config['debug']['log_errors'] == '1'){
+	if(!defined('SETUP_SCRIPT') && System::config('debug/log_errors') == '1'){
 		$ErrorsLog->Write($Error);
 	}
-	if($SITE_ERRORS && isset(System::$config['debug']['php_errors']) && System::$config['debug']['php_errors'] == '1'){
+	if($SITE_ERRORS && System::config('debug/php_errors')){
 		System::$Errors[] = $Error."\n";
 	}
 	if(PRINT_ERRORS){

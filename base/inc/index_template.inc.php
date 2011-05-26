@@ -14,10 +14,10 @@ class Page extends PageTemplate{
 
 	public function InitPage(){
 		$this->InitPageTemplate();
-		$this->SetGZipCompressionEnabled(System::$config['general']['gzip_status'] == '1');
+		$this->SetGZipCompressionEnabled(System::config('general/gzip_status') == '1');
 
-		$TemplateDir = System::$config['tpl_dir'].System::$config['general']['site_template'].'/';
-		$DefaultTemplateDir = System::$config['tpl_dir'].System::$config['general']['default_template'].'/';
+		$TemplateDir = System::config('tpl_dir').System::config('general/site_template').'/';
+		$DefaultTemplateDir = System::config('tpl_dir').System::config('general/default_template').'/';
 
 		if(defined('MOD_THEME') && MOD_THEME != '' && (is_file($TemplateDir.'themes/'.MOD_THEME) || is_file($DefaultTemplateDir.'themes/'.MOD_THEME))){
 			$ThemeFile = 'themes/'.MOD_THEME;
@@ -39,10 +39,10 @@ class Page extends PageTemplate{
 		if(defined('MOD_DIR')){
 			$this->SetVar('template', 'mdir', MOD_DIR);
 		}
-		$this->SetVar('template', 'site_name', System::$config['general']['site_name']);
-		$this->SetVar('template', 'site_slogan', System::$config['general']['site_slogan']);
-		$this->SetVar('template', 'site_email', System::$config['general']['site_email']);
-		$this->SetVar('template', 'copyright', System::$config['general']['_copyright']);
+		$this->SetVar('template', 'site_name', System::config('general/site_name'));
+		$this->SetVar('template', 'site_slogan', System::config('general/site_slogan'));
+		$this->SetVar('template', 'site_email', System::config('general/site_email'));
+		$this->SetVar('template', 'copyright', System::config('general/_copyright'));
 
 		$ac = System::user()->AccessLevel();
 		$this->SetVar('template', 'is_system_admin', System::user()->isSuperUser()); // Системный администратор
@@ -137,7 +137,7 @@ class Page extends PageTemplate{
 				$tempvars = array();
 				$childs = array();
 				if($enabled){
-					include(RealPath2(System::$config['blocks_dir'].$block['type']).'/index.php'); // => $vars
+					include(RealPath2(System::config('blocks_dir').$block['type']).'/index.php'); // => $vars
 				}
 				if($enabled){
 					$this->AddUserBlock($area, $vars, $tempvars, $childs, SafeDB(RealPath2($block['template']), 255, str));
@@ -155,7 +155,7 @@ class Page extends PageTemplate{
 		$vars['llogin'] = 'Логин';
 		$vars['lpass'] = 'Пароль';
 		$vars['lremember'] = 'Запомнить меня';
-		$vars['registration'] = System::$config['user']['registration'] == 'on';
+		$vars['registration'] = System::config('user/registration') == 'on';
 		$vars['lregistration'] = 'Регистрация';
 		$vars['registration_url'] = Ufu('index.php?name=user&op=registration', 'user/{op}/');
 		$vars['lsubmit'] = 'Вход';
@@ -170,11 +170,11 @@ class Page extends PageTemplate{
 		}
 		System::user()->OnlineProcess($title);
 		if(System::user()->Auth){
-			System::user()->ChargePoints(System::$config['points']['browsing']);
+			System::user()->ChargePoints(System::config('points/browsing'));
 		}
 		$this->ViewBlocks();
 		//Добавляем информацию к странице
-		$this->SetVar('template', 'showinfo', System::$config['general']['show_script_time']);
+		$this->SetVar('template', 'showinfo', System::config('general/show_script_time'));
 		$this->SetVar('template', 'info', '');
 		$this->SetVar('template', 'errors_text', implode(System::$Errors));
 		$this->EchoAll();

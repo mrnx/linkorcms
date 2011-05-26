@@ -52,6 +52,12 @@ function AdminPages( $action ){
 		case 'savelink':
 			AdminPagesLinkSave();
 			break;
+		case 'cat':
+			AdminPagesCatEditor();
+			break;
+		case 'savecat':
+			AdminPagesCatSave();
+			break;
 		case 'changestatus':
 			AdminPagesChangeStatus();
 			break;
@@ -73,7 +79,7 @@ function AdminPages( $action ){
 			return true;
 			break;
 		default:
-			AdminPagesMain();
+			AdminPagesAjaxTree();
 	}
 }
 
@@ -96,9 +102,8 @@ function AdminPagesClearCache(){
  * @return int
  */
 function AdminPagesNewOrder( $parent_id ){
-	global $db;
-	$db->Select('pages', "`parent`='$parent_id'");
-	return $db->NumRows();
+	System::database()->Select('pages', "`parent`='$parent_id'");
+	return System::database()->NumRows();
 }
 
 /**
@@ -208,13 +213,13 @@ function AdminPagesAjaxTree(){
 	$elements = array();
 	if($parent == 0){
 		$func = '';
-		$func .= SpeedButton('Добавить дочернюю страницу', '#', 'images/admin/page_add.png');
-		$func .= SpeedButton('Добавить дочернюю ссылку', '#', 'images/admin/link_add.png');
-		$func .= SpeedButton('Добавить дочернюю категорию', '#', 'images/admin/folder_add.png');
+		$func .= SpeedButton('Добавить дочернюю страницу', ADMIN_FILE.'?exe=pages&a=editor', 'images/admin/page_add.png');
+		$func .= SpeedButton('Добавить дочернюю ссылку', ADMIN_FILE.'?exe=pages&a=link', 'images/admin/link_add.png');
+		$func .= SpeedButton('Добавить дочернюю категорию', ADMIN_FILE.'?exe=pages&a=cat', 'images/admin/folder_add.png');
 		$site_node = array(
 			'id'=>'0',
-			'title'=> System::$config['general']['site_name'],
-			'icon'=> 'images/globe_16.png',
+			'title'=> System::config('general/site_name'),
+			'icon'=> 'images/globe.png',
 			'func'=>$func,
 			'isnode'=>true,
 			'opened'=>true,
@@ -230,7 +235,7 @@ function AdminPagesAjaxTree(){
 			$type = 'Страница';
 			$counter = SafeDB($page['hits'], 11, int);
 			$editlink = ADMIN_FILE.'?exe=pages&a=editor&id='.$id;
-		}else{
+		}elseif($page['type'] == 'link'){
 			$link = SafeDB($page['text'], 255, str);
 			if(substr($link, 0, 6) == 'mod://'){
 				$link = Ufu('index.php?name='.substr($link, 6), '{name}/');
@@ -239,17 +244,23 @@ function AdminPagesAjaxTree(){
 			$type = 'Ссылка';
 			$counter = '-&nbsp;';
 			$editlink = ADMIN_FILE.'?exe=pages&a=link&id='.$id;
+		}else{
+			$link = Ufu('index.php?name=pages&file='.SafeDB($page['link'], 255, str), 'pages/{file}.html');
+			$icon = 'images/folder.png';
+			$type = 'Категория';
+			$counter = '-&nbsp;';
+			$editlink = ADMIN_FILE.'?exe=pages&a=cat&id='.$id;
 		}
 		$func = '';
-		$func .= System::admin()->SpeedButton('Добавить дочернюю страницу', '#', 'images/admin/page_add.png');
-		$func .= System::admin()->SpeedButton('Добавить дочернюю ссылку', '#', 'images/admin/link_add.png');
-		$func .= System::admin()->SpeedButton('Добавить дочернюю категорию', '#', 'images/admin/folder_add.png');
+		$func .= System::admin()->SpeedButton('Добавить дочернюю страницу', ADMIN_FILE.'?exe=pages&a=editor&parent='.$id, 'images/admin/page_add.png');
+		$func .= System::admin()->SpeedButton('Добавить дочернюю ссылку', ADMIN_FILE.'?exe=pages&a=link&parent='.$id, 'images/admin/link_add.png');
+		$func .= System::admin()->SpeedButton('Добавить дочернюю категорию', ADMIN_FILE.'?exe=pages&a=cat&parent='.$id, 'images/admin/folder_add.png');
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedStatus('Скрыть из меню', 'Показать в меню', ADMIN_FILE.'?exe=pages&a=changemenu&id='.$id.'&ajax', $page['showinmenu'] == '1', 'images/menu_enabled.png', 'images/menu_disabled.png');
 		$func .= System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=pages&a=changestatus&id='.$id.'&ajax', $page['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-		//$func .= System::admin()->SpeedConfirm('Удалить', System::$config['admin_file'].'?exe=pages&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
+		//$func .= System::admin()->SpeedConfirm('Удалить', System::config('admin_file').'?exe=pages&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
 		$func .= System::admin()->SpeedAjax(
 			'Удалить',
 			'images/admin/delete.png',
@@ -382,8 +393,12 @@ function AdminPagesRenderPage( $title, $pagetext, $copy, $auto_br, $info ){
  */
 function AdminPagesEditor(){
 	global $config, $db, $site;
+
 	$link = '';
 	$parent_id = -1;
+	if(isset($_GET['parent'])){
+		$parent_id = SafeEnv($_GET['parent'], 11, int);
+	}
 	$id = -1;
 	$title = '';
 	$text = '';
@@ -577,6 +592,9 @@ function AdminPagesLinkEditor(){
 	$id = -1;
 	$title = '';
 	$parent_id = -1;
+	if(isset($_GET['parent'])){
+		$parent_id = SafeEnv($_GET['parent'], 11, int);
+	}
 	$view = array(1 => false, 2 => false, 3 => false, 4 => false);
 	$enabled = array(false, false);
 	$showinmenu = array(false, false);
@@ -586,7 +604,7 @@ function AdminPagesLinkEditor(){
 		$showinmenu[1] = true;
 		$form_title = 'Добавление ссылки';
 		$submit = 'Добавить';
-	} else{
+	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Select('pages', "`id`='$id'");
 		$pg = $db->FetchRow();
@@ -661,6 +679,87 @@ function AdminPagesLinkSave(){
 	}
 	AdminPagesClearCache();
 	GO($config['admin_file'].'?exe=pages');
+}
+
+/**
+ * Редактирование категории
+ * @return void
+ */
+function AdminPagesCatEditor(){
+	$link = '';
+	$id = -1;
+	$title = '';
+	$parent_id = -1;
+	if(isset($_GET['parent'])){
+		$parent_id = SafeEnv($_GET['parent'], 11, int);
+	}
+	$view = array(1 => false, 2 => false, 3 => false, 4 => false);
+	$enabled = array(false, false);
+	$showinmenu = array(false, false);
+	if(!isset($_GET['id'])){
+		$view[4] = true;
+		$enabled[1] = true;
+		$showinmenu[1] = true;
+		$form_title = 'Добавление категории';
+		$submit = 'Добавить';
+	}else{
+		$id = SafeEnv($_GET['id'], 11, int);
+		System::database()->Select('pages', "`id`='$id'");
+		$pg = System::database()->FetchRow();
+		$parent_id = SafeEnv($pg['parent'], 11, int);
+		$title = SafeEnv($pg['title'], 255, str);
+		$view[SafeDB($pg['view'], 1, int)] = true;
+		$enabled[SafeDB($pg['enabled'], 1, int)] = true;
+		$showinmenu[SafeDB($pg['showinmenu'], 1, int)] = true;
+		$form_title = 'Редактирование категории';
+		$submit = 'Сохранить';
+	}
+	# Возможные родительские страницы
+	$tree = new Tree('pages');
+	$cats_data = array();
+	$cats_data = $tree->GetCatsData($parent_id, false, true, $id, true);
+	#Кто видит
+	$visdata = array();
+	System::site()->DataAdd($visdata, 'all', 'Все', $view['4']);
+	System::site()->DataAdd($visdata, 'members', 'Только пользователи', $view['2']);
+	System::site()->DataAdd($visdata, 'guests', 'Только гости', $view['3']);
+	System::site()->DataAdd($visdata, 'admins', 'Только администраторы', $view['1']);
+
+	FormRow('Заголовок', System::site()->Edit('title', $title, false, 'style="width:400px;" maxlength="255"'));
+	FormRow('Родительская страница', System::site()->Select('parent_id', $cats_data));
+	FormRow('Кто видит', System::site()->Select('view', $visdata));
+	FormRow('Показать в меню', System::site()->Radio('showinmenu', 'off', $showinmenu[0]).'Нет&nbsp;&nbsp;'.System::site()->Radio('showinmenu', 'on', $showinmenu[1]).'Да');
+	FormRow('Включить', System::site()->Radio('enabled', 'off', $enabled[0]).'Нет&nbsp;&nbsp;'.System::site()->Radio('enabled', 'on', $enabled[1]).'Да');
+	AddCenterBox($form_title);
+	AddForm('<form action="'.ADMIN_FILE.'?exe=pages&a=savecat'.($id != -1 ? '&id='.$id : '').'" method="post">', System::site()->Button('Отмена', 'onclick="history.go(-1)"').System::site()->Submit($submit));
+}
+
+/**
+ * Сохранение изменений категории
+ * @return void
+ */
+function AdminPagesCatSave(){
+	$parent_id = SafeEnv($_POST['parent_id'], 11, int);
+	$title = SafeEnv($_POST['title'], 255, str);
+	$view = ViewLevelToInt($_POST['view']);
+	$enabled = EnToInt($_POST['enabled']);
+	$showinmenu = EnToInt($_POST['showinmenu']);
+	if(isset($_GET['id'])){
+		$id = SafeEnv($_GET['id'], 11, int);
+		System::database()->Select('pages', "`id`='".$id."'");
+		$page = System::database()->FetchRow();
+		$order = SafeDB($page['order'], 11, int);
+	}else{
+		$order = AdminPagesNewOrder($parent_id);
+	}
+	$values = Values('', $parent_id, $title, '', '', time(), time(), '0', '0', '', SafeEnv(Translit($title, true), 255, str), $view, $enabled, '', '', '', 'cat', $order, $showinmenu);
+	if(isset($_GET['id'])){ // Редатирование
+		System::database()->Update('pages', $values, "`id`='".$id."'", true);
+	}else{
+		System::database()->Insert('pages', $values);
+	}
+	AdminPagesClearCache();
+	GO(ADMIN_FILE.'?exe=pages');
 }
 
 /**

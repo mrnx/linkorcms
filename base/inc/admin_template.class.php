@@ -43,12 +43,12 @@ class AdminPage extends PageTemplate{
 	public function Init( $PageTemplate ){
 		$ajax = IsAjax();
 		$this->InitPageTemplate($ajax);
-		$this->SetGZipCompressionEnabled(System::$config['general']['gzip_status'] == '1');
+		$this->SetGZipCompressionEnabled(System::config('general/gzip_status') == '1');
 
 		// Папка с шаблоном
 		$Template = 'default_admin'; // fixme: Вынести в конфигурацию сата
-		$TemplateDir = System::$config['tpl_dir'].$Template.'/';
-		$DefaultTemplateDir = System::$config['tpl_dir'].'default_admin'.'/'; // fixme: доработать
+		$TemplateDir = System::config('tpl_dir').$Template.'/';
+		$DefaultTemplateDir = System::config('tpl_dir').'default_admin'.'/'; // fixme: доработать
 
 		if($ajax){ // Загрузка страницы посредством AJAX запроса
 			$this->InitStarkyt($TemplateDir, $PageTemplate);
@@ -84,7 +84,7 @@ class AdminPage extends PageTemplate{
 		$vars['cms_version_id']         = CMS_VERSION_ID;
 		$vars['cms_build']              = CMS_BUILD;
 		$vars['cms_version_str']        = CMS_VERSION_STR;
-		$vars['site']                   = System::$config['general']['site_name'];
+		$vars['site']                   = System::config('general/site_name');
 		$vars['errors_text']            = '';
 		$vars['tool_menu_block']        = false;
 		$vars['content_block']          = false;
@@ -202,7 +202,7 @@ class AdminPage extends PageTemplate{
 		$ImgSrc = ($Status ? $EnabledImage : $DisabledImage);
 		$Title = ($Status ? $EnabledTitle : $DisabledTitle);
 		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); return false;";
-		$s = '<a title="'.$Title.'" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
 		//echo $s."\n\n";
 		return $s;
 	}
@@ -407,7 +407,7 @@ class AdminPage extends PageTemplate{
 	public function TEcho(){
 		global $script_start_time;
 		System::user()->OnlineProcess($this->Title);
-		$this->BlockTemplate->vars['showinfo'] = System::$config['general']['show_script_time'];
+		$this->BlockTemplate->vars['showinfo'] = System::config('general/show_script_time');
 		if(IsAjax()){
 			$this->BlockTemplate->vars['head_items'] = $this->GenerateHead();
 		}

@@ -9,7 +9,7 @@ define('ADMIN_SCRIPT', true);
 define('VALID_RUN', true);
 
 require 'config/init.php'; // Конфигурация и инициализация
-define('ADMIN_FILE', System::$config['admin_file']); // Ссылка на админ-панель
+define('ADMIN_FILE', System::config('admin_file')); // Ссылка на админ-панель
 
 // Проверка пользователя
 if(!($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && System::user()->AllowCookie('admin', true))){
@@ -72,7 +72,7 @@ if(!System::user()->CheckAccess2($ModuleName, $ModuleName)){
 }
 
 // Вспомогательные константы
-define('MOD_DIR', System::$config['mod_dir'].$ModuleName.'/');
+define('MOD_DIR', System::config('mod_dir').$ModuleName.'/');
 define('MOD_FILE', MOD_DIR.'admin.php');
 
 // Подключаем модуль

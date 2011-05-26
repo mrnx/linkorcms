@@ -76,7 +76,7 @@ if(!$system['no_templates']){
 
 // Сообщения
 if(!$system['no_messages']){
-	include_once(System::$config['inc_dir'].'messages.inc.php');
+	include_once(System::config('inc_dir').'messages.inc.php');
 }
 
 // Подключаем модуль

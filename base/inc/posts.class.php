@@ -137,8 +137,8 @@ class Posts{
 		$this->PostsTable = $PostsTable;
 		$this->AlloyComments = $AlloyComments;
 
-		if(isset(System::$config['comments'])){
-			$config = System::$config['comments'];
+		if(System::config('comments')){
+			$config = System::config('comments');
 			$this->FloodTime = $config['floodtime'];
 			$this->PostMaxLength = $config['maxlength'];
 			$this->GuestPost = $config['guestpost'];
@@ -323,7 +323,7 @@ class Posts{
 
 		// Инициализируем навигацию
 		$comm_nav_obj = new Navigation($Page, $NavigationBlockName);
-		$comm_nav_obj->FrendlyUrl = System::$config['general']['ufu'];
+		$comm_nav_obj->FrendlyUrl = System::config('general/ufu');
 		if(!isset($this->PostsTree[0])){
 			$comm_nav_obj->DisableNavigation();
 		}else{
@@ -448,7 +448,7 @@ class Posts{
 		}else{
 			System::site()->AddBlock('smilies', true, true, 'smile');
 			foreach($smilies as $smile){
-				$smile['file'] = System::$config['general']['smilies_dir'].$smile['file'];
+				$smile['file'] = System::config('general/smilies_dir').$smile['file'];
 				$smile['code'] = SafeDB($smile['code'], 255, str);
 				$sub_codes = explode(',', $smile['code']);
 				$smile['code'] = $sub_codes[0];
