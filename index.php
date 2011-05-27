@@ -35,7 +35,7 @@ $db->Select('modules', "`enabled`='1' and `folder`='$ModuleName'"); // Проверяем
 
 // Установлен такой модуль?
 if($db->NumRows() == 0){
-	include $config['inc_dir'].'index_template.inc.php';
+	System::site()->InitPage();
 	System::site()->AddTextBox('Ошибка', '<center>Данная страница ('.SafeDB($ModuleName, 255, str).') не существует или не доступна в данный момент.</center>');
 	System::site()->TEcho();
 	exit;
@@ -44,7 +44,7 @@ if($db->NumRows() == 0){
 // Проверка на доступ
 $mod = $db->FetchRow();
 if(!$user->AccessIsResolved($mod['view'], $userAccess)){
-	include $config['inc_dir'].'index_template.inc.php';
+	System::site()->InitPage();
 	System::site()->AddTextBox('Ошибка', '<center>Доступ запрещен.</center>');
 	System::site()->TEcho();
 	exit;
@@ -76,7 +76,7 @@ if(!$system['no_templates']){
 
 // Сообщения
 if(!$system['no_messages']){
-	include_once(System::$config['inc_dir'].'messages.inc.php');
+	include_once(System::config('inc_dir').'messages.inc.php');
 }
 
 // Подключаем модуль

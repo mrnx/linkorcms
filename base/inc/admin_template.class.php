@@ -4,13 +4,6 @@
 # © 2011 Александр Галицкий (linkorcms@yandex.ru)
 # Назначение: Шаблонизатор для админ-панели
 
-if(!defined('VALID_RUN')){
-	header("HTTP/1.1 404 Not Found");
-	exit;
-}
-
-include_once System::$config['inc_dir'].'page_template.class.php';
-
 class AdminPage extends PageTemplate{
 
 	public $SideBarMenuLinks = array();
@@ -50,12 +43,12 @@ class AdminPage extends PageTemplate{
 	public function Init( $PageTemplate ){
 		$ajax = IsAjax();
 		$this->InitPageTemplate($ajax);
-		$this->SetGZipCompressionEnabled(System::$config['general']['gzip_status'] == '1');
+		$this->SetGZipCompressionEnabled(System::config('general/gzip_status') == '1');
 
 		// Папка с шаблоном
 		$Template = 'default_admin'; // fixme: Вынести в конфигурацию сата
-		$TemplateDir = System::$config['tpl_dir'].$Template.'/';
-		$DefaultTemplateDir = System::$config['tpl_dir'].'default_admin'.'/'; // fixme: доработать
+		$TemplateDir = System::config('tpl_dir').$Template.'/';
+		$DefaultTemplateDir = System::config('tpl_dir').'default_admin'.'/'; // fixme: доработать
 
 		if($ajax){ // Загрузка страницы посредством AJAX запроса
 			$this->InitStarkyt($TemplateDir, $PageTemplate);
@@ -91,7 +84,7 @@ class AdminPage extends PageTemplate{
 		$vars['cms_version_id']         = CMS_VERSION_ID;
 		$vars['cms_build']              = CMS_BUILD;
 		$vars['cms_version_str']        = CMS_VERSION_STR;
-		$vars['site']                   = System::$config['general']['site_name'];
+		$vars['site']                   = System::config('general/site_name');
 		$vars['errors_text']            = '';
 		$vars['tool_menu_block']        = false;
 		$vars['content_block']          = false;
@@ -133,7 +126,8 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет в блок обычный текст
-	 * @param <type> $text
+	 * @param string $text
+	 * @return void
 	 */
 	public function AddText( $text ){
 		$this->BlockContents->NewSubBlock(true, array(), array(), '', $text);
@@ -185,7 +179,7 @@ class AdminPage extends PageTemplate{
 	 * @return string
 	 */
 	public function SpeedConfirm( $Title, $Url, $ImgSrc, $Confirm = 'Уверены?' ){
-		$OnClick = "SpeedConfirmButtonClick('$Confirm', this)";
+		$OnClick = "return Admin.Buttons.Confirm('$Confirm', this)";
 		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
 	}
 
@@ -200,10 +194,17 @@ class AdminPage extends PageTemplate{
 	 * @return string
 	 */
 	public function SpeedStatus( $EnabledTitle, $DisabledTitle, $AjaxUrl, $Status, $EnabledImage, $DisabledImage ){
+		$EnabledTitle = addslashes($EnabledTitle);
+		$DisabledTitle = addslashes($DisabledTitle);
+		$AjaxUrl = addslashes($AjaxUrl);
+		$EnabledImage = addslashes($EnabledImage);
+		$DisabledImage = addslashes($DisabledImage);
 		$ImgSrc = ($Status ? $EnabledImage : $DisabledImage);
 		$Title = ($Status ? $EnabledTitle : $DisabledTitle);
-		$OnClick = "SpeedStatusButtonClick('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); return false;";
-		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); return false;";
+		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+		//echo $s."\n\n";
+		return $s;
 	}
 
 	/**
@@ -215,6 +216,15 @@ class AdminPage extends PageTemplate{
 	 */
 	public function SpeedFunction( $Title, $ImgSrc, $OnClickJavaScript ){
 		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClickJavaScript.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+	}
+
+	public function SpeedAjax($Title, $Icon, $AjaxUrl, $ConfirmMessage = '', $OnStart = '', $OnSuccess = '', $Method = 'post', $Params = ''){
+		$AjaxUrl = addslashes($AjaxUrl);
+		$Method = addslashes($Method);
+		$Params = addslashes($Params);
+		$ConfirmMessage = addslashes($ConfirmMessage);
+		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMessage',  this); return false;";
+		return '<a title="'.$Title.'" href="#" class="button" onclick="return false;" onmousedown="'.$OnClick.'"><img src="'.$Icon.'" alt="'.$Title.'" /></a>';
 	}
 
 	/**
@@ -298,7 +308,7 @@ class AdminPage extends PageTemplate{
 	 */
 	function AddAdminMenu(){
 		if(IsAjax()) return;
-		$menu = System::db()->Select('admin_menu', "`enabled`='1'");
+		$menu = System::database()->Select('admin_menu', "`enabled`='1'");
 		SortArray($menu, 'order');
 		$items = array(); // Элементы меню по родительским индексам
 		foreach($menu as &$item){
@@ -397,7 +407,7 @@ class AdminPage extends PageTemplate{
 	public function TEcho(){
 		global $script_start_time;
 		System::user()->OnlineProcess($this->Title);
-		$this->BlockTemplate->vars['showinfo'] = System::$config['general']['show_script_time'];
+		$this->BlockTemplate->vars['showinfo'] = System::config('general/show_script_time');
 		if(IsAjax()){
 			$this->BlockTemplate->vars['head_items'] = $this->GenerateHead();
 		}

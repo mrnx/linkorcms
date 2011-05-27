@@ -160,19 +160,6 @@
 					arrow = '<div class="admin_menu_item_arrow"></div>';
 				}
 
-//				if(menuData[i].admin){
-//					admin = "Admin('"+menuData[i].admin+"', window.adminAjaxLinks); return false;";
-//					click = 'return false;';
-//					target = '';
-//				}else if(menuData[i].url){
-//					admin = '';
-//					click = '';
-//
-//					if(menuData[i].blank){
-//						target = 'target="_blank"';
-//					}
-//				}
-
 				html = '<div class="admin_menu_item">';
 				link_body = icon+arrow+'<div class="admin_menu_item_title">'+menuData[i].title+'</div>';
 

@@ -12,6 +12,7 @@ $tempvars['content'] = 'block/content/menu.html';
 
 $uri = $_SERVER['REQUEST_URI'];
 
+// Кэширование
 $bcache = LmFileCache::Instance();
 $bcache_name = 'menu'.$user->AccessLevel();
 if($bcache->HasCache('block', $bcache_name)){
@@ -33,6 +34,7 @@ if($bcache->HasCache('block', $bcache_name)){
 	return;
 }
 
+// Выборка
 $where = "`enabled`='1'";
 $w2 = GetWhereByAccess('view');
 if($w2 != ''){
@@ -40,19 +42,18 @@ if($w2 != ''){
 }
 $pages = $db->Select('pages', $where);
 SortArray($pages, 'order');
-
 $catsPid = array();
 $catsId = array();
 foreach($pages as $page){
 	$catsPid[$page['parent']][] = $page;
 }
-
 if(isset($catsPid[0])){
 	$pages = $catsPid[0];
 }else{
 	$pages = array();
 }
 
+// Генерация меню
 $block_menu_items = Starkyt::CreateBlock(true, true, 'menu_item');
 foreach($pages as $page){
 	if($page['showinmenu'] == '1'){
@@ -63,10 +64,13 @@ foreach($pages as $page){
 			if(substr($link, 0, 6) == 'mod://'){
 				$link = Ufu('index.php?name='.substr($link, 6), '{name}/');
 			}
+		}else{
+			$link = false;
 		}
-		$vars_item = array('title'=>$page['title'], 'link'=> str_replace('&amp;', '&', $link), 'subitems'=>false);
-		$vars_item['selected'] = (strpos($uri, $link) !== false);
-		$subitem_selected = false;
+		$link = str_replace('&amp;', '&', $link);
+		$vars_item = array('title'=>$page['title'], 'link'=> $link, 'subitems'=>false);
+		$vars_item['selected'] = $link != '' && (strpos($uri, $link) !== false);
+		$selected = false;
 
 		$block_menu_subitems = Starkyt::CreateBlock(true, true, 'menu_subitem');
 		if(isset($catsPid[$page['id']]) && $page['showinmenu'] == '1'){
@@ -81,18 +85,20 @@ foreach($pages as $page){
 						if(substr($link, 0, 6) == 'mod://'){
 							$link = Ufu('index.php?name='.substr($link, 6), '{name}/');
 						}
+					}else{
+						continue;
 					}
-					$selected = (strpos($uri, $link) !== false);
-					if(!$subitem_selected && $selected){
-						$subitem_selected = true;
+					$link = str_replace('&amp;', '&', $link);
+					$vars_subitem = array('title'=>$subpage['title'], 'link'=>$link);
+					$vars_subitem['selected'] = (strpos($uri, $link) !== false);
+					if(!$selected && $vars_subitem['selected']){
+						$selected = true;
 					}
-					$vars_subitem = array('title'=>$subpage['title'], 'link'=>str_replace('&amp;', '&', $link));
-					$vars_subitem['selected'] = $selected;
 					$block_menu_subitems['sub'][] = Starkyt::CreateSubBlock(true, $vars_subitem);
 				}
 			}
 		}
-		$vars_item['selected'] = $vars_item['selected'] || $subitem_selected;
+		$vars_item['selected'] = $vars_item['selected'] || $selected;
 		$block_menu_items['sub'][] = Starkyt::CreateSubBlock(true, $vars_item, array(), '', '', array('block_menu_subitems'=>$block_menu_subitems));
 	}
 }

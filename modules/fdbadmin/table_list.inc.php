@@ -16,8 +16,8 @@ if(isset($_GET['dec'])) $sort_dec = true;
 SortArray($tables, $sort, $sort_dec);
 
 $top_text = '';
-$top_text .= '<strong>БД:</strong> '.System::db()->SelectDbName.'<br>';
-if(System::db()->Name == 'FilesDB'){
+$top_text .= '<strong>БД:</strong> '.System::database()->SelectDbName.'<br>';
+if(System::database()->Name == 'FilesDB'){
 	$mode = 'Файловая база данных';
 }else{
 	$mode = 'MySQL';

@@ -92,19 +92,19 @@ class PageTemplate extends Starkyt{
 		@Header('Pragma: no-cache');
 
 		if(!$Disabled){
-			$this->InitStarkyt(System::$config['inc_dir'], 'page.php');
+			$this->InitStarkyt(System::config('inc_dir'), 'page.php');
 			$this->AddBlock('head');
 			$this->Charset = 'windows-1251'; // FIXME: Перенести куда нибудь!
 			$this->Generator = CMS_VERSION_STR;
-			if(isset(System::$config['meta_tags'])){
-				$this->Author = System::$config['meta_tags']['author'];
-				$this->Copyright = System::$config['meta_tags']['copyright'];
-				$this->Description = System::$config['meta_tags']['description'];
-				$this->KeyWords = System::$config['meta_tags']['key_words'];
-				$this->Robots = System::$config['meta_tags']['robots'];
-				$this->RevisitAfter = System::$config['meta_tags']['revisit_after'];
-				$this->Icon = System::$config['meta_tags']['favicon'];
-				$this->OtherMeta = System::$config['meta_tags']['other_meta'];
+			if(System::config('meta_tags')){
+				$this->Author = System::config('meta_tags/author');
+				$this->Copyright = System::config('meta_tags/copyright');
+				$this->Description = System::config('meta_tags/description');
+				$this->KeyWords = System::config('meta_tags/key_words');
+				$this->Robots = System::config('meta_tags/robots');
+				$this->RevisitAfter = System::config('meta_tags/revisit_after');
+				$this->Icon = System::config('meta_tags/favicon');
+				$this->OtherMeta = System::config('meta_tags/other_meta');
 			}
 			$this->Disabled = $Disabled;
 		}
@@ -315,7 +315,6 @@ class PageTemplate extends Starkyt{
 			}
 		}
 		// Подключаем JQuery и плагины
-		include_once 'scripts/jquery/jquery.php';
 		if($this->JQueryFile != ''){
 			$Head .= '<script src="'.$this->JQueryFile.'" type="text/javascript"></script>'."\n";
 			foreach($this->JQueryPlugins as $filename){
@@ -351,11 +350,11 @@ class PageTemplate extends Starkyt{
 	 */
 	public function GenerateTitle(){
 		if(defined('INDEX_PHP') && INDEX_PHP == true){
-			$title = System::$config['general']['site_name'].(System::$config['general']['main_title'] != '' ? ' - '.System::$config['general']['main_title'] : '');
+			$title = System::config('general/site_name').(System::config('general/main_title') != '' ? ' - '.System::config('general/main_title') : '');
 		}elseif($this->SeoTitle != ''){
-			$title = $this->SeoTitle.' - '.System::$config['general']['site_name'];
+			$title = $this->SeoTitle.' - '.System::config('general/site_name');
 		}else{
-			$title = ($this->Title != '' ? $this->Title.' - ' : '').System::$config['general']['site_name'];
+			$title = ($this->Title != '' ? $this->Title.' - ' : '').System::config('general/site_name');
 		}
 		return $title;
 	}
@@ -385,16 +384,16 @@ class PageTemplate extends Starkyt{
 		if(ob_get_level() > 0 && ob_get_length() > 0){
 			$contents = ob_get_clean().$contents;
 		}
-		if(!defined('SETUP_SCRIPT') && System::$config['general']['show_script_time']){
+		if(!defined('SETUP_SCRIPT') && System::config('general/show_script_time')){
 			$end_time = GetMicroTime();
 			$end_time = $end_time - SCRIPT_START_TIME;
-			$php_time = $end_time - System::db()->QueryTotalTime;
+			$php_time = $end_time - System::database()->QueryTotalTime;
 			$persent = 100 / $end_time;
 			$memory = memory_get_peak_usage(true);
 			$MB = $memory / 1024 / 1024;
 			$info = 'Страница сгенерирована за '.sprintf("%01.4f", $end_time).' сек. Шаблонизатор: '.sprintf("%01.4f", $end - $start).' сек.<br>'
 					.'Память: '.sprintf("%01.2f", $MB).'М./'.get_cfg_var('memory_limit').'. '
-			        .'БД: '.System::db()->NumQueries.' запросов за '.sprintf("%01.4f", System::db()->QueryTotalTime).' сек. ( PHP: '.round($persent * $php_time).'% БД: '.round($persent * System::db()->QueryTotalTime).'% )';
+			        .'БД: '.System::database()->NumQueries.' запросов за '.sprintf("%01.4f", System::database()->QueryTotalTime).' сек. ( PHP: '.round($persent * $php_time).'% БД: '.round($persent * System::database()->QueryTotalTime).'% )';
 		}else{
 			$info = '';
 		}

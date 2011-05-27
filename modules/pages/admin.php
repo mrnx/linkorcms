@@ -13,7 +13,6 @@ if(!$user->CheckAccess2('pages', 'pages')){
 }
 
 $text = '';
-include_once ($config['inc_dir'].'tree.class.php');
 include_once ($config['inc_dir'].'configuration/functions.php');
 
 if(isset($_GET['a'])){
@@ -22,21 +21,24 @@ if(isset($_GET['a'])){
 	AdminPages('main');
 }
 
-function AdminPages( $action )
-{
+function AdminPages( $action ){
 	TAddToolLink('Страницы', 'main', 'pages');
-	//TAddToolLink('Ajax структура', 'ajaxtree', 'pages&a=ajaxtree');
 	TAddToolLink('Добавить страницу', 'editor', 'pages&a=editor');
 	TAddToolLink('Добавить ссылку', 'link', 'pages&a=link');
+	TAddToolLink('Добавить категорию', 'cat', 'pages&a=cat');
 	TAddToolLink('Настройки', 'config', 'pages&a=config');
 	TAddToolBox($action);
 	switch($action){
 		case 'main':
-			AdminPagesMain();
-			break;
 		case 'ajaxtree':
 		case 'ajaxnode':
 			AdminPagesAjaxTree();
+			break;
+		case 'ajaxmove':
+			AdminPagesAjaxMove();
+			break;
+		case 'delete':
+			AdminPagesDelete();
 			break;
 		case 'editor':
 			if(isset($_POST['action']) && $_POST['action'] != 'preview'){
@@ -51,14 +53,17 @@ function AdminPages( $action )
 		case 'savelink':
 			AdminPagesLinkSave();
 			break;
+		case 'cat':
+			AdminPagesCatEditor();
+			break;
+		case 'savecat':
+			AdminPagesCatSave();
+			break;
 		case 'changestatus':
 			AdminPagesChangeStatus();
 			break;
 		case 'changemenu':
 			AdminPagesChangeMenu();
-			break;
-		case 'del':
-			AdminPagesDelete();
 			break;
 		case 'resetcounter':
 			AdminPagesResetCounter();
@@ -75,12 +80,15 @@ function AdminPages( $action )
 			return true;
 			break;
 		default:
-			AdminPagesMain();
+			AdminPagesAjaxTree();
 	}
 }
 
-function AdminPagesClearCache()
-{
+/**
+ * Очистка кэша страниц и меню
+ * @return void
+ */
+function AdminPagesClearCache(){
 	$bcache = LmFileCache::Instance();
 	$bcache->Delete('block', 'menu1');
 	$bcache->Delete('block', 'menu2');
@@ -89,15 +97,23 @@ function AdminPagesClearCache()
 	$bcache->Delete('tree', 'pages'); // Нестандартное дерево, используем апи при построении но не используем его при редактировании
 }
 
-function AdminPagesNewOrder( $parent_id )
-{
-	global $db;
-	$db->Select('pages', "`parent`='$parent_id'");
-	return $db->NumRows();
+/**
+ * Определяет количество страниц в категории
+ * @param  $parent_id
+ * @return int
+ */
+function AdminPagesNewOrder( $parent_id ){
+	System::database()->Select('pages', "`parent`='$parent_id'");
+	return System::database()->NumRows();
 }
 
-function AdminPagesRender( $row, $level )
-{
+/**
+ * Генерирует статическую таблицу страниц в виде дерева
+ * @param  $row
+ * @param  $level
+ * @return void
+ */
+function AdminPagesRender( $row, $level ){
 	global $config, $text, $pages_tree;
 	$vi = ViewLevelToStr(SafeDB($row['view'], 1, int));
 	$pid = SafeDB($row['id'], 11, int);
@@ -158,11 +174,10 @@ function AdminPagesRender( $row, $level )
 	$text .= '<tr><td>'.$move_menu.'</td><td>'.$levs.'</td><td>'.$type.'</td><td><a href="'.$link.'" target="_blank">'.SafeDB($row['link'], 255, str).'</a></td><td>'.$counter.'</td><td>'.$vi.'</td><td>'.$menu.'</td><td>'.$st.'</td><td>'.$func.'</td></tr>';
 }
 
-function AdminPagesMain()
-{
+// Главная страница - статическое дерево
+function AdminPagesMain(){
 	global $config, $db, $text;
 	global $pages_tree;
-
 	$pages = $db->Select('pages');
 	SortArray($pages, 'order');
 	$pages_tree = new Tree($pages);
@@ -174,6 +189,10 @@ function AdminPagesMain()
 	AddTextBox('Страницы', $text);
 }
 
+/**
+ * Генерирует Ajax дерево страниц
+ * @return void
+ */
 function AdminPagesAjaxTree(){
 	global $pages_tree;
 
@@ -183,26 +202,25 @@ function AdminPagesAjaxTree(){
 		$parent = 0;
 	}
 
-	include_once('scripts/jquery/jquery.php');
-	include_once('scripts/jquery_ui/ui.php');
+	include_once('scripts/jquery_ui/jquery-ui.php');
 	include_once('scripts/jquery_plugins/plugins.php');
 	include_once('scripts/jquery_nestedSortable/nestedSortable.php');
 	include_once('scripts/jquery_treeview/treeview.php');
 
-	$pages = System::db()->Select('pages');
+	$pages = System::database()->Select('pages');
 	SortArray($pages, 'order');
 	$pages_tree = new Tree($pages);
 
 	$elements = array();
 	if($parent == 0){
 		$func = '';
-		$func .= SpeedButton('Добавить дочернюю страницу', '#', 'images/admin/page_add.png');
-		$func .= SpeedButton('Добавить дочернюю ссылку', '#', 'images/admin/link_add.png');
-		$func .= SpeedButton('Добавить дочернюю категорию', '#', 'images/admin/folder_add.png');
+		$func .= SpeedButton('Добавить дочернюю страницу', ADMIN_FILE.'?exe=pages&a=editor', 'images/admin/page_add.png');
+		$func .= SpeedButton('Добавить дочернюю ссылку', ADMIN_FILE.'?exe=pages&a=link', 'images/admin/link_add.png');
+		$func .= SpeedButton('Добавить дочернюю категорию', ADMIN_FILE.'?exe=pages&a=cat', 'images/admin/folder_add.png');
 		$site_node = array(
 			'id'=>'0',
-			'title'=> System::$config['general']['site_name'],
-			'icon'=> 'images/globe_16.png',
+			'title'=> System::config('general/site_name'),
+			'icon'=> 'images/globe.png',
 			'func'=>$func,
 			'isnode'=>true,
 			'opened'=>true,
@@ -218,7 +236,7 @@ function AdminPagesAjaxTree(){
 			$type = 'Страница';
 			$counter = SafeDB($page['hits'], 11, int);
 			$editlink = ADMIN_FILE.'?exe=pages&a=editor&id='.$id;
-		}else{
+		}elseif($page['type'] == 'link'){
 			$link = SafeDB($page['text'], 255, str);
 			if(substr($link, 0, 6) == 'mod://'){
 				$link = Ufu('index.php?name='.substr($link, 6), '{name}/');
@@ -227,17 +245,31 @@ function AdminPagesAjaxTree(){
 			$type = 'Ссылка';
 			$counter = '-&nbsp;';
 			$editlink = ADMIN_FILE.'?exe=pages&a=link&id='.$id;
+		}else{
+			$link = Ufu('index.php?name=pages&file='.SafeDB($page['link'], 255, str), 'pages/{file}.html');
+			$icon = 'images/folder.png';
+			$type = 'Категория';
+			$counter = '-&nbsp;';
+			$editlink = ADMIN_FILE.'?exe=pages&a=cat&id='.$id;
 		}
 		$func = '';
-		$func .= System::admin()->SpeedButton('Добавить дочернюю страницу', '#', 'images/admin/page_add.png');
-		$func .= System::admin()->SpeedButton('Добавить дочернюю ссылку', '#', 'images/admin/link_add.png');
-		$func .= System::admin()->SpeedButton('Добавить дочернюю категорию', '#', 'images/admin/folder_add.png');
+		$func .= System::admin()->SpeedButton('Добавить дочернюю страницу', ADMIN_FILE.'?exe=pages&a=editor&parent='.$id, 'images/admin/page_add.png');
+		$func .= System::admin()->SpeedButton('Добавить дочернюю ссылку', ADMIN_FILE.'?exe=pages&a=link&parent='.$id, 'images/admin/link_add.png');
+		$func .= System::admin()->SpeedButton('Добавить дочернюю категорию', ADMIN_FILE.'?exe=pages&a=cat&parent='.$id, 'images/admin/folder_add.png');
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedStatus('Скрыть из меню', 'Показать в меню', ADMIN_FILE.'?exe=pages&a=changemenu&id='.$id.'&ajax', $page['showinmenu'] == '1', 'images/menu_enabled.png', 'images/menu_disabled.png');
 		$func .= System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=pages&a=changestatus&id='.$id.'&ajax', $page['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-		$func .= System::admin()->SpeedConfirm('Удалить', System::$config['admin_file'].'?exe=pages&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
+		//$func .= System::admin()->SpeedConfirm('Удалить', System::config('admin_file').'?exe=pages&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
+		$func .= System::admin()->SpeedAjax(
+			'Удалить',
+			'images/admin/delete.png',
+			ADMIN_FILE.'?exe=pages&a=ajaxdelete&id='.$id,
+			'Уверены что хотите удалить? Все дочерние страницы и ссылки так-же будут удалены.',
+			'',
+			'$(\'#tree_container\').lTreeView(\'deleteNode\', '.$id.');'
+		);
 
 		$view = ViewLevelToStr(SafeDB($page['view'], 1, int));
 		$info = "<b>Тип</b>: $type<br />
@@ -248,7 +280,7 @@ function AdminPagesAjaxTree(){
 		$elements[] = array(
 			'id'=>$id,
 			'icon'=>$icon,
-			'title'=>'<b><a href="#" onclick="return Admin(\''.$editlink.'\', '.ADMIN_AJAX_LINKS.');">'.SafeDB($page['title'], 255, str).'</a></b>',
+			'title'=>'<b><a href="'.$editlink.'" onclick="return Admin.CheckButton(2, event);" onmousedown="return Admin.LoadPage(\''.$editlink.'\', event);">'.SafeDB($page['title'], 255, str).'</a></b>',
 			'info'=>$info,
 			'func'=>$func,
 			'isnode'=>isset($pages_tree->Cats[$id]),
@@ -264,20 +296,36 @@ function AdminPagesAjaxTree(){
 	}
 
 	if($parent == 0){
-		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("div#tree_container").lTreeView({}, '.JsonEncode($tree).');</script>');
+		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("#tree_container").lTreeView({move: \''.ADMIN_FILE.'?exe=pages&a=ajaxmove\', del: \''.ADMIN_FILE.'?exe=pages&a=delete\', tree: '.JsonEncode($tree).'});</script>');
 	}else{
 		echo JsonEncode($tree);
 		exit;
 	}
 }
 
-function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$auto_br, &$info, &$view, &$enabled, &$seo_title, &$seo_keywords, &$seo_description, &$showinmenu )
-{
+/**
+ * Проверяет POST данные страницы
+ * @param  $link
+ * @param  $parent_id
+ * @param  $title
+ * @param  $text
+ * @param  $copy
+ * @param  $auto_br
+ * @param  $info
+ * @param  $view
+ * @param  $enabled
+ * @param  $seo_title
+ * @param  $seo_keywords
+ * @param  $seo_description
+ * @param  $showinmenu
+ * @return void
+ */
+function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$auto_br, &$info, &$view, &$enabled, &$seo_title, &$seo_keywords, &$seo_description, &$showinmenu ){
 	$link = htmlspecialchars($_POST['link']);
 	$parent_id = htmlspecialchars($_POST['parent_id']);
 	$title = htmlspecialchars($_POST['title']);
 	if($link == ''){
-		$link = Translit($title, true);
+		$link = Translit4Url($title);
 	}
 	$text = htmlspecialchars($_POST['text']);
 	$copy = htmlspecialchars($_POST['copy']);
@@ -319,8 +367,16 @@ function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$a
 	//
 }
 
-function AdminPagesRenderPage( $title, $pagetext, $copy, $auto_br, $info )
-{
+/**
+ * Выводит предпросмотр страницы
+ * @param  $title
+ * @param  $pagetext
+ * @param  $copy
+ * @param  $auto_br
+ * @param  $info
+ * @return void
+ */
+function AdminPagesRenderPage( $title, $pagetext, $copy, $auto_br, $info ){
 	$text = '<table cellspacing="0" cellpadding="0" boreder="0" width="100%" style="font-size:10pt;">';
 	$text .= '<tr><td align="center"><h1>'.$title.'</h1></td></tr>';
 	if($auto_br){
@@ -332,12 +388,18 @@ function AdminPagesRenderPage( $title, $pagetext, $copy, $auto_br, $info )
 	AddTextBox('Предпросмотр страницы', $text);
 }
 
-function AdminPagesEditor()
-{
+/**
+ * Редактор страницы
+ * @return void
+ */
+function AdminPagesEditor(){
 	global $config, $db, $site;
 
 	$link = '';
 	$parent_id = -1;
+	if(isset($_GET['parent'])){
+		$parent_id = SafeEnv($_GET['parent'], 11, int);
+	}
 	$id = -1;
 	$title = '';
 	$text = '';
@@ -450,14 +512,17 @@ function AdminPagesEditor()
 	AddForm('<form action="'.$config['admin_file'].'?exe=pages&a=editor'.$url.'" method="post">', $site->Hidden('method', $met).$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Select('action', $acts).$site->Submit('Выполнить'));
 }
 
-function AdminPagesSave()
-{
+/**
+ * Сохранение изменений страницы
+ * @return void
+ */
+function AdminPagesSave(){
 	global $db, $config;
-	$link = SafeEnv($_POST['link'], 255, str);
 	$parent_id = SafeEnv($_POST['parent_id'], 11, int);
+	$link = SafeEnv($_POST['link'], 255, str);
 	$title = SafeEnv($_POST['title'], 255, str);
 	if($link == ''){
-		$link = SafeEnv(Translit($title, true), 255, str);
+		$link = SafeEnv(Translit4Url($title), 255, str);
 	}
 	$text = SafeEnv($_POST['text'], 0, str);
 	$copy = SafeEnv($_POST['copy'], 255, str);
@@ -518,13 +583,19 @@ function AdminPagesSave()
 	GO($config['admin_file'].'?exe=pages');
 }
 
-function AdminPagesLinkEditor()
-{
+/**
+ * Редактор ссылок
+ * @return void
+ */
+function AdminPagesLinkEditor(){
 	global $config, $db, $site;
 	$link = '';
 	$id = -1;
 	$title = '';
 	$parent_id = -1;
+	if(isset($_GET['parent'])){
+		$parent_id = SafeEnv($_GET['parent'], 11, int);
+	}
 	$view = array(1 => false, 2 => false, 3 => false, 4 => false);
 	$enabled = array(false, false);
 	$showinmenu = array(false, false);
@@ -534,7 +605,7 @@ function AdminPagesLinkEditor()
 		$showinmenu[1] = true;
 		$form_title = 'Добавление ссылки';
 		$submit = 'Добавить';
-	} else{
+	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Select('pages', "`id`='$id'");
 		$pg = $db->FetchRow();
@@ -575,13 +646,15 @@ function AdminPagesLinkEditor()
 	AddForm('<form action="'.$config['admin_file'].'?exe=pages&a=savelink'.($id != -1 ? '&id='.$id : '').'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($submit));
 }
 
-function AdminPagesLinkSave()
-{
+/**
+ * Сохранение изменений ссылки
+ * @return void
+ */
+function AdminPagesLinkSave(){
 	global $db, $config;
 	$parent_id = SafeEnv($_POST['parent_id'], 11, int);
 	$title = SafeEnv($_POST['title'], 255, str);
 	if($_POST['module'] != ''){
-		//$url = 'index.php?name='.SafeEnv($_POST['module'], 255, str);
 		$url = 'mod://'.SafeEnv($_POST['module'], 255, str);
 	}else{
 		$url = SafeEnv($_POST['link'], 255, str);
@@ -597,7 +670,7 @@ function AdminPagesLinkSave()
 	}else{
 		$order = AdminPagesNewOrder($parent_id);
 	}
-	$values = Values('', $parent_id, $title, $url, '', time(), time(), '0', '0', '', SafeEnv(Translit($title, true), 255, str), $view, $enabled, '', '', '', 'link', $order, $showinmenu);
+	$values = Values('', $parent_id, $title, $url, '', time(), time(), '0', '0', '', SafeEnv(Translit4Url($title), 255, str), $view, $enabled, '', '', '', 'link', $order, $showinmenu);
 	if(isset($_GET['id'])){ // Редатирование
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Update('pages', $values, "`id`='".$id."'", true);
@@ -608,28 +681,114 @@ function AdminPagesLinkSave()
 	GO($config['admin_file'].'?exe=pages');
 }
 
-function AdminPagesChangeStatus()
-{
-	global $config, $db;
-	$db->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	$r = $db->FetchRow();
+/**
+ * Редактирование категории
+ * @return void
+ */
+function AdminPagesCatEditor(){
+	$link = '';
+	$id = -1;
+	$title = '';
+	$parent_id = -1;
+	if(isset($_GET['parent'])){
+		$parent_id = SafeEnv($_GET['parent'], 11, int);
+	}
+	$view = array(1 => false, 2 => false, 3 => false, 4 => false);
+	$enabled = array(false, false);
+	$showinmenu = array(false, false);
+	if(!isset($_GET['id'])){
+		$view[4] = true;
+		$enabled[1] = true;
+		$showinmenu[1] = true;
+		$form_title = 'Добавление категории';
+		$submit = 'Добавить';
+	}else{
+		$id = SafeEnv($_GET['id'], 11, int);
+		System::database()->Select('pages', "`id`='$id'");
+		$pg = System::database()->FetchRow();
+		$parent_id = SafeEnv($pg['parent'], 11, int);
+		$title = SafeEnv($pg['title'], 255, str);
+		$view[SafeDB($pg['view'], 1, int)] = true;
+		$enabled[SafeDB($pg['enabled'], 1, int)] = true;
+		$showinmenu[SafeDB($pg['showinmenu'], 1, int)] = true;
+		$form_title = 'Редактирование категории';
+		$submit = 'Сохранить';
+	}
+	# Возможные родительские страницы
+	$tree = new Tree('pages');
+	$cats_data = array();
+	$cats_data = $tree->GetCatsData($parent_id, false, true, $id, true);
+	#Кто видит
+	$visdata = array();
+	System::site()->DataAdd($visdata, 'all', 'Все', $view['4']);
+	System::site()->DataAdd($visdata, 'members', 'Только пользователи', $view['2']);
+	System::site()->DataAdd($visdata, 'guests', 'Только гости', $view['3']);
+	System::site()->DataAdd($visdata, 'admins', 'Только администраторы', $view['1']);
+
+	FormRow('Заголовок', System::site()->Edit('title', $title, false, 'style="width:400px;" maxlength="255"'));
+	FormRow('Родительская страница', System::site()->Select('parent_id', $cats_data));
+	FormRow('Кто видит', System::site()->Select('view', $visdata));
+	FormRow('Показать в меню', System::site()->Radio('showinmenu', 'off', $showinmenu[0]).'Нет&nbsp;&nbsp;'.System::site()->Radio('showinmenu', 'on', $showinmenu[1]).'Да');
+	FormRow('Включить', System::site()->Radio('enabled', 'off', $enabled[0]).'Нет&nbsp;&nbsp;'.System::site()->Radio('enabled', 'on', $enabled[1]).'Да');
+	AddCenterBox($form_title);
+	AddForm('<form action="'.ADMIN_FILE.'?exe=pages&a=savecat'.($id != -1 ? '&id='.$id : '').'" method="post">', System::site()->Button('Отмена', 'onclick="history.go(-1)"').System::site()->Submit($submit));
+}
+
+/**
+ * Сохранение изменений категории
+ * @return void
+ */
+function AdminPagesCatSave(){
+	$parent_id = SafeEnv($_POST['parent_id'], 11, int);
+	$title = SafeEnv($_POST['title'], 255, str);
+	$view = ViewLevelToInt($_POST['view']);
+	$enabled = EnToInt($_POST['enabled']);
+	$showinmenu = EnToInt($_POST['showinmenu']);
+	if(isset($_GET['id'])){
+		$id = SafeEnv($_GET['id'], 11, int);
+		System::database()->Select('pages', "`id`='".$id."'");
+		$page = System::database()->FetchRow();
+		$order = SafeDB($page['order'], 11, int);
+	}else{
+		$order = AdminPagesNewOrder($parent_id);
+	}
+	$values = Values('', $parent_id, $title, '', '', time(), time(), '0', '0', '', SafeEnv(Translit4Url($title), 255, str), $view, $enabled, '', '', '', 'cat', $order, $showinmenu);
+	if(isset($_GET['id'])){ // Редатирование
+		System::database()->Update('pages', $values, "`id`='".$id."'", true);
+	}else{
+		System::database()->Insert('pages', $values);
+	}
+	AdminPagesClearCache();
+	GO(ADMIN_FILE.'?exe=pages');
+}
+
+/**
+ * Изменение статуса страницы или ссылки
+ * @return void
+ */
+function AdminPagesChangeStatus(){
+	System::database()->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	$r = System::database()->FetchRow();
 	if($r['enabled'] == 1){
 		$en = '0';
 	}else{
 		$en = '1';
 	}
-	$db->Update('pages', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	System::database()->Update('pages', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	AdminPagesClearCache();
 	if(!isset($_GET['ajax'])){
-		GO($config['admin_file'].'?exe=pages');
+		GO(ADMIN_FILE.'?exe=pages');
 	}else{
 		echo 'OK';
 		exit;
 	}
 }
 
-function AdminPagesChangeMenu()
-{
+/**
+ * Изменения статуса отображения страницы или ссылки в меню
+ * @return void
+ */
+function AdminPagesChangeMenu(){
 	global $config, $db;
 	$db->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	$r = $db->FetchRow();
@@ -648,40 +807,48 @@ function AdminPagesChangeMenu()
 	}
 }
 
-function AdminPagesDelete()
-{
-	global $config, $db;
-	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=pages');
+function _DeletePage($id){
+	$sub_items = System::database()->Select('pages', "`parent`='$id'");
+	foreach($sub_items as $item){
+		_DeletePage(SafeEnv($item['id'], 11, int));
 	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$db->Delete('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		AdminPagesClearCache();
-		GO($config['admin_file'].'?exe=pages');
-	}else{
-		$r = $db->Select('pages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		// FIXME Одинаково удаляет ссылки на модули, страницы и просто ссылки...
-		$text = 'Вы действительно хотите удалить страницу <a href="'.Ufu('index.php?name=pages&file='.SafeDB($r[0]['link'], 255, str), 'pages/{file}.html').'" target="_blank">"'.SafeDB($r[0]['title'], 255, str).'"</a><br />'.'<a href="'.$config['admin_file'].'?exe=pages&a=del&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
-	}
+	System::database()->Delete('pages', "`id`='$id'");
 }
 
-function AdminPagesResetCounter()
-{
+/**
+ * Удаление страницы или ссылки
+ * @return void
+ */
+function AdminPagesDelete(){
+	if(!isset($_POST['id'])){
+		exit("ERROR");
+	}
+	_DeletePage(SafeEnv($_POST['id'], 11, int));
+	AdminPagesClearCache();
+	exit("OK");
+}
+
+/**
+ * Сброс счестчика просмотров станицы
+ * @return void
+ */
+function AdminPagesResetCounter(){
 	global $config, $db;
 	$db->Update('pages', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	GO($config['admin_file'].'?exe=pages');
 }
 
-function AdminPagesBSort( $a, $b )
-{
+function AdminPagesBSort( $a, $b ){
 	if($a['order'] == $b['order'])
 		return 0;
 	return ($a['order'] < $b['order']) ? -1 : 1;
 }
 
-function AdminPagesMove()
-{
+/**
+ * Перемещение страницы вверх или вниз
+ * @return void
+ */
+function AdminPagesMove(){
 	global $config, $db;
 	$move = SafeEnv($_GET['to'], 4, str); // up, down
 	$id = SafeEnv($_GET['id'], 11, int);
@@ -723,6 +890,50 @@ function AdminPagesMove()
 	}
 	AdminPagesClearCache();
 	GO($config['admin_file'].'?exe=pages');
+}
+
+/**
+ * Обработчик перемещения эементов в древовидном списке страниц
+ * @return void
+ */
+function AdminPagesAjaxMove(){
+	$itemId = SafeEnv($_POST['item_id'], 11, int);
+	$parentId = SafeEnv($_POST['target_id'], 11, int);
+	$position = SafeEnv($_POST['item_new_position'], 11, int);
+
+	// Перемещаемый элемент
+	System::database()->Select('pages',"`id`='$itemId'");
+	if(System::database()->NumRows() == 0){
+		// Error
+		exit;
+	}
+	$item = System::database()->FetchRow();
+	// Изменяем его родителя, если нужно
+	if($item['parent'] != $parentId){
+		System::database()->Update('pages', "`parent`='$parentId'", "`id`='$itemId'");
+	}
+	// Обноеление индексов элементов
+	$indexes = array(); // соотвествие индексов и id элементов
+	$items = System::database()->Select('pages',"`parent`='$parentId'");
+	if($position == -1){
+		$position = count($items);
+	}
+	SortArray($items, 'order');
+	$i = 0;
+	foreach($items as $p){
+		if($p['id'] == $itemId){
+			$indexes[$p['id']] = $position;
+		}else{
+			if($i == $position) $i++;
+			$indexes[$p['id']] = $i;
+			$i++;
+		}
+	}
+	// Обновляем индексы
+	foreach($indexes as $id=>$order){
+		System::database()->Update('pages', "`order`='$order'", "`id`='$id'");
+	}
+	exit;
 }
 
 ?>

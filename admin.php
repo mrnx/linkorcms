@@ -9,7 +9,7 @@ define('ADMIN_SCRIPT', true);
 define('VALID_RUN', true);
 
 require 'config/init.php'; // Конфигурация и инициализация
-define('ADMIN_FILE', System::$config['admin_file']); // Ссылка на админ-панель
+define('ADMIN_FILE', System::config('admin_file')); // Ссылка на админ-панель
 
 // Проверка пользователя
 if(!($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && System::user()->AllowCookie('admin', true))){
@@ -54,10 +54,10 @@ if(!isset($_GET['exe'])){
 		GO(Ufu('index.php')); // exit
 	}
 }
-System::db()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'");
+System::database()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'");
 
 // Установлен такой модуль?
-if(System::db()->NumRows() == 0){
+if(System::database()->NumRows() == 0){
 	System::admin()->AddAdminMenu();
 	System::admin()->AddTextBox('Админ панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$ModuleName.'" не найден!</div>');
 	System::admin()->TEcho();
@@ -72,7 +72,7 @@ if(!System::user()->CheckAccess2($ModuleName, $ModuleName)){
 }
 
 // Вспомогательные константы
-define('MOD_DIR', System::$config['mod_dir'].$ModuleName.'/');
+define('MOD_DIR', System::config('mod_dir').$ModuleName.'/');
 define('MOD_FILE', MOD_DIR.'admin.php');
 
 // Подключаем модуль

@@ -662,6 +662,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 				if(isset($vals[1])){
 					$vals[1] = substr($vals[1], 0, -1);
 				}else{
+					$vals[0] = substr($vals[0], 0, -1);
 					$vals[1] = '';
 				}
 				if(isset($OpenedBlocks[$level][$block_name]['vars'][$var_name])){

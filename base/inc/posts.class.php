@@ -137,8 +137,8 @@ class Posts{
 		$this->PostsTable = $PostsTable;
 		$this->AlloyComments = $AlloyComments;
 
-		if(isset(System::$config['comments'])){
-			$config = System::$config['comments'];
+		if(System::config('comments')){
+			$config = System::config('comments');
 			$this->FloodTime = $config['floodtime'];
 			$this->PostMaxLength = $config['maxlength'];
 			$this->GuestPost = $config['guestpost'];
@@ -304,7 +304,7 @@ class Posts{
 		}else{
 			$where = ''; // Вся таблица
 		}
-		$posts = System::db()->Select($this->PostsTable, $where);
+		$posts = System::database()->Select($this->PostsTable, $where);
 
 		// Сортировка
 		SortArray($posts, 'post_date', $this->DecreaseSort);
@@ -323,7 +323,7 @@ class Posts{
 
 		// Инициализируем навигацию
 		$comm_nav_obj = new Navigation($Page, $NavigationBlockName);
-		$comm_nav_obj->FrendlyUrl = System::$config['general']['ufu'];
+		$comm_nav_obj->FrendlyUrl = System::config('general/ufu');
 		if(!isset($this->PostsTree[0])){
 			$comm_nav_obj->DisableNavigation();
 		}else{
@@ -388,8 +388,8 @@ class Posts{
 
 		$vars = array();
 		if($Edit){
-			System::db()->Select($this->PostsTable, "`id`='$post_id'");
-			$post = System::db()->FetchRow();
+			System::database()->Select($this->PostsTable, "`id`='$post_id'");
+			$post = System::database()->FetchRow();
 
 			if(System::user()->Auth){
 				$access = (System::user()->Get('u_id') == $post['user_id'] || System::user()->isAdmin());
@@ -442,13 +442,13 @@ class Posts{
 		include_once('scripts/bbcode_editor/index.php');
 
 		// Смайлики для формы
-		$smilies = System::db()->Select('smilies', "`enabled`='1'");
-		if(System::db()->NumRows() == 0){
+		$smilies = System::database()->Select('smilies', "`enabled`='1'");
+		if(System::database()->NumRows() == 0){
 			System::site()->AddBlock('smilies', true, false, 'smile', '','Смайликов пока нет.');
 		}else{
 			System::site()->AddBlock('smilies', true, true, 'smile');
 			foreach($smilies as $smile){
-				$smile['file'] = System::$config['general']['smilies_dir'].$smile['file'];
+				$smile['file'] = System::config('general/smilies_dir').$smile['file'];
 				$smile['code'] = SafeDB($smile['code'], 255, str);
 				$sub_codes = explode(',', $smile['code']);
 				$smile['code'] = $sub_codes[0];
@@ -458,8 +458,8 @@ class Posts{
 	}
 
 	public function CheckFlood(){
-		System::db()->Select($this->PostsTable, "`user_ip`='".getip()."' and `post_date`>'".(time() - $this->FloodTime)."'");
-		if(System::db()->NumRows() > 0){
+		System::database()->Select($this->PostsTable, "`user_ip`='".getip()."' and `post_date`>'".(time() - $this->FloodTime)."'");
+		if(System::database()->NumRows() > 0){
 			return true;
 		}else{
 			return false;
@@ -474,8 +474,8 @@ class Posts{
 				$errors[] = 'post_id не инициализирована в GET.';
 			}else{
 				$post_id = SafeEnv($_GET['post_id'], 11,int);
-				System::db()->Select($this->PostsTable, "`id`='$post_id'");
-				$post = System::db()->FetchRow();
+				System::database()->Select($this->PostsTable, "`id`='$post_id'");
+				$post = System::database()->FetchRow();
 			}
 		}else{
 			if(!$this->AlloyComments){
@@ -590,9 +590,9 @@ class Posts{
 			if(!$Edit){
 				$vals = Values('', $ObjectId, $user_id, $user_name, $user_homepage, $user_email, $user_hideemail, getip(), time(), $post_message, $post_parent_id);
 				$cols = array('id', 'object_id', 'user_id', 'user_name', 'user_homepage', 'user_email', 'user_hideemail', 'user_ip', 'post_date', 'post_message', 'post_parent_id');
-				System::db()->Insert($this->PostsTable, $vals, $cols);
+				System::database()->Insert($this->PostsTable, $vals, $cols);
 			}else{
-				System::db()->Update($this->PostsTable, "`post_message`='$post_message'", "`id`='$post_id'");
+				System::database()->Update($this->PostsTable, "`post_message`='$post_message'", "`id`='$post_id'");
 			}
 			return true;
 		}else{
@@ -607,8 +607,8 @@ class Posts{
 			}
 		}
 		if($post_id != null){
-			System::db()->Select($this->PostsTable, "`id`='$post_id'");
-			$post = System::db()->FetchRow();
+			System::database()->Select($this->PostsTable, "`id`='$post_id'");
+			$post = System::database()->FetchRow();
 		}else{
 			$text = 'post_id нигде не инициализирована.';
 			System::site()->AddTextBox('Ошибка.', '<center>'.$text.'</center>');
@@ -628,11 +628,11 @@ class Posts{
 		}
 		if(!$first || isset($_GET['ok'])){
 			$del_count = 1;
-			$parent_posts = System::db()->Select($this->PostsTable, "`post_parent_id`='$post_id'");
+			$parent_posts = System::database()->Select($this->PostsTable, "`post_parent_id`='$post_id'");
 			foreach($parent_posts as $post){
 				$del_count += $this->DeletePost(SafeDB($post['id'], 11, int), false);
 			}
-			System::db()->Delete($this->PostsTable, "`id`='$post_id'");
+			System::database()->Delete($this->PostsTable, "`id`='$post_id'");
 			return $del_count;
 		}else{
 			$text = '<br />Удалить сообщение?<br /><br />'

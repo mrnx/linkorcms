@@ -47,7 +47,7 @@ function BBCodeToolBar(id_name){
 
 	document.write(BBCodeButton('Увеличить размер поля', 'scripts/bbcode_editor/images/down.png', "Resize('" + id_name + "', true)"));
 	document.write(BBCodeButton('Уменьшить размер поля', 'scripts/bbcode_editor/images/up.png', "Resize('" + id_name + "', false)"));
-	
+
 	document.write("</div>");
 
 	document.write("<div id=\"fontcolor\" class=\"bbcode_colorbar\" style=\"visibility: hidden; display: none;\">\n\
@@ -81,7 +81,7 @@ function BBCodeAddTagUrl(id_name){
 			BBCodeAddTag('[url]', '[/url]', id_name, url_link);
 		}
 	}
-} 
+}
 
 function BBCodeAddTagFontColor(color, id_name){
 	text = document.getElementById(id_name);
@@ -89,25 +89,25 @@ function BBCodeAddTagFontColor(color, id_name){
 	var tag2 = '[/color]';
 	BBCodeAddTag(tag1 , tag2 , id_name);
 	ShowHide('fontcolor');
-} 
+}
 
 function BBCodeAddTagSelectFontSize(box, id_name){
 	text = document.getElementById(id_name);
-	boxs = document.getElementById(box);	
+	boxs = document.getElementById(box);
 	var tag1 = '[size='+boxs.value+']' ;
 	var tag2 = '[/size]';
 	boxs.options[0].selected = true;
 	BBCodeAddTag(tag1 , tag2 , id_name);
-} 
+}
 
 function BBCodeAddTagSelect(box, id_name){
 	text = document.getElementById(id_name);
-	boxs = document.getElementById(box);	
+	boxs = document.getElementById(box);
 	var tag1 = '['+boxs.value+']' ;
 	var tag2 = '[/'+boxs.value+']';
 	boxs.options[0].selected = true;
 	BBCodeAddTag(tag1, tag2, id_name);
-} 
+}
 
 
 function BBCodeAddTagVideo(id_name){
@@ -179,61 +179,4 @@ function Resize(id_name, actions){
 		}
 	}
 	m.focus();
-}
-
-function AutoResize( ta, minHeight ){
-	if(!-[1,]){ // Если IE
-		return;
-	}
-	helper = document.getElementById('_textarea_resize_helper');
-	if(!helper){
-		helper = document.createElement('pre');
-		helper.id = '_textarea_resize_helper';
-		helper.style['display'] = 'block';
-		helper.style['position'] = 'absolute';
-		helper.style['left'] = '-10000px'; //'1px';
-		helper.style['top'] = '-10000px'; //'1px';
-		helper.style['width'] = (ta.offsetWidth - 24)+'px';
-		helper.style['paddingTop'] = GetS(ta, 'paddingTop');
-		helper.style['paddingRight'] = GetS(ta, 'paddingRight');
-		helper.style['paddingBottom'] = GetS(ta, 'paddingBottom');
-		helper.style['paddingLeft'] = GetS(ta, 'paddingLeft');
-		helper.style['fontSize'] = GetS(ta, 'fontSize');
-		helper.style['fontFamily'] = GetS(ta, 'fontFamily');
-		helper.style['lineHeight'] = GetS(ta, 'lineHeight');
-		helper.style['whiteSpace'] = 'pre-wrap';
-		helper.style['wordWrap'] = 'break-word';
-		helper.style['overflow'] = 'hidden';
-		document.body.appendChild(helper);
-		ta.style['overflow'] = 'hidden';
-		ta.style['resize'] = 'none';
-		ta.onscroll = function(e){
-			if(e.srcElement &&  e.srcElement.offsetHeight < 600)
-				e.srcElement.scrollTop = 0;
-		}
-	}
-	helper.style['width'] = (ta.offsetWidth - 24)+'px';
-	helper.innerHTML = ta.value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-	if(!/opera/i.test(navigator.userAgent.toLowerCase())){
-		helper.innerHTML = helper.innerHTML.replace(/(\r\n|\n\r|\r|\n)/g, '\n').replace('/\t/g', '&#09;').replace(/\n$/g, '\n\n');
-	}else{
-		helper.innerHTML = helper.innerHTML.replace('/\t/g', '&#09;').replace(/(\r\n|\n\r|\r|\n)$/g, '\n&nbsp;');
-	}
-
-
-	if(helper.offsetHeight > 600){
-		newHeight = 600;
-		ta.style['overflow'] = '';
-	}else{
-		newHeight = helper.offsetHeight;
-		ta.style['overflow'] = 'hidden';
-	}
-	if(newHeight > minHeight){
-		ta.style['height'] = newHeight+'px';
-	}else{
-		ta.style['height'] = minHeight+'px';
-		//helper.innerHTML = '';
-	}
-
 }
