@@ -25,6 +25,7 @@ function AdminPages( $action ){
 	TAddToolLink('Страницы', 'main', 'pages');
 	TAddToolLink('Добавить страницу', 'editor', 'pages&a=editor');
 	TAddToolLink('Добавить ссылку', 'link', 'pages&a=link');
+	TAddToolLink('Добавить категорию', 'cat', 'pages&a=cat');
 	TAddToolLink('Настройки', 'config', 'pages&a=config');
 	TAddToolBox($action);
 	switch($action){
@@ -324,7 +325,7 @@ function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$a
 	$parent_id = htmlspecialchars($_POST['parent_id']);
 	$title = htmlspecialchars($_POST['title']);
 	if($link == ''){
-		$link = Translit($title, true);
+		$link = Translit4Url($title);
 	}
 	$text = htmlspecialchars($_POST['text']);
 	$copy = htmlspecialchars($_POST['copy']);
@@ -517,11 +518,11 @@ function AdminPagesEditor(){
  */
 function AdminPagesSave(){
 	global $db, $config;
-	$link = SafeEnv($_POST['link'], 255, str);
 	$parent_id = SafeEnv($_POST['parent_id'], 11, int);
+	$link = SafeEnv($_POST['link'], 255, str);
 	$title = SafeEnv($_POST['title'], 255, str);
 	if($link == ''){
-		$link = SafeEnv(Translit($title, true), 255, str);
+		$link = SafeEnv(Translit4Url($title), 255, str);
 	}
 	$text = SafeEnv($_POST['text'], 0, str);
 	$copy = SafeEnv($_POST['copy'], 255, str);
@@ -654,7 +655,6 @@ function AdminPagesLinkSave(){
 	$parent_id = SafeEnv($_POST['parent_id'], 11, int);
 	$title = SafeEnv($_POST['title'], 255, str);
 	if($_POST['module'] != ''){
-		//$url = 'index.php?name='.SafeEnv($_POST['module'], 255, str);
 		$url = 'mod://'.SafeEnv($_POST['module'], 255, str);
 	}else{
 		$url = SafeEnv($_POST['link'], 255, str);
@@ -670,7 +670,7 @@ function AdminPagesLinkSave(){
 	}else{
 		$order = AdminPagesNewOrder($parent_id);
 	}
-	$values = Values('', $parent_id, $title, $url, '', time(), time(), '0', '0', '', SafeEnv(Translit($title, true), 255, str), $view, $enabled, '', '', '', 'link', $order, $showinmenu);
+	$values = Values('', $parent_id, $title, $url, '', time(), time(), '0', '0', '', SafeEnv(Translit4Url($title), 255, str), $view, $enabled, '', '', '', 'link', $order, $showinmenu);
 	if(isset($_GET['id'])){ // Редатирование
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Update('pages', $values, "`id`='".$id."'", true);
@@ -752,7 +752,7 @@ function AdminPagesCatSave(){
 	}else{
 		$order = AdminPagesNewOrder($parent_id);
 	}
-	$values = Values('', $parent_id, $title, '', '', time(), time(), '0', '0', '', SafeEnv(Translit($title, true), 255, str), $view, $enabled, '', '', '', 'cat', $order, $showinmenu);
+	$values = Values('', $parent_id, $title, '', '', time(), time(), '0', '0', '', SafeEnv(Translit4Url($title), 255, str), $view, $enabled, '', '', '', 'cat', $order, $showinmenu);
 	if(isset($_GET['id'])){ // Редатирование
 		System::database()->Update('pages', $values, "`id`='".$id."'", true);
 	}else{

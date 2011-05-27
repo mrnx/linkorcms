@@ -503,7 +503,7 @@ function SafeDB( $Var, $maxlength, $type, $strip_tags = true, $specialchars=true
 	if(is_array($Var)){
 		for($i=0, $cnt=count($Var); $i<$cnt; $i++){
 			if($maxlength > 0){
-				$Var[$i] = substr($Var[$i],0,$maxlength);
+				$Var[$i] = substr($Var[$i], 0, $maxlength);
 			}
 			$Var[$i] = trim($Var[$i]);
 			if($safexss){
@@ -519,7 +519,7 @@ function SafeDB( $Var, $maxlength, $type, $strip_tags = true, $specialchars=true
 		}
 	}else{
 		if($maxlength > 0){
-			$Var = substr($Var,0,$maxlength);
+			$Var = substr($Var, 0, $maxlength);
 		}
 		$Var = trim($Var);
 		if($safexss){
@@ -585,8 +585,8 @@ function Parser_ParseSetStr( &$set, &$row, &$info ){
 			break;
 		}
 		$col = trim(substr($s, 0, $pos));
-		if(substr($col,0,1)=='`'){
-			$col = substr($col,1,strlen($col)-2);
+		if(substr($col, 0, 1)=='`'){
+			$col = substr($col, 1, strlen($col)-2);
 		}
 		$s = substr($s,$pos+1);
 		$pos = strpos($s,"'");
@@ -1205,8 +1205,7 @@ function UnRegisterCommentTable($name, $delete=false){
  * @param <type> $homePage
  * @param <type> $uIP
  */
-function UpdateUserComments($uid, $newUid, $Name, $email, $hEmail, $homePage, $uIP=null)
-{
+function UpdateUserComments($uid, $newUid, $Name, $email, $hEmail, $homePage, $uIP=null){
 	global $db;
 	$set = "user_id='$newUid',user_name='$Name',user_homepage='$homePage',user_email='$email',"
 	."user_hideemail='$hEmail'".($uIP<>null?",user_ip='$uIP'":'');
@@ -1264,8 +1263,7 @@ function DivideWord( $text, $maxWordLength='30' ){
  * @param Integer $coll // номер колонки в массиве по которой его сортировать
  * @param Boolean $OnDecrease // если true то сортировка будет осуществляться в обратном порядке
  */
-function SortArray( &$array, $coll, $OnDecrease=false )
-{
+function SortArray( &$array, $coll, $OnDecrease=false ){
 	global $SATempVar;
 
 	if(!function_exists('SorterUp')){
@@ -1313,8 +1311,7 @@ function Values(){
 }
 
 #Переводит уровень в строку
-function ViewLevelToStr($level,$s_admins='',$s_members='',$s_guests='',$s_all='')
-{
+function ViewLevelToStr($level,$s_admins='',$s_members='',$s_guests='',$s_all=''){
 	switch($level){
 		case 1:	$s_admins=='' ? $vi='<font color="#FF0000">Админы</font>' : $vi=$s_admins;
 		break;
@@ -1331,8 +1328,7 @@ function ViewLevelToStr($level,$s_admins='',$s_members='',$s_guests='',$s_all=''
 
 //Создаст запрос базы данных чтобы получить только те объекты (данные),
 // которые пользователь с данным доступом может видеть
-function GetWhereByAccess($param_name, $user_access=null)
-{
+function GetWhereByAccess($param_name, $user_access=null){
 	if($user_access == null){
 		global $user;
 		$user_access = $user->AccessLevel();
@@ -1359,8 +1355,7 @@ function GetMicroTime()
  * @param Timestamp $time // Время timestamp
  * @return unknown
  */
-function TimeRender($time, $full=true, $logic=true)
-{
+function TimeRender($time, $full=true, $logic=true){
 	global $config;
 	if($time==false || !is_numeric($time)){
 		return 'Нет данных';
@@ -1394,8 +1389,7 @@ function TimeRender($time, $full=true, $logic=true)
  * @param Time $endtime // Время остановки в секундах
  * @return array('days'=>Количество дней,'hours'=>Количество часов,'sdays'=>Обозначение дней,'shours'=>Обозначение часов)
  */
-function TotalTime($runtime, $endtime)
-{
+function TotalTime($runtime, $endtime){
 	$right = $endtime - $runtime;
 	if($right<0){return false;}
 
@@ -1465,8 +1459,7 @@ function GetFileName($Name){
  * @param String $parentf // Не обращайте внимания. Нужна для работы функции.
  * @return Array // Список найденных файлов
  */
-function GetFiles( $folder, $use_subfolders = false, $use_mask = false, $mask = '', $newSearch = true, $parentf = '' )
-{
+function GetFiles( $folder, $use_subfolders = false, $use_mask = false, $mask = '', $newSearch = true, $parentf = '' ){
 	static $sfiles = array();
 	if(!is_dir($folder)){
 		return $sfiles;
@@ -1500,8 +1493,7 @@ function GetFiles( $folder, $use_subfolders = false, $use_mask = false, $mask = 
  *
  * @param String $folder Путь до папки с последним слешем.
  */
-function GetFolders( $folder )
-{
+function GetFolders( $folder ){
 	$result = array();
 	if(!is_dir($folder)){
 		return $result;
@@ -1518,8 +1510,7 @@ function GetFolders( $folder )
 	return $result;
 }
 
-function GetFolderSize( $folder )
-{
+function GetFolderSize( $folder ){
 	$file_size = 0;
 	$files = scandir($folder);
 	foreach($files as $file){
@@ -1536,8 +1527,7 @@ function GetFolderSize( $folder )
 }
 
 # Возвращает ИП адрес пользователя
-function getip()
-{
+function getip(){
 	global $_SERVER, $config;
 	if(!isset($config['info']['ip'])){
 		if(isset($_SERVER['REMOTE_ADDR'])){
@@ -1567,18 +1557,11 @@ function getip()
  * @param String $email // e-mail адрес
  * @return Boolean
  */
-function CheckEmail( $email )
-{
-	return (
-		preg_match(
-			'/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i'
-			,trim($email)
-		)
-	);
+function CheckEmail( $email ){
+	return (preg_match('/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i',trim($email)));
 }
 
-function CheckUserEmail( $Email, &$error_out, $CheckExist=false, $xor_id=0 )
-{
+function CheckUserEmail( $Email, &$error_out, $CheckExist=false, $xor_id=0 ){
 	global $db, $config;
 	if($Email == ''){
 		$error_out[] = 'Вы не ввели ваш E-mail адрес.';
@@ -1606,8 +1589,7 @@ function CheckUserEmail( $Email, &$error_out, $CheckExist=false, $xor_id=0 )
  * @param $CheckExist // Произвести проверку на занятость логина
  * @return Boolean // Истина если логин верный
  */
-function CheckLogin( $login, &$error_out, $CheckExist=false, $xor_id=0 )
-{
+function CheckLogin( $login, &$error_out, $CheckExist=false, $xor_id=0 ){
 	global $db, $config;
 	$result = true;
 	if(isset($config['user']['login_min_length'])){
@@ -1641,8 +1623,7 @@ function CheckLogin( $login, &$error_out, $CheckExist=false, $xor_id=0 )
  * @param $CheckExist // Произвести проверку на занятость логина
  * @return Boolean // Истина если пароль верный
  */
-function CheckNikname( $nikname, &$error_out, $CheckExist=false, $xor_id=0 )
-{
+function CheckNikname( $nikname, &$error_out, $CheckExist=false, $xor_id=0 ){
 	global $db, $config;
 	$result = true;
 	if($nikname == ''){
@@ -1670,8 +1651,7 @@ function CheckNikname( $nikname, &$error_out, $CheckExist=false, $xor_id=0 )
  * @param $error_out // Переменная в которую произвести вывод ошибок (массив)
  * @return Boolean // Истина если пароль верный
  */
-function CheckPass($pass,&$error_out)
-{
+function CheckPass($pass,&$error_out){
 	global $config;
 	$result = true;
 	if(isset($config['user']['pass_min_length'])){
@@ -1692,8 +1672,7 @@ function CheckPass($pass,&$error_out)
  * @param Integer $length // Длинна строки
  * @return String
  */
-function GenRandomString($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
-{
+function GenRandomString($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'){
 	srand((double)microtime()*1000000);
 	$char_length = (strlen($chars)-1);
 	$rstring = '';
@@ -1709,8 +1688,7 @@ function GenRandomString($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij
  * @param Integer $length // Длина пароля
  * @return String
  */
-function GenBPass($length)
-{
+function GenBPass($length){
 	srand((double)microtime()*1000000);
 	$password = '';
 	$vowels = array('a','e','i','o','u');
@@ -1726,8 +1704,7 @@ function GenBPass($length)
 /**
  * Отправляет E-mail
  */
-function SendMail( $ToName, $ToEmail, $Subject, $Text, $Html=false, $From='', $FromEmail='' )
-{
+function SendMail( $ToName, $ToEmail, $Subject, $Text, $Html=false, $From='', $FromEmail='' ){
 	global $config;
 	$mail = LmEmailExtended::Instance();
 
@@ -1770,8 +1747,7 @@ function GO( $address, $exit = true, $response_code = 303 ){
 	}
 }
 
-function GoBack( $exit = true, $response_code = 303 )
-{
+function GoBack( $exit = true, $response_code = 303 ){
 	if(isset($_SERVER['HTTP_REFERER'])){
 		GO($_SERVER['HTTP_REFERER'], $exit, $response_code);
 	}else{
@@ -1782,8 +1758,7 @@ function GoBack( $exit = true, $response_code = 303 )
 // Перенаправляет пользователя на страницу на которой он был заданное число переходов ранее
 // Если в качестве значения параметра $BackSteps передать единицу, то работа функции будет аналогична функции GoBack()
 // Максимальное значение $BackSteps равно девяти.
-function HistoryGoBack( $BackSteps, $exit = true, $response_code = 303 )
-{
+function HistoryGoBack( $BackSteps, $exit = true, $response_code = 303 ){
 	global $user;
 	$history = $user->Get('HISTORY');
 	if(isset($history[10-$BackSteps])){
@@ -1791,8 +1766,7 @@ function HistoryGoBack( $BackSteps, $exit = true, $response_code = 303 )
 	}
 }
 
-function HistoryGetUrl( $BackSteps )
-{
+function HistoryGetUrl( $BackSteps ){
 	global $user;
 	$history = $user->Get('HISTORY');
 	if(isset($history[10-$BackSteps])){
@@ -1807,8 +1781,7 @@ function HistoryGetUrl( $BackSteps )
  * @param <type> $Url
  * @return <type>
  */
-function SaveRefererUrl( $Url = '' )
-{
+function SaveRefererUrl( $Url = '' ){
 	if($Url == ''){
 		$Url = HistoryGetUrl(1);
 	}
@@ -1821,8 +1794,7 @@ function SaveRefererUrl( $Url = '' )
  * Выполняет перенаправление по сохраненному в сессии адресу
  * @param <type> $id
  */
-function GoRefererUrl( $id )
-{
+function GoRefererUrl( $id ){
 	if(isset($_SESSION['saved_urls'][$id])){
 		$url = $_SESSION['saved_urls'][$id];
 		unset($_SESSION['saved_urls'][$id]);
@@ -1832,8 +1804,7 @@ function GoRefererUrl( $id )
 	}
 }
 
-function GetRefererUrl( $id )
-{
+function GetRefererUrl( $id ){
 	if(isset($_SESSION['saved_urls'][$id])){
 		$url = $_SESSION['saved_urls'][$id];
 		unset($_SESSION['saved_urls'][$id]);
@@ -1852,8 +1823,7 @@ function GetRefererUrl( $id )
  * @param Integer $offset // С какого символа начинать поиск
  * @return Integer // Номер символа
  */
-function StrPosEx($str,$needle,$searchWhere=1,$offset=0)
-{
+function StrPosEx($str,$needle,$searchWhere=1,$offset=0){
 	for($i=1;$i<=$searchWhere;$i++){
 		$offset = strpos($str,$needle,$offset);
 		if($offset===false){
@@ -1874,8 +1844,7 @@ function StrPosEx($str,$needle,$searchWhere=1,$offset=0)
  * @param Integer $sellength // Длина области
  * @param String $needle // Что вставить / заменить
  */
-function InsertToStr( &$str, $selstart, $sellength, $needle )
-{
+function InsertToStr( &$str, $selstart, $sellength, $needle ){
 	if(is_array($str)){
 		for($i=0,$cnt=count($str);$i<$cnt;$i++){
 			$left = substr($str[$i],0,$selstart);
@@ -1896,15 +1865,13 @@ function InsertToStr( &$str, $selstart, $sellength, $needle )
  * @param Integer $selstart // Начало области
  * @param Integer $sellength // Длина области
  */
-function DeleteFromStr( &$str, $selstart, $sellength )
-{
+function DeleteFromStr( &$str, $selstart, $sellength ){
 	$left = substr($str,0,$selstart);
 	$right = substr($str,$selstart+$sellength);
 	$str = $left.$right;
 }
 
-function GetRatingImage( $votes_amount, $votes )
-{
+function GetRatingImage( $votes_amount, $votes ){
 	$default = 'images/rating_system/rating.gif';
 	if($votes_amount==0){
 		return $default;
@@ -1917,8 +1884,7 @@ function GetRatingImage( $votes_amount, $votes )
 	}
 }
 
-function FormatFileSize($size, $sizeType = 'b')
-{
+function FormatFileSize($size, $sizeType = 'b'){
 	if($sizeType == 'b'){
 		$mb = 1024*1024;
 		if($size>$mb){$size = sprintf("%01.2f",$size/$mb).' Мб';
@@ -1938,8 +1904,7 @@ function FormatFileSize($size, $sizeType = 'b')
 
 //Вызывается при запросе несуществующей
 //страницы или ошибки и использования спецсимволов в параметрах
-function HackOff($LowProtect=false, $redirect=true)
-{
+function HackOff($LowProtect=false, $redirect=true){
 	global $user, $config;
 	if($user->isAdmin() || $LowProtect){
 		if(defined('MAIN_SCRIPT') || defined('PLUG_SCRIPT') || !defined('ADMIN_SCRIPT')){
@@ -1964,8 +1929,7 @@ function HackOff($LowProtect=false, $redirect=true)
 	}
 }
 
-function RealPath2($path)
-{
+function RealPath2($path){
 	$path = str_replace('\\', '/',$path);
 	$path = str_replace(array('../','./'),'',$path);
 	$parr = explode('/',$path);
@@ -1988,8 +1952,7 @@ function RealPath2($path)
 	return $path;
 }
 
-function GDVersion()
-{
+function GDVersion(){
 	global $config;
 	if(!isset($config['info']['gd'])){
 		if(!extension_loaded('gd')){
@@ -2008,8 +1971,7 @@ function GDVersion()
 	}
 }
 
-function AdminImageControl( $Title, $LoadTitle, $FileName, $Dir, $Name = 'image', $LoadName = 'up_image', $FormName = 'edit_form' )
-{
+function AdminImageControl( $Title, $LoadTitle, $FileName, $Dir, $Name = 'image', $LoadName = 'up_image', $FormName = 'edit_form' ){
 	global $site;
 
 	$max_file_size = ini_get('upload_max_filesize');
@@ -2045,14 +2007,11 @@ function AdminImageControl( $Title, $LoadTitle, $FileName, $Dir, $Name = 'image'
 	</tr>
 </table>
 HTML;
-
-
 	FormRow($Title, $ctrl);
 	FormRow($LoadTitle, $site->FFile($LoadName).'<br /><small>Формат изображений только *.jpg,*.jpeg,*.gif,*.png</small><br /><small>Максимальный размер файла: '.$max_file_size.'</small>');
 }
 
-function CreateThumb( $SrcFileName, $DstFileName, $MaxWidth, $MaxHeight )
-{
+function CreateThumb( $SrcFileName, $DstFileName, $MaxWidth, $MaxHeight ){
 	global $config;
 	if(is_file($DstFileName)){
 		unlink($DstFileName);
@@ -2063,8 +2022,7 @@ function CreateThumb( $SrcFileName, $DstFileName, $MaxWidth, $MaxHeight )
 	$thumb->SaveToFile($DstFileName);
 }
 
-function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default, &$Error, $CreateThumbs = true, $OriginalOptimization = false, $OriginalMaxWidth = 800, $OriginalMaxHeight = 600)
-{
+function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default, &$Error, $CreateThumbs = true, $OriginalOptimization = false, $OriginalMaxWidth = 800, $OriginalMaxHeight = 600){
 	global $config;
 	$Error = false;
 	if($Default == 'no_image/no_image.png') {
@@ -2110,8 +2068,7 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 	return $result;
 }
 
-function ImageSize( $FileName )
-{
+function ImageSize( $FileName ){
 	$size = getimagesize($FileName);
 	$size['width'] = $size[0];
 	$size['height'] = $size[1];
@@ -2138,8 +2095,7 @@ function GetBoolValue($var){
  * @param <type> $text
  * @return <type>
  */
-function Translit($text, $strip_spaces = true)
-{
+function Translit( $text, $strip_spaces = true ){
 	if($strip_spaces) {
 		$text = str_replace(' ', '_', $text);
 	}
@@ -2178,8 +2134,7 @@ function Translit($text, $strip_spaces = true)
 		'э' => 'e`', 'Э' => 'E`',
 		'ю' => 'yu', 'Ю' => 'YU',
 		'я' => 'ya', 'Я' => 'YA',
-	    )
-	);
+	));
 	return $text;
 }
 
@@ -2188,8 +2143,7 @@ function Translit($text, $strip_spaces = true)
  * @param <type> $text
  * @return <type>
  */
-function Retranslit($text, $strip_tospaces = true)
-{
+function Retranslit( $text, $strip_tospaces = true ){
 	if($strip_tospaces){
 		$text = str_replace('_', ' ', $text);
 	}
@@ -2227,14 +2181,58 @@ function Retranslit($text, $strip_tospaces = true)
 		'e`' => 'э', 'E`' => 'Э',
 		'yu' => 'ю', 'YU' => 'Ю',
 		'ya' => 'я', 'YA' => 'Я',
-	    )
-	);
+	));
+	return $text;
+}
+
+/**
+ * Транслитерация строки для использования в URL
+ * @param  $String
+ * @return void
+ */
+function Translit4Url( $text ){
+	$text = str_replace(' ', '_', $text);
+	$text = strtr($text, "`~!@#$%^&*()\"'{}[]\\|/,.-=+?<>", '');
+	$text = strtr($text, array(
+		'а' => 'a', 'А' => 'A',
+		'б' => 'b', 'Б' => 'B',
+		'в' => 'v', 'В' => 'V',
+		'г' => 'g', 'Г' => 'G',
+		'д' => 'd', 'Д' => 'D',
+		'е' => 'e', 'Е' => 'E',
+		'ё' => 'yo', 'Ё' => 'YO',
+		'ж' => 'zh', 'Ж' => 'ZH',
+		'з' => 'z', 'З' => 'Z',
+		'и' => 'i', 'И' => 'I',
+		'й' => 'j', 'Й' => 'J',
+		'к' => 'k', 'К' => 'K',
+		'л' => 'l', 'Л' => 'L',
+		'м' => 'm', 'М' => 'M',
+		'н' => 'n', 'Н' => 'N',
+		'о' => 'o', 'О' => 'O',
+		'п' => 'p', 'П' => 'P',
+		'р' => 'r', 'Р' => 'R',
+		'с' => 's', 'С' => 'S',
+		'т' => 't', 'Т' => 'T',
+		'у' => 'u', 'У' => 'U',
+		'ф' => 'f', 'Ф' => 'F',
+		'х' => 'x', 'Х' => 'X',
+		'ц' => 'c', 'Ц' => 'C',
+		'ч' => 'ch', 'Ч' => 'CH',
+		'ш' => 'sh', 'Ш' => 'SH',
+		'щ' => 'shh', 'Щ' => 'SHH',
+		'ъ' => '', 'Ъ' => '',
+		'ы' => 'y', 'Ы' => 'Y',
+		'ь' => '', 'Ь' => '',
+		'э' => 'e', 'Э' => 'E',
+		'ю' => 'yu', 'Ю' => 'YU',
+		'я' => 'ya', 'Я' => 'YA',
+	));
 	return $text;
 }
 
 #Выводит массив с информацией об установленных модулях
-function GetModuleList()
-{
+function GetModuleList(){
 	global $db;
 	$db->Select('modules','');
 	$r = array();
@@ -2458,64 +2456,62 @@ function BbCodeTag( $tag, $part ){
  * @return
  */
 function BbCodePrepare( $text ){
-	$preg =
-		array
-		(
-			'~\[s\](.*?)\[\/s\]~si' => '<del>$1</del>',
-			'~\[b\](.*?)\[\/b\]~si' => '<strong>$1</strong>',
-			'~\[i\](.*?)\[\/i\]~si' => '<em>$1</em>',
-			'~\[u\](.*?)\[\/u\]~si' => '<u>$1</u>',
-			'~\[color=(.*?)\](.*?)\[\/color\]~si' => '<span style="color:$1;">$2</span>',
-			'~\[size=(.*?)\](.*?)\[\/size\]~si' => '<span style="font-size:$1px;">$2</span>',
-			'~\[div=(.*?)\](.*?)\[\/div\]~si' => '<div style="$1">$2</div>',
-			'~\[p=(.*?)\](.*?)\[\/p\]~si' => '<p style="$1">$2</p>',
-			'~\[span=(.*?)\](.*?)\[\/span\]~si' => '<span style="$1">$2</span>',
-			'~\[left (.*?)\](.*?)\[\/left\]~si' => '<div style="text-align: left; $1">$2</div>',
-			'~\[left\](.*?)\[\/left\]~si' => '<div style="text-align: left;">$1</div>',
-			'~\[right (.*?)\](.*?)\[\/right\]~si' => '<div style="text-align: right; $1">$2</div>',
-			'~\[right\](.*?)\[\/right\]~si' => '<div style="text-align: right;">$1</div>',
-			'~\[center (.*?)\](.*?)\[\/center\]~si' => '<div style="text-align: center; $1">$2</div>',
-			'~\[center\](.*?)\[\/center\]~si' => '<div style="text-align: center;">$1</div>',
-			'~\[justify\](.*?)\[\/justify\]~si' => '<p style="text-align: justify;">$1</p>',
-			'~\[pleft\](.*?)\[\/pleft\]~si' => '<p style="text-align: left;">$1</p>',
-			'~\[pright\](.*?)\[\/pright\]~si' => '<p style="text-align: right;">$1</p>',
-			'~\[pcenter\](.*?)\[\/pcenter\]~si' => '<p style="text-align: center;">$1</p>',
-			'~\[br\]~si' => '<br clear="all">',
-			'~\[hr\]~si' => '<hr color="#B5B5B5">',
-			'~\[line\]~si' => '<hr>',
-			'~\[table\]~si' => '<div><table border="1" cellspacing="1" cellpadding="1" width="50%" style="margin:10px;  float:left;" >',
-			'~\[\/table\]~si' => '</table></div>',
-			'~\[tr\]~si' => '<tr>',
-			'~\[\/tr\]~si' => '</tr>',
-			'~\[td\]~si' => '<td style="padding:10px;">',
-			'~\[\/td\]~si' => '</td>',
-			'~\[th\]~si' => '<th>',
-			'~\[\/th\]~si' => '</th>',
-			'~\[\*\](.*?)\[\/\*\]~si' => '<li>$1</li>',
-			'~\[\*\]~si' => '<li>',
-			'~\[ul\](.*?)\[\/ul\]~si' => "<ul>$1</li></ul>",
-			'~\[list\](.*?)\[\/list\]~si' => "<ul>$1</li></ul>",
-			'~\[ol\](.*?)\[\/ol\]~si' => '<ol>$1</li></ol>',
-			'~\[php\](.*?)\[\/php\]~sei' => "'<span>'.BbCodeTag('php', '$1').'</span>'",
-			'~\[hide\](.*?)\[\/hide\]~sei' => "'<div class=\"bbcode_hide\"><a href=\"javascript:onclick=ShowHide(\''.strlen(md5('$1')).substr(md5('$1'),0,3).'\')\">Скрытый текст</a><div id=\"'.strlen(md5('$1')).substr(md5('$1'),0,3).'\" style=\"visibility: hidden; display: none;\">$1</div></div>'",
-			'~\[h1\](.*?)\[\/h1\]~si' => '<h1>$1</h1>',
-			'~\[h2\](.*?)\[\/h2\]~si' => '<h2>$1</h2>',
-			'~\[h3\](.*?)\[\/h3\]~si' => '<h3>$1</h3>',
-			'~\[h4\](.*?)\[\/h4\]~si' => '<h4>$1</h4>',
-			'~\[h5\](.*?)\[\/h5\]~si' => '<h5>$1</h5>',
-			'~\[h6\](.*?)\[\/h6\]~si' => '<h6>$1</h6>',
-			'~\[video\](.*?)\[\/video\]~sei' => "'<CENTER><div>'.strip_tags(htmlspecialchars_decode('$1'), '<object><param><embed>').'</div></CENTER>'",
-			'~\[code\](.*?)\[\/code\]~si' => '<div class="bbcode_code"><code>$1</code></div>',
-			'~\[email\](.*?)\[\/email\]~sei' => "AntispamEmail('$1')",
-			'~\[email=(.*?)\](.*?)\[\/email\]~sei' => "'<a rel=\"noindex\" href=\"mailto:'.str_replace('@', '.at.','$1').'\">$2</a>'",
-			'~\[url\](.*?)\[\/url\]~sei' => "'<a href=\"'.UrlRender('$1').'\" target=\"_blank\">$1</a>'",
-			'~\[url=(.*?)?\](.*?)\[\/url\]~sei' => "'<a href=\"'.UrlRender('$1').'\"target=\"_blank\">$2</a>'",
-			'~\[img=(.*?)x(.*?)\](.*?)\[\/img\]~si' => '<img src="$3" style="width: $1px; height: $2px" >',
-			'~\[img (.*?)\](.*?)\[\/img\]~si' => '<img src="$2" title="$1" alt="$1">',
-			'~\[img\](.*?)\[\/img\]~si' => '<a href="$1" target="_blank"><img src="$1"></a>',
-			'~\[quote\](.*?)\[\/quote\]~si' => '<div class="bbcode_quote">$1</div>',
-			'~\[quote=(?:&quot;|"|\')?(.*?)["\']?(?:&quot;|"|\')?\](.*?)\[\/quote\]~si' => '<div class="bbcode_quote"><strong>$1:</strong>$2</div>',
-		);
+	$preg = array(
+		'~\[s\](.*?)\[\/s\]~si' => '<del>$1</del>',
+		'~\[b\](.*?)\[\/b\]~si' => '<strong>$1</strong>',
+		'~\[i\](.*?)\[\/i\]~si' => '<em>$1</em>',
+		'~\[u\](.*?)\[\/u\]~si' => '<u>$1</u>',
+		'~\[color=(.*?)\](.*?)\[\/color\]~si' => '<span style="color:$1;">$2</span>',
+		'~\[size=(.*?)\](.*?)\[\/size\]~si' => '<span style="font-size:$1px;">$2</span>',
+		'~\[div=(.*?)\](.*?)\[\/div\]~si' => '<div style="$1">$2</div>',
+		'~\[p=(.*?)\](.*?)\[\/p\]~si' => '<p style="$1">$2</p>',
+		'~\[span=(.*?)\](.*?)\[\/span\]~si' => '<span style="$1">$2</span>',
+		'~\[left (.*?)\](.*?)\[\/left\]~si' => '<div style="text-align: left; $1">$2</div>',
+		'~\[left\](.*?)\[\/left\]~si' => '<div style="text-align: left;">$1</div>',
+		'~\[right (.*?)\](.*?)\[\/right\]~si' => '<div style="text-align: right; $1">$2</div>',
+		'~\[right\](.*?)\[\/right\]~si' => '<div style="text-align: right;">$1</div>',
+		'~\[center (.*?)\](.*?)\[\/center\]~si' => '<div style="text-align: center; $1">$2</div>',
+		'~\[center\](.*?)\[\/center\]~si' => '<div style="text-align: center;">$1</div>',
+		'~\[justify\](.*?)\[\/justify\]~si' => '<p style="text-align: justify;">$1</p>',
+		'~\[pleft\](.*?)\[\/pleft\]~si' => '<p style="text-align: left;">$1</p>',
+		'~\[pright\](.*?)\[\/pright\]~si' => '<p style="text-align: right;">$1</p>',
+		'~\[pcenter\](.*?)\[\/pcenter\]~si' => '<p style="text-align: center;">$1</p>',
+		'~\[br\]~si' => '<br clear="all">',
+		'~\[hr\]~si' => '<hr color="#B5B5B5">',
+		'~\[line\]~si' => '<hr>',
+		'~\[table\]~si' => '<div><table border="1" cellspacing="1" cellpadding="1" width="50%" style="margin:10px;  float:left;" >',
+		'~\[\/table\]~si' => '</table></div>',
+		'~\[tr\]~si' => '<tr>',
+		'~\[\/tr\]~si' => '</tr>',
+		'~\[td\]~si' => '<td style="padding:10px;">',
+		'~\[\/td\]~si' => '</td>',
+		'~\[th\]~si' => '<th>',
+		'~\[\/th\]~si' => '</th>',
+		'~\[\*\](.*?)\[\/\*\]~si' => '<li>$1</li>',
+		'~\[\*\]~si' => '<li>',
+		'~\[ul\](.*?)\[\/ul\]~si' => "<ul>$1</li></ul>",
+		'~\[list\](.*?)\[\/list\]~si' => "<ul>$1</li></ul>",
+		'~\[ol\](.*?)\[\/ol\]~si' => '<ol>$1</li></ol>',
+		'~\[php\](.*?)\[\/php\]~sei' => "'<span>'.BbCodeTag('php', '$1').'</span>'",
+		'~\[hide\](.*?)\[\/hide\]~sei' => "'<div class=\"bbcode_hide\"><a href=\"javascript:onclick=ShowHide(\''.strlen(md5('$1')).substr(md5('$1'),0,3).'\')\">Скрытый текст</a><div id=\"'.strlen(md5('$1')).substr(md5('$1'),0,3).'\" style=\"visibility: hidden; display: none;\">$1</div></div>'",
+		'~\[h1\](.*?)\[\/h1\]~si' => '<h1>$1</h1>',
+		'~\[h2\](.*?)\[\/h2\]~si' => '<h2>$1</h2>',
+		'~\[h3\](.*?)\[\/h3\]~si' => '<h3>$1</h3>',
+		'~\[h4\](.*?)\[\/h4\]~si' => '<h4>$1</h4>',
+		'~\[h5\](.*?)\[\/h5\]~si' => '<h5>$1</h5>',
+		'~\[h6\](.*?)\[\/h6\]~si' => '<h6>$1</h6>',
+		'~\[video\](.*?)\[\/video\]~sei' => "'<CENTER><div>'.strip_tags(htmlspecialchars_decode('$1'), '<object><param><embed>').'</div></CENTER>'",
+		'~\[code\](.*?)\[\/code\]~si' => '<div class="bbcode_code"><code>$1</code></div>',
+		'~\[email\](.*?)\[\/email\]~sei' => "AntispamEmail('$1')",
+		'~\[email=(.*?)\](.*?)\[\/email\]~sei' => "'<a rel=\"noindex\" href=\"mailto:'.str_replace('@', '.at.','$1').'\">$2</a>'",
+		'~\[url\](.*?)\[\/url\]~sei' => "'<a href=\"'.UrlRender('$1').'\" target=\"_blank\">$1</a>'",
+		'~\[url=(.*?)?\](.*?)\[\/url\]~sei' => "'<a href=\"'.UrlRender('$1').'\"target=\"_blank\">$2</a>'",
+		'~\[img=(.*?)x(.*?)\](.*?)\[\/img\]~si' => '<img src="$3" style="width: $1px; height: $2px" >',
+		'~\[img (.*?)\](.*?)\[\/img\]~si' => '<img src="$2" title="$1" alt="$1">',
+		'~\[img\](.*?)\[\/img\]~si' => '<a href="$1" target="_blank"><img src="$1"></a>',
+		'~\[quote\](.*?)\[\/quote\]~si' => '<div class="bbcode_quote">$1</div>',
+		'~\[quote=(?:&quot;|"|\')?(.*?)["\']?(?:&quot;|"|\')?\](.*?)\[\/quote\]~si' => '<div class="bbcode_quote"><strong>$1:</strong>$2</div>',
+	);
 	$text = preg_replace(array_keys($preg), array_values($preg), $text);
 	return $text;
 }
