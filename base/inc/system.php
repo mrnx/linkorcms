@@ -2192,7 +2192,7 @@ function Retranslit( $text, $strip_tospaces = true ){
  */
 function Translit4Url( $text ){
 	$text = str_replace(' ', '_', $text);
-	$text = strtr($text, "`~!@#$%^&*()\"'{}[]\\|/,.-=+?<>", '');
+	$text = str_replace(array('`','~','!','@','#','$','%','^','&','*','(',')','"',"'",'{','}','[',']','\\','|','/',',','.','-','=','+','?','<','>'), '', $text);
 	$text = strtr($text, array(
 		'à' => 'a', 'À' => 'A',
 		'á' => 'b', 'Á' => 'B',
