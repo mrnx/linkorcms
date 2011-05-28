@@ -6,6 +6,6 @@ if(!defined('VALID_RUN')){
 }
 
 System::site()->JQueryPlugin('scripts/jquery_treeview/jquery.treeview.js', true);
-System::site()->AddCSSFile('scripts/jquery_treeview/theme/treeview.css', true);
+System::site()->AddCSSFile('scripts/jquery_treeview/theme/jquery.treeview.css', true);
 
 ?>

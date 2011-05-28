@@ -1,0 +1,35 @@
+.ui-lTable {
+	width: 100%;
+	margin: 0px;
+	margin-bottom: 5px;
+	border-collapse: collapse;
+	border: 1px #CCCCCC solid;
+	cursor: default;
+}
+
+/* ячейки заголовков таблиц */
+.ui-lTable-column{
+	padding: 5px;
+	color: #000;
+	background-color: #E7E7E7;
+	background-image: url(../img/table_th.png);
+	border: 1px #CCCCCC solid;
+	text-shadow: 0px 1px 0px #fff;
+	text-align: center;
+	font-weight: normal;
+}
+
+/* ќбычные €чейки */
+.ui-lTable-cell{
+	padding: 4px;
+	text-align: center;
+	vertical-align: middle;
+	border-bottom: 1px #CCCCCC solid;
+}
+
+.ui-lTable-row-even{
+	background-color: #F5F5FF;
+}
+.ui-lTable-row-hover{
+	background-color: #DDEAF7;
+}

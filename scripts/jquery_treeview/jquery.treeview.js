@@ -311,10 +311,10 @@
 			if('info' in opt && opt.info != ''){
 				var $info = $('<div id="item_info_'+opt.id+'" class="item_info"><span class="tooltip">'+opt.info+'</span></div>').appendTo($div);
 				$info.lPopUp({
-					             show: function(options){
-						             $(this).children(options.popupObject).fadeIn("fast");
-					             }
-				             });
+					show: function(options){
+						$(this).children(options.popupObject).fadeIn("fast");
+					}
+				});
 			}
 
 			// Функциональные ссылки div.item_func_bar

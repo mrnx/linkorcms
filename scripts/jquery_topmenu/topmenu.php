@@ -6,6 +6,6 @@ if(!defined('VALID_RUN')){
 }
 
 System::site()->JQueryPlugin('scripts/jquery_topmenu/jquery.topmenu.js', true);
-System::site()->AddCSSFile('scripts/jquery_topmenu/theme/topmenu.css', true);
+System::site()->AddCSSFile('scripts/jquery_topmenu/theme/jquery.topmenu.css', true);
 
 ?>
