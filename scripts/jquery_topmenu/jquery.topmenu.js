@@ -7,11 +7,11 @@
 
 (function($){
 
-	$.fn.lTopMenu = function( menuData ){
+	$.fn.topmenu = function( menuData ){
 
 		var $topmenu;
 		var active = false; // Состояние, показывает что меню было активировано
-		var timer_label = 'l-topmenu-deactivate-timer';
+		var timer_label = null;
 		var prev_enter_object = null;
 		var prev_item_target = null;
 
@@ -78,15 +78,15 @@
 
 		// Событие - курсор мыши был перемещен в область меню
 		function EventMenuEnter(event){
-			$(event.currentTarget).stopTime(timer_label);
+			clearTimeout(timer_label);
 		}
 
 		// Событие - курсор мыши вышел за область меню
 		function EventMenuLeave(event){
-			$(event.currentTarget).oneTime(1200, timer_label, function(){
+			timer_label = setTimeout(function(){
 				HideSubMenus();
 				active = false;
-			});
+			}, 1200);
 		}
 
 		// Событие - клик на элеменете верхнего уровня

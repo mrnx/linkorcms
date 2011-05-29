@@ -15,7 +15,7 @@
 
 (function( $, undefined ){
 
-	$.widget( "ui.lTreeView", {
+	$.widget( "ui.treeview", {
 		options: {
 			move: '',   // Адрес страницы обработчика перемещения элементов
 			del: '',  // Адрес страницы обработчика удаления элементов

@@ -12,7 +12,7 @@
 
 (function( $, undefined ){
 
-	$.widget("ui.lTable", {
+	$.widget("ui.table", {
 		options: {
 			columns: {}, // Описание колонок
 			rows: {}, // Данные таблицы

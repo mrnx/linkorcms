@@ -11,10 +11,7 @@ if(!$user->CheckAccess2('news', 'news_edit')){
 }
 
 $site->AddJSFile('news.js');
-$status = 0;
-$topic_id = -1;
-$auth_id = -1;
-$menuurl = GenMenuUrl($status, $topic_id, $auth_id);
+
 $topic_id = 0; #Номер темы
 $newstitle = ''; # Заголовок новости
 $icon = ''; # Иконки
@@ -165,6 +162,6 @@ FormRow('Кто видит', $site->Select('view', $visdata));
 FormRow('Включить', $site->Radio('enabled', 'on', $enabled[1]).'Да&nbsp;'.$site->Radio('enabled', 'off', $enabled[0]).'Нет');
 
 AddCenterBox($title);
-AddForm('<form name="news_editor" action="'.$config['admin_file'].'?exe=news&a=save&m='.$met.$menuurl.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Select('action', $acts).$site->Submit('Выполнить'));
+AddForm('<form name="news_editor" action="'.$config['admin_file'].'?exe=news&a=save&m='.$met.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Select('action', $acts).$site->Submit('Выполнить'));
 
 ?>

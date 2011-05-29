@@ -10,10 +10,7 @@ if(!$user->CheckAccess2('news', 'news_edit')){
 	return;
 }
 
-$status = 0;
-$topic_id = -1;
-$auth_id = -1;
-$menuurl = GenMenuUrl($status, $topic_id, $auth_id);
+
 $db->Select('news', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 $news = $db->FetchRow();
 if(SafeDB($news['enabled'], 1, int) == 1){
@@ -24,6 +21,7 @@ if(SafeDB($news['enabled'], 1, int) == 1){
 	CalcNewsCounter(SafeDB($news['topic_id'], 11, int), true);
 }
 $db->Update('news', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+
 $par = SafeEnv($_GET['pv'], 10, str);
 switch($par){
 	case 'main':
@@ -46,6 +44,6 @@ $bcache->Delete('block', 'news2');
 $bcache->Delete('block', 'news3');
 $bcache->Delete('block', 'news4');
 
-GO($config['admin_file'].'?exe=news'.$link.$menuurl);
+GO($config['admin_file'].'?exe=news'.$link);
 
 ?>

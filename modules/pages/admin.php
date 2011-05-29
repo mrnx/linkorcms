@@ -196,16 +196,13 @@ function AdminPagesMain(){
 function AdminPagesAjaxTree(){
 	global $pages_tree;
 
+	UseScript('jquery_ui_treeview');
+
 	if(CheckGet('parent')){
 		$parent = SafeEnv($_GET['parent'], 11, int);
 	}else{
 		$parent = 0;
 	}
-
-	include_once('scripts/jquery_ui/jquery-ui.php');
-	include_once('scripts/jquery_plugins/plugins.php');
-	include_once('scripts/jquery_nestedSortable/nestedSortable.php');
-	include_once('scripts/jquery_treeview/treeview.php');
 
 	$pages = System::database()->Select('pages');
 	SortArray($pages, 'order');
@@ -296,7 +293,7 @@ function AdminPagesAjaxTree(){
 	}
 
 	if($parent == 0){
-		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("#tree_container").lTreeView({move: \''.ADMIN_FILE.'?exe=pages&a=ajaxmove\', del: \''.ADMIN_FILE.'?exe=pages&a=delete\', tree: '.JsonEncode($tree).'});</script>');
+		AddTextBox('Страницы', '<div id="tree_container"></div><script>$("#tree_container").treeview({move: \''.ADMIN_FILE.'?exe=pages&a=ajaxmove\', del: \''.ADMIN_FILE.'?exe=pages&a=delete\', tree: '.JsonEncode($tree).'});</script>');
 	}else{
 		echo JsonEncode($tree);
 		exit;

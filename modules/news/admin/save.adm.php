@@ -10,11 +10,6 @@ if(!$user->CheckAccess2('news', 'news_edit')){
 	return;
 }
 
-$status = 0;
-$topic_id = -1;
-$auth_id = -1;
-$menuurl = GenMenuUrl($status, $topic_id, $auth_id);
-
 $author = $user->Get('u_name');
 
 #Получаем основные параметры
@@ -96,7 +91,6 @@ $bcache->Delete('block', 'news2');
 $bcache->Delete('block', 'news3');
 $bcache->Delete('block', 'news4');
 
-//GO($config['admin_file'].'?exe=news'.$menuurl);
 GoRefererUrl($_GET['back']);
 AddTextBox('Сообщение', 'Изменения сохранены.');
 

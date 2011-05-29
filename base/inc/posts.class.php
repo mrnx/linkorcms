@@ -439,7 +439,7 @@ class Posts{
 		System::site()->Blocks[$PostFormBlockName]['vars'] = $vars;
 
 		// JavaScript
-		include_once('scripts/bbcode_editor/index.php');
+		include_once('scripts/bbcode_editor/script.php');
 
 		// Смайлики для формы
 		$smilies = System::database()->Select('smilies', "`enabled`='1'");
