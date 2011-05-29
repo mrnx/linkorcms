@@ -2218,8 +2218,6 @@ function Retranslit( $text, $strip_tospaces = true ){
  * @return void
  */
 function Translit4Url( $text ){
-	$text = str_replace(' ', '_', $text);
-	$text = str_replace(array('`','~','!','@','#','$','%','^','&','*','(',')','"',"'",'{','}','[',']','\\','|','/',',','.','-','=','+','?','<','>'), '', $text);
 	$text = strtr($text, array(
 		'à' => 'a', 'À' => 'A',
 		'á' => 'b', 'Á' => 'B',
@@ -2255,6 +2253,9 @@ function Translit4Url( $text ){
 		'þ' => 'yu', 'Þ' => 'YU',
 		'ÿ' => 'ya', 'ß' => 'YA',
 	));
+	$text = preg_replace('/[^a-z ]*/i', '', $text);
+	$text = trim($text);
+	$text = str_replace(' ', '_', $text);
 	return $text;
 }
 
