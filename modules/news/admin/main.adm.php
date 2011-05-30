@@ -6,15 +6,15 @@
 	}
 
 	TAddSubTitle('Главная');
-	$site->AddCSSFile('news.css');
-	$num = $config['news']['newsonpage']; //Количество новостей на страницу
 	AddCenterBox('Новости');
+
+	$num = $config['news']['newsonpage']; //Количество новостей на страницу
 
 	$news = $db->Select('news');
 	SortArray($news, 'date', true);
 
 	// Выводим новости
-	include_once('scripts/jquery_table/script.php');
+	UseScript('jquery_ui_table');
 
 	$text = '';
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
@@ -23,6 +23,7 @@
 		$text .= AdminRenderNews2($s, false, $page, $topics[$s['topic_id']]);
 	}
 	$text .= '</table>';
+
 	AddText($text);
 
 ?>
