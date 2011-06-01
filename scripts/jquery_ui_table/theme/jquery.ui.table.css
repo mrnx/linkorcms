@@ -1,4 +1,4 @@
-.ui-lTable {
+.ui-table {
 	width: 100%;
 	margin: 0px;
 	margin-bottom: 5px;
@@ -8,28 +8,88 @@
 }
 
 /* ячейки заголовков таблиц */
-.ui-lTable-column{
-	padding: 5px;
+.ui-table-column{
+	height: 22px;
+	line-height: 22px;
 	color: #000;
 	background-color: #E7E7E7;
-	background-image: url(../img/table_th.png);
+	background-image: url(table_th.png);
 	border: 1px #CCCCCC solid;
 	text-shadow: 0px 1px 0px #fff;
-	text-align: center;
 	font-weight: normal;
 }
 
+.ui-table-column-sortable{
+	cursor: pointer;
+}
+
+.ui-table-column-sortable:hover{
+	background-position: 0 44px;
+}
+
+.ui-table-column-sortable:active{
+	background-image: none;
+	text-shadow: none;
+	color: #555;
+}
+
+.ui-table-column-sortable-selected{
+	cursor: pointer;
+	background-position: 0 22px;
+}
+
+.ui-table-column-value{
+	padding-left: 10px;
+}
+
+.ui-table-column-arrow{
+	background: url(sort_none.gif);
+	float: right;
+	margin-top: 6px;
+	width: 21px;
+	height: 9px;
+}
+
+.ui-table-column-arrow-asc{
+	background: url(sort_asc.gif);
+	float: right;
+	margin-top: 9px;
+	width: 21px;
+	height: 4px;
+}
+
+.ui-table-column-arrow-desc{
+	background: url(sort_desc.gif);
+	float: right;
+	margin-top: 9px;
+	width: 21px;
+	height: 4px;
+}
+
 /* ќбычные €чейки */
-.ui-lTable-cell{
-	padding: 4px;
-	text-align: center;
+.ui-table-cell{
+	padding: 4px 10px;
 	vertical-align: middle;
 	border-bottom: 1px #CCCCCC solid;
 }
 
-.ui-lTable-row-even{
+.ui-table-row{
+	background-color: #FFF;
+}
+
+.ui-table-row-even{
 	background-color: #F5F5FF;
 }
-.ui-lTable-row-hover{
+.ui-table-row-hover{
 	background-color: #DDEAF7;
+}
+
+.ui-table-align-left{
+	text-align: left;
+}
+.ui-table-align-right{
+	text-align: right;
+}
+.ui-table-align-center{
+	text-align: center;
 }

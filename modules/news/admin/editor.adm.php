@@ -10,8 +10,6 @@ if(!$user->CheckAccess2('news', 'news_edit')){
 	return;
 }
 
-$site->AddJSFile('news.js');
-
 $topic_id = 0; #Номер темы
 $newstitle = ''; # Заголовок новости
 $icon = ''; # Иконки

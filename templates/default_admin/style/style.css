@@ -56,13 +56,16 @@ div.header {
 	height: 80px;
 	background: url(../img/header.png);
 }
+
 div.admin_logo {
 	height: 80px;
 	background: url(../img/adminlogo.png) no-repeat left top;
 }
+
 .menu {
 	background-color: #F6F6F6;
 }
+
 .menu_backing {
 	background-color: #A5C0D4;
 	padding: 1px;
@@ -124,6 +127,7 @@ div.admin_logo {
 .breadcrumb img {
 	vertical-align: middle;
 }
+
 .breadcrumb span {
 	vertical-align: middle;
 }
@@ -146,6 +150,7 @@ div.admin_logo {
 	float: left;
 	width: 210px;
 }
+
 .sidebar_menu {
 	float: left;
 	background-color: #F6F6F6;
@@ -161,6 +166,7 @@ div.admin_logo {
 	-webkit-box-shadow: 2px 2px 2px #DDD;
 	-moz-box-shadow: 2px 2px 2px #DDD;
 }
+
 .sidebar_text {
 	float: left;
 	background-color: #F6F6F6;
@@ -177,11 +183,13 @@ div.admin_logo {
 	-webkit-box-shadow: 2px 2px 2px #DDD;
 	-moz-box-shadow: 2px 2px 2px #DDD;
 }
+
 .sidebar_notitle {
 	border-top: 3px #A5C0D4 solid;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
 }
+
 .sidebar_title {
 	float: left;
 	background-color: #A5C0D4;
@@ -198,8 +206,11 @@ div.admin_logo {
 	-webkit-box-shadow: 2px 2px 2px #DDD;
 	-moz-box-shadow: 2px 2px 2px #DDD;
 }
+
 #sidebar .sideNav { }
+
 #sidebar .sideNav li { border-bottom: 1px solid #ddd; }
+
 #sidebar .sideNav li a {
 	display: block;
 	color: #646464;
@@ -207,24 +218,27 @@ div.admin_logo {
 	text-decoration: none;
 	padding: 8px 19px;
 }
+
 #sidebar .sideNav li a:hover {
 	background: #fdfcf6;
 	color: #222;
 	cursor: default;
 }
+
 #sidebar .sideNav li a.activate {
 	background: #DDEAF7;
 }
+
 #sidebar .sideNav li a.active {
 	background: #DDEAF7;
 	color: #c66653;
 }
+
 #sidebar .sideNav li a.active:hover {
 	background: #DDEAF7;
 	color: #c66653;
 	cursor: default;
 }
-
 
 /* Колонка с контентом */
 
@@ -273,6 +287,7 @@ h3 {
 	font-size: 8pt;
 	line-height: 14px;
 }
+
 .footer_no_blocks {
 	margin: 5px 0 0 0;
 	height: 45px;
@@ -286,7 +301,6 @@ h3 {
 
 #footer a:hover { text-decoration: none; }
 
-
 /* Постраничная навигация */
 
 div.nav{
@@ -294,6 +308,7 @@ div.nav{
 	margin-top: 0;
 	text-align: center;
 }
+
 a.nav_item {
 	border: 1px #ccc solid;
 	background: #eee url(../img/nav_grey.png);
@@ -302,7 +317,9 @@ a.nav_item {
 	border-radius: 3px;
 	padding: 3px 8px;
 	line-height: 26px;
+	cursor: default;
 }
+
 a.nav_item:hover {
 	color: #000;
 	border-color: #aaa;
@@ -310,6 +327,7 @@ a.nav_item:hover {
 	-webkit-box-shadow: 0 0 2px #aaa;
 	-moz-box-shadow: 0 0 2px #aaa;
 }
+
 .nav_item:active{
 	background-image: -webkit-gradient(
     linear,
@@ -327,6 +345,7 @@ a.nav_item:hover {
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 }
+
 .nav_active {
 	font-weight: bold;
 
@@ -362,6 +381,7 @@ a.nav_item:hover {
 	border-right: none;
 	margin: 10px 0px 10px 0px;
 }
+
 .commth { /* Ячейки заголовков таблицы комментария */
 	color: #000080;
 	background-color: #E1E1E1;
@@ -371,6 +391,7 @@ a.nav_item:hover {
 	padding-left: 3px;
 	padding-right: 3px;
 }
+
 .commtd { /* Ячейки для обычных ячеек таблицы комментария*/
 	padding: 1px;
 	border: 1px #ABC5D8 solid;
@@ -379,6 +400,7 @@ a.nav_item:hover {
 	background-color: #F5F5F5;
 	text-align: center;
 }
+
 .commtext { /* Ячейка с текстом комментария*/
 	padding: 2px;
 	padding-left: 5px;
@@ -392,22 +414,25 @@ a.nav_item:hover {
 /* Таблицы */
 
 .cfgtable {
-	width: 100%;
-	margin: 0px;
-	margin-bottom: 5px;
+	width: 95%;
+	margin: 10px 0 27px 27px;
 	border-collapse: collapse;
 	border: 1px #CCCCCC solid;
 	cursor: default;
 }
+
 .cfgtable_even{
 	background-color: #F5F5FF;
 }
+
 .cfgtable_odd{
 	background-color: #FFF;
 }
+
 .cfgtable_hover{
 	background-color: #DDEAF7;
 }
+
 .cfgtable th{ /* Ячейки заголовков таблиц */
 	padding: 5px;
 	color: #000;
@@ -418,6 +443,7 @@ a.nav_item:hover {
 	text-align: center;
 	font-weight: normal;
 }
+
 .cfgtable td{ /* Ячейки для обычных таблиц*/
 	padding: 4px;
 	text-align: center;
@@ -433,34 +459,40 @@ a.nav_item:hover {
 	border: 1px #B5D0E4 solid;
 	background-color: #FFF;
 }
+
 .formtable th{
 	font-weight: normal;
 	font-size: 9pt;
 	color: #000;
 	padding: 5px 14px 0 14px;
 }
+
 .formtabletd{ /* Ячейки для элементов форм */
 	padding: 2px 14px 5px 14px;
 	vertical-align: middle;
 	border-bottom: 1px #ccc dotted;
 }
+
 .formtabletitle{ /* Заголовок таблицы */
 	background: url("../img/blocktitlefon.gif");
 	padding: 6px 14px 6px 14px;
 	color: #000000;
 	text-shadow: 1px 1px 1px #eeeeee;
 }
+
 .form_textcaption_tabletd{
 	font-weight: normal;
 	font-size: 9pt;
 	color: #000;
 	padding: 5px 14px 0 14px;
 }
+
 .form_text_tabletd{
 	padding: 4px 14px 10px 14px;
 	vertical-align: middle;
 	border-bottom: 1px #ccc dotted;
 }
+
 .fsubmit{
 	background-color: #eee;
 	padding: 4px 14px 4px 0;
@@ -482,6 +514,7 @@ a.button{
 	margin-right: 1px;
 	text-align: center;
 }
+
 a.button:hover{
 	border-color: #aaa;
 	box-shadow: 0 0 2px #aaa;
@@ -489,6 +522,7 @@ a.button:hover{
 	-moz-box-shadow: 0 0 2px #aaa;
 	cursor: default;
 }
+
 a.button:active{
 	background-image: -webkit-gradient(
 		linear,
@@ -505,6 +539,7 @@ a.button:active{
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
 }
+
 a.button img{
 	vertical-align: bottom;
 	padding: 0;

@@ -258,7 +258,6 @@ function AdminPagesAjaxTree(){
 		$func .= System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=pages&a=changestatus&id='.$id.'&ajax', $page['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-		//$func .= System::admin()->SpeedConfirm('Удалить', System::config('admin_file').'?exe=pages&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
 		$func .= System::admin()->SpeedAjax(
 			'Удалить',
 			'images/admin/delete.png',
@@ -399,7 +398,7 @@ function AdminPagesEditor(){
 	}
 	$id = -1;
 	$title = '';
-	$text = '';
+	$text = '<p></p>';
 	$copy = '';
 	$auto_br = array(false, false);
 	$info = array(false, false, false, false, false);
@@ -486,7 +485,7 @@ function AdminPagesEditor(){
 	FormRow('[seo] Ключевые слова', $site->Edit('seo_keywords', $seo_keywords, false, 'style="width:400px;"'));
 	FormRow('[seo] Описание', $site->Edit('seo_description', $seo_description, false, 'style="width:400px;"'));
 	//
-	FormTextRow('Текст', $site->HtmlEditor('text', $text, 600, 400));
+	FormTextRow('Текст (HTML)', $site->HtmlEditor('text', $text, 600, 400));
 	FormRow('Вставлять тег &lt;br&gt;<br />автоматически',
 		'<label>'.$site->Radio('auto_br', 'on', $auto_br[1]).'Да</label>&nbsp;'
 		.'<label>'.$site->Radio('auto_br', 'off', $auto_br[0]).'Нет</label>');

@@ -9,7 +9,8 @@
 
 .toplevel{
 	padding: 5px;
-	width: 98%;
+	width: 95%;
+	margin: 10px 0 27px 27px;
 	border: 1px #cccccc solid;
 	border-top-width: 2px;
 	background-color: #fff;
@@ -71,7 +72,6 @@
 	margin: 2px 5px 0 5px;
 	cursor: move;
 	display: inline-block;
-	/*background-color: #88f;*/
 }
 .treeview .item_icon img{
 	margin: 0;
@@ -82,7 +82,6 @@
 	display: inline-block;
 	line-height: 22px;
 	vertical-align: top;
-	/*background-color: #f88;*/
 }
 
 .treeview .item_func_bar{

@@ -63,7 +63,7 @@
 		 */
 		ShowSplashScreen: function(){
 			if(this.splashShows == 0){
-				$('div#wrapper').fadeTo(500, 0.5);
+				$('div#wrapper').fadeTo(0, 0.5);
 				$('div#ajaxsplashscreen').fadeIn('fast');
 			}
 			this.splashShows++;

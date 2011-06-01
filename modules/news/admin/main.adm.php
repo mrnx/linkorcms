@@ -5,25 +5,68 @@
 		exit;
 	}
 
-	TAddSubTitle('Главная');
-	AddCenterBox('Новости');
+	System::admin()->AddSubTitle('Главная');
 
-	$num = $config['news']['newsonpage']; //Количество новостей на страницу
+	$num = System::config('news/newsonpage'); //Количество новостей на страницу
 
-	$news = $db->Select('news');
-	SortArray($news, 'date', true);
+	$newsdb = System::database()->Select('news');
+	$columns = array('title', 'date', 'hit_counter', 'comments_counter', 'view', 'enabled');
+	$sortby = 'date';
+	$desc = true;
+	if(isset($_POST['sortby'])){
+		$sortby = $columns[$_POST['sortby']];
+		$desc = $_POST['desc'] == '1';
+	}
+	SortArray($newsdb, $sortby, $desc);
 
 	// Выводим новости
 	UseScript('jquery_ui_table');
+	$table = new jQueryUiTable();
+	$table->AddColumn('Заголовок');
+	$table->AddColumn('Дата', 'left', true, true, true);
+	$table->AddColumn('Просмотров', 'right');
+	$table->AddColumn('Комментарий', 'right');
+	$table->AddColumn('Кто видит', 'center');
+	$table->AddColumn('Статус', 'center');
+	$table->AddColumn('Функции', 'center', false);
 
-	$text = '';
-	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
-	$text .= '<tr><th>Заголовок</th><th>Дата</th><th>Просмотров</th><th>Комментарии</th><th>Кто видит</th><th>Статус</th><th>Функции</th></tr>';
-	foreach($news as $s){
-		$text .= AdminRenderNews2($s, false, $page, $topics[$s['topic_id']]);
+	foreach($newsdb as $news){
+		$id = SafeDB($news['id'], 11, int);
+		$aed = System::user()->CheckAccess2('news', 'news_edit');
+		if($page > 1){
+			$pageparams = '&page='.$page;
+		}else{
+			$pageparams = '';
+		}
+
+		$status = System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=news&a=changestatus&id='.$id.'&pv=main'.$pageparams, $news['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
+		$view = ViewLevelToStr(SafeDB($news['view'], 1, int));
+
+		$allowComments = SafeDB($news['allow_comments'], 1, bool);
+		$comments = SafeDB($news['comments_counter'], 11, int); // Количество комментарий
+
+		$func = '';
+		$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=news&a=edit&id='.$id, 'images/admin/edit.png');
+		$func .= System::admin()->SpeedButton('Удалить', ADMIN_FILE.'?exe=news&a=delnews&id='.$id, 'images/admin/delete.png');
+
+		$table->AddRow(
+			$id,
+			'<b><a href="'.ADMIN_FILE.'?exe=news&a=edit&id='.$id.'">'.SafeDB($news['title'], 255, str).'</a></b>',
+			TimeRender(SafeDB($news['date'], 11, int)),
+			SafeDB($news['hit_counter'], 11, int),
+			($allowComments ? $comments : 'Обсуждение закрыто'),
+			$view,
+			$status,
+			$func
+		);
 	}
-	$text .= '</table>';
 
-	AddText($text);
+	$table->listingUrl = ADMIN_FILE.'?exe=news&ajax';
+	if(isset($_GET['ajax'])){
+		echo $table->GetRowsJson();
+		exit;
+	}else{
+		System::admin()->AddTextBox('Новости', $table->GetHtml());
+	}
 
 ?>
