@@ -333,7 +333,7 @@ class PageTemplate extends Starkyt{
 		// JavaScript
 		$JSInline = '';
 		if($this->JQueryFile != ''){
-			$JSInline .= "jQuery(document).ready(function(){".$this->OnLoadJavaScript."});\n";
+			$JSInline .= "jQuery(function(){".$this->OnLoadJavaScript."});\n";
 		}else{
 			$JSInline .= "window.onload = function(){".$this->OnLoadJavaScript."};\n";
 		}

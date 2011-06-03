@@ -8,6 +8,15 @@
 	System::admin()->AddSubTitle('Главная');
 
 	$num = System::config('news/newsonpage'); //Количество новостей на страницу
+	if(isset($_REQUEST['page'])){
+		$page = intval($_REQUEST['page']);
+		if($page > 1){
+			$pageparams = '&page='.$page;
+		}
+	}else{
+		$page = 0;
+		$pageparams = '';
+	}
 
 	$newsdb = System::database()->Select('news');
 	$columns = array('title', 'date', 'hit_counter', 'comments_counter', 'view', 'enabled');
@@ -22,6 +31,12 @@
 	// Выводим новости
 	UseScript('jquery_ui_table');
 	$table = new jQueryUiTable();
+	$table->listingUrl = ADMIN_FILE.'?exe=news&ajax';
+	$table->total = count($newsdb);
+	$table->onPage = 1;//$num;
+	$table->page = $page;
+
+
 	$table->AddColumn('Заголовок');
 	$table->AddColumn('Дата', 'left', true, true, true);
 	$table->AddColumn('Просмотров', 'right');
@@ -33,13 +48,8 @@
 	foreach($newsdb as $news){
 		$id = SafeDB($news['id'], 11, int);
 		$aed = System::user()->CheckAccess2('news', 'news_edit');
-		if($page > 1){
-			$pageparams = '&page='.$page;
-		}else{
-			$pageparams = '';
-		}
 
-		$status = System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=news&a=changestatus&id='.$id.'&pv=main'.$pageparams, $news['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
+		$status = System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=news&a=changestatus&id='.$id.'&pv=main', $news['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
 		$view = ViewLevelToStr(SafeDB($news['view'], 1, int));
 
 		$allowComments = SafeDB($news['allow_comments'], 1, bool);
@@ -61,7 +71,6 @@
 		);
 	}
 
-	$table->listingUrl = ADMIN_FILE.'?exe=news&ajax';
 	if(isset($_GET['ajax'])){
 		echo $table->GetRowsJson();
 		exit;

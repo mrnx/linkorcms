@@ -15,6 +15,8 @@
 		this.Ajax = Ajax;
 		this.splashShows = 0;
 		this.splashShowsMax = 0;
+		this.liveWatch = [];
+		this.liveTimer = null;
 	}
 
 	window.AdminFn.prototype = {
@@ -64,7 +66,7 @@
 		ShowSplashScreen: function(){
 			if(this.splashShows == 0){
 				$('div#wrapper').fadeTo(0, 0.5);
-				$('div#ajaxsplashscreen').fadeIn('fast');
+				$('div#ajaxsplashscreen').show();
 			}
 			this.splashShows++;
 			this.splashShowsMax++;
@@ -85,6 +87,50 @@
 				this.splashShows = 0;
 				this.splashShowsMax = 0;
 			}
+		},
+
+		/**
+		 * Запуск таймера обработки селекторов
+		 */
+		_liveRun: function(){
+			var self = this;
+			this._liveStop();
+			this.liveTimer = setInterval(function(){
+				var length = self.liveWatch.length,
+						w;
+				while( length-- ){
+					w = self.liveWatch[length];
+					var objs = $(w.selector),
+							nobjs = objs.not(w.elms);
+					nobjs.each(function(){
+						w.fn.apply(this);
+					});
+				}
+			}, 200);
+		},
+
+		/**
+		 * Остановка таймера обработки селекторов
+		 */
+		_liveStop: function(){
+			if(this.liveTimer) clearInterval(this.liveTimer);
+		},
+
+		/**
+		 * Вновь созданные элементы удовлетворяющие условию селектора будут обработаны заданной функцией
+		 * @param selector Селектор для выборки элементов
+		 * @param fn Функция обработчик
+		 */
+		Live: function(selector, fn){
+			elms = $(selector);
+			this.liveWatch.push({
+				selector: selector,
+				fn: fn,
+				elms: elms
+			});
+			elms.each(function(){
+						fn.apply(this);
+					});
 		},
 
 		/**
@@ -153,6 +199,7 @@
 	};
 
 	window.Admin = new AdminFn('admin.php', false); // FIXME: admin.php, ajax ?
+	window.Admin._liveRun();
 
 })(window, jQuery);
 

@@ -19,7 +19,10 @@
 
 			// Адрес страницы для обновления данных
 			// таблицы (POST: page, itemsonpage, sortby, desc)
-			listingUrl: ""
+			listingUrl: "",
+			onpage: 10, // Кол-во элементов на странице
+			page: 1, // Текущая страница
+			total: 0 // Количество элементов всего
 		},
 
 		default_column_options: {
@@ -40,10 +43,19 @@
 		thead: null,
 		tbody: null,
 		tfoot: null,
+		tnav: null,
+
+		navStart: 0, // смещение постраничной навигации
+		totalPages: 0,
 
 		_create: function(){
 			var o = this.options,
 					self = this;
+
+			console.dir(o);
+
+			this.navStart = 0;
+			this.totalPages = Math.round(o.total / o.onpage);
 
 			// Генерируем таблицу
 			this.table = $('<table class="ui-table"></table>').appendTo(this.element);
@@ -67,7 +79,7 @@
 						var arrowClass = 'ui-table-column-arrow';
 					}
 					var $arrow = $('<div id="ui-table-arrow" class="'+arrowClass+'"></div>').prependTo($value);
-					$th.bind('mousedown', (function(id){
+					$th.bind('click', (function(id){
 							return function(){
 								self._setSortedColumn(id);
 							}
@@ -75,8 +87,40 @@
 				}
 			}
 
+			// Подвал таблицы
+			var footer = $('<tr>').appendTo(this.tfoot);
+			var $ftd = $('<td class="ui-table-footer" colspan="'+o.columns.length+'"></td>').appendTo(footer);
+
+			// Постраничная навигация
+			var $nav = $('<div class="ui-table-footer-nav"></div>').appendTo($ftd);
+			$('<a title="Назад" href="#" class="button"><img src="images/admin/back.png" alt="Назад" /></a>').appendTo($nav);
+			this.tnav = $('<div class="ui-table-footer-nav-items"></div>').appendTo($nav);
+			$('<a title="Вперед" href="#" class="button"><img src="images/admin/next.png" alt="Вперед" /></a>').appendTo($nav);
+			this._rebuildNav();
+
+			$('<div class="ui-table-footer-panel"><a title="Обновить данные таблицы" href="#" class="button"><img src="images/admin/refresh.png" alt="Обновить" /></a></div>').appendTo($ftd);
+			$('<div class="ui-table-footer-panel">Кол-во на странице:&nbsp;' +
+			  '<select id="rowsonpage">' +
+			  '<option'+(o.onpage == 10 ? ' selected' : '')+'>10</option>' +
+			  '<option'+(o.onpage == 20 ? ' selected' : '')+'>20</option>' +
+			  '<option'+(o.onpage == 30 ? ' selected' : '')+'>30</option>' +
+			  '<option'+(o.onpage == 40 ? ' selected' : '')+'>40</option>' +
+			  '<option'+(o.onpage == 50 ? ' selected' : '')+'>50</option>' +
+			  '<option'+(o.onpage == 75 ? ' selected' : '')+'>75</option>' +
+			  '<option'+(o.onpage == 100 ? ' selected' : '')+'>100</option>' +
+			  '</select>' +
+			  '</div>').appendTo($ftd);
+			$('<div class="ui-table-footer-panel"><span>Всего объектов: '+o.total+'</span></div>').appendTo($ftd);
+			$('<div class="ui-table-footer-panel"><span>Всего страниц: '+o.total+'</span></div>').appendTo($ftd);
+
 			// Заполняем
 			this._setData(o.rows);
+		},
+
+		_rebuildNav: function(){
+			for(var i=0; i < this.totalPages; i++){
+				$('<a href="#" onclick="return false;" class="button">&nbsp;'+i+'&nbsp;</a>').appendTo(this.tnav);
+			}
 		},
 
 		/**

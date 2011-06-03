@@ -16,6 +16,9 @@
 		private $columns = array();
 		private $rows = array();
 		public $listingUrl = '';
+		public $total = 0;
+		public $page = 0;
+		public $onPage = 10;
 
 		public function AddColumn( $Title, $Align = 'left', $Sortable = true, $Sorted = false, $Desc = false ){
 			$this->columns[] = array(
@@ -49,7 +52,10 @@
 			$options = array(
 				'columns' => $this->columns,
 				'rows' => $this->rows,
-				'listingUrl' => $this->listingUrl
+				'listingUrl' => $this->listingUrl,
+				'total' => $this->total,
+				'page' => $this->page,
+				'onpage' => $this->onPage
 			);
 			return JsonEncode($options);
 		}

@@ -114,7 +114,6 @@ class Page extends PageTemplate{
 
 	public function ViewBlocks(){
 		global $site, $db, $user; // הכÿ סמגלוסעטלמסעט
-
 		$where = "`enabled`='1'";
 		$w2 = GetWhereByAccess('view');
 		if($w2 != ''){
@@ -127,7 +126,7 @@ class Page extends PageTemplate{
 			$mblok1=$block['id'];
 			$mblok2=$block['showin'];
 			$mblok3=$block['showin_uri'] ;
-			if( $this->BloksCheckView($mblok1,$mblok2,$mblok3)){
+			if($this->BloksCheckView($mblok1,$mblok2,$mblok3)){
 				$area = SafeDB($block['position'], 1, str);
 				$title = SafeDB($block['title'], 255, str);
 				$enabled = SafeDB($block['enabled'], 1, int);

@@ -93,3 +93,33 @@
 .ui-table-align-center{
 	text-align: center;
 }
+
+.ui-table-footer{
+	background-color: #eee;
+}
+
+.ui-table-footer-panel{
+	border-left: 1px #ccc solid;
+	padding: 4px;
+	float: right;
+}
+
+.ui-table-footer-panel span{
+	line-height: 22px;
+}
+
+.ui-table-footer-nav{
+	padding: 4px;
+	float: left;
+}
+.ui-table-footer-nav-items{
+	float: left;
+}
+/*.ui-table-footer-nav-items a{*/
+	/*display: inline-block;*/
+	/*border:  1px #ccc solid;*/
+	/*width: 20px;*/
+	/*height: 22px;*/
+	/*text-align: center;*/
+	/*vertical-align: middle;*/
+}

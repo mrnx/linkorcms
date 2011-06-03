@@ -5,16 +5,22 @@
 	System::admin()->AddCSSFile('style.css');
 
 	System::admin()->AddOnLoadJS(<<<JS
-		$('.cfgtable tr:nth-child(even)').addClass('cfgtable_even').hover(
-			function(){ $(this).addClass('cfgtable_hover'); },
-			function(){ $(this).removeClass('cfgtable_hover'); }
-		);
-		$('.cfgtable tr:nth-child(odd)').addClass('cfgtable_odd').hover(
-			function(){ $(this).addClass('cfgtable_hover'); },
-			function(){ $(this).removeClass('cfgtable_hover'); }
-		);
-		$("#sidebar .sideNav li a").mousedown(function(e){ if(e.which == 1)$(this).addClass('activate'); });
-		$("input[type=button], input[type=submit]").button();
+		(function($){
+
+			// Обработка элементов с интервалом
+		  Admin.Live(".cfgtable tr:nth-child(even)", function(){ $(this).addClass('cfgtable_even').hover(
+				function(){ $(this).addClass('cfgtable_hover'); },
+				function(){ $(this).removeClass('cfgtable_hover'); }
+			)});
+		  Admin.Live(".cfgtable tr:nth-child(odd)", function(){ $(this).addClass('cfgtable_odd').hover(
+				function(){ $(this).addClass('cfgtable_hover'); },
+				function(){ $(this).removeClass('cfgtable_hover'); }
+			);});
+		  Admin.Live("#sidebar .sideNav li a", function(){
+		    $(this).mousedown(function(e){if(e.which == 1)$(this).addClass('activate'); });
+		  });
+			Admin.Live(".button, input[type=button], input[type=submit]", function(){ $(this).button(); });
+		})(jQuery);
 JS
 );
 ?>

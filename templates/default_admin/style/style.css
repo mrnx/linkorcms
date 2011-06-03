@@ -500,52 +500,52 @@ a.nav_item:hover {
 	vertical-align: middle;
 }
 
-a.button{
-	width: 20px;
-	height: 18px;
-	border: 1px #ccc solid;
-	background: #eee url(../img/nav_grey.png);
-	border-radius: 3px;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	display: inline-block;
-	padding-left: 0;
-	padding-top: 2px;
-	margin-right: 1px;
-	text-align: center;
-}
+/*a.button{*/
+	/*width: 20px;*/
+	/*height: 18px;*/
+	/*border: 1px #ccc solid;*/
+	/*background: #eee url(../img/nav_grey.png);*/
+	/*border-radius: 3px;*/
+	/*-moz-border-radius: 3px;*/
+	/*-webkit-border-radius: 3px;*/
+	/*display: inline-block;*/
+	/*padding-left: 0;*/
+	/*padding-top: 2px;*/
+	/*margin-right: 1px;*/
+	/*text-align: center;*/
+/*}*/
 
-a.button:hover{
-	border-color: #aaa;
-	box-shadow: 0 0 2px #aaa;
-	-webkit-box-shadow: 0 0 2px #aaa;
-	-moz-box-shadow: 0 0 2px #aaa;
-	cursor: default;
-}
+/*a.button:hover{*/
+	/*border-color: #aaa;*/
+	/*box-shadow: 0 0 2px #aaa;*/
+	/*-webkit-box-shadow: 0 0 2px #aaa;*/
+	/*-moz-box-shadow: 0 0 2px #aaa;*/
+	/*cursor: default;*/
+/*}*/
 
-a.button:active{
-	background-image: -webkit-gradient(
-		linear,
-		left bottom,
-		left top,
-		color-stop(1, rgb(185,224,245)),
-		color-stop(0, rgb(146,189,214))
-	);
-	background-image: -moz-linear-gradient(
-		center top,
-		rgb(185,224,245),
-		rgb(146,189,214)
-	);
-	-webkit-box-shadow: none;
-	-moz-box-shadow: none;
-}
+/*a.button:active{*/
+	/*background-image: -webkit-gradient(*/
+		/*linear,*/
+		/*left bottom,*/
+		/*left top,*/
+		/*color-stop(1, rgb(185,224,245)),*/
+		/*color-stop(0, rgb(146,189,214))*/
+	/*);*/
+	/*background-image: -moz-linear-gradient(*/
+		/*center top,*/
+		/*rgb(185,224,245),*/
+		/*rgb(146,189,214)*/
+	/*);*/
+	/*-webkit-box-shadow: none;*/
+	/*-moz-box-shadow: none;*/
+/*}*/
 
-a.button img{
-	vertical-align: bottom;
-	padding: 0;
-	margin: 0;
-	border: none;
-}
+/*a.button img{*/
+	/*vertical-align: bottom;*/
+	/*padding: 0;*/
+	/*margin: 0;*/
+	/*border: none;*/
+/*}*/
 
 
 /* Таблица конфигурации */
