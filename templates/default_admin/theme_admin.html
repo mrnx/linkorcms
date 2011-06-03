@@ -6,7 +6,6 @@
 
 	System::admin()->AddOnLoadJS(<<<JS
 		(function($){
-
 			// Обработка элементов с интервалом
 		  Admin.Live(".cfgtable tr:nth-child(even)", function(){ $(this).addClass('cfgtable_even').hover(
 				function(){ $(this).addClass('cfgtable_hover'); },

@@ -45,17 +45,16 @@
 		tfoot: null,
 		tnav: null,
 
-		navStart: 0, // смещение постраничной навигации
-		totalPages: 0,
+		navStart: 1, // смещение постраничной навигации
+		sortBy: null,
+		sortDesc: false,
 
 		_create: function(){
 			var o = this.options,
 					self = this;
 
-			console.dir(o);
-
-			this.navStart = 0;
-			this.totalPages = Math.round(o.total / o.onpage);
+			this.navStart = o.page - 4;
+			if(this.navStart < 1) this.navStart = 1;
 
 			// Генерируем таблицу
 			this.table = $('<table class="ui-table"></table>').appendTo(this.element);
@@ -72,6 +71,8 @@
 				var $value = $('<div class="ui-table-column-value">'+col.title+'</div>').appendTo($th);
 				if(col.sortable){
 					if(col.sorted){
+						this.sortBy = i;
+						this.sortDesc = col.desc;
 						$th.addClass('ui-table-column-sortable-selected');
 						var arrowClass = 'ui-table-column-arrow-'+(col.desc ? 'desc' : 'asc');
 					}else{
@@ -93,12 +94,16 @@
 
 			// Постраничная навигация
 			var $nav = $('<div class="ui-table-footer-nav"></div>').appendTo($ftd);
-			$('<a title="Назад" href="#" class="button"><img src="images/admin/back.png" alt="Назад" /></a>').appendTo($nav);
-			this.tnav = $('<div class="ui-table-footer-nav-items"></div>').appendTo($nav);
-			$('<a title="Вперед" href="#" class="button"><img src="images/admin/next.png" alt="Вперед" /></a>').appendTo($nav);
+			this.tnav = $('<span class="ui-table-footer-nav-items"></span>').appendTo($nav);
 			this._rebuildNav();
 
-			$('<div class="ui-table-footer-panel"><a title="Обновить данные таблицы" href="#" class="button"><img src="images/admin/refresh.png" alt="Обновить" /></a></div>').appendTo($ftd);
+			var $updb = $('<div class="ui-table-footer-panel"></div>').appendTo($ftd);
+			this._button({
+				html: '<img src="images/admin/refresh.png" alt="Обновить" />',
+				title: "Обновить данные таблицы",
+				click: function(){ self._updateData(); return false; }
+			}).appendTo($updb);
+
 			$('<div class="ui-table-footer-panel">Кол-во на странице:&nbsp;' +
 			  '<select id="rowsonpage">' +
 			  '<option'+(o.onpage == 10 ? ' selected' : '')+'>10</option>' +
@@ -110,16 +115,85 @@
 			  '<option'+(o.onpage == 100 ? ' selected' : '')+'>100</option>' +
 			  '</select>' +
 			  '</div>').appendTo($ftd);
+			$ftd.find("#rowsonpage").change(function(){
+				o.onpage = parseInt(this.value);
+				self._updateData();
+				self._rebuildNav();
+			});
 			$('<div class="ui-table-footer-panel"><span>Всего объектов: '+o.total+'</span></div>').appendTo($ftd);
-			$('<div class="ui-table-footer-panel"><span>Всего страниц: '+o.total+'</span></div>').appendTo($ftd);
 
 			// Заполняем
 			this._setData(o.rows);
 		},
 
+		_button: function(options){
+			if(!options.click) options.click = function(){ return false; };
+			if(!options.class) options.class = "button";
+			if(!options.href) options.href = "#";
+			return $('<a>', options);
+		},
+
+		_setPage: function( page ){
+			if(page < 1 || page > Math.ceil(this.options.total / this.options.onpage)) return;
+			this.options.page = page;
+			this.navStart = page - 4;
+			if(this.navStart < 1) this.navStart = 1;
+			this._rebuildNav();
+			this._updateData();
+		},
+
+		_getNavBounds: function(totalPages, page, start, stop){
+			if(start == undefined){
+				if(this.navStart > totalPages - 9) this.navStart = totalPages - 9;
+				if(this.navStart < 1) this.navStart = 1;
+				var start = this.navStart;
+				var stop = this.navStart + 9;
+				if(stop > totalPages) stop = totalPages;
+			}
+			var show = stop - start;
+			if(show == 9 || (start == 1 && stop == totalPages)){
+				return {start: start, stop: stop};
+			}
+			if(show < 9){
+				start = start - 1;
+				stop = stop + 1;
+			}
+			if(start < 1) start = 1;
+			if(stop > totalPages) stop = totalPages;
+			return this._getNavBounds(totalPages, page, start, stop);
+		},
+
 		_rebuildNav: function(){
-			for(var i=0; i < this.totalPages; i++){
-				$('<a href="#" onclick="return false;" class="button">&nbsp;'+i+'&nbsp;</a>').appendTo(this.tnav);
+			var self = this,
+					o = this.options,
+					totalPages = Math.ceil(o.total / o.onpage),
+					page = o.page,
+					bounds = this._getNavBounds(totalPages, page);
+			this.tnav.children().remove();
+			if(totalPages == 1) return;
+			this._button({
+				             html: '<img src="images/admin/back.png" alt="Назад" /></a>',
+				             title: "Назад",
+				             click: function(){self._setPage(o.page-1);return false;}
+			             }).appendTo(this.tnav);
+			if(totalPages > 9)
+				this._button({html: "&nbsp;1...&nbsp;",mousedown: function(){self.navStart=self.navStart-9;self._rebuildNav();}}).appendTo(this.tnav);
+			for(var i=bounds.start; i<=bounds.stop; i++){
+				if(i == page){
+					this._button({html: '<u>'+i+'</u>', disabled: "disabled"}).appendTo(this.tnav);
+				}else{
+					this._button({text: i, click: (function(p){return function(){self._setPage(p); return false;}})(i) }).appendTo(this.tnav);
+				}
+			}
+			if(totalPages > 9)
+				this._button({html: "..."+totalPages, mousedown: function(){self.navStart=self.navStart+9;self._rebuildNav();}}).appendTo(this.tnav);
+			this._button({
+				             html: '<img src="images/admin/next.png" alt="Вперед" />',
+				             title: "Вперед",
+				             click: function(){self._setPage(o.page+1);return false;}
+			             }).appendTo(this.tnav);
+			if(window.Admin.LiveUpdate){
+				window.Admin.LiveUpdate();
 			}
 		},
 
@@ -137,28 +211,25 @@
 		_setSortedColumn: function( ColumnId ){
 			var o = this.options.columns[ColumnId];
 			if(!o.sortable) return;
-
 			this.thead.find('th').removeClass().addClass('ui-table-column ui-table-column-sortable');
 			this.thead.find('#ui-table-arrow').removeClass().addClass('ui-table-column-arrow');
 			var $th = this.thead.find('#ui-table-column-'+ColumnId);
-
 			if(o.sorted){
 				o.desc = !o.desc;
 			}else{
 				o.desc = false;
 			}
-
 			for(var i = 0; i < this.options.columns.length; i++){
 				this.options.columns[i].sorted = false;
 			}
 			o.sorted = true;
-
 			$th.removeClass().addClass('ui-table-column ui-table-column-sortable-selected');
 			var arrowClass = 'ui-table-column-arrow-'+(o.desc ? 'desc' : 'asc');
-
 			$th.find('#ui-table-arrow').removeClass().addClass(arrowClass);
 			this.options.columns[ColumnId] = o;
-			this._updateData(1, 10, ColumnId, o.desc);
+			this.sortBy = ColumnId;
+			this.sortDesc = o.desc;
+			this._updateData();
 		},
 
 		/**
@@ -190,19 +261,24 @@
 		/**
 		 * Загрузка обновленных данных с сервера
 		 */
-		_updateData: function( page, itemsonpage, sortby, desc ){
-			var self = this;
+		_updateData: function(){
+			var self = this,
+			postdata = 'page='+this.options.page+'&onpage='+this.options.onpage;
+			if(this.sortBy != null){
+				postdata += '&sortby='+this.sortBy+'&desc='+(this.sortDesc ? '1' : '0');
+			}
 			if(self.options.listingUrl == '') return;
 			if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
 			$.ajax({
 				type: "POST",
 				url: self.options.listingUrl,
 				dataType: "json",
-				data: 'page='+page+'&itemsonpage='+itemsonpage+'&sortby='+sortby+'&desc='+(desc ? '1' : '0'),
+				data: postdata,
 				cache: false,
 				success: function(data){
 					self._setData(data);
 					if(window.Admin.ShowSplashScreen) window.Admin.HideSplashScreen();
+					if(window.Admin.LiveUpdate) window.Admin.LiveUpdate();
 				}
 			});
 		}

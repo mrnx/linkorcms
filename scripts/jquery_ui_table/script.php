@@ -18,7 +18,7 @@
 		public $listingUrl = '';
 		public $total = 0;
 		public $page = 0;
-		public $onPage = 10;
+		public $onpage = 10;
 
 		public function AddColumn( $Title, $Align = 'left', $Sortable = true, $Sorted = false, $Desc = false ){
 			$this->columns[] = array(
@@ -55,7 +55,7 @@
 				'listingUrl' => $this->listingUrl,
 				'total' => $this->total,
 				'page' => $this->page,
-				'onpage' => $this->onPage
+				'onpage' => $this->onpage
 			);
 			return JsonEncode($options);
 		}

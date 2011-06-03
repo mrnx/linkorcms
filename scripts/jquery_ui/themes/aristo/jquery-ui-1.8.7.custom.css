@@ -27,7 +27,7 @@
 
 /* Interaction Cues
 ----------------------------------*/
-.ui-state-disabled { cursor: default !important; }
+.ui-state-disabled { cursor: default !important; background: none; }
 
 
 /* Icons
@@ -518,7 +518,7 @@ button.ui-button-icons-only { width: 3.7em; }
 
 /*button text element */
 .ui-button .ui-button-text { display: block; font-size: 12px; font-weight: bold; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6); }
-.ui-button-text-only .ui-button-text { padding: 2px 2px 1px 2px; line-height: 17px; }
+.ui-button-text-only .ui-button-text { padding: 2px 4px 1px 4px; line-height: 17px; min-width: 16px; }
 .ui-button-text-only .ui-button-text img{ padding: 0; vertical-align: top; }
 .ui-button-icon-only .ui-button-text, .ui-button-icons-only .ui-button-text { padding: .4em; text-indent: -9999999px; }
 .ui-button-text-icon-primary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: .4em 1em .4em 2.1em; }

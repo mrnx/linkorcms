@@ -7,15 +7,31 @@
 
 	System::admin()->AddSubTitle('Главная');
 
-	$num = System::config('news/newsonpage'); //Количество новостей на страницу
+	// Количество новостей на странице
+	if(isset($_REQUEST['onpage'])){
+		$num = intval($_REQUEST['onpage']);
+	}else{
+		$num = System::config('news/newsonpage');
+	}
 	if(isset($_REQUEST['page'])){
 		$page = intval($_REQUEST['page']);
 		if($page > 1){
 			$pageparams = '&page='.$page;
 		}
 	}else{
-		$page = 0;
+		$page = 1;
 		$pageparams = '';
+	}
+
+	function ArrayPage( &$ObjArray, $OnPage, $Page ){
+		$pages_count = ceil(count($ObjArray) / $OnPage);
+		if($Page < 1){
+			$Page = 1;
+		}elseif($Page > $pages_count){
+			$Page = $pages_count;
+		}
+		$start = $OnPage * $Page - $OnPage;
+		return array_slice($ObjArray, $start, $OnPage);
 	}
 
 	$newsdb = System::database()->Select('news');
@@ -33,9 +49,8 @@
 	$table = new jQueryUiTable();
 	$table->listingUrl = ADMIN_FILE.'?exe=news&ajax';
 	$table->total = count($newsdb);
-	$table->onPage = 1;//$num;
+	$table->onpage = $num;
 	$table->page = $page;
-
 
 	$table->AddColumn('Заголовок');
 	$table->AddColumn('Дата', 'left', true, true, true);
@@ -45,6 +60,7 @@
 	$table->AddColumn('Статус', 'center');
 	$table->AddColumn('Функции', 'center', false);
 
+	$newsdb = ArrayPage($newsdb, $num, $page); // Берем только новости с текущей страницы
 	foreach($newsdb as $news){
 		$id = SafeDB($news['id'], 11, int);
 		$aed = System::user()->CheckAccess2('news', 'news_edit');

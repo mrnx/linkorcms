@@ -96,16 +96,7 @@
 			var self = this;
 			this._liveStop();
 			this.liveTimer = setInterval(function(){
-				var length = self.liveWatch.length,
-						w;
-				while( length-- ){
-					w = self.liveWatch[length];
-					var objs = $(w.selector),
-							nobjs = objs.not(w.elms);
-					nobjs.each(function(){
-						w.fn.apply(this);
-					});
-				}
+				self.LiveUpdate();
 			}, 200);
 		},
 
@@ -114,6 +105,19 @@
 		 */
 		_liveStop: function(){
 			if(this.liveTimer) clearInterval(this.liveTimer);
+		},
+
+		LiveUpdate: function(){
+			var length = this.liveWatch.length,
+					w;
+			while( length-- ){
+				w = this.liveWatch[length];
+				var objs = $(w.selector),
+						nobjs = objs.not(w.elms);
+				nobjs.each(function(){
+					w.fn.apply(this);
+				});
+			}
 		},
 
 		/**
