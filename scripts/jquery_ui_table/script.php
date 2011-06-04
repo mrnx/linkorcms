@@ -15,18 +15,18 @@
 		private $id = 0;
 		private $columns = array();
 		private $rows = array();
-		public $listingUrl = '';
+		public $listing = '';
 		public $total = 0;
 		public $page = 0;
 		public $onpage = 10;
+		public $sortby = -1;
+		public $sortdesc = false;
 
 		public function AddColumn( $Title, $Align = 'left', $Sortable = true, $Sorted = false, $Desc = false ){
 			$this->columns[] = array(
 				'id' => $this->id,
 				'title' => $Title,
 				'sortable' => $Sortable,
-				'sorted' => $Sorted,
-				'desc' => $Desc,
 				'align' => $Align
 			);
 			$this->id++;
@@ -52,10 +52,12 @@
 			$options = array(
 				'columns' => $this->columns,
 				'rows' => $this->rows,
-				'listingUrl' => $this->listingUrl,
+				'listing' => $this->listing,
 				'total' => $this->total,
 				'page' => $this->page,
-				'onpage' => $this->onpage
+				'onpage' => $this->onpage,
+				'sortby' => $this->sortby,
+				'sortdesc' => $this->sortdesc
 			);
 			return JsonEncode($options);
 		}

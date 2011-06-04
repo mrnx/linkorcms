@@ -19,18 +19,18 @@
 
 			// Адрес страницы для обновления данных
 			// таблицы (POST: page, itemsonpage, sortby, desc)
-			listingUrl: "",
+			listing: "",
 			onpage: 10, // Кол-во элементов на странице
 			page: 1, // Текущая страница
-			total: 0 // Количество элементов всего
+			total: 0, // Количество элементов всего
+			sortby: -1,
+			sortdesc: false
 		},
 
 		default_column_options: {
 			id: "0", // Уникальный идентификатор для доступа
 			title: "Column Title", // Заголовок
 			sortable: true, // Разрешить сортировку по этому столбцу
-			sorted: false, // Приходящие данные отсортированы по данной колонке
-			desc: false,
 			align: "left" // Выравнивание в ячейках (left, right, center)
 		},
 
@@ -46,8 +46,6 @@
 		tnav: null,
 
 		navStart: 1, // смещение постраничной навигации
-		sortBy: null,
-		sortDesc: false,
 
 		_create: function(){
 			var o = this.options,
@@ -70,11 +68,9 @@
 				$th.bind('selectstart', function(){ return false; });
 				var $value = $('<div class="ui-table-column-value">'+col.title+'</div>').appendTo($th);
 				if(col.sortable){
-					if(col.sorted){
-						this.sortBy = i;
-						this.sortDesc = col.desc;
+					if(i == o.sortby){
 						$th.addClass('ui-table-column-sortable-selected');
-						var arrowClass = 'ui-table-column-arrow-'+(col.desc ? 'desc' : 'asc');
+						var arrowClass = 'ui-table-column-arrow-'+(o.sortdesc ? 'desc' : 'asc');
 					}else{
 						$th.addClass('ui-table-column-sortable');
 						var arrowClass = 'ui-table-column-arrow';
@@ -169,6 +165,8 @@
 					totalPages = Math.ceil(o.total / o.onpage),
 					page = o.page,
 					bounds = this._getNavBounds(totalPages, page);
+			if(page > totalPages) page = o.page = totalPages;
+			if(page < 1) page = o.page = 1;
 			this.tnav.children().remove();
 			if(totalPages == 1) return;
 			this._button({
@@ -215,20 +213,19 @@
 			this.thead.find('#ui-table-arrow').removeClass().addClass('ui-table-column-arrow');
 			var $th = this.thead.find('#ui-table-column-'+ColumnId);
 			if(o.sorted){
-				o.desc = !o.desc;
+				this.options.sortdesc = !this.options.sortdesc;
 			}else{
-				o.desc = false;
+				this.options.sortdesc = false;
 			}
 			for(var i = 0; i < this.options.columns.length; i++){
 				this.options.columns[i].sorted = false;
 			}
 			o.sorted = true;
 			$th.removeClass().addClass('ui-table-column ui-table-column-sortable-selected');
-			var arrowClass = 'ui-table-column-arrow-'+(o.desc ? 'desc' : 'asc');
+			var arrowClass = 'ui-table-column-arrow-'+(this.options.sortdesc ? 'desc' : 'asc');
 			$th.find('#ui-table-arrow').removeClass().addClass(arrowClass);
 			this.options.columns[ColumnId] = o;
-			this.sortBy = ColumnId;
-			this.sortDesc = o.desc;
+			this.options.sortby = ColumnId;
 			this._updateData();
 		},
 
@@ -264,14 +261,14 @@
 		_updateData: function(){
 			var self = this,
 			postdata = 'page='+this.options.page+'&onpage='+this.options.onpage;
-			if(this.sortBy != null){
-				postdata += '&sortby='+this.sortBy+'&desc='+(this.sortDesc ? '1' : '0');
+			if(this.options.sortby > -1){
+				postdata += '&sortby='+this.options.sortby+'&desc='+(this.options.sortdesc ? '1' : '0');
 			}
-			if(self.options.listingUrl == '') return;
+			if(self.options.listing == '') return;
 			if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
 			$.ajax({
 				type: "POST",
-				url: self.options.listingUrl,
+				url: self.options.listing,
 				dataType: "json",
 				data: postdata,
 				cache: false,
@@ -281,7 +278,18 @@
 					if(window.Admin.LiveUpdate) window.Admin.LiveUpdate();
 				}
 			});
+		},
+
+		/* PUBLIC */
+
+		/**
+		 * Удаление строки таблицы
+		 * @param id
+		 */
+		update: function(){
+			this._updateData();
 		}
+
 	});
 
 })(jQuery);

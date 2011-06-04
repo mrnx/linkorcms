@@ -23,37 +23,31 @@
 		$pageparams = '';
 	}
 
-	function ArrayPage( &$ObjArray, $OnPage, $Page ){
-		$pages_count = ceil(count($ObjArray) / $OnPage);
-		if($Page < 1){
-			$Page = 1;
-		}elseif($Page > $pages_count){
-			$Page = $pages_count;
-		}
-		$start = $OnPage * $Page - $OnPage;
-		return array_slice($ObjArray, $start, $OnPage);
-	}
-
 	$newsdb = System::database()->Select('news');
 	$columns = array('title', 'date', 'hit_counter', 'comments_counter', 'view', 'enabled');
 	$sortby = 'date';
+	$sortbyid = 1;
 	$desc = true;
-	if(isset($_POST['sortby'])){
-		$sortby = $columns[$_POST['sortby']];
-		$desc = $_POST['desc'] == '1';
+	if(isset($_REQUEST['sortby'])){
+		$sortby = $columns[$_REQUEST['sortby']];
+		$sortbyid = intval($_REQUEST['sortby']);
+		$desc = $_REQUEST['desc'] == '1';
 	}
 	SortArray($newsdb, $sortby, $desc);
 
 	// Выводим новости
 	UseScript('jquery_ui_table');
 	$table = new jQueryUiTable();
-	$table->listingUrl = ADMIN_FILE.'?exe=news&ajax';
+	$table->listing = ADMIN_FILE.'?exe=news&ajax';
 	$table->total = count($newsdb);
 	$table->onpage = $num;
 	$table->page = $page;
 
+	$table->sortby = $sortbyid;
+	$table->sortdesc = $desc;
+
 	$table->AddColumn('Заголовок');
-	$table->AddColumn('Дата', 'left', true, true, true);
+	$table->AddColumn('Дата', 'left');
 	$table->AddColumn('Просмотров', 'right');
 	$table->AddColumn('Комментарий', 'right');
 	$table->AddColumn('Кто видит', 'center');

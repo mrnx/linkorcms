@@ -155,6 +155,26 @@ abstract class System{
 }
 
 /**
+ * Функция возвращает часть массива, как если бы
+ * он был разбит на определенное количество частей.
+ * Иногда удобно использовать для организации постраничной навигации.
+ * @param  $ObjArray Массив
+ * @param  $OnPage Количество элементов массива в одной части
+ * @param  $Page Какую часть вернуть начиная с единицы
+ * @return array
+ */
+function ArrayPage( &$ObjArray, $OnPage, $Page ){
+	$pages_count = ceil(count($ObjArray) / $OnPage);
+	if($Page < 1){
+		$Page = 1;
+	}elseif($Page > $pages_count){
+		$Page = $pages_count;
+	}
+	$start = $OnPage * $Page - $OnPage;
+	return array_slice($ObjArray, $start, $OnPage);
+}
+
+/**
  * Функция автоматически подключает скрипты из папки script к странице. Принимает произвольное количество параметров или массив.
  * @return void
  */
