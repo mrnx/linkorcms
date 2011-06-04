@@ -12,7 +12,12 @@
 </head>
 <body>
 <script language="JavaScript">
-	document.write(opener.document.edit_form.article.value);
+	var f = opener.document.edit_form;
+	var atext = f.article.value;
+	if(f.auto_br_article.value == 'on'){
+		atext = nltobr(atext);
+	}
+	document.write(atext);
 </script>
 </body>
 </html>

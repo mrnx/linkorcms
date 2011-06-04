@@ -128,11 +128,11 @@ function AdminArticlesEditor()
 	$description = '';
 	$article = '';
 	$image = '';
-	$auto_br_article = array(false, false);
-	$auto_br_desc = array(false, false);
+	$auto_br_desc = false;
+	$auto_br_article = false;
 	$allow_comments = true;
 	$allow_votes = true;
-	$view = array(1=>false, 2=>false, 3=>false, 4=>false);
+	$view = 4;
 	$active = true;
 	//Модуль SEO
 	$seo_title = '';
@@ -140,9 +140,6 @@ function AdminArticlesEditor()
 	$seo_description = '';
 	//
 	if(!isset($_GET['id'])){
-		$view[4] = true;
-		$auto_br_article[0] = true;
-		$auto_br_desc[0] = true;
 		$action = 'add';
 		$top = 'Добавление статьи';
 		$cap = 'Добавить';
@@ -158,11 +155,15 @@ function AdminArticlesEditor()
 		$description = SafeDB($par['description'], 0, str, false);
 		$article = SafeDB($par['article'], 0, str, false);
 		$image = SafeDB($par['image'], 250, str);
-		$auto_br_article[SafeDB($par['auto_br_article'], 1, int)] = true;
-		$auto_br_desc[SafeDB($par['auto_br_desc'], 1, int)] = true;
+
+		$auto_br_article = SafeDB($par['auto_br_article'], 1, bool);
+		$auto_br_desc = SafeDB($par['auto_br_desc'], 1, bool);
+
+		$active = SafeDB($par['active'], 1, bool);
+
 		$allow_comments = SafeDB($par['allow_comments'], 1, int);
 		$allow_votes = SafeDB($par['allow_votes'], 1, int);
-		$view[SafeDB($par['view'], 1, int)] = true;
+		$view = SafeDB($par['view'], 1, int);
 		//Модуль SEO
 		$seo_title = SafeDB($par['seo_title'], 255, str);
 		$seo_keywords = SafeDB($par['seo_keywords'], 255, str);
@@ -174,7 +175,6 @@ function AdminArticlesEditor()
 	}
 	unset($par);
 
-	$visdata = GetUserTypesFormData($view);
 	$cats_data = array();
 	$cats_data = $tree->GetCatsData($cat_id);
 	if(count($cats_data) == 0){
@@ -190,20 +190,20 @@ function AdminArticlesEditor()
 	FormRow('[seo] Описание', $site->Edit('seo_description', $seo_description, false, 'style="width:400px;"'));
 	//
 	AdminImageControl('Изображение', 'Загрузить изображение', $image, $config['articles']['images_dir']);
+
 	FormTextRow('Короткая статья (HTML)', $site->HtmlEditor('description', $description, 600, 200));
-	FormRow('Преобразовать текст в HTML', $site->Radio('auto_br_desc', 'on', $auto_br_desc[1]).'Да&nbsp;'.$site->Radio('auto_br_desc', 'off', $auto_br_desc[0]).'Нет');
+	FormRow('Преобразовать текст в HTML', $site->Select('auto_br_desc', GetEnData($auto_br_desc, 'Да', 'Нет')));
+
 	FormTextRow('Полная статья (HTML)', $site->HtmlEditor('article', $article, 600, 400));
-	FormRow('Преобразовать текст в HTML', $site->Radio('auto_br_article', 'on', $auto_br_article[1]).'Да&nbsp;'.$site->Radio('auto_br_article', 'off', $auto_br_article[0]).'Нет');
+	FormRow('Преобразовать текст в HTML', $site->Select('auto_br_article', GetEnData($auto_br_article, 'Да', 'Нет')));
+
 	FormRow('Автор', $site->Edit('author', $author, false, 'style="width:400px;" maxlength="50"'));
 	FormRow('E-mail автора', $site->Edit('email', $email, false, 'style="width:400px;" maxlength="50"'));
 	FormRow('Сайт автора', $site->Edit('www', $www, false, 'style="width:400px;" maxlength="250"'));
-	$enData = GetEnData($allow_comments, 'Разрешить', 'Запретить');
-	FormRow('Комментарии', $site->Select('allow_comments', $enData));
-	$enData = GetEnData($allow_votes, 'Разрешить', 'Запретить');
-	FormRow('Оценки', $site->Select('allow_votes', $enData));
-	FormRow('Кто видит', $site->Select('view', $visdata));
-	$enData = GetEnData($active, 'Да', 'Нет');
-	FormRow('Активна', $site->Select('active', $enData));
+	FormRow('Комментарии', $site->Select('allow_comments', GetEnData($allow_comments, 'Разрешить', 'Запретить')));
+	FormRow('Оценки', $site->Select('allow_votes', GetEnData($allow_votes, 'Разрешить', 'Запретить')));
+	FormRow('Кто видит', $site->Select('view', GetUserTypesFormData($view)));
+	FormRow('Активна', $site->Select('active', GetEnData($active, 'Да', 'Нет')));
 	AddCenterBox($top);
 	AddForm('<form name="edit_form" action="'.$config['admin_file'].'?exe=articles&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Button('Предпросмотр', 'onclick="PreviewOpen();"').$site->Submit($cap));
 }
