@@ -35,20 +35,7 @@ switch($action){
 		AdminNewsEditor();
 		break;
 	case 'save':
-		$method = $_GET['m'];
-		if($_POST['action'] == 'save'){
-			include (MOD_DIR.'admin/save.adm.php');
-		} else{
-			if($method == 'add'){
-				$action = 'addpreview';
-			} else{
-				$action = 'editpreview';
-			}
-			include (MOD_DIR.'admin/editor.adm.php');
-		}
-		break;
-	case 'addpreview':
-		include (MOD_DIR.'admin/editor.adm.php');
+		AdminNewsSave();
 		break;
 	case 'delnews':
 		include (MOD_DIR.'admin/delete.adm.php');
@@ -83,15 +70,6 @@ switch($action){
 		}
 		AdminConfigurationSave('news&a=config', 'news', false);
 		break;
-}
-
-function AdminRenderPreviewNews($title, $stext, $ctext, $auto_br){
-	if($auto_br){
-		$stext = nl2br($stext);
-		$ctext = nl2br($ctext);
-	}
-	$news = '<table cellspacing="0" cellpadding="0" class="newspreview">'.'<tr><td><b>'.$title.'</b><br /><br /></td></tr>'.'<tr><td>'.$stext.' '.$ctext.'</td></tr>'.'</table>';
-	return $news;
 }
 
 function CalcNewsCounter($topic_id, $inc){
@@ -193,41 +171,6 @@ function AdminNewsMain(){
 	}
 }
 
-function AcceptPOST()
-{
-	global $config, $topic_id, $newstitle,
-		$icon, $stext, $ctext,
-		$view, $allow_comments, $auto_br,
-		$enabled, $img_view, $seo_title,
-		$seo_keywords, $seo_description;
-
-	$topic_id = $_POST['topic_id'];
-	$newstitle = htmlspecialchars($_POST['title']);
-	$NewsImagesDir = $config['news']['icons_dirs'];
-	$ThumbsDir = $NewsImagesDir.'thumbs/';
-	$error = false;
-	$icon = LoadImage('up_photo', $NewsImagesDir, $ThumbsDir, $config['news']['thumb_max_width'], $config['news']['thumb_max_height'], $_POST['icon'], $error);
-	if($error){
-		AddTextBox('Ошибка', '<center>Неправильный формат файла. Можно загружать только изображения формата GIF, JPEG или PNG.</center>');
-	}
-	$stext = htmlspecialchars($_POST['shorttext']);
-	$ctext = htmlspecialchars($_POST['continuation']);
-	$view = array('1'=>false, '2'=>false, '3'=>false, '4'=>false);
-	$view[ViewLevelToInt($_POST['view'])] = true;
-	$allow_comments = array(false, false);
-	$allow_comments[EnToInt($_POST['acomments'])] = true;
-	$auto_br = array(false, false);
-	$auto_br[EnToInt($_POST['auto_br'])] = true;
-	$enabled = array(false, false);
-	$enabled[EnToInt($_POST['enabled'])] = true;
-	$img_view = $_POST['img_view'];
-	//Модуль SEO
-	$seo_title = htmlspecialchars($_POST['seo_title']);
-	$seo_keywords = htmlspecialchars($_POST['seo_keywords']);
-	$seo_description = htmlspecialchars($_POST['seo_description']);
-	//
-}
-
 /**
  * Редактор новостей (редактирование / добавление)
  * @return void
@@ -266,7 +209,7 @@ function AdminNewsEditor(){
 		$title = 'Добавление новости';
 		$caption = 'Добавить';
 		TAddSubTitle($title);
-		$met = 'add';
+		$met = '';
 	}else{ // Редактирование новости
 		System::database()->Select('news', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$news = System::database()->FetchRow();
@@ -290,7 +233,7 @@ function AdminNewsEditor(){
 		$title = 'Редактирование новости';
 		$caption = 'Сохранить';
 		TAddSubTitle($title);
-		$met = 'edit&id='.SafeEnv($_GET['id'], 11, int);
+		$met = '&id='.SafeEnv($_GET['id'], 11, int);
 	}
 
 	System::database()->Select('news_topics', '');
@@ -332,11 +275,102 @@ function AdminNewsEditor(){
 
 	AddCenterBox($title);
 	AddForm(
-		'<form name="news_editor" action="'.ADMIN_FILE.'?exe=news&a=save&m='.$met.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">',
+		'<form name="news_editor" action="'.ADMIN_FILE.'?exe=news&a=save'.$met.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">',
 	  System::admin()->Button('Отмена', 'onclick="history.go(-1)"')
 	  .System::admin()->Button('Предпросмотр', 'onclick="NewsPreviewOpen();"')
 	  .System::admin()->Submit($caption)
 	);
+}
+
+function AdminNewsSave(){
+	global $news_access_editnews;
+
+	if(!$news_access_editnews){
+		AddTextBox('Ошибка', 'Доступ запрещён');
+		return;
+	}
+
+	$author = System::user()->Get('u_name');
+
+	// Получаем параметры
+	$topic_id = SafeEnv($_POST['topic_id'], 11, int);
+	$title = SafeEnv($_POST['title'], 255, str);
+	// Модуль SEO
+	$seo_title = SafeEnv($_POST['seo_title'], 255, str);
+	$seo_keywords = SafeEnv($_POST['seo_keywords'], 255, str);
+	$seo_description = SafeEnv($_POST['seo_description'], 255, str);
+	//
+	$allow_comments = EnToInt($_POST['acomments']);
+
+	$NewsImagesDir = RealPath2(System::config('news/icons_dirs'));
+	$ThumbsDir = $NewsImagesDir.'thumbs/';
+	$error = false;
+	$icon = LoadImage(
+			'up_photo',
+			$NewsImagesDir,
+			$ThumbsDir,
+			System::config('news/thumb_max_width'),
+			System::config('news/thumb_max_height'),
+			$_POST['icon'],
+			$error
+	);
+
+	if($error){
+		AddTextBox('Ошибка', '<center>Неправильный формат файла. Можно загружать только изображения формата GIF, JPEG или PNG.<br /><a href="javascript:history.go(-1)">Назад</a></center>');
+		return;
+	}
+
+	$start_text = SafeEnv($_POST['shorttext'],0,str, false);
+	$end_text = SafeEnv($_POST['continuation'],0,str, false);
+	$auto_br = EnToInt($_POST['auto_br']);
+	$view = ViewLevelToInt(SafeEnv($_POST['view'],15,str));
+	$enabled = EnToInt($_POST['enabled']);
+	$img_view = SafeEnv($_POST['img_view'],1,int);
+
+	$comments_counter = 0;
+	$hit_counter = 0;
+
+	if(isset($_GET['id'])){
+		$id = SafeEnv($_GET['id'],11,int);
+		System::database()->Select('news',"`id`='$id'");
+		$news = System::database()->FetchRow();
+		$author = SafeDB($news['author'], 255, str);
+		$comments_counter = SafeDB($news['comments_counter'], 11, int);
+		$hit_counter = SafeDB($news['hit_counter'], 11, int);
+		$date = SafeDB($news['date'], 11, int);
+
+		if($topic_id != $news['topic_id'] && $news['enabled'] == 1){
+			CalcNewsCounter($news['topic_id'], false);
+			CalcNewsCounter($topic_id, true);
+		}
+
+		if($enabled != $news['enabled']){
+			CalcNewsCounter($topic_id, $enabled);
+		}
+	}else{
+		$date = time();
+	}
+
+	$vals = Values('',$title,$date,$author,$topic_id,
+	$allow_comments,$icon,$start_text,$end_text,$auto_br,
+	$comments_counter,$hit_counter,$view,$enabled, $img_view,
+	$seo_title, $seo_keywords, $seo_description);
+
+	if(isset($id)){
+		System::database()->Update('news', $vals, "`id`='".SafeEnv($_GET['id'],11,int)."'",true);
+	}else{
+		System::database()->Insert('news', $vals);
+		CalcNewsCounter($topic_id, true);
+	}
+
+	$bcache = LmFileCache::Instance();
+	$bcache->Delete('block', 'news1');
+	$bcache->Delete('block', 'news2');
+	$bcache->Delete('block', 'news3');
+	$bcache->Delete('block', 'news4');
+
+	GoRefererUrl($_GET['back']);
+	AddTextBox('Сообщение', 'Изменения сохранены.');
 }
 
 ?>
