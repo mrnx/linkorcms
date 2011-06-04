@@ -488,7 +488,6 @@ function SafeXSS( &$var ){
  * @return Variable
  */
 function SafeEnv( $Var, $maxlength, $type, $strip_tags = false, $addsl = true, $safexss = true ){
-	global $db;
 	if(is_array($Var)){
 		foreach($Var as $i=>$v){
 			if($maxlength > 0){
@@ -524,7 +523,7 @@ function SafeEnv( $Var, $maxlength, $type, $strip_tags = false, $addsl = true, $
 		}
 		if($addsl){
 			if(defined("DATABASE")){
-				$Var = $db->EscapeString($Var);
+				$Var = System::database()->EscapeString($Var);
 			}else{
 				$Var = addslashes($Var);
 			}
@@ -2924,16 +2923,20 @@ function GetBlockTemplates(){
 
 /**
  * Генерирует данные уровня доступа для Html::Select
- * @param  $view
- * @return array
+ * @param array | int $view Массиы со значением для каждого уровня или номер выделенного уровня
+ * @return array | int
  */
-function GetUserTypesFormData($view){
-	global $site;
+function GetUserTypesFormData( $view ){
 	$visdata = array();
-	$site->DataAdd($visdata, 'all', 'Все', $view['4']);
-	$site->DataAdd($visdata, 'members', 'Только пользователи', $view['2']);
-	$site->DataAdd($visdata, 'guests', 'Только гости', $view['3']);
-	$site->DataAdd($visdata, 'admins', 'Только администраторы', $view['1']);
+	if(!is_array($view)){
+		$_view = $view;
+		$view = array('1'=>false, '2'=>false, '3'=>false, '4'=>false);
+		$view[$_view] = true;
+	}
+	System::admin()->DataAdd($visdata, 'all', 'Все', $view['4']);
+	System::admin()->DataAdd($visdata, 'members', 'Только пользователи', $view['2']);
+	System::admin()->DataAdd($visdata, 'guests', 'Только гости', $view['3']);
+	System::admin()->DataAdd($visdata, 'admins', 'Только администраторы', $view['1']);
 	return $visdata;
 }
 
@@ -2942,7 +2945,7 @@ function GetUserTypesFormData($view){
  * @param  $level
  * @return string
  */
-function ViewLevelToInt($level){
+function ViewLevelToInt( $level ){
 	switch($level){
 		case 'admins':
 			$vi = '1';

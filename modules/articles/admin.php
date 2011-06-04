@@ -163,7 +163,6 @@ function AdminArticlesEditor()
 		$allow_comments = SafeDB($par['allow_comments'], 1, int);
 		$allow_votes = SafeDB($par['allow_votes'], 1, int);
 		$view[SafeDB($par['view'], 1, int)] = true;
-		$active = SafeDB($par['active'], 1, int);
 		//Модуль SEO
 		$seo_title = SafeDB($par['seo_title'], 255, str);
 		$seo_keywords = SafeDB($par['seo_keywords'], 255, str);
