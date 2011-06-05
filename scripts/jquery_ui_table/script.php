@@ -63,7 +63,7 @@
 		}
 
 		public function GetHtml(){
-			return "<div id=\"news_table\"></div><script>$('#news_table').table(".$this->GetOptions().");</script>";
+			return '<div id="news_table"></div><script>$("#news_table").table('.$this->GetOptions().');</script>';
 		}
 
 	}
