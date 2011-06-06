@@ -23,6 +23,8 @@ define('SCRIPT_START_TIME', microtime(true));
 // Низкоуровневая конфигурация (конфигурационные константы)
 require 'config/config.php';
 
+setlocale(LC_ALL, LOCALE);
+
 // Отпечатки пальцев LinkorCMS
 require 'config/version.php';
 if(isset($_GET['checklcsite'])){

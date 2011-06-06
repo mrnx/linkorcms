@@ -678,6 +678,7 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current { float:left; }
 .ui-datepicker .ui-state-default { background: transparent; border-color: #FFF; }
 .ui-datepicker .ui-state-active { background: #5F83B9; border-color: #5F83B9; color: #FFF; font-weight: bold; text-shadow: 0 1px 1px #234386; }
+.ui-datepicker .ui-state-hover { border-color: #5F83B9; }
 
 /* with multiple calendars */
 .ui-datepicker.ui-datepicker-multi { width:auto; }

@@ -183,10 +183,17 @@ function AdminNewsEditor(){
 		return;
 	}
 
+	UseScript('jquery_ui');
 	System::admin()->AddJS("
 	function NewsPreviewOpen(){
 		window.open('index.php?name=plugins&p=preview&mod=news','Preview','resizable=yes,scrollbars=yes,menubar=no,status=no,location=no,width=640,height=480');
 	}");
+	System::admin()->AddOnLoadJS('
+	$( "#datepicker" ).datepicker({
+			dateFormat: "dd.mm.yy",
+			changeMonth: true,
+			changeYear: true
+	});');
 
 	$topic_id = 0; // Номер темы
 	$newstitle = ''; // Заголовок новости
@@ -203,6 +210,9 @@ function AdminNewsEditor(){
 	$seo_title = '';
 	$seo_keywords = '';
 	$seo_description = '';
+
+	$public_date = date("d.m.Y", time());
+	$public_time = date("G:i", time());
 
 	if(!isset($_GET['id'])){ // Добавление новости
 		$auto_br = false;
@@ -229,6 +239,9 @@ function AdminNewsEditor(){
 		$seo_title = SafeDB($news['seo_title'], 255, str);
 		$seo_keywords = SafeDB($news['seo_keywords'], 255, str);
 		$seo_description = SafeDB($news['seo_description'], 255, str);
+
+		$public_date = date("d.m.Y", $news['date']);
+		$public_time = date("G:i", $news['date']);
 
 		$title = 'Редактирование новости';
 		$caption = 'Сохранить';
@@ -269,6 +282,11 @@ function AdminNewsEditor(){
 	FormTextRow('Полная новость (HTML)', System::admin()->HtmlEditor('continuation', $ctext, 600, 400));
 
 	FormRow('Преобразовать текст в HTML', System::admin()->Select('auto_br', GetEnData($auto_br, 'Да', 'Нет')));
+
+	FormRow('Дата и время публикации',
+	        System::admin()->Edit('public_date', $public_date, false, 'id="datepicker" style="width:120px;"')
+	        .System::admin()->Edit('public_time', $public_time, false, 'style="width:60px;"'));
+
 	FormRow('Комментарии', System::admin()->Select('acomments', GetEnData($allow_comments, 'Разрешить', 'Запретить')));
 	FormRow('Кто видит', System::admin()->Select('view', GetUserTypesFormData($view)));
 	FormRow('Включить', System::admin()->Select('enabled', GetEnData($enabled, 'Да', 'Нет')));
@@ -327,6 +345,10 @@ function AdminNewsSave(){
 	$enabled = EnToInt($_POST['enabled']);
 	$img_view = SafeEnv($_POST['img_view'],1,int);
 
+	$public_date = $_POST['public_date'];
+	$public_time = $_POST['public_time'];
+	$public = strtotime(str_replace('.', '-', $public_date).' '.$public_time);
+
 	$comments_counter = 0;
 	$hit_counter = 0;
 
@@ -337,7 +359,6 @@ function AdminNewsSave(){
 		$author = SafeDB($news['author'], 255, str);
 		$comments_counter = SafeDB($news['comments_counter'], 11, int);
 		$hit_counter = SafeDB($news['hit_counter'], 11, int);
-		$date = SafeDB($news['date'], 11, int);
 
 		if($topic_id != $news['topic_id'] && $news['enabled'] == 1){
 			CalcNewsCounter($news['topic_id'], false);
@@ -347,17 +368,15 @@ function AdminNewsSave(){
 		if($enabled != $news['enabled']){
 			CalcNewsCounter($topic_id, $enabled);
 		}
-	}else{
-		$date = time();
 	}
 
-	$vals = Values('',$title,$date,$author,$topic_id,
-	$allow_comments,$icon,$start_text,$end_text,$auto_br,
-	$comments_counter,$hit_counter,$view,$enabled, $img_view,
+	$vals = Values('', $title, $public, $author, $topic_id,
+	$allow_comments, $icon, $start_text, $end_text, $auto_br,
+	$comments_counter, $hit_counter, $view, $enabled, $img_view,
 	$seo_title, $seo_keywords, $seo_description);
 
 	if(isset($id)){
-		System::database()->Update('news', $vals, "`id`='".SafeEnv($_GET['id'],11,int)."'",true);
+		System::database()->Update('news', $vals, "`id`='$id'",true);
 	}else{
 		System::database()->Insert('news', $vals);
 		CalcNewsCounter($topic_id, true);
