@@ -1,7 +1,7 @@
 <?php
 
 function WriteConfigFile( $filename, $db_type, $host, $user, $pass, $name, $pref, $version ){
-	file_put_contents($filename, "<?php\n"
+	$dbconf = "<"."?php\n"
 	."// Файл сгенерирован инсталлятором\n"
 	."// Настройки базы данных\n"
 	."\n"
@@ -14,7 +14,8 @@ function WriteConfigFile( $filename, $db_type, $host, $user, $pass, $name, $pref
 	."\$config['db_pref'] = '$pref';\n"
 	."\$config['db_version'] = '$version';\n"
 	."\n"
-	."?>");
+	."?".">";
+	file_put_contents($filename, $dbconf);
 }
 
 function WriteSaltFile( $filename ){

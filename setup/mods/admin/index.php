@@ -5,10 +5,8 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-global $user;
-
-if(!$user->isDef('setup_type')){
-	$user->Def('setup_type', 'install');
+if(!System::user()->isDef('setup_type')){
+	System::user()->Def('setup_type', 'install');
 }
 
 if(isset($_GET['p'])){
@@ -74,12 +72,9 @@ switch($p){
 		}else{
 			// Перенаправление и запись.
 			global $db, $config;
-			include_once ($config['s_inc_dir'].'database.php');
-			$db->Update('users', "login='$login',pass='$pass2',email='$email'", "`id`='7'");
-
+			System::database()->Update('users', "login='$login',pass='$pass2',email='$email'", "`id`='7'");
 			// Автоматически определяем и устанавливаем URL сайта в настройках.
 			ConfigSetValue('general', 'site_url', GetSiteUrl());
-			
 			GO('setup.php?mod=finish');
 		}
 		break;

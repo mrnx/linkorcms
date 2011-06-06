@@ -99,6 +99,9 @@ set_error_handler('ErrorHandler');
 $SiteLog = new Logi($config['log_dir'].'site.log.php');
 $ErrorsLog = new Logi($config['log_dir'].'errors.log.php');
 
+// Сессии
+$user = new User();
+
 if(is_file('config/db_config.php')){ // Система установлена
 
 	// Загружаем конфигурацию
@@ -106,12 +109,12 @@ if(is_file('config/db_config.php')){ // Система установлена
 	require 'config/salt.php';
 
 	// Блокируем инсталлятор, если он не заблокирован
-	if(!is_file('config/setup_lock.php')){
+	if(!is_file('config/setup_lock.php') && !defined('SETUP_SCRIPT')){
 		file_put_contents('config/setup_lock.php', "\n");
 	}
 
 	// Проверяем версию базы данных
-	if(!defined('SETUP_SCRIPT') && substr($config['db_version'], 0, 3) != substr(CMS_VERSION, 0, 3)){
+	if(substr($config['db_version'], 0, 3) != substr(CMS_VERSION, 0, 3) && !defined('SETUP_SCRIPT')){
 		exit('<html><head><title>Ошибка</title></head><body><center><h2>Требуется обновление базы данных.</h2></center></body></html>');
 	}
 
@@ -119,64 +122,66 @@ if(is_file('config/db_config.php')){ // Система установлена
 	define("DATABASE", true);
 	IncludeSystemPluginsGroup('database', 'layer'); // Подключение драйвера базы данных
 	if(method_exists($db, 'Connect')){
-		$db->ErrorReporting = $config["db_errors"];
+		$db->ErrorReporting = $config['db_errors'];
 		$db->Prefix = $config['db_pref'];
-		$db->Connect($config["db_host"], $config["db_user"], $config["db_pass"], $config["db_name"]);
+		$db->Connect($config['db_host'], $config['db_user'], $config['db_pass'], $config['db_name']);
 		if(!$db->Connected){
 			exit('<html><head><title>Ошибка</title></head><body><center>Проблемы с базой данных, проверьте настройки базы данных.</center></body></html>');
 		}
 	} else{
 		exit('<html><head><title>Ошибка</title></head><body><center>Проблема с подключением драйвера базы данных.</center></body></html>');
 	}
+	if($db->DbSelected){
+		// Загрузка конфигурации сайта
+		LoadSiteConfig($config);
+		LoadSiteConfig($plug_config, 'plugins_config', 'plugins_config_groups');
 
-	// Загрузка конфигурации сайта
-	LoadSiteConfig($config);
-	LoadSiteConfig($plug_config, 'plugins_config', 'plugins_config_groups');
+		// Автообновление
+		include('config/autoupdate.php');
 
-	// Автообновление
-	include('config/autoupdate.php');
-
-	// Устанавливаем временную зону сайта по умолчанию
-	SetDefaultTimezone();
-
-	// Сессии и пользователи
-	$user = new User();
-	$userAuth = IntVal($user->Get('u_auth'));
-	$userAccess = IntVal($user->Get('u_level'));
-
-	// Подключаем плагины(в автозапуске)
-	if(defined('MAIN_SCRIPT') || defined('ADMIN_SCRIPT')){
-		$pcache = LmFileCache::Instance();
-		if(defined('MAIN_SCRIPT')){
-			$pcache_name = 'plugins_auto_main';
-		}elseif(defined('ADMIN_SCRIPT')){
-			$pcache_name = 'plugins_auto_admin';
-		}
-		if($pcache->HasCache('system', $pcache_name)){
-			$plugins = $pcache->Get('system', $pcache_name);
+		// Устанавливаем временную зону сайта по умолчанию
+		$user->CheckCookies();
+		$user->AccessInit($user->AccessGroup());
+		if($user->Auth && $user->Get('u_timezone')){
+			@date_default_timezone_set($user->Get('u_timezone'));
 		}else{
-			if(defined('MAIN_SCRIPT')){
-				$q = "`type`= 1 or `type`= 3";
-			} elseif(defined('ADMIN_SCRIPT')){
-				$q = "`type`= 1 or `type`= 2";
-			}
-			$plugins = $db->Select('plugins', $q);
-			$pcache->Write('system', $pcache_name, $plugins);
+			SetDefaultTimezone();
 		}
-		foreach($plugins as $plugin){
-			$PluginName = $config['plug_dir'].SafeDB(RealPath2($plugin['name']), 255, str);
-			if(file_exists($PluginName.'/index.php') && is_dir($PluginName)){
-				include $PluginName.'/index.php';
-			} else{
-				UninstallPlugin($plugin['name']);
+		$userAuth = IntVal($user->Get('u_auth'));
+		$userAccess = IntVal($user->Get('u_level'));
+
+		// Подключаем плагины(в автозапуске)
+		if(defined('MAIN_SCRIPT') || defined('ADMIN_SCRIPT')){
+			$pcache = LmFileCache::Instance();
+			if(defined('MAIN_SCRIPT')){
+				$pcache_name = 'plugins_auto_main';
+			}elseif(defined('ADMIN_SCRIPT')){
+				$pcache_name = 'plugins_auto_admin';
+			}
+			if($pcache->HasCache('system', $pcache_name)){
+				$plugins = $pcache->Get('system', $pcache_name);
+			}else{
+				if(defined('MAIN_SCRIPT')){
+					$q = "`type`= 1 or `type`= 3";
+				} elseif(defined('ADMIN_SCRIPT')){
+					$q = "`type`= 1 or `type`= 2";
+				}
+				$plugins = $db->Select('plugins', $q);
+				$pcache->Write('system', $pcache_name, $plugins);
+			}
+			foreach($plugins as $plugin){
+				$PluginName = $config['plug_dir'].SafeDB(RealPath2($plugin['name']), 255, str);
+				if(file_exists($PluginName.'/index.php') && is_dir($PluginName)){
+					include $PluginName.'/index.php';
+				} else{
+					UninstallPlugin($plugin['name']);
+				}
 			}
 		}
 	}
 }elseif(!defined('SETUP_SCRIPT')){ // Система не установлена
 	Header("Location: setup.php");
 	exit();
-}else{ // Идёт установка
-	$user = new User();
 }
 
 ?>

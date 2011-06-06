@@ -107,12 +107,15 @@ switch($p){
 				$p3 = $fail;
 				$error3 = true;
 			}
-			$text .= "</tr><tr><td id=\"l\">Папка \"".$config['config_dir']."\" доступна для записи:</td><td>".$p3."</td>\n";
+			$text .= '</tr><tr><td id="l">Папка "'.$config['config_dir'].'" доступна для записи:</td><td>'.$p3."</td>\n";
 			if($error3){
-				$text .= "</tr><tr><td id=\"l\">Выставите права 777 на эту папку.</td><td></td>\n";
+				$text .= '</tr><tr><td id="l">Выставите права 777 на эту папку.</td><td></td>'."\n";
 			}
 		}
-		$text .= "</tr></table>\n"."<input type=\"hidden\" name=\"db_host\" value=\"$db_host\">\n"."<input type=\"hidden\" name=\"db_name\" value=\"$db_name\">\n"."<input type=\"hidden\" name=\"db_pref\" value=\"$db_pref\">\n";
+		$text .= "</tr></table>\n"
+		         ."<input type=\"hidden\" name=\"db_host\" value=\"$db_host\">\n"
+		         ."<input type=\"hidden\" name=\"db_name\" value=\"$db_name\">\n"
+		         ."<input type=\"hidden\" name=\"db_pref\" value=\"$db_pref\">\n";
 		if(isset($_POST['exdel'])){
 			$text .= "<input type=\"hidden\" name=\"exdel\" value=\"1\">\n";
 		}
@@ -126,35 +129,38 @@ switch($p){
 		}
 		break;
 	case 3:
-		global $config, $db, $default_prefix, $info_ext, $data_ext, $bases_path;
-		$this->SetTitle(_FDB_CREATE);
+		global $config, $default_prefix, $info_ext, $data_ext, $bases_path;
 		$db_host = SafeEnv($_POST['db_host'], 250, str);
 		$db_name = SafeEnv($_POST['db_name'], 250, str);
 		$db_pref = SafeEnv($_POST['db_pref'], 250, str);
-		$filename = $config['config_dir']."db_config.php";
+		$filename = $config['config_dir'].'db_config.php';
 		WriteConfigFile($filename, 'FilesDB', $db_host, '', '', $db_name, $db_pref, CMS_VERSION);
-		$saltfilename = $config['config_dir']."salt.php";
+		$saltfilename = $config['config_dir'].'salt.php';
 		WriteSaltFile($saltfilename);
-		include_once ($config['s_inc_dir'].'database.php');
-		$delete_ex = isset($_POST['exdel']);
-		$create_db = isset($_POST['create_db']);
-		if(!$db->Connected){
+
+		GO('setup.php?mod=flatfilesdb_setup&p=4'
+			.(isset($_POST['exdel']) ? '&exdel='.$_POST['exdel'] : '')
+		  .(isset($_POST['create_db']) ? '&create_db='.$_POST['create_db'] : '')
+		);
+		break;
+	case 4:
+		global $config, $default_prefix, $info_ext, $data_ext, $bases_path;
+		$this->SetTitle(_FDB_CREATE);
+		$delete_ex = isset($_GET['exdel']);
+		$create_db = isset($_GET['create_db']);
+		if(!System::database()->Connected){
 			$this->SetContent("<html>\n<head>\n\t<title>!!!Ошибка!!!</title>\n</head>\n<body>\n<center>Проблемы с базой данных, проверьте настройки базы данных.</center>\n</body>\n</html>");
 		}else{
 			if($create_db){
-				$db->CreateDB($db_name, false);
+				System::database()->CreateDB($config['db_name'], false);
 			}
-			$db->SelectDB($db_name);
+			System::database()->SelectDB($config['db_name']);
 			$tables = ShowTables();
 			foreach($tables as $table){
-				$info = $db_pref.'_'.$table.$info_ext;
-				$info2 = $db_host.$db_name.'/'.$info;
-				$info = $default_prefix.'_'.$table.$info_ext;
-				$info = $bases_path.$info;
-				$data = $db_pref.'_'.$table.$data_ext;
-				$data2 = $db_host.$db_name.'/'.$data;
-				$data = $default_prefix.'_'.$table.$data_ext;
-				$data = $bases_path.$data;
+				$info = $bases_path.$default_prefix.'_'.$table.$info_ext;
+				$info2 = $config['db_host'].$config['db_name'].'/'.$config['db_pref'].'_'.$table.$info_ext;
+				$data = $bases_path.$default_prefix.'_'.$table.$data_ext;
+				$data2 = $config['db_host'].$config['db_name'].'/'.$config['db_pref'].'_'.$table.$data_ext;
 				if(is_file($info2) && $delete_ex){
 					unlink($info2);
 					unlink($data2);
@@ -164,11 +170,11 @@ switch($p){
 					copy($data, $data2);
 				}
 			}
-			$this->SetContent("База данных создана успешно!<br />Нажмите \"Далее\" для создания учетной записи главного администратора.");
-			$this->AddButton('Далее', 'flatfilesdb_setup&p=4');
+			$this->SetContent('База данных создана успешно!<br />Нажмите "Далее" для создания учетной записи главного администратора.');
+			$this->AddButton('Далее', 'flatfilesdb_setup&p=5');
 		}
 		break;
-	case 4: // На страницу создания главного администратора
+	case 5: // На страницу создания главного администратора
 		GO('setup.php?mod=admin');
 		break;
 }

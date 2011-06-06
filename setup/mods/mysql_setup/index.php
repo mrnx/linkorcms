@@ -17,8 +17,7 @@ if(isset($_GET['p'])){
 	$p = 1;
 }
 
-function ShowTables()
-{
+function ShowTables(){
 	global $default_prefix, $info_ext, $bases_path;
 	$dir = opendir($bases_path);
 	$i = -1;
@@ -34,8 +33,7 @@ function ShowTables()
 	return $tables;
 }
 
-function GetTableInfo( $tablename )
-{
+function GetTableInfo( $tablename ){
 	global $default_prefix, $info_ext, $bases_path;
 	$iname = $bases_path.$default_prefix.'_'.$tablename.$info_ext;
 	$fp = fopen($iname, "r");
@@ -48,8 +46,7 @@ function GetTableInfo( $tablename )
 	return $info;
 }
 
-function ReadData( $tablename )
-{
+function ReadData( $tablename ){
 	global $default_prefix, $data_ext, $bases_path;
 	$dname = $bases_path.$default_prefix.'_'.$tablename.$data_ext;
 	$data = file_get_contents($dname);
@@ -57,8 +54,7 @@ function ReadData( $tablename )
 	return $data;
 }
 
-function sqlValues( $data )
-{
+function sqlValues( $data ){
 	$result = '';
 	foreach($data as $var){
 		$var = str_replace('&#13', "\r", $var);
@@ -152,35 +148,40 @@ switch($p){
 		WriteConfigFile($filename, 'MySQL', $db_host, $db_user, $db_pass, $db_name, $db_pref, CMS_VERSION);
 		$saltfilename = $config['config_dir']."salt.php";
 		WriteSaltFile($saltfilename);
-		global $db;
-		include_once ($config['s_inc_dir'].'database.php');
-		$delete_ex = isset($_POST['exdel']);
-		$create_db = isset($_POST['create_db']);
-		if(!$db->Connected){
+		GO('setup.php?mod=mysql_setup&p=4'
+			.(isset($_POST['exdel']) ? '&exdel='.$_POST['exdel'] : '')
+		  .(isset($_POST['create_db']) ? '&create_db='.$_POST['create_db'] : '')
+		);
+		break;
+	case 4:
+		global $config;
+		$delete_ex = isset($_GET['exdel']);
+		$create_db = isset($_GET['create_db']);
+		if(!System::database()->Connected){
 			$this->SetContent("<html>\n<head>\n\t<title>!!!Ошибка!!!</title>\n</head>\n<body>\n<center>Проблемы с базой данных, проверьте настройки базы данных.</center>\n</body>\n</html>");
 		}else{
 			if($create_db){
-				$db->CreateDB($db_name, false);
+				System::database()->CreateDB($config['db_name'], false);
 			}
-			$db->SelectDB($db_name);
+			System::database()->SelectDB($config['db_name']);
 			$tables = ShowTables();
 			foreach($tables as $table){
 				$info = GetTableInfo($table);
-				$db->CreateTable($info['name'], $info, $delete_ex);
+				System::database()->CreateTable($info['name'], $info, $delete_ex);
 				$data = ReadData($table);
 				foreach($data as $row){
 					$values = sqlValues($row);
-					$sql = "INSERT INTO `{$db_pref}_{$table}` VALUES $values";
-					if(!$db->MySQLQuery($sql)){
-						echo $db->ErrorMsg;
+					$sql = "INSERT INTO `{$config['db_pref']}_{$table}` VALUES $values";
+					if(!System::database()->MySQLQuery($sql)){
+						echo System::database()->ErrorMsg;
 					}
 				}
 			}
 			$this->SetContent("База данных создана успешно!<br />Нажмите \"Далее\" для создания учетной записи главного администратора.");
-			$this->AddButton('Далее', 'mysql_setup&p=4');
+			$this->AddButton('Далее', 'mysql_setup&p=5');
 		}
 		break;
-	case 4: // На страницу создания главного администратора
+	case 5: // На страницу создания главного администратора
 		GO('setup.php?mod=admin');
 		break;
 }

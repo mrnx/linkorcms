@@ -249,7 +249,6 @@ class User{
 
 	// Конструктор
 	public function User(){
-		$this->host = false;
 		if($this->Started == false){
 			if(!session_start()){
 				echo $this->errors[] = '<b>Внимание!</b>: User->User(): Ошибка при запуске сессии.<br />';
@@ -257,6 +256,8 @@ class User{
 				$this->Started = true;
 			}
 		}
+
+		// Пишем свой http_referer. Брать реферер из $_SERVER['HTTP_REFERER'].
 		if($this->isDef('REFERER')){
 			$_SERVER['HTTP_REFERER'] = $this->Get('REFERER'); // Пишем свой HTTP_REFERER
 			// Модуль History
@@ -276,7 +277,6 @@ class User{
 				$this->Def('FIRST_REFERER', SafeEnv(trim($_SERVER['HTTP_REFERER']), 255, str));
 			}
 		}
-		// Пишем свой http_referer. Брать реферер из $_SERVER['HTTP_REFERER'].
 		$this->Def('REFERER', GetSiteHost().$_SERVER['REQUEST_URI']);
 
 		if(isset($_SESSION['u_auth']) && $_SESSION['u_ip'] == getip()){ // сессия привязывается к ip адресу
@@ -284,23 +284,6 @@ class User{
 			$this->Auth = $this->Get('u_auth');
 		}else{
 			$_SESSION = array();
-		}
-
-		if(!$this->AllowCookie('auth')){
-			if(isset($_COOKIE['auth'])){
-				$this->UnsetCookie('auth');
-			}
-			$this->RegisterGuestData();
-		}
-
-		if(!defined('SETUP_SCRIPT')){
-			$this->AccessInit($this->AccessGroup());
-			if($this->Auth){
-				$tz = $this->Get('u_timezone');
-				if(!empty($tz)){
-					@date_default_timezone_set($tz);
-				}
-			}
 		}
 	}
 
@@ -374,6 +357,15 @@ class User{
 					return '<center>Неверное имя пользователя или пароль!</center>';
 				}
 			}
+		}
+	}
+
+	public function CheckCookies(){
+		if(!$this->AllowCookie('auth')){
+			if(isset($_COOKIE['auth'])){
+				$this->UnsetCookie('auth');
+			}
+			$this->RegisterGuestData();
 		}
 	}
 
