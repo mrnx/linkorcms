@@ -22,6 +22,12 @@
 		public $sortby = -1;
 		public $sortdesc = false;
 
+		/**
+		 * URL ajax запроса на удаление элемента таблицы
+		 * @var string
+		 */
+		public $del = '';
+
 		public function AddColumn( $Title, $Align = 'left', $Sortable = true, $Sorted = false, $Desc = false ){
 			$this->columns[] = array(
 				'id' => $this->id,
@@ -44,10 +50,6 @@
 			);
 		}
 
-		public function GetRowsJson(){
-			return JsonEncode($this->rows);
-		}
-
 		public function GetOptions(){
 			$options = array(
 				'columns' => $this->columns,
@@ -57,13 +59,14 @@
 				'page' => $this->page,
 				'onpage' => $this->onpage,
 				'sortby' => $this->sortby,
-				'sortdesc' => $this->sortdesc
+				'sortdesc' => $this->sortdesc,
+				'del' => $this->del
 			);
 			return JsonEncode($options);
 		}
 
-		public function GetHtml(){
-			return '<div id="news_table"></div><script>$("#news_table").table('.$this->GetOptions().');</script>';
+		public function GetHtml( $DivName = 'news_table' ){
+			return '<div id="'.$DivName.'"></div><script>$("#'.$DivName.'").table('.$this->GetOptions().');</script>';
 		}
 
 	}

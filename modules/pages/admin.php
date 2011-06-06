@@ -176,13 +176,12 @@ function AdminPagesAjaxTree(){
 		$func .= System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=pages&a=changestatus&id='.$id.'&ajax', $page['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-		$func .= System::admin()->SpeedAjax(
+
+		$func .= System::admin()->SpeedConfirmJs(
 			'Удалить',
+			'$(\'#tree_container\').treeview(\'deleteNode\', '.$id.');',
 			'images/admin/delete.png',
-			ADMIN_FILE.'?exe=pages&a=ajaxdelete&id='.$id,
-			'Уверены что хотите удалить? Все дочерние страницы и ссылки так-же будут удалены.',
-			'',
-			'$(\'#tree_container\').lTreeView(\'deleteNode\', '.$id.');'
+			'Уверены что хотите удалить? Все дочерние страницы и ссылки так-же будут удалены.'
 		);
 
 		$view = ViewLevelToStr(SafeDB($page['view'], 1, int));
@@ -735,11 +734,11 @@ function _DeletePage($id){
  */
 function AdminPagesDelete(){
 	if(!isset($_POST['id'])){
-		exit("ERROR");
+		exit('ERROR');
 	}
 	_DeletePage(SafeEnv($_POST['id'], 11, int));
 	AdminPagesClearCache();
-	exit("OK");
+	exit('OK');
 }
 
 /**

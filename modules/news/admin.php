@@ -37,24 +37,24 @@ switch($action){
 	case 'save':
 		AdminNewsSave();
 		break;
-	case 'delnews':
-		include (MOD_DIR.'admin/delete.adm.php');
+	case 'delete':
+		AdminNewsDelete();
 		break;
 	case 'changestatus':
-		include (MOD_DIR.'admin/status.adm.php');
+		AdminNewsChangeStatus();
 		break;
 	case 'topics':
-		include (MOD_DIR.'admin/topics.adm.php');
+		AdminNewsTopics();
 		break;
 	case 'savetopic':
 	case 'addtopic':
-		include (MOD_DIR.'admin/savetopic.adm.php');
+		AdminNewsTopicSave();
 		break;
 	case 'deltopic':
-		include (MOD_DIR.'admin/topic_delete.php');
+		AdminNewsTopicsDelete();
 		break;
 	case 'edittopic':
-		include (MOD_DIR.'admin/topic_edit.php');
+		AdminNewsEditTopic();
 		break;
 	case 'config':
 		if(!$user->CheckAccess2('news', 'news_conf')){
@@ -122,6 +122,7 @@ function AdminNewsMain(){
 	UseScript('jquery_ui_table');
 	$table = new jQueryUiTable();
 	$table->listing = ADMIN_FILE.'?exe=news&ajax';
+	$table->del = ADMIN_FILE.'?exe=news&a=delete';
 	$table->total = count($newsdb);
 	$table->onpage = $num;
 	$table->page = $page;
@@ -141,7 +142,11 @@ function AdminNewsMain(){
 		$id = SafeDB($news['id'], 11, int);
 		$aed = System::user()->CheckAccess2('news', 'news_edit');
 
-		$status = System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=news&a=changestatus&id='.$id.'&pv=main', $news['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
+		$status = System::admin()->SpeedStatus(
+			'Выключить', 'Включить',
+			ADMIN_FILE.'?exe=news&a=changestatus&id='.$id, $news['enabled'],
+			'images/bullet_green.png', 'images/bullet_red.png'
+		);
 		$view = ViewLevelToStr(SafeDB($news['view'], 1, int));
 
 		$allowComments = SafeDB($news['allow_comments'], 1, bool);
@@ -149,7 +154,12 @@ function AdminNewsMain(){
 
 		$func = '';
 		$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=news&a=edit&id='.$id, 'images/admin/edit.png');
-		$func .= System::admin()->SpeedButton('Удалить', ADMIN_FILE.'?exe=news&a=delnews&id='.$id, 'images/admin/delete.png');
+		$func .= System::admin()->SpeedConfirmJs(
+			'Удалить',
+			'$(\'#news_table\').table(\'deleteRow\', '.$id.');',
+			'images/admin/delete.png',
+			'Уверены, что хотите удалить эту новость?'
+		);
 
 		$table->AddRow(
 			$id,
@@ -164,7 +174,7 @@ function AdminNewsMain(){
 	}
 
 	if(isset($_GET['ajax'])){
-		echo $table->GetRowsJson();
+		echo $table->GetOptions();
 		exit;
 	}else{
 		System::admin()->AddTextBox('Новости', $table->GetHtml());
@@ -390,6 +400,173 @@ function AdminNewsSave(){
 
 	GoRefererUrl($_GET['back']);
 	AddTextBox('Сообщение', 'Изменения сохранены.');
+}
+
+function AdminNewsDelete(){
+	global $news_access_editnews;
+
+	if(!isset($_POST['id']) || !$news_access_editnews){
+		exit('ERROR');
+	}
+
+	$id = SafeEnv($_POST['id'], 11, int);
+	System::database()->Select('news', "`id`='$id'");
+	$news = System::database()->FetchRow();
+
+	System::database()->Delete('news', "`id`='$id'");
+	System::database()->Delete('news_comments', "`object_id`='$id'");
+	if($news['enabled']){
+		CalcNewsCounter(SafeDB($news['topic_id'], 11, int), false);
+	}
+
+	$bcache = LmFileCache::Instance();
+	$bcache->Delete('block', 'news1');
+	$bcache->Delete('block', 'news2');
+	$bcache->Delete('block', 'news3');
+	$bcache->Delete('block', 'news4');
+
+	exit('OK');
+}
+
+function AdminNewsChangeStatus(){
+	global $news_access_editnews;
+
+	if(!isset($_POST['id']) || !$news_access_editnews){
+		exit('ERROR');
+	}
+
+	$id = SafeEnv($_GET['id'], 11, int);
+	System::database()->Select('news', "`id`='$id'");
+	$news = System::database()->FetchRow();
+	$enabled = ($news['enabled'] ? '0' : '1');
+	CalcNewsCounter(SafeDB($news['topic_id'], 11, int), $enabled);
+	System::database()->Update('news', "enabled='$enabled'", "`id`='$id'");
+
+	$bcache = LmFileCache::Instance();
+	$bcache->Delete('block', 'news1');
+	$bcache->Delete('block', 'news2');
+	$bcache->Delete('block', 'news3');
+	$bcache->Delete('block', 'news4');
+
+	exit('OK');
+}
+
+function AdminNewsTopics(){
+	global $news_access_edittopics;
+
+	if(!$news_access_edittopics){
+		AddTextBox('Ошибка', 'Доступ запрещён');
+		return;
+	}
+
+	AddCenterBox('Текущие новостные разделы');
+	$topics = System::database()->Select('news_topics');
+	$icons_dir = System::config('news/icons_dirs');
+
+	$cntr = 0;
+	$text = '<table style="width: 100%; border: 1px #ABC5D8 solid; background-color: #fff; border-collapse: inherit; padding: 10px;">';
+	foreach($topics as $i=>$topic){
+		$topic_id = SafeDB($topic['id'], 11, int);
+		$edit_url = ADMIN_FILE.'?exe=news&a=edittopic&id='.$topic_id;
+		$edit = System::admin()->SpeedButton('Редактировать', $edit_url, 'images/admin/edit.png');
+		$del = System::admin()->SpeedAjax(
+			'Удалить',
+			ADMIN_FILE.'?exe=news&a=deltopic&id='.$topic_id,
+			'images/admin/delete.png',
+			'Удалить раздел? Все новости в этом разделе так-же будут удалены.',
+			'',
+			"$('#topic_$topic_id').children('div').fadeOut('slow');"
+		);
+		if($cntr % 4 == 0) $text .= '<tr>';
+		$text .= '<td id="topic_'.$topic_id.'" valign="top" align="center" style="padding: 10px;"><div>';
+		$text .= '<b><a href="'.$edit_url.'">'.SafeDB($topic['title'], 255, str).'</a></b> ('. SafeDB($topic['counter'], 11, int).')';
+		if(is_file($icons_dir.SafeDB($topic['image'], 255, str))){
+			$text .= '<br /><a href="'.$edit_url.'"><img src="'.$icons_dir.SafeDB($topic['image'], 255, str).'" height="80" title="'.SafeDB($topic['description'], 255, str).'" /></a>';
+		}
+		$text .= '<br />'.$edit.' '.$del.'';
+		$text .= '</div></td>';
+		$cntr++;
+		if($cntr % 4 == 0) $text .= '</tr>';
+	}
+	if($cntr % 4 != 0) $text .= '</tr>';
+
+	$text .= '</table>';
+	$text .= '<br />.:Создать новый раздел:.<br />';
+	AddText($text);
+
+	FormRow('Название раздела', System::admin()->Edit('topic_name', '', false, 'maxlength="255" style="width:400px;"'));
+	FormTextRow('Описание (HTML)', System::admin()->HtmlEditor('topic_description', '', 600, 200));
+	AdminImageControl('Изображение', 'Загрузить изображение', '', $icons_dir, 'topic_image', 'up_photo', 'topicsform');
+	AddForm('<form name="topicsform" action="'.ADMIN_FILE.'?exe=news&a=addtopic" method="post" enctype="multipart/form-data">', System::admin()->Submit('Создать'));
+}
+
+function AdminNewsTopicSave(){
+	global $news_access_edittopics, $action;
+
+	if(!$news_access_edittopics){
+		AddTextBox('Ошибка', 'Доступ запрещён');
+		return;
+	}
+
+	$NewsImagesDir = System::config('news/icons_dirs');
+	$ThumbsDir = $NewsImagesDir.'thumbs/';
+	$error = false;
+	$file = LoadImage('up_photo', $NewsImagesDir, $ThumbsDir, System::config('news/thumb_max_width'), System::config('news/thumb_max_height'), SafeEnv(RealPath2($_POST['topic_image']), 255, str, true), $error);
+	if($error){
+		AddTextBox('Ошибка', '<center>Неправильный формат файла. Можно загружать только изображения формата GIF, JPEG или PNG.<br /><a href="javascript:history.go(-1)">Назад</a></center>');
+		return;
+	}
+
+	if($action == 'addtopic'){
+		$values = Values('', SafeEnv($_POST['topic_name'], 255, str), SafeEnv($_POST['topic_description'], 255, str), $file, '0');
+		System::database()->Insert('news_topics', $values);
+	}elseif($action == 'savetopic'){
+		$id = SafeEnv($_GET['id'], 11, int);
+		System::database()->Select('news_topics', "`id`='".$id."'");
+		$topic = System::database()->FetchRow();
+		$values = Values('', SafeEnv($_POST['topic_name'], 255, str), SafeEnv($_POST['topic_description'], 255, str), $file, SafeEnv($topic['counter'], 11, int));
+		System::database()->Update('news_topics', $values, "`id`='$id'", true);
+	}
+
+	GO(ADMIN_FILE.'?exe=news&a=topics');
+}
+
+function AdminNewsTopicsDelete(){
+	global $news_access_edittopics;
+
+	if(!isset($_GET['id']) || !$news_access_edittopics){
+		exit('ERROR');
+	}
+
+	$id = SafeEnv($_GET['id'], 11, int);
+	System::database()->Delete('news', "`topic_id`='$id'");
+	System::database()->Delete('news_coments', "`object`='$id'");
+	System::database()->Delete('news_topics', "`id`='$id'");
+
+	exit('OK');
+}
+
+function AdminNewsEditTopic(){
+	global $news_access_edittopics;
+
+	if(!isset($_GET['id']) || !$news_access_edittopics){
+		AddTextBox('Ошибка', 'Доступ запрещён');
+		return;
+	}
+
+	AddCenterBox('Редактирование раздела');
+
+	$id = SafeEnv($_GET['id'], 11, int);
+	System::database()->Select('news_topics', "`id`='".$id."'");
+	$topic = System::database()->FetchRow();
+
+	FormRow('Название раздела', System::admin()->Edit('topic_name', SafeDB($topic['title'], 255, str), false, 'maxlength="255" style="width:400px;"'));
+	FormTextRow('Описание (HTML)', System::admin()->HtmlEditor('topic_description', SafeDB($topic['description'], 255, str), 600, 200));
+	AdminImageControl('Изображение', 'Загрузить изображение', RealPath2(SafeDB($topic['image'], 255, str)), RealPath2(System::config('news/icons_dirs')), 'topic_image', 'up_photo', 'topicsform');
+	AddForm(
+		'<form name="topicsform" action="'.ADMIN_FILE.'?exe=news&a=savetopic&id='.$id.'" method="post" enctype="multipart/form-data">',
+		System::admin()->Button('Отмена', 'onclick="history.go(-1);"').System::admin()->Submit('Сохранить')
+	);
 }
 
 ?>

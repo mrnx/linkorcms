@@ -24,6 +24,48 @@ class User{
 	public $SuperUser = false;
 	public $host;
 
+	// Конструктор
+	public function __construct(){
+		if($this->Started == false){
+			if(!session_start()){
+				echo $this->errors[] = '<b>Внимание!</b>: User->User(): Ошибка при запуске сессии.<br />';
+			}else{
+				$this->Started = true;
+			}
+		}
+
+		// Пишем свой http_referer. Брать реферер из $_SERVER['HTTP_REFERER'].
+		if(!IsAjax()){ // Не Ajax запрос
+			if($this->isDef('REFERER')){
+				$_SERVER['HTTP_REFERER'] = $this->Get('REFERER'); // Пишем свой HTTP_REFERER
+				// Модуль History
+				if($this->isDef('HISTORY')){
+					$history = $this->Get('HISTORY');
+					$history[] = $_SERVER['HTTP_REFERER'];
+					if(count($history) > 10){ // Максимальное число шагов которое сохраняется в сессии
+						array_shift($history);
+					}
+					$this->Def('HISTORY', $history);
+				}else{
+					$this->Def('HISTORY', array($_SERVER['HTTP_REFERER']));
+				}
+				//
+			}else{
+				if(isset($_SERVER['HTTP_REFERER']) && trim($_SERVER['HTTP_REFERER']) != ''){
+					$this->Def('FIRST_REFERER', SafeEnv(trim($_SERVER['HTTP_REFERER']), 255, str));
+				}
+			}
+			$this->Def('REFERER', GetSiteHost().$_SERVER['REQUEST_URI']);
+		}
+
+		if(isset($_SESSION['u_auth']) && $_SESSION['u_ip'] == getip()){ // сессия привязывается к ip адресу
+			$this->session = $_SESSION;
+			$this->Auth = $this->Get('u_auth');
+		}else{
+			$_SESSION = array();
+		}
+	}
+
 	public function Started( $func ){
 		if($this->Started == false){
 			echo $errors[] = "<b>Внимание!</b> : User->$func(): Сессия не создана.<br />";
@@ -244,46 +286,6 @@ class User{
 			return $info;
 		}else{
 			return $this->online;
-		}
-	}
-
-	// Конструктор
-	public function User(){
-		if($this->Started == false){
-			if(!session_start()){
-				echo $this->errors[] = '<b>Внимание!</b>: User->User(): Ошибка при запуске сессии.<br />';
-			}else{
-				$this->Started = true;
-			}
-		}
-
-		// Пишем свой http_referer. Брать реферер из $_SERVER['HTTP_REFERER'].
-		if($this->isDef('REFERER')){
-			$_SERVER['HTTP_REFERER'] = $this->Get('REFERER'); // Пишем свой HTTP_REFERER
-			// Модуль History
-			if($this->isDef('HISTORY')){
-				$history = $this->Get('HISTORY');
-				$history[] = $_SERVER['HTTP_REFERER'];
-				if(count($history) > 10){ // Максимальное число шагов которое сохраняется в сессии
-					array_shift($history);
-				}
-				$this->Def('HISTORY', $history);
-			}else{
-				$this->Def('HISTORY', array($_SERVER['HTTP_REFERER']));
-			}
-			//
-		}else{
-			if(isset($_SERVER['HTTP_REFERER']) && trim($_SERVER['HTTP_REFERER']) != ''){
-				$this->Def('FIRST_REFERER', SafeEnv(trim($_SERVER['HTTP_REFERER']), 255, str));
-			}
-		}
-		$this->Def('REFERER', GetSiteHost().$_SERVER['REQUEST_URI']);
-
-		if(isset($_SESSION['u_auth']) && $_SESSION['u_ip'] == getip()){ // сессия привязывается к ip адресу
-			$this->session = $_SESSION;
-			$this->Auth = $this->Get('u_auth');
-		}else{
-			$_SESSION = array();
 		}
 	}
 

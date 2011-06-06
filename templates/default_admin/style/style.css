@@ -414,8 +414,8 @@ a.nav_item:hover {
 /* Таблицы */
 
 .cfgtable {
-	width: 95%;
-	margin: 10px 0 27px 27px;
+	width: 100%;
+	margin: 10px 0;
 	border-collapse: collapse;
 	border: 1px #CCCCCC solid;
 	cursor: default;

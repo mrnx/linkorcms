@@ -166,21 +166,41 @@ class AdminPage extends PageTemplate{
 	 * @param <type> $ImgSrc
 	 * @return <type>
 	 */
-	public function SpeedButton( $Title, $Url, $ImgSrc ){
-		return '<a title="'.$Title.'" href="'.$Url.'" class="button"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+	public function SpeedButton( $Title, $Url, $ImgSrc = '' ){
+		return '<a title="'.$Title.'" href="'.$Url.'" class="button">'
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
+			.'</a>';
 	}
 
 	/**
-	 * Генерирует код кнопки с запросом на выполнение
+	 * Кнопка - ссылка с предупреждением
 	 * @param  $Title
 	 * @param  $Url
 	 * @param  $ImgSrc
 	 * @param string $Confirm
 	 * @return string
 	 */
-	public function SpeedConfirm( $Title, $Url, $ImgSrc, $Confirm = 'Уверены?' ){
-		$OnClick = "return Admin.Buttons.Confirm('$Confirm', this)";
-		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
+	public function SpeedConfirm( $Title, $Url, $ImgSrc = '', $ConfirmMsg = 'Уверены?' ){
+		$ConfirmMsg = addslashes($ConfirmMsg);
+		$OnClick = "return Admin.Buttons.Confirm('$ConfirmMsg', this)";
+		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'">'
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
+			.'</a>';
+	}
+
+	/**
+	 * Кнопка с выполнением JS кода с предупреждением
+	 * @param  $Title Заголовок кнопки
+	 * @param  $ImgSrc Путь к иконке
+	 * @param $OnClick JavaScript код при нажатии
+	 * @param string $ConfirmMsg Сообщение предупреждения, если пустое, то не сработает
+	 * @return void
+	 */
+	public function SpeedConfirmJs( $Title, $OnClick, $ImgSrc = '', $ConfirmMsg = '' ){
+		$OnClick = "if(confirm('$ConfirmMsg')) $OnClick; return false";
+		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'">'
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
+			.'</a>';
 	}
 
 	/**
@@ -199,32 +219,25 @@ class AdminPage extends PageTemplate{
 		$AjaxUrl = addslashes($AjaxUrl);
 		$EnabledImage = addslashes($EnabledImage);
 		$DisabledImage = addslashes($DisabledImage);
+
 		$ImgSrc = ($Status ? $EnabledImage : $DisabledImage);
 		$Title = ($Status ? $EnabledTitle : $DisabledTitle);
 		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); return false;";
-		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
-		//echo $s."\n\n";
+		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'">'
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
+			.'</a>';
 		return $s;
 	}
 
-	/**
-	 * Кнопка выполняющая JavaScript
-	 * @param  $Title
-	 * @param  $ImgSrc
-	 * @param  $OnClickJavaScript
-	 * @return string
-	 */
-	public function SpeedFunction( $Title, $ImgSrc, $OnClickJavaScript ){
-		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClickJavaScript.'"><img src="'.$ImgSrc.'" alt="'.$Title.'" /></a>';
-	}
-
-	public function SpeedAjax($Title, $Icon, $AjaxUrl, $ConfirmMessage = '', $OnStart = '', $OnSuccess = '', $Method = 'post', $Params = ''){
+	public function SpeedAjax($Title, $AjaxUrl, $ImgSrc = '', $ConfirmMessage = '', $OnStart = '', $OnSuccess = '', $Method = 'post', $Params = ''){
 		$AjaxUrl = addslashes($AjaxUrl);
 		$Method = addslashes($Method);
 		$Params = addslashes($Params);
 		$ConfirmMessage = addslashes($ConfirmMessage);
 		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMessage',  this); return false;";
-		return '<a title="'.$Title.'" href="#" class="button" onclick="return false;" onmousedown="'.$OnClick.'"><img src="'.$Icon.'" alt="'.$Title.'" /></a>';
+		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'">'
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
+			.'</a>';
 	}
 
 	/**

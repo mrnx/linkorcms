@@ -218,6 +218,10 @@ function SmiliesReplace( &$text ){
 	$text = strtr($text, $codes);
 }
 
+/**
+ * Страница запрошена с помощью Ajax (XMLHttpRequest) ?
+ * @return bool
+ */
 function IsAjax(){
 	return isset($_SERVER['HTTP_X_REQUESTED_WITH']) ? $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' : false;
 }

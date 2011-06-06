@@ -1,7 +1,7 @@
 
 // Клиентский код веб-приложения Админ-панели
 
-(function(window, $){
+(function(window, $, undefined){
 
 	var document = window.document;
 
@@ -160,8 +160,11 @@
 			 * @param AjaxQueryUrl
 			 * @param Object
 			 */
-			Status: function( EnabledTitle, DisabledTitle, EnabledImage, DisabledImage, AjaxQueryUrl, Object ){
-				var img = $(Object).children("img:first").get(0), src, title;
+			Status: function( EnabledTitle, DisabledTitle, EnabledImage, DisabledImage, AjaxQueryUrl, LinkObject ){
+				var img = $(LinkObject).find("img:first").get(0),
+						src,
+						title;
+
 				if($(img).attr("src") == EnabledImage){
 					src = DisabledImage;
 					title = DisabledTitle;
@@ -175,8 +178,12 @@
 					url: AjaxQueryUrl,
 					dataType: "text",
 					success: function(){
-						$(img).attr("src", src);
-						$(img).attr("title", title);
+						if(img){
+							$(img).attr("src", src);
+							$(img).attr("title", title);
+						}else{
+							$(LinkObject).text(title);
+						}
 						Admin.HideSplashScreen();
 					},
 					cache: false
@@ -186,12 +193,16 @@
 
 			Ajax: function( AjaxUrl, Start, Success, Method, Params, Confirm, link ){
 				if(Confirm != '' && confirm(Confirm)){
+					Admin.ShowSplashScreen();
 					Start(link);
 					$.ajax({
 						type: Method,
 						url: AjaxUrl,
 						data: Params,
-						success: Success,
+						success: function(data, textStatus, jqXHR){
+							Success.call(this, data, textStatus, jqXHR);
+							Admin.HideSplashScreen();
+						},
 						cache: false
 					});
 				}

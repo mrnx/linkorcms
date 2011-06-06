@@ -20,6 +20,11 @@
 			// Адрес страницы для обновления данных
 			// таблицы (POST: page, itemsonpage, sortby, desc)
 			listing: "",
+
+			// Адрес страницы для удаления элемента таблицы
+			//(POST: id)
+			del: "",
+
 			onpage: 10, // Кол-во элементов на странице
 			page: 1, // Текущая страница
 			total: 0, // Количество элементов всего
@@ -116,7 +121,7 @@
 				self._updateData();
 				self._rebuildNav();
 			});
-			$('<div class="ui-table-footer-panel"><span>Всего объектов: '+o.total+'</span></div>').appendTo($ftd);
+			$('<div class="ui-table-footer-panel"><span>Всего объектов: </span><span id="ui-table-footer-total">'+o.total+'</span></div>').appendTo($ftd);
 
 			// Заполняем
 			this._setData(o.rows);
@@ -273,7 +278,9 @@
 				data: postdata,
 				cache: false,
 				success: function(data){
-					self._setData(data);
+					self._setData(data.rows);
+					self.options.total = data.total;
+					self.tfoot.find("#ui-table-footer-total").text(data.total);
 					if(window.Admin.ShowSplashScreen) window.Admin.HideSplashScreen();
 					if(window.Admin.LiveUpdate) window.Admin.LiveUpdate();
 				}
@@ -288,6 +295,32 @@
 		 */
 		update: function(){
 			this._updateData();
+		},
+
+		/**
+		 * Посылает запрос на удаление элемента таблицы
+		 * @param rowId
+		 */
+		deleteRow: function( rowId ){
+			var self = this;
+			var $item = $("#ui-table-row-"+rowId);
+			if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
+			$.ajax({
+				type: "POST",
+				url: self.options.del,
+				data: 'id='+rowId,
+				cache: false,
+				success: function(){
+					if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
+					$item.fadeOut('slow', function(){
+						$item.remove();
+						self.tbody.children().removeClass("ui-table-row-even");
+						self.tbody.children(":even").addClass("ui-table-row-even");
+						self.options.total--;
+						self.tfoot.find("#ui-table-footer-total").text(self.options.total);
+					});
+				}
+			});
 		}
 
 	});
