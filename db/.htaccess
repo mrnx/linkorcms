@@ -1,7 +1,1 @@
-AuthUserFile /dev/null
-AuthGroupFile /dev/null
-AuthName DenyViaWeb
-AuthType Basic
-
-order allow,deny
 deny from all

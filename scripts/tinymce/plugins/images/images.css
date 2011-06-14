@@ -1,0 +1,601 @@
+* {
+	margin:0px;
+	padding:0px;
+}
+
+a * { border:none; }
+
+:focus { outline: 0; }
+
+iframe {
+	width: 700px !important;
+	height: 550px !important;
+}
+
+fieldset {
+	border: none;
+}
+
+body {
+	overflow: hidden;
+	background-color:#a4bbd3;
+	font-family:tahoma,arial;
+}
+
+#AddressBar{
+	position: fixed;
+	left: 0;
+	top: 0;
+	right: 0;
+	height: 29px;
+}
+
+#insertImage {
+	position: fixed;
+	left: 5px;
+	top: 4px;
+	cursor: pointer;
+	-moz-user-select:none;
+}
+
+#addr {
+	position: fixed;
+	left: 32px;
+	top: 3px;
+	right: 5px;
+	cursor: pointer;
+	float:left;
+	background-color: #e4eaf1;
+	-moz-user-select:none;
+	height:22px;
+	vertical-align: middle;
+	padding: 0 3px;
+	overflow: hidden;
+	border: 1px #8D9CAC solid;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+
+#ToolBar{
+	position: fixed;
+	left: 0;
+	top: 30px;
+	right: 0;
+	height: 32px;
+	-moz-user-select: none;
+	background: #e4eaf1 url(img/toolBack.gif) repeat-x top;
+}
+
+#tree{
+	position: fixed;
+	left: 0;
+	top: 63px;
+	bottom: 70px;
+	width: 190px;
+
+	border-right: 1px #a7bac5 solid;
+	overflow: auto;
+	padding: 10px 0;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+
+	background-color: #fcfcfc;
+}
+
+#files{
+	position: fixed;
+	left: 191px;
+	right: 0;
+	top: 63px;
+	bottom: 70px;
+
+
+	overflow: auto;
+	padding-left: 6px;
+	-moz-user-select: none;
+
+	background-color: #fcfcfc;
+}
+
+#Foot{
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 70px;
+	background: #f0fbfe url(img/footBackground.gif) repeat-x top;
+	font-size: 12px;
+	color: black;
+}
+
+.addrItem {
+	float:left;
+	padding: 0 15px 0 5px;
+	margin: 1px 0;
+	height:20px;
+	line-height: 20px;
+	vertical-align: middle;
+	background-image: url(img/arrowRight.gif);
+	background-position: right center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	font-size:12px;
+}
+
+.addrItem img {
+	cursor: pointer;
+	vertical-align: middle;
+}
+
+.addrItemEnd {
+	float:left;
+	padding: 0 5px 0 5px;
+	margin:1px 0;
+	height:20px;
+	line-height: 20px;
+	vertical-align: middle;
+	font-size:12px;
+}
+
+#toBeginBtn {
+	cursor: pointer;
+}
+
+#ToolBar .toolBar1 {
+	background: transparent url(img/toolLeft.gif) no-repeat left top;
+}
+
+#ToolBar .toolBar2 {
+	background: transparent url(img/toolRight.gif) no-repeat right top;
+	height:32px;
+	padding: 0 3px;
+}
+
+.toolItem {
+	float: left;
+	margin: 0 10px 0 10px;
+	color: #eff4f8;
+	font-size: 12px;
+	height:32px;
+	cursor: pointer;
+}
+.toolItem img {
+	margin: 8px 0;
+	float: left;
+}
+.toolItem span {
+	display: block;
+	float: left;
+	margin: 9px 0 0 8px;
+}
+
+#loader {
+	float: right;
+	margin: 8px 8px 0 0;
+	display: none;
+}
+
+#footTable {
+	width: 100%;
+	margin: 5px 0 0 15px;
+	font-size: 12px;
+}
+
+#footTable td {
+	padding: 5px 5px 0 0;
+}
+
+#footTableName{
+	width: 100%;
+	font-size: 12px;
+}
+#footTableName td {
+	padding:0;
+}
+
+.footLabel {
+	text-align:right;
+	color: #737373;
+	-moz-user-select:none;
+}
+
+#footSize, #footExt, #footDate, #fileNameEdit, #footLink, #footDim {
+	-moz-user-select: none;
+}
+
+#footLink {
+	white-space: nowrap;
+}
+
+#footTableName, #footDateLabel, #footLinkLabel, #footDimLabel, #footDate, #footLink, #footDim {
+	visibility: hidden;
+}
+
+#fileNameEdit{
+	cursor: pointer;
+	padding: 2px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+#fileNameEdit:hover{
+	background: #ddd;
+}
+
+#fileNameSave {
+	cursor: pointer;
+	padding: 2px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	margin-left: 2px;
+	display: none;
+}
+#fileNameSave:hover{
+	background: #ddd;
+}
+
+#fileName{
+	line-height: 20px;
+	vertical-align: middle;
+	float: left;
+	max-width: 180px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#fileNameValue{
+	width: 170px;
+}
+
+.folderImages {
+	background: transparent url(img/folder_open_image.png) 4px center no-repeat;
+	font-size: 12px;
+	padding: 3px 5px 0 25px;
+	height: 17px;
+	margin:0px 7px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.folderFiles {
+	background: transparent url(img/folder_open_document.png) 4px center no-repeat;
+	font-size: 12px;
+	padding: 3px 5px 0 25px;
+	height: 17px;
+	margin:0px 7px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.folderClosed {
+	background: transparent url(img/folder.png) 4px center no-repeat;
+	font-size: 12px;
+	padding: 3px 5px 0 25px;
+	height: 17px;
+	margin:0px 7px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.folderOpened {
+	background: transparent url(img/folder_open.png) 4px center no-repeat;
+	font-size: 12px;
+	padding: 3px 5px 0 25px;
+	height: 17px;
+	margin:0px 7px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.folderS {
+	background: transparent url(img/folders.png) 4px center no-repeat;
+	font-size: 12px;
+	padding: 3px 5px 0 25px;
+	height: 17px;
+	margin:0px 7px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.folderAct {
+	background-position:3px center;
+	padding: 2px 5px 0 24px;
+	height: 16px;
+	background-color:#def1fb;
+	border:solid 1px #b3e4f9;
+	-moz-border-radius:4px; -webkit-border-radius:4px;
+}
+.folderHover {
+	background-position:3px center;
+	padding: 2px 5px 0 24px;
+	height: 16px;
+	background-color:#f2f2f2;
+	border:solid 1px #eaeaea;
+	-moz-border-radius:4px; -webkit-border-radius:4px;
+}
+.folderActHover {
+	background-position:3px center;
+	padding: 2px 5px 0 24px;
+	height: 16px;
+	background-color:#d1ebf9;
+	border:solid 1px #b6e1f7;
+	-moz-border-radius:4px; -webkit-border-radius:4px;
+}
+.folderOpenSection {
+	padding: 0 0 0 15px;
+	display: none;
+}
+
+#newFolderBlock {
+	background: transparent url(img/folder_arrow.png) 4px center no-repeat;
+	padding: 3px 5px 0 25px;
+	height: 17px;
+	margin:0px 7px 0 22px;
+	white-space: nowrap;
+	display: none;
+}
+#newFolderBlock input {
+	width: 100%;
+	font-size: 12px;
+	font-family: tahoma, arial;
+	vertical-align: top;
+	border: 1px #ccc solid;
+	padding: 2px;
+}
+
+.imageBlock {
+	float: left;
+	width: 114px; height: 144px;
+	margin: 1px;
+	border: solid 1px black;
+}
+
+.imageBlock0 {
+	float: left;
+	width: 118px; height: 148px;
+	margin: 1px;
+	border: solid 1px #fcfcfc;
+}
+
+.imageBlockHover {
+	background-color: #eff8fd;
+	border: solid 1px #d8f0fa;
+	-moz-border-radius: 5px; -webkit-border-radius: 5px;
+}
+
+.imageBlockAct {
+	background-color: #def1fb;
+	border: solid 1px #b3e4f9;
+	-moz-border-radius: 5px; -webkit-border-radius: 5px;
+}
+
+.imageBlockActHover {
+	background-color: #d5effc;
+	border: solid 1px #a7e0f8;
+	-moz-border-radius: 5px; -webkit-border-radius: 5px;
+}
+
+.imageBlock1 {
+	bottom: 0px;
+	width: 110px;
+	text-align: center;
+	overflow: hidden;
+}
+
+.imageName {
+	font-size: 12px;
+	padding: 2px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.imageImage{
+	padding: 2px;
+	border-top: solid 1px #e0e0e0;
+	border-right: solid 1px #c1c1c1;
+	border-bottom: solid 1px #c1c1c1;
+	border-left: solid 1px #e0e0e0;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	background-color: #fcfcfc;
+	min-height: 105px;
+	line-height: 105px;
+	vertical-align: middle;
+}
+
+.imageImage img{
+	vertical-align: middle;
+}
+
+#menuCancelFolder,#menuSaveFolder {
+	display: none;
+}
+
+
+/* Окно мультизагрузки */
+
+#uploadWindow{
+	color: #515151;
+	font-size: 14px;
+  position: absolute;
+  top: 50%; left: 50%;
+	width: 585px; height: 494px;
+  margin-top: -247px;
+  margin-left: -292px;
+  z-index: 10;
+	background: transparent url(img/uploadWindow.png) no-repeat left top;
+	display: none;
+}
+
+#uploadWindowHeader{
+	margin: 20px;
+	margin-bottom: 10px;
+	height: 30px;
+	border-bottom: 1px #ccc solid;
+}
+
+#uploadCaption{
+	color: #515151;
+	float: left;
+	font-weight: bold;
+	line-height: 25px;
+	padding-left: 5px;
+}
+
+#uploadClose {
+	float: right;
+	width: 25px;
+	height: 25px;
+	background: #aaa url(img/uploadClose.gif) no-repeat left top;
+	cursor: pointer;
+}
+
+#uploadWindowContent{
+	margin: 0 25px 20px 25px;
+	margin-top: 0;
+}
+
+#uploadCaptionSelectFiles{
+	margin-bottom: 5px;
+}
+
+#uploadTarget{
+	color: #111111;
+	font-size: 14px;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+#uploadTarget span{
+	color: #515151;
+	margin-right: 8px;
+}
+
+.SWFcontent{
+	margin: 4px 0 0 28px;
+	display: none;
+}
+
+#turboBtn{
+	float:left;
+	width: 70px;
+	height: 24px;
+	position: relative;
+}
+#btnUploadOver{
+	position: absolute;
+	left: 0;
+	top: 0;
+	width:70px;
+	height:24px;
+	z-index: 2;
+}
+#btnUpload{
+	position: absolute;
+	left: 0;
+	top: 0;
+	width:70px;
+	height:24px;
+	z-index: 1;
+}
+#spanButtonPlaceholder{
+	position: absolute;
+	left: 0; top: 0;
+	width:70px; height:24px;
+	z-index: 2;
+}
+#btnCancel{
+ margin-left: 8px; height: 24px;
+}
+
+
+#divStatus {
+	padding-left:10px;
+	line-height: 25px;
+}
+
+#fsUploadProgress {
+	margin: 10px 0 10px 0;
+	width: 520px;
+	height: 320px;
+	overflow: auto;
+	border: 1px #ccc solid;
+	border-left-color: #aaa;
+	border-top-color: #aaa;
+}
+
+.progressWrapper {
+	overflow: hidden;
+	margin: 5px;
+	padding: 3px;
+	background-color: #eee;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+
+.progressContainer {
+	margin: 5px 0 0 0;
+	padding: 0px;
+	overflow: hidden;
+}
+
+.progressName {
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.progressBarInProgress,
+.progressBarComplete,
+.progressBarError {
+	font-size: 0;
+	width: 0%;
+	height: 2px;
+	background-color: #B6B6B6;
+	margin-top: 2px;
+}
+.progressBarComplete {
+	width: 100%;
+	background-color: #515151;
+	visibility: hidden;
+}
+.progressBarError {
+	width: 100%;
+	background-color: red;
+	visibility: hidden;
+}
+.progressBarStatus {
+	margin: 2px 0 0 24px;
+	width: 337px;
+	font-size: 7pt;
+	font-family: Arial;
+	text-align: left;
+	white-space: nowrap;
+}
+a.progressCancel {
+	font-size: 0;
+	display: block;
+	height: 14px;
+	width: 14px;
+	background-image: url(img/cancelbutton.gif);
+	background-repeat: no-repeat;
+	background-position: -14px 0px;
+	float: left;
+	margin:2px 10px 0 0;
+}
+a.progressCancel:hover {
+	background-position: 0px 0px;
+}
+
+/* Message */
+.message {
+	margin: 1em 0;
+	padding: 10px 20px;
+	border: solid 1px #FFDD99;
+	background-color: #FFFFCC;
+	overflow: hidden;
+}
+/* Error */
+.red { color:red; }
+/* Current */
+.green {}
+/* Complete */
+.blue {}

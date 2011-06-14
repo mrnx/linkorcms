@@ -7,7 +7,7 @@
 
 if(!defined("USER")){
 	define("USER", true);
-	define("EXTRA_ADMIN_COOKIE", '3794y7v387o3');
+	define("EXTRA_ADMIN_COOKIE", 'Chahghiu6eiFai2kan4ei');
 }else{
 	return;
 }
@@ -24,7 +24,12 @@ class User{
 	public $SuperUser = false;
 	public $host;
 
-	// Конструктор
+	public $access2 = array();
+	public $SuperAccess2 = false;
+
+	/**
+	 * Конструктор
+	 */
 	public function __construct(){
 		if($this->Started == false){
 			if(!session_start()){
@@ -32,8 +37,10 @@ class User{
 			}else{
 				$this->Started = true;
 			}
+			if(isset($_REQUEST['PHPSESSID'])){ // Установка ИД сессии через GET и POST
+				session_id($_REQUEST['PHPSESSID']);
+			}
 		}
-
 		// Пишем свой http_referer. Брать реферер из $_SERVER['HTTP_REFERER'].
 		if(!IsAjax()){ // Не Ajax запрос
 			if($this->isDef('REFERER')){
@@ -49,7 +56,6 @@ class User{
 				}else{
 					$this->Def('HISTORY', array($_SERVER['HTTP_REFERER']));
 				}
-				//
 			}else{
 				if(isset($_SERVER['HTTP_REFERER']) && trim($_SERVER['HTTP_REFERER']) != ''){
 					$this->Def('FIRST_REFERER', SafeEnv(trim($_SERVER['HTTP_REFERER']), 255, str));
@@ -66,7 +72,7 @@ class User{
 		}
 	}
 
-	public function Started( $func ){
+	protected function Started( $func ){
 		if($this->Started == false){
 			echo $errors[] = "<b>Внимание!</b> : User->$func(): Сессия не создана.<br />";
 			return false;
@@ -99,10 +105,10 @@ class User{
 				return $this->session[$name];
 			}elseif(isset($_SESSION[$name])){
 				return $_SESSION[$name];
-			}else{
-				return false;
 			}
+			return false;
 		}
+		return false;
 	}
 
 	public function SetCookie( $Name, $Value, $Expiry = null){
@@ -110,7 +116,9 @@ class User{
 	}
 
 	public function UnsetCookie( $Name ){
-		setcookie($Name, '', time() - 3600);
+		if(isset($_COOKIE[$Name])){
+			setcookie($Name, '', time() - 3600);
+		}
 	}
 
 	public function isAdmin(){
@@ -123,6 +131,7 @@ class User{
 
 	/**
 	 * Возвращает тип пользователя
+	 * @return int 1 Администратор, 2 Пользователь, 3 Гость, 4 Гость
 	 */
 	public function AccessLevel(){
 		if($this->Get('u_level') === false){
@@ -130,23 +139,19 @@ class User{
 		}else{
 			return $this->Get('u_level');
 		}
-		//1 Администратор
-		//2 Пользователь
-		//3 Гость
-		//4 Гость
 	}
 
 	/**
 	 * Проверяет может ли пользователь с таким доступом
 	 * видеть объект с таким уровнем видимости
-	 * @param Integer $viewlevel // Уровень видимости объекта
-	 * @param Integer $accesslevel // Уровень доступа пользователя
+	 * @param Integer $viewlevel Уровень видимости объекта
+	 * @param null $user_access Уровень доступа пользователя
+	 * @internal param int $accesslevel Уровень доступа пользователя
 	 * @return Boolean
 	 */
 	public function AccessIsResolved( $viewlevel, $user_access = null ){
 		if($user_access == null){
-			global $user;
-			$user_access = $user->AccessLevel();
+			$user_access = $this->AccessLevel();
 		}
 		if($user_access == 1){
 			return true;
@@ -157,13 +162,16 @@ class User{
 		}elseif($user_access == $viewlevel){
 			return true;
 		}
+		return false;
 	}
-	public $access2 = array();
-	public $SuperAccess2 = false;
 
-	// Выдает перечень модулей и их функций в
-	// которые имеет доступ данная админская должность
-	// $result[group] = array(name,name,name,...);
+	/**
+	 * Выдает перечень модулей и их функций
+	 * в которые имеет доступ данная админская должность
+	 * $result[group] = array(name,name,name,...);
+	 * @param  $UserAccessGroup
+	 * @return void
+	 */
 	public function AccessInit( $UserAccessGroup ){
 		global $config, $db;
 		$this->access2 = array();
@@ -190,11 +198,15 @@ class User{
 		$this->access2 = $ac2;
 	}
 
-	// Проверяет имеет ли админ доступ
+	/**
+	 * Проверяет имеет ли админ доступ
+	 * На сервере где не работают сессии эта функция всегда
+	 * возвращает false если у пользователя не полный доступ
+	 * @param  $AccessGroup
+	 * @param  $AccessKey
+	 * @return bool
+	 */
 	public function CheckAccess2( $AccessGroup, $AccessKey ){
-		//На сервере где не работают сессии эта функция всегда возвращает false если у пользователя не полный доступ
-		//return true;
-		//
 		if($this->SuperAccess2 || (isset($this->access2[$AccessGroup]) && in_array($AccessKey, $this->access2[$AccessGroup]))){
 			return true;
 		}else{
@@ -202,16 +214,19 @@ class User{
 		}
 	}
 
-	// Системный ли администратор (супердоступ)
+	/**
+	 * Системный ли администратор (супердоступ)
+	 * @return bool
+	 */
 	public function isSuperUser(){
 		return $this->SuperUser;
 	}
 
-	// Возвращает id группы текущего пользователя
+	/**
+	 * Возвращает id группы текущего пользователя
+	 * @return int -1 Гость, 0 Пользователь, Далее по базе данных
+	 */
 	public function AccessGroup(){
-		//-1 Гость
-		//0 Пользователь
-		//Далее по базе данных
 		if(!$this->Auth){
 			return -1;
 		}
@@ -223,12 +238,19 @@ class User{
 		}
 	}
 
-	// Возвращает имя пользователя
+	/**
+	 * Возвращает имя пользователя
+	 * @return string
+	 */
 	public function Name(){
 		return $this->Get('u_name');
 	}
 
-	// Обновляет таблицу пользователей онлайн
+	/**
+	 * Обновляет таблицу пользователей онлайн
+	 * @param $page
+	 * @return
+	 */
 	public function OnlineProcess( $page ){
 		global $config, $db;
 		//Удаляем старые сессии
@@ -265,7 +287,10 @@ class User{
 		}
 	}
 
-	// Возвращает информацию о пользователях онлайн
+	/**
+	 * Возвращает информацию о пользователях онлайн
+	 * @return array
+	 */
 	public function Online(){
 		global $config, $db;
 		if($this->online == null){
@@ -289,7 +314,12 @@ class User{
 		}
 	}
 
-	// Добавляет или отнимает пункты у пользователя.
+	/**
+	 * Добавляет или отнимает пункты у пользователя
+	 * @param  $num
+	 * @param null $user_id
+	 * @return bool
+	 */
 	public function ChargePoints( $num, $user_id = null ){
 		if($num == 0 || (!$this->Auth && $user_id == null)){
 			return false;
@@ -311,7 +341,14 @@ class User{
 		return true;
 	}
 
-	// Устанавливает cookie авторизации пользователя.
+	/**
+	 * Устанавливает cookie авторизации пользователя
+	 * @param  $login
+	 * @param  $password
+	 * @param bool $remember
+	 * @param int $expiry
+	 * @return void
+	 */
 	public function SetUserCookie( $login, $password, $remember = false, $expiry = 2592000 ){
 		global $config;
 		$auth = base64_encode($login.':'.md5(md5($password).$config['salt']));
@@ -376,10 +413,17 @@ class User{
 	public function AllowCookie( $CookieName, $AdminCookie = false ){
 		global $config, $db;
 
-		if(!isset($_COOKIE[$CookieName])) return false;
 		if(defined('SETUP_SCRIPT')) return false;
 
-		$auth = base64_decode($_COOKIE[$CookieName]);
+		if(isset($_COOKIE[$CookieName])){
+			$cookie = $_COOKIE[$CookieName];
+		}elseif(isset($_REQUEST[$CookieName])){ // Можно передавать в POST и GET
+			$cookie = $_REQUEST[$CookieName];
+		}else{
+			return false;
+		}
+
+		$auth = base64_decode($cookie);
 		$auth = explode(":", $auth);
 		$login = SafeEnv($auth[0], 255, str);
 		$cookie_md5 = $auth[1];

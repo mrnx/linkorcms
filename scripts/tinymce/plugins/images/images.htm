@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
+	<title>Менеджер изображений</title>
+	<link rel="stylesheet" type="text/css" href="images.css" />
+
+	<script type="text/javascript" src="../../tiny_mce_popup.js"></script>
+	<script type="text/javascript" src="../../../jquery/jquery.min.js"></script>
+
+	<!--  SWFUpload -->
+	<script type="text/javascript" src="../../../swfupload/swfupload.js"></script>
+	<script type="text/javascript" src="../../../swfupload/plugins/swfupload.swfobject.js"></script>
+	<script type="text/javascript" src="../../../swfupload/plugins/swfupload.queue.js"></script>
+	<script type="text/javascript" src="../../../swfupload/plugins/swfupload.cookies.js"></script>
+	<script type="text/javascript" src="../../../swfupload/fileprogress.js"></script>
+	<script type="text/javascript" src="../../../swfupload/handlers.js"></script>
+
+	<script type="text/javascript">
+	jQuery(function($)
+	  {
+
+			window.ImagesDialog = {
+				init : function(ed){
+					tinyMCEPopup.resizeToInnerSize();
+				},
+				insert : function(text){
+					var ed = tinyMCEPopup.editor, dom = ed.dom;
+					tinyMCEPopup.execCommand('mceInsertContent', false, text);
+				}
+			};
+			tinyMCEPopup.onInit.add(ImagesDialog.init, ImagesDialog);
+
+			var connectorUrl = '../../../../index.php?name=plugins&p=connectors&mod=images';
+
+		  //Флаг загрузки
+			var folderLoadFlag = false;
+		  var ctrlState = false; // Для выделения файлов
+
+		  var SID;
+
+			// Получить текущую директорию и ее тип
+			function getCurrentPath(){
+				var path = $('.addrItemEnd').attr('path');
+				if(!path) path = '/';
+				return path;
+			}
+
+			function openFolder(path, callback){
+				$.ajax({
+					type: "POST",
+					url: connectorUrl,
+					data: "action=showpath&path="+path,
+					success: function(data){
+						$('#addr').html(data);
+					}
+				});
+				$.ajax({
+					type: "POST",
+					url: connectorUrl,
+					data: "action=showdir&path="+path,
+					success: function(data){
+						$('#loader').hide();
+						//$('#files').html(data);
+						$('#files').html(data);
+						showFootInfo();
+						callback();
+					}
+				});
+			}
+
+			function showFootInfo(){
+				$('#fileNameEdit').show();
+				$('#fileNameSave').hide();
+				var file = $('.imageBlockAct');
+				if(file.length > 1){
+					$('#footTableName, #footDateLabel, #footLinkLabel, #footDimLabel, #footDate, #footLink, #footDim').css('visibility','hidden');
+					$('#footExt').text('Выбрано файлов: '+file.length);
+					var tmpSizeCount = 0;
+					$.each(file, function(i, item){
+						tmpSizeCount += parseInt($(this).attr('fsize'));
+					});
+					$('#footSize').text(intToMb(tmpSizeCount));
+				}else if(file.length == 0){
+					$('#footTableName, #footDateLabel, #footLinkLabel, #footDimLabel, #footDate, #footLink, #footDim').css('visibility','hidden');
+					var allFiles = $('.imageBlock0');
+					$('#footExt').text('Всего файлов: '+allFiles.length);
+					var tmpSizeCount = 0;
+					$.each(allFiles, function(i, item) {
+						tmpSizeCount += parseInt($(this).attr('fsize'));
+					});
+					$('#footSize').text(intToMb(tmpSizeCount));
+				}else{
+					$('#fileName').text(file.attr('fname'));
+					$('#footExt').text(file.attr('ext'));
+					$('#footDate').text(file.attr('date'));
+					$('#footLink a').text(file.attr('fname').substr(0,16)).attr('href', file.attr('linkto_url'));
+					$('#footSize').text(intToMb(file.attr('fsize')));
+					if(file.attr('type') == 'image'){
+						$('#footDim').text(file.attr('fwidth')+'x'+file.attr('fheight'));
+						$('#footDimLabel, #footDim').css('visibility','visible');
+					}else{
+						$('#footDimLabel, #footDim').css('visibility','hidden');
+					}
+					$('#footTableName, #footDateLabel, #footLinkLabel, #footDate, #footLink').css('visibility','visible');
+				}
+			}
+
+			// Байты в Мб и Кб
+			function intToMb(i){
+				if(i < 1024){
+					return i + ' Байт';
+				}else if(i < 1048576){
+					var v = i/1024;
+					v = parseInt(v*10)/10;
+					return v + ' Кб';
+				}else{
+					var v = i/1048576;
+					v = parseInt(v*10)/10;
+					return v + ' Мб';
+				}
+			}
+
+			function selectAllFiles(){
+				$('.imageBlock0').addClass('imageBlockAct');
+				showFootInfo();
+			}
+
+			function cancelNewFolder(){
+				if(!canCancelFolder) {
+					canCancelFolder = true;
+					return false;
+				}
+				$('#menuCancelFolder,#menuSaveFolder').hide();
+				$('#menuCreateFolder').show();
+				$('#newFolderBlock').slideUp('fast', function(){
+					$(this).remove();
+				});
+			}
+
+			function saveNewFolder(){
+				canCancelFolder = false;
+				if($('#newFolderBlock input').val() == '') {
+					alert('Введите имя новой папки');
+					$('#newFolderBlock input').focus();
+					return false;
+				}
+				$('#loader').show();
+				$('#menuCancelFolder,#menuSaveFolder').hide();
+				$('#menuCreateFolder').show();
+				//Запрос на создание папки + сервер должен отдать новую структуру каталогов
+				var pathtype = $('.folderAct').attr('pathtype');
+				var path = $('.folderAct').attr('path');
+				var path_new = $('#newFolderBlock input').val();
+				var path_will = path+'/'+path_new;
+				$.ajax({
+					type: "POST",
+					url: connectorUrl,
+					dataType: "json",
+					data: "action=newfolder&type="+ pathtype +"&path="+ path +"&name=" + path_new,
+					success: function(data){
+						$('#loader').hide();
+						if(data.error != ''){
+							alert(data.error);
+							$('#newFolderBlock input').focus();
+						}else{
+							$('#tree').html(data.tree);
+							$('#addr').html(data.addr);
+							canCancelFolder = true;
+							//Открываем созданную папку
+							$.ajax({
+								type: "POST",
+								url: connectorUrl,
+								data: "action=showdir&pathtype="+pathtype+"&path="+$('.folderAct').attr('path'),
+								success: function(data){
+									$('#loader').hide();
+									$('#files').html(data);
+								}
+							});
+						}
+					}
+				});
+			}
+
+			function checkFiles(){
+				if($('.fileOpen').length > 1){
+					$('#normalSubmit').show();
+				}else{
+					$('#normalSubmit').hide();
+				}
+				$('#normalResult').hide();
+			}
+
+		// Загрузка
+			$('#loader').show();
+			// Путь (хлебные крошки)
+			$.ajax({
+				type: "POST",
+				url: connectorUrl,
+				data: "action=showpath&path=&default=1",
+				success: function(data){
+					$('#addr').html(data);
+				}
+			});
+			// Дерево папок
+			$.ajax({
+				type: "POST",
+				url: connectorUrl,
+				data: "action=showtree&path=&default=1",
+				success: function(data){
+					$('#tree').html(data);
+				}
+			});
+			// Session ID для Flash-загрузчика
+			$.ajax({
+				type: "POST",
+				url: connectorUrl,
+				data: "action=SID",
+				success: function(data){
+					SID = data;
+				}
+			});
+			// Список файлов
+			$.ajax({
+				type: "POST",
+				url: connectorUrl,
+				data: "action=showdir&path=&default=1",
+				success: function(data){
+					$('#loader').hide();
+					$('#files').html(data);
+					showFootInfo();
+				}
+			});
+
+		// Хлебные крошки
+			$('.addrItem').live('mouseover', function(){
+				$(this).css({'background-color':'#b1d3fa'});
+			});
+			$('.addrItem').live('mouseout', function(){
+				$(this).css({'background-color':'#e4eaf1'});
+			});
+
+			$('.addrItem').live('mousedown', function(){
+				$(this).css({'background-color':'#679ad3'});
+			});
+			$('.addrItem').live('mouseup', function(){
+				$(this).css({'background-color':'#b1d3fa'});
+				$.ajax({
+					type: "POST",
+					url: connectorUrl,
+					data: "action=showtree&path="+$(this).attr('path'),
+					success: function(data){
+						$('#tree').html(data);
+					}
+				});
+				$.ajax({
+					type: "POST",
+					url: connectorUrl,
+					data: "action=showpath&path="+$(this).attr('path'),
+					success: function(data){
+						$('#addr').html(data);
+					}
+				});
+				$.ajax({
+					type: "POST",
+					url: connectorUrl,
+					data: "action=showdir&path="+$(this).attr('path'),
+					success: function(data){
+						$('#loader').hide();
+						$('#files').html(data);
+						showFootInfo();
+					}
+				});
+			});
+
+		// Элементы дерева слева
+			$('.folderClosed,.folderOpened,.folderS,.folderImages,.folderFiles').live('mouseover', function(){
+				if(!$(this).hasClass('folderAct')){
+					$(this).addClass('folderHover');
+				} else {
+					$(this).addClass('folderActHover');
+				}
+			});
+			$('.folderClosed,.folderOpened,.folderS,.folderImages,.folderFiles').live('mouseout', function(){
+				if(!$(this).hasClass('folderAct')){
+					$(this).removeClass('folderHover');
+				} else {
+					$(this).removeClass('folderActHover');
+				}
+			});
+
+		// Открыть указанную папку
+		  $('.folderClosed,.folderOpened,.folderS,.folderImages,.folderFiles').live('mousedown',function(){
+				//Запрет на переключение
+				if(folderLoadFlag) return false;
+				folderLoadFlag = true;
+				$('#loader').show();
+				$('.folderAct').removeClass('folderAct');
+				$(this).removeClass('folderHover');
+				$(this).addClass('folderAct');
+				openFolder($(this).attr('path'), function(){ folderLoadFlag = false; });
+			});
+			$('.folderImages,.folderFiles').live('dblclick',function(){
+				$(this).next().slideToggle('normal');
+			});
+			$('.folderOpened,.folderS').live('dblclick',function(){
+				if(!$(this).next().hasClass('folderOpenSection')) return false;
+				if($(this).hasClass('folderS')) {
+					$(this).removeClass('folderS').addClass('folderOpened');
+				} else {
+					$(this).removeClass('folderOpened').addClass('folderS');
+				}
+				$(this).next().slideToggle('normal');
+			});
+
+		// Создать папку
+			var canCancelFolder = true;
+			$('#menuCreateFolder').click(function(){
+				$(this).hide();
+				$('#menuCancelFolder,#menuSaveFolder').show();
+				$('.folderAct').after('<div id="newFolderBlock"><input type="text" name="newfolder" id="newFolder" /></div>');
+				$('#newFolderBlock').slideDown('fast', function(){
+					$('#newFolderBlock input').focus().blur(cancelNewFolder).keypress(function(e){
+						if(e.which == 13){
+							saveNewFolder();
+						}else if (e.which == 27){
+							cancelNewFolder();
+						}else{
+							return true;
+						}
+					});
+				});
+			});
+
+		// Создание новой папки
+			$('#menuCancelFolder').click(cancelNewFolder);
+			$('#menuSaveFolder').click(saveNewFolder).hover(
+					function(){ canCancelFolder = false; },
+					function(){ canCancelFolder = true; }
+			);
+
+		// Удалить папку
+			$('#menuDelFolder').click(function(){
+				var path = getCurrentPath();
+				if(confirm('Удалить папку '+path+'?')){
+					$('#loader').show();
+					$.ajax({
+						type: "POST",
+						url: connectorUrl,
+						dataType: "json",
+						data: "action=delfolder&path="+path,
+						success: function(data){
+							if(data.error){
+								$('#loader').hide();
+								alert(data.error);
+							}else{
+								$.ajax({
+									type: "POST",
+									url: connectorUrl,
+									data: "action=showtree&path=",
+									success: function(data){
+										$('#tree').html(data);
+									}
+								});
+								openFolder('', function(){ $('#loader').hide(); });
+							}
+						}
+					});
+				}
+			});
+
+		// Удалить файлы
+			$('#menuDelFiles').click(function(){
+				var files = $('.imageBlockAct');
+				if(files.length == 0){
+					alert('Выберите файлы для удаления.\n\nМожно выделять несколько файлов сразу, для этого удерживайте Ctrl при выборе.');
+				}else{
+					if(files.length == 1){
+						var conf = confirm('Удалить файл '+files.attr('filename')+'?');
+					}else{
+						var conf = confirm('Выбрано файлов для удаления: '+files.length+'\n\nПродолжить?');
+					}
+					if(conf){
+						$('#loader').show();
+						var path = getCurrentPath();
+						//Собираем строку запроса
+						var actionStr = 'action=delfile&path='+path;
+						$.each(files, function(i, item){
+							actionStr += "&md5["+i+"]="+$(this).attr('md5')+"&filename["+i+"]="+$(this).attr('filename');
+						});
+						$.ajax({
+							type: "POST",
+							url: connectorUrl,
+							data: actionStr,
+							dataType: "json",
+							success: function(data){
+								$('#loader').hide();
+								if(!data.error){
+									$('#files').html(data.ok);
+									var count_files = $('.imageBlock0').length;
+									$('.folderAct > #count_files').text((count_files ? ' ('+count_files+')' : ''));
+									showFootInfo();
+								}else{
+									alert(data.error);
+								}
+							}
+						});
+					}
+				}
+			});
+
+		// Выделение
+			$('.imageBlock0').live('mouseover', function(){
+				if(!$(this).hasClass('imageBlockAct')){
+					$(this).addClass('imageBlockHover');
+				} else {
+					$(this).addClass('imageBlockActHover');
+				}
+			});
+			$('.imageBlock0').live('mouseout', function(){
+				if(!$(this).hasClass('imageBlockAct')){
+					$(this).removeClass('imageBlockHover');
+				} else {
+					$(this).removeClass('imageBlockActHover');
+				}
+			});
+			$('.imageBlock0').live('mousedown', function(){
+				if(ctrlState){
+					if($(this).hasClass('imageBlockActHover') || $(this).hasClass('imageBlockAct')){
+						$(this).removeClass('imageBlockAct');
+						$(this).removeClass('imageBlockActHover');
+					} else {
+						$(this).removeClass('imageBlockHover');
+						$(this).addClass('imageBlockAct');
+					}
+				}else{
+					$('.imageBlockAct').removeClass('imageBlockAct');
+					$(this).removeClass('imageBlockHover');
+					$(this).addClass('imageBlockAct');
+				}
+				showFootInfo();
+			});
+			$(this).keydown(function(event){
+				if(ctrlState && event.keyCode==65){
+					selectAllFiles();
+				}
+				if(event.keyCode==17) ctrlState = true;
+			});
+			$(this).keyup(function(event){
+				if(event.keyCode==17) ctrlState = false;
+			});
+
+		// Вставка изображения в документ
+			$('.imageBlock0').live('dblclick', function(){
+				var e = $(this);
+				if(e.attr('type') == 'file'){
+					var filesize = e.attr('fsizetext');
+					var text = '<a href="'+e.attr('linkto')+'" title="'+e.attr('fname')+'">';
+					text += e.attr('fname');
+					text += '</a> ' + ' ('+filesize+') ';
+				}else{
+					if(e.attr('fmiddle')){
+						var addAttr = (e.attr('fclass') != '' ? 'class="'+e.attr('fclass')+'"':'')+' '+(e.attr('frel')!=''?'rel="'+e.attr('frel')+'"' : '');
+						var text = '<a href="'+e.attr('linkto')+'" '+addAttr+' title="'+e.attr('fname')+'">';
+						text += '<img src="'+e.attr('fmiddle')+'" width="'+e.attr('fmiddlewidth')+'" height="'+e.attr('fmiddleheight')+'" alt="'+e.attr('fname')+'" />';
+						text += '</a> ';
+					}else{
+						var text = '<img src="'+e.attr('linkto')+'" width="'+e.attr('fwidth')+'" height="'+e.attr('fheight')+'" alt="'+e.attr('fname')+'" /> ';
+					}
+				}
+				ImagesDialog.insert(text);
+				if($('.imageBlockAct').length == 1){
+					tinyMCEPopup.close();
+				}
+			});
+
+			$(this).blur(function(event){
+				ctrlState = false;
+			});
+
+		  // Кнопка "Вставить изображение"
+			$('#insertImage').click(function(){
+				$('.imageBlockAct').trigger('dblclick');
+				tinyMCEPopup.close();
+			});
+
+		// Переименовать
+		  function SaveName(){
+				$('#loader').show();
+				// Запрос
+				var path = getCurrentPath();
+				var newname = $('#fileNameValue').val();
+				$.ajax({
+					type: "POST",
+					url: connectorUrl,
+					dataType: "json",
+					data: 'action=renamefile&path='+path+'&filename='+$('.imageBlockAct').attr('filename')+'&newname='+newname,
+					success: function(data){
+						$('#loader').hide();
+						if(!data.error){
+							$('#fileName').html(data.ok);
+							$('.imageBlockAct .imageName').text(data.ok);
+							$('.imageBlockAct').attr('fname', data.ok);
+							$('.imageBlockAct').attr('filename', data.ok2);
+							$('.imageBlockAct').attr('linkto', data.linkto);
+						}else{
+							alert(data.error);
+						}
+					}
+				});
+				$('#fileNameSave').hide();
+				$('#fileNameEdit').show();
+		  }
+
+			$('#fileNameValue').live('keypress', function(e){
+				if(e.which == 13){
+					SaveName();
+				}else if (e.which == 27){
+					return false;
+				}else{
+					return true;
+				}
+			});
+			$('#fileNameEdit').click(function(){
+				$('#fileName').html('<input type="text" name="fileName" id="fileNameValue" value="'+$('#fileName').html()+'">');
+				$('#fileNameValue').focus();
+				$('#fileNameEdit').hide();
+				$('#fileNameSave').show();
+
+			});
+			// Сохранить имя
+			$('#fileNameSave').click(function(){
+				SaveName();
+			});
+
+		// Загрузка файлов
+			// Открыть окно
+		  $('#menuUploadFiles').click(function(){
+				var path = getCurrentPath();
+			  if(path.charAt(0) != '/'){
+				  path = '/'+path;
+			  }
+				var str = '<span>Файлы:</span>';
+				str += path;
+				$('#uploadTarget').html(str);
+				$('#uploadWindow').show();
+			});
+
+			// Закрыть окно
+			$('#uploadClose').click(function(){
+				$('#loader').show();
+				var path = getCurrentPath();
+				$.ajax({
+					type: "POST",
+					url: connectorUrl,
+					data: "action=showtree&path="+path,
+					success: function(data){
+						$('#tree').html(data);
+					}
+				});
+				openFolder(path, function(){
+					$('#loader').hide();
+				});
+				$('#uploadWindow').hide();
+			});
+
+			// SWFUpload
+			swfu = new SWFUpload({
+				flash_url : "../../../swfupload/swfupload.swf",
+				upload_url: connectorUrl,
+				post_params: {
+					"action" : "uploadfile"
+				},
+				file_size_limit : "100 MB",
+				file_types : "*.*",
+				file_types_description : "Все файлы",
+				file_upload_limit : 0,
+				file_queue_limit : 0,
+				custom_settings : {
+					progressTarget : "fsUploadProgress",
+					cancelButtonId : "btnCancel"
+				},
+				debug: false,
+
+				button_placeholder_id : "spanButtonPlaceholder",
+				button_width: 70,
+				button_height: 24,
+				button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT,
+				button_cursor: SWFUpload.CURSOR.HAND,
+
+				swfupload_loaded_handler : function() {
+					var self = this;
+					clearTimeout(this.customSettings.loadingTimeout);
+					document.getElementById("divLoadingContent").style.display = "none";
+					document.getElementById("divLongLoading").style.display = "none";
+					document.getElementById("divAlternateContent").style.display = "none";
+					document.getElementById("btnCancel").onclick = function () { self.cancelQueue(); };
+					var path = getCurrentPath();
+					this.addPostParam('path', path);
+				},
+				file_queued_handler : fileQueued,
+				file_queue_error_handler : fileQueueError,
+				file_dialog_complete_handler : fileDialogComplete,
+				upload_start_handler : uploadStart,
+				upload_progress_handler : uploadProgress,
+				upload_error_handler : uploadError,
+				upload_success_handler : uploadSuccess,
+				upload_complete_handler : uploadComplete,
+				queue_complete_handler : queueComplete,
+
+				swfupload_pre_load_handler : swfUploadPreLoad,
+				swfupload_load_failed_handler : swfUploadLoadFailed,
+					minimum_flash_version : "9.0.28"
+			});
+		});
+	</script>
+</head>
+<body>
+
+	<div id="uploadWindow">
+		<div id="uploadWindowHeader">
+			<div id="uploadCaption">Загрузка файлов</div>
+			<div id="uploadClose"></div>
+			<div style="clear: both;"></div>
+		</div>
+		<div id="uploadWindowContent">
+			<div id="uploadCaptionSelectFiles">Выберите несколько файлов:</div>
+
+			<div>
+				<div id="turboBtn">
+					<div id="btnUploadOver"><span id="spanButtonPlaceholder"></span></div>
+					<input id="btnUpload" type="button" value="Обзор &#133;" />
+				</div>
+				<input id="btnCancel" type="button" value="Отменить все загрузки" disabled="disabled" />
+				<span id="divStatus"></span>
+			</div>
+
+			<div id="fsUploadProgress"></div>
+
+			<div id="divLoadingContent" class="SWFcontent">SWFUpload загружается. Одну секундочку...</div>
+			<div id="divLongLoading" class="SWFcontent">SWFUpload слишком долго загружается или произошла ошибка загрузки, убедитесь что корректно установлен Flash Player.</div>
+			<div id="divAlternateContent" class="SWFcontent">SWFUpload не может быть загружен. Необходимо установить или обновить Flash Player. Посетите <a href="http://www.adobe.com/shockwave/download/download.cgi?P1_Prod_Version=ShockwaveFlash">сайт Adobe</a> чтоб скачать Flash Player.</div>
+			<div id="uploadTarget"></div>
+			<div style="clear: both;"></div>
+		</div>
+	</div>
+
+	<div id="insertImage" title="Вставить изображение"><img src="img/icon.gif" width="20" height="20" alt="Вставить изображение" /></div>
+	<div id="addr"></div>
+
+	<div id="ToolBar">
+		<div class="toolBar1">
+			<div class="toolBar2">
+				<div class="toolItem" id="menuCreateFolder">
+					<img src="img/folder_plus.png" width="16" height="16" alt="Создать папку" />
+					<span>Создать папку</span>
+				</div>
+				<div class="toolItem" id="menuDelFolder">
+					<img src="img/folder_minus.png" width="16" height="16" alt="Удалить папку" />
+					<span>Удалить папку</span>
+				</div>
+				<div class="toolItem" id="menuCancelFolder">
+					<img src="img/cross_circle_frame.png" width="16" height="16" alt="Отменить создание папки" />
+					<span>Отменить создание</span>
+				</div>
+				<div class="toolItem" id="menuSaveFolder">
+					<img src="img/tick_circle_frame.png" width="16" height="16" alt="Подтвердить создание папки" />
+					<span>Создать</span>
+				</div>
+				<div class="toolItem" id="menuUploadFiles">
+					<img src="img/images_plus.png" width="16" height="16" alt="Загрузить файлы" />
+					<span>Загрузить файлы</span>
+				</div>
+				<div class="toolItem" id="menuDelFiles">
+					<img src="img/images_minus.png" width="16" height="16" alt="Удалить файлы" />
+					<span>Удалить файлы</span>
+				</div>
+				<div id="loader">
+					<img src="img/ajax-loader.gif" width="16" height="16" alt="Загрузка" />
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="tree"></div>
+	<div id="files">
+		<div style="clear:both;"></div>
+	</div>
+
+	<div id="Foot">
+		<table cellpadding="0" cellspacing="0" id="footTable">
+			<tr>
+				<td width="30%">
+					<table id="footTableName">
+						<tr>
+							<td>
+								<div id="fileName"></div>
+								<div style="float: left; width: 16px; vertical-align: top;">
+									<img src="img/pencil_small.png" width="16" height="16" alt="Редактировать" id="fileNameEdit" />
+									<img src="img/tick_small.png" width="16" height="16" alt="Сохранить" id="fileNameSave" />
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td width="20%" class="footLabel" id="footDateLabel">Дата загрузки:</td>
+				<td width="25%" id="footDate"></td>
+				<td class="footLabel" id="footDimLabel">Размеры:</td>
+				<td id="footDim"></td>
+			</tr>
+			<tr>
+				<td id="footExt"></td>
+				<td class="footLabel" id="footLinkLabel">Ссылка на файл:</td>
+				<td id="footLink"><img src="img/chain.png" width="16" height="16" alt="Ссылка" style="vertical-align:sub" /> <a href="#" target="_blank"></a></td>
+				<td class="footLabel">Размер:</td>
+				<td id="footSize"></td>
+			</tr>
+		</table>
+	</div>
+
+</body>
+</html>

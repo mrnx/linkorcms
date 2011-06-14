@@ -12,7 +12,7 @@ require 'config/init.php'; // Конфигурация и инициализация
 define('ADMIN_FILE', System::config('admin_file')); // Ссылка на админ-панель
 
 // Проверка пользователя
-if(!($userAuth === 1 && $userAccess === 1 && isset($_COOKIE['admin']) && System::user()->AllowCookie('admin', true))){
+if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie('admin', true))){
 	if(isset($_POST['admin_login'])){ // Проверка логина-пароля
 		$admin_name = SafeEnv($_POST['admin_name'], 255, str);
 		$admin_password = SafeEnv($_POST['admin_password'], 255, str);

@@ -55,7 +55,7 @@ function AdminPluginsRender( $name, $installed, $configex, $group = '' )
 		$image .= '<b>'.SafeDB(SafeDB($plugins[$name]['name-ru'], 255, str), 255, str).'</b><br />';
 	}
 	if(isset($plugins[$name]['logo'])){
-		$imagename = RealPath2($config['plug_dir'].$name.'/'.SafeDB(SafeEnv($plugins[$name]['logo'], 250, str), 250, str));
+		$imagename = RealPath2($config['plug_dir'].$name.'/'.SafeDB($plugins[$name]['logo'], 250, str));
 		if(!is_dir($imagename) && file_exists($imagename)){
 			$image .= '<img width="64" height="64" src="'.$imagename.'" /><br />';
 		}

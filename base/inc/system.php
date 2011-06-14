@@ -121,6 +121,30 @@ abstract class System{
 		return $GLOBALS['site'];
 	}
 
+	static private function configs( $globalVarName, $Path, $SetValue = null ){
+		$Path = explode('/', $Path);
+		if(isset($Path[1])){
+			if(isset($SetValue)){
+				$old_value = $GLOBALS[$globalVarName][$Path[0]][$Path[1]];
+				$GLOBALS[$globalVarName][$Path[0]][$Path[1]] = $SetValue;
+				ConfigSetValue($Path[0], $Path[1], $SetValue);
+				return $old_value;
+			}else{
+				if(isset($GLOBALS[$globalVarName][$Path[0]][$Path[1]])){
+					return $GLOBALS[$globalVarName][$Path[0]][$Path[1]];
+				}else{
+					return false;
+				}
+			}
+		}else{
+			if(isset($GLOBALS[$globalVarName][$Path[0]])){
+				return $GLOBALS[$globalVarName][$Path[0]];
+			}else{
+				return false;
+			}
+		}
+	}
+
 	/**
 	 * Прочитать значение настройки или установить новое значение
 	 * @static
@@ -129,27 +153,43 @@ abstract class System{
 	 * @return mixed При установке нового значения настройки, возвращает старое значение
 	 */
 	static public function config( $Path, $SetValue = null ){
-		$Path = explode('/', $Path);
-		if(isset($Path[1])){
-			if(isset($SetValue)){
-				$old_value = $GLOBALS['config'][$Path[0]][$Path[1]];
-				$GLOBALS['config'][$Path[0]][$Path[1]] = $SetValue;
-				ConfigSetValue($Path[0], $Path[1], $SetValue);
-				return $old_value;
-			}else{
-				if(isset($GLOBALS['config'][$Path[0]][$Path[1]])){
-					return $GLOBALS['config'][$Path[0]][$Path[1]];
-				}else{
-					return false;
-				}
-			}
-		}else{
-			if(isset($GLOBALS['config'][$Path[0]])){
-				return $GLOBALS['config'][$Path[0]];
-			}else{
-				return false;
-			}
+		return self::configs('config', $Path, $SetValue);
+	}
+
+	/**
+	 * Прочитать значение настройки плагина
+	 * @static
+	 * @param  $Path
+	 * @return bool
+	 */
+	static public function plug_config( $Path ){
+		return self::configs('plug_config', $Path);
+	}
+
+	/**
+	 * Возвращает объект лога ошибок
+	 * @static
+	 * @param string $Message
+	 * @return Logi
+	 */
+	static public function log_errors( $Message = '', $exit = false ){
+		if($Message != ''){
+			$GLOBALS['ErrorsLog']->Write($Message, $exit);
 		}
+		return $GLOBALS['ErrorsLog'];
+	}
+
+	/**
+	 * Возвращает объект лога сайта
+	 * @static
+	 * @param string $Message
+	 * @return Logi
+	 */
+	static public function log( $Message = '', $exit = false ){
+		if($Message != ''){
+			$GLOBALS['SiteLog']->Write($Message, $exit);
+		}
+		return $GLOBALS['SiteLog'];
 	}
 
 }
@@ -994,7 +1034,7 @@ function GetUserRank($points, $type, $access){
 			if($rank['min'] > $points){
 				return array(
 				    SafeDB($last['title'], 250, str),
-				    $config['general']['ranks_dir'].RealPath2(SafeDB($last['image'], 250, str)),
+				    RealPath2($config['general']['ranks_dir'].SafeDB($last['image'], 250, str)),
 				    SafeDB($last['id'], 11, int));
 			}else{
 				$last = $rank;
@@ -1002,7 +1042,7 @@ function GetUserRank($points, $type, $access){
 		}
 		return array(
 		    SafeDB($last['title'], 250, str),
-		    $config['general']['ranks_dir'].RealPath2(SafeDB($last['image'], 250, str)),
+		    RealPath2($config['general']['ranks_dir'].SafeDB($last['image'], 250, str)),
 		    SafeDB($last['id'], 11, int));
 	}else{ // Администратор
 		$admintypes = GetUserTypes();
@@ -1473,29 +1513,35 @@ function TotalTime($runtime, $endtime){
 }
 
 /**
- * Извлекает из полного имени файла его расширение с точкой
+ * Извлекает из полного имени файла его расширение
  *
  * @param String $file // Полное имя файла
+ * @param bool $removeDot // Удалить ведущую точку
  * @return String
  */
-function GetFileExt($file){
-	$pos = strrpos($file,'.');
+function GetFileExt( $file, $removeDot = false ){
+	$pos = strrpos($file, '.');
+	if($removeDot) $pos++;
 	if(!($pos===false)){
-		return substr($file,$pos);
+		return substr($file, $pos);
 	}else{
 		return '';
 	}
 }
 
 /**
- * Извлекает из полного имени файла его имя без расширения.
+ * Извлекает из полного имени файла его имя без расширения
  *
  * @param Itring $Name // Полное имя файла
  * @return String
  */
-function GetFileName($Name){
-	$ext = strrpos($Name,".");
-	return basename($Name,substr($Name,$ext));
+function GetFileName( $Name, $RemoveExt = true ){
+	if($RemoveExt){
+		$suffix = substr($Name, strrpos($Name, '.'));
+	}else{
+		$suffix = null;
+	}
+	return basename($Name, $suffix);
 }
 
 /**
@@ -1574,6 +1620,28 @@ function GetFolderSize( $folder ){
 		}
 	}
 	return $file_size;
+}
+
+/**
+ * Удаляет папку со всеми вложениями
+ * @param  $Path
+ * @return bool
+ */
+function RmDirRecursive( $Path ){
+	if(!is_dir($Path)) return false;
+	$dir = @opendir($Path);
+	if(!$dir) return false;
+	while($file = @readdir($dir)){
+		$fn = $Path.'/'.$file;
+		if(is_file($fn) || is_link($fn)){
+			if(!unlink($fn)) return false;
+		}elseif(is_dir($fn) && ($file != '.') && ($file != '..')){
+			if(!RmDirRecursive($fn)) return false;
+		}
+	}
+	@closedir($dir);
+	if(!rmdir($Path)) return false;
+	return true;
 }
 
 # Возвращает ИП адрес пользователя
@@ -1934,7 +2002,7 @@ function GetRatingImage( $votes_amount, $votes ){
 	}
 }
 
-function FormatFileSize($size, $sizeType = 'b'){
+function FormatFileSize( $size, $sizeType = 'b' ){
 	if($sizeType == 'b'){
 		$mb = 1024*1024;
 		if($size>$mb){$size = sprintf("%01.2f",$size/$mb).' Мб';
@@ -1954,7 +2022,7 @@ function FormatFileSize($size, $sizeType = 'b'){
 
 //Вызывается при запросе несуществующей
 //страницы или ошибки и использования спецсимволов в параметрах
-function HackOff($LowProtect=false, $redirect=true){
+function HackOff( $LowProtect=false, $redirect=true ){
 	global $user, $config;
 	if($user->isAdmin() || $LowProtect){
 		if(defined('MAIN_SCRIPT') || defined('PLUG_SCRIPT') || !defined('ADMIN_SCRIPT')){
@@ -1979,27 +2047,23 @@ function HackOff($LowProtect=false, $redirect=true){
 	}
 }
 
+/**
+ * Возвращает канонизированный путь к папке,
+ * удаляет слэши из начала и конца пути
+ * @param  $path
+ * @return mixed|string
+ */
 function RealPath2($path){
 	$path = str_replace('\\', '/',$path);
-	$path = str_replace(array('../','./'),'',$path);
-	$parr = explode('/',$path);
-	$pcnt = count($parr);
-	for($i=0;$i<$pcnt;$i++){
-		if($i<>$pcnt-1){
-			if($parr[$i]<>''){
-				$parr[$i] = str_replace('.','',$parr[$i]);
-			}else{
-				unset($parr[$i]);
-			}
+	$path_array = explode('/', $path);
+	$path_result = array();
+	foreach($path_array as $name){
+		$name2 = str_replace('.', '', $name);
+		if($name2 != ''){
+			$path_result[] = $name;
 		}
 	}
-	$path = implode('/',$parr);
-	if($pcnt>1){
-		if((substr($path, 0, 1) == '/')){
-			$path = substr($path, 1);
-		}
-	}
-	return $path;
+	return implode('/', $path_result);
 }
 
 function GDVersion(){
@@ -2027,7 +2091,7 @@ function AdminImageControl( $Title, $LoadTitle, $FileName, $Dir, $Name = 'image'
 	$max_file_size = ini_get('upload_max_filesize');
 
 	$images_data = array();
-	$Dir = RealPath2($Dir);
+	$Dir = RealPath2($Dir).'/';
 
 	$images = array();
 	$images = GetFiles($Dir,false,true,'.gif.png.jpeg.jpg');
@@ -2062,18 +2126,15 @@ HTML;
 }
 
 function CreateThumb( $SrcFileName, $DstFileName, $MaxWidth, $MaxHeight ){
-	global $config;
 	if(is_file($DstFileName)){
 		unlink($DstFileName);
 	}
-	include_once($config['inc_dir'].'picture.class.php');
 	$thumb = new TPicture($SrcFileName);
 	$thumb->SetImageSize($MaxWidth, $MaxHeight);
 	$thumb->SaveToFile($DstFileName);
 }
 
 function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default, &$Error, $CreateThumbs = true, $OriginalOptimization = false, $OriginalMaxWidth = 800, $OriginalMaxHeight = 600){
-	global $config;
 	$Error = false;
 	if($Default == 'no_image/no_image.png') {
 		$Default = '';
@@ -2090,7 +2151,7 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 			$ext = GetFileExt($file_name);
 			$name = GetFileName($file_name);
 			$i = 1;
-			while(is_file($Dir.$file_name)) {
+			while(is_file($Dir.$file_name)){
 				$i++;
 				$file_name = $name.'_'.$i.$ext;
 			}
@@ -2101,18 +2162,18 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 			}else{
 				CreateThumb($_FILES[$PostName]['tmp_name'], $FileName, $OriginalMaxWidth, $OriginalMaxHeight);
 			}
-			if($CreateThumbs) {
-				if(!is_dir($ThumbsDir)) {
+			if($CreateThumbs){
+				if(!is_dir($ThumbsDir)){
 					mkdir($ThumbsDir, 0777);
 				}
 				CreateThumb($FileName, $ThumbFileName, $MaxWidth, $MaxHeight);
 			}
 			$result = $file_name;
-		} else {
+		}else{
 			$Error = true;
 			return RealPath2(SafeEnv($Default, 255, str));
 		}
-	} else {
+	}else{
 		$result = RealPath2(SafeEnv($Default, 255, str));
 	}
 	return $result;
@@ -2276,7 +2337,7 @@ function Translit4Url( $text ){
 		'ю' => 'yu', 'Ю' => 'YU',
 		'я' => 'ya', 'Я' => 'YA',
 	));
-	$text = preg_replace('/[^a-z ]*/i', '', $text);
+	$text = preg_replace('/[^a-zA-Z0-9.-_ ]*/', '', $text);
 	$text = trim($text);
 	$text = str_replace(' ', '_', $text);
 	return $text;
@@ -2405,6 +2466,14 @@ function GetSiteDir( $EndSlash = true ){
 		$dir = substr($dir, 0, -1);
 	}
 	return $dir;
+}
+
+function GetSiteRoot( $EndSlash = true ){
+	$doc = $_SERVER['DOCUMENT_ROOT'];
+	$dir = GetSiteDir($EndSlash);
+	if(substr($doc, -1) != '/' && substr($dir, 0, 1) != '/') $doc .= '/';
+	$root = $doc.$dir;
+	return $root;
 }
 
 /**
@@ -2593,22 +2662,33 @@ function ErrorsOff(){
  * @param  $Line
  * @return void
  */
-function ErrorHandler($No, $Error, $File, $Line = -1){
+function ErrorHandler( $No, $Error, $File, $Line = -1 ){
+	static $LogedErrors = array();
+	static $First = true;
 	global $ErrorsLog, $SITE_ERRORS;
 	$errortype = array(
 		1 => 'Ошибка', 2 => 'Предупреждение!', 4 => 'Ошибка разборщика', 8 => 'Замечание', 16 => 'Ошибка ядра', 32 => 'Предупреждение ядра!', 64 => 'Ошибка компиляции',
 		128 => 'Предупреждение компиляции!', 256 => 'Пользовательская Ошибка', 512 => 'Пользовательскаое Предупреждение!', 1024 => 'Пользовательскаое Замечание', 2048 => 'Небольшое замечание',
 		8192 => 'Устаревший код'
 	);
-	$Error = '<br /><b>'.$errortype[$No].'</b>: '.$Error.' в <b>'.$File.($Line > -1 ? '</b> на линии <b>'.$Line.'</b>' : '').'.<br />';
-	if(!defined('SETUP_SCRIPT') && System::config('debug/log_errors') == '1'){
-		$ErrorsLog->Write($Error);
-	}
-	if($SITE_ERRORS && System::config('debug/php_errors')){
-		System::$Errors[] = $Error."\n";
+	$ErrorHtml = '<br /><b>'.$errortype[$No].'</b>: '.$Error.' в <b>'.$File.($Line > -1 ? '</b> на линии <b>'.$Line.'</b>' : '').'.<br />'."\n";
+	if(!defined('SETUP_SCRIPT') && System::config('debug/log_errors')){
+		$ErrorText = '"'.$errortype[$No].'" "'.$Error.'" "'.$File.'"'.($Line > -1 ? ' "'.$Line.'"' : '');
+		if(!in_array($ErrorText, $LogedErrors)){ // Отсеиваем одинаковые ошибки
+			$LogedErrors[] = $ErrorText;
+			if($First){
+				$First = false;
+				$ErrorText = '---- '.date("d.m.y G:i", time())."\n".$ErrorText;
+			}
+			$ErrorsLog->Write($ErrorText);
+		}
 	}
 	if(PRINT_ERRORS){
-		print $Error;
+		print $ErrorHtml;
+		return;
+	}
+	if($SITE_ERRORS && System::config('debug/php_errors')){
+		System::$Errors[] = $ErrorHtml."\n";
 	}
 }
 
@@ -2706,7 +2786,7 @@ function IncludeSystemPluginsGroup($group, $function = '', $return = false, $ret
 		foreach($plugins as $plugin){
 			if(($function == '') || (isset($plugin['function']) && $function == $plugin['function'])){
 				global $include_plugin_path; // эта переменная будет доступна из плагина
-				$include_plugin_path = RealPath2($config['plug_dir'].$group.'/'.$plugin['name'].'/');
+				$include_plugin_path = RealPath2($config['plug_dir'].$group.'/'.$plugin['name']).'/';
 				if($return){
 					if($return_full){
 						$plugin['path'] = $include_plugin_path;
@@ -2760,10 +2840,8 @@ function GetPlugins($ClearCache = false){
 		return $resultcache;
 	}
 
-	$install_plugins = array(
-	); // Установленные плагины
-	$install_groups = array(
-	); // Установленные группы
+	$install_plugins = array(); // Установленные плагины
+	$install_groups = array(); // Установленные группы
 
 	$plugins = $db->Select('plugins', '');
 	foreach($plugins as $temp){
@@ -2780,14 +2858,14 @@ function GetPlugins($ClearCache = false){
 	foreach($plugins as $name => $plugin){
 		if(isset($plugins['type']) && $plugins['type'] == PLUG_SYSTEM){
 			unset($plugins[$name]);
-		} else{
+		}else{
 			$plugins[$name]['installed'] = isset($install_plugins[$name]);
 		}
 	}
 	foreach($groups as $name => $group){
 		if(isset($groups[$name]['type']) && $groups[$name]['type'] == PLUG_SYSTEM){
 			unset($groups[$name]);
-		} else{
+		}else{
 			foreach($group['plugins'] as $pname => $plugin){
 				$groups[$name]['plugins'][$pname]['installed'] = isset($install_groups[$name][$pname]);
 			}
@@ -2869,7 +2947,7 @@ function InstallPlugin($plugin_name, $group = ''){
 			$db->Insert('plugins', $vals);
 			PluginsClearCache();
 		}
-	} else{
+	}else{
 		if(isset($plugins['plugins'][$name]) && $plugins['plugins'][$name]['installed'] == false){
 			$p = &$plugins['plugins'][$name];
 			if(!isset($p['config'])){
@@ -2903,10 +2981,10 @@ function IncludePluginsGroup($group, $function = '', $return = false){
 		foreach($plugins as $plugin){
 			if(($plugin['installed'] && $function == '') || ($plugin['installed'] && isset($plugin['function']) && $function == $plugin['function'])){
 				global $include_plugin_path; // эта переменная будет доступна из плагина
-				$include_plugin_path = RealPath2($config['plug_dir'].$group.'/'.$plugin['name'].'/');
+				$include_plugin_path = RealPath2($config['plug_dir'].$group.'/'.$plugin['name']).'/';
 				if($return){
 					$result[] = $include_plugin_path;
-				} else{
+				}else{
 					include ($include_plugin_path.'index.php');
 				}
 			}

@@ -5,19 +5,19 @@
 body{
 	padding: 10px;
 	margin: 0px;
-	font-size: 9pt;
+	font-size: 10pt;
 	background-color: #FFFFFF;
 }
 
-.interface_font{ font-size: 8pt; }
-.read_font{ font-size: 10pt; text-align: justify; font-family: Verdana, Tahoma, Sans-Serif; }
+.interface_font{ font-size: 10pt; }
+.read_font{ font-size: 11pt; text-align: justify; font-family: Verdana, "Droid Sans", Sans; }
 .fade{ color: #888888; }
 .admin_edit_link img{ vertical-align: bottom; }
 
 img { padding: 0; margin: 0; border: none; }
 form { margin: 0px; }
 table, td {}
-input {font-size: 8pt;background-color: #FFFFFF;border: 1px solid #CCCCCC;padding: 2px;-moz-border-radius: 2px;-webkit-border-radius: 2px;border-radius: 2px;}
+input {font-size: 10pt;background-color: #FFFFFF;border: 1px solid #CCCCCC;padding: 2px;-moz-border-radius: 2px;-webkit-border-radius: 2px;border-radius: 2px;}
 input[type=submit], input[type=button], button{cursor: pointer;background-color: #EFEFEF;}
 input[type=radio]{ border: 0; }
 input[type=image]{ border: 0; padding: 0; margin: 0; }
@@ -152,27 +152,30 @@ textarea {padding: 2px 0 2px 4px;background-color: #FAFAFA;border: 1px solid #CC
 
 /* Статьи */
 	.articletable{ margin-top: 10px; margin-bottom: 20px; }
-	.articletable th{ font-size: 10pt; text-align: left; }
-	.articletext { padding: 3px 0 3px 0; }
+	.articletable th{ font-size: 12pt; text-align: left; }
+	.articletext { padding: 5px; }
 	.article_fade { color: #888888; }
 	.article_image { margin: 0 10px 10px 0; }
 	.article_rating_image{ vertical-align: bottom; }
 	.article_link { padding-left: 1px; padding-right: 20px; }
 	div.article_read_info{ padding-top: 20px; }
+	.article_read { padding: 10px; }
+	.article_read_info { padding-left: 20px; }
 	.article_read_info span{ color: #00506D; }
 	.article_read_rating{text-align: center;padding: 7px;margin-top: 10px;color: #000000;background-color: var(basecolor);-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
 
 /* Архив файлов */
-	.downloadtable{margin-top: 10px;margin-bottom: 20px;border: 1px #DED8F8 solid;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
-	.downloadtable_full{padding: 0;margin-top: 10px;margin-bottom: 20px;}
-	.downloadtable th, .downloadtable_full th{font-size: 10pt;text-align: left;padding: 7px;margin-top: -5px;color: #000000;background-color: #DED8F8;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
-	.downloadtable td{padding: 5px;}
+	.downloadtable{ margin-top: 10px; margin-bottom: 20px; border: 1px #DED8F8 solid; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
+	.downloadtable_full{ padding: 0; margin-top: 10px; margin-bottom: 20px; }
+	.downloadtable th, .downloadtable_full th{ font-size: 10pt; text-align: left; padding: 7px; margin-top: -5px; color: #000000; background-color: #DED8F8; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
+	.downloadtable td{ padding: 5px; }
 	.download_image{ margin: 15px; text-align: center; }
-	.download_description{ padding-top: 10px; }
-	.downloadinfo_table{border: 1px #DED8F8 solid;border-spacing: 2px;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;margin-bottom: 10px;}
-	.downloadinfo_table td{text-align: center;}
-	.downloadinfo_table th{font-size: 8pt;padding: 4px;background-color: #DED8F8;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
-	.download_rating{text-align: center;padding: 7px;margin-top: 10px;color: #000000;background-color: var(basecolor);-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
+	.download_description{ padding: 5px; }
+	.download_description_full{ padding: 10px; }
+	.downloadinfo_table{ border: 1px #DED8F8 solid; border-spacing: 2px; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; margin-bottom: 10px; }
+	.downloadinfo_table td{ text-align: center; }
+	.downloadinfo_table th{ font-size: 8pt; padding: 4px; background-color: #DED8F8; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
+	.download_rating{ text-align: center; padding: 7px; margin-top: 10px; color: #000000; background-color: var(basecolor); -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
 
 /* Web-формы */
 	.formtitle { padding: 5px; font-size: 10pt; font-weight: bold; padding: 10px; background-color: var(basecolor); -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }

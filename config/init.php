@@ -96,8 +96,8 @@ require $config['inc_dir'].'system.php'; // Функции
 set_error_handler('ErrorHandler');
 
 // Логи
-$SiteLog = new Logi($config['log_dir'].'site.log.php');
-$ErrorsLog = new Logi($config['log_dir'].'errors.log.php');
+$SiteLog = new Logi($config['log_dir'].'site.log');
+$ErrorsLog = new Logi($config['log_dir'].'errors.log');
 
 // Сессии
 $user = new User();
@@ -170,7 +170,7 @@ if(is_file('config/db_config.php')){ // Система установлена
 				$pcache->Write('system', $pcache_name, $plugins);
 			}
 			foreach($plugins as $plugin){
-				$PluginName = $config['plug_dir'].SafeDB(RealPath2($plugin['name']), 255, str);
+				$PluginName = RealPath2($config['plug_dir'].SafeDB($plugin['name'], 255, str));
 				if(file_exists($PluginName.'/index.php') && is_dir($PluginName)){
 					include $PluginName.'/index.php';
 				} else{

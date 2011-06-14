@@ -57,14 +57,14 @@ switch($action){
 		AdminNewsEditTopic();
 		break;
 	case 'config':
-		if(!$user->CheckAccess2('news', 'news_conf')){
+		if(!$news_access_editconfig){
 			AddTextBox('Ошибка', 'Доступ запрещён!');
 			return;
 		}
 		AdminConfigurationEdit('news', 'news', false, false, 'Конфигурация модуля "Новости"');
 		break;
 	case 'configsave':
-		if(!$user->CheckAccess2('news', 'news_conf')){
+		if(!$news_access_editconfig){
 			AddTextBox('Ошибка', 'Доступ запрещён!');
 			return;
 		}
@@ -318,7 +318,7 @@ function AdminNewsSave(){
 		return;
 	}
 
-	$author = System::user()->Get('u_name');
+	$author = SafeEnv(System::user()->Get('u_name'), 255, str);
 
 	// Получаем параметры
 	$topic_id = SafeEnv($_POST['topic_id'], 11, int);
@@ -331,7 +331,7 @@ function AdminNewsSave(){
 	$allow_comments = EnToInt($_POST['acomments']);
 
 	$NewsImagesDir = RealPath2(System::config('news/icons_dirs'));
-	$ThumbsDir = $NewsImagesDir.'thumbs/';
+	$ThumbsDir = $NewsImagesDir.'/thumbs/';
 	$error = false;
 	$icon = LoadImage(
 			'up_photo',
@@ -348,8 +348,8 @@ function AdminNewsSave(){
 		return;
 	}
 
-	$start_text = SafeEnv($_POST['shorttext'],0,str, false);
-	$end_text = SafeEnv($_POST['continuation'],0,str, false);
+	$start_text = SafeEnv($_POST['shorttext'], 0, str, false);
+	$end_text = SafeEnv($_POST['continuation'], 0, str, false);
 	$auto_br = EnToInt($_POST['auto_br']);
 	$view = ViewLevelToInt(SafeEnv($_POST['view'],15,str));
 	$enabled = EnToInt($_POST['enabled']);
@@ -364,17 +364,15 @@ function AdminNewsSave(){
 
 	if(isset($_GET['id'])){
 		$id = SafeEnv($_GET['id'],11,int);
-		System::database()->Select('news',"`id`='$id'");
+		System::database()->Select('news', "`id`='$id'");
 		$news = System::database()->FetchRow();
-		$author = SafeDB($news['author'], 255, str);
-		$comments_counter = SafeDB($news['comments_counter'], 11, int);
-		$hit_counter = SafeDB($news['hit_counter'], 11, int);
-
+		$author = SafeEnv($news['author'], 255, str);
+		$comments_counter = SafeEnv($news['comments_counter'], 11, int);
+		$hit_counter = SafeEnv($news['hit_counter'], 11, int);
 		if($topic_id != $news['topic_id'] && $news['enabled'] == 1){
 			CalcNewsCounter($news['topic_id'], false);
 			CalcNewsCounter($topic_id, true);
 		}
-
 		if($enabled != $news['enabled']){
 			CalcNewsCounter($topic_id, $enabled);
 		}
@@ -386,7 +384,7 @@ function AdminNewsSave(){
 	$seo_title, $seo_keywords, $seo_description);
 
 	if(isset($id)){
-		System::database()->Update('news', $vals, "`id`='$id'",true);
+		System::database()->Update('news', $vals, "`id`='$id'", true);
 	}else{
 		System::database()->Insert('news', $vals);
 		CalcNewsCounter($topic_id, true);
