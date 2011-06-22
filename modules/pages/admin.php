@@ -242,7 +242,7 @@ function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$a
 	}
 	$text = htmlspecialchars($_POST['text']);
 	$copy = htmlspecialchars($_POST['copy']);
-	$auto_br[EnToInt($_POST['auto_br'])] = true;
+	$auto_br = EnToInt($_POST['auto_br']);
 	$inf = '';
 	if(isset($_POST['ins_title'])){
 		$inf .= '1';
@@ -271,8 +271,8 @@ function AdminPagesAcceptPost( &$link, &$parent_id, &$title, &$text, &$copy, &$a
 	}
 	$info = array($inf[0], $inf[1], $inf[2], $inf[3], $inf[4]);
 	$view[ViewLevelToInt($_POST['view'])] = true;
-	$enabled[EnToInt($_POST['enabled'])] = true;
-	$showinmenu[EnToInt($_POST['showinmenu'])] = true;
+	$enabled = EnToInt($_POST['enabled']);
+	$showinmenu = EnToInt($_POST['showinmenu']);
 	//Модуль SEO
 	$seo_title = htmlspecialchars($_POST['seo_title']);
 	$seo_keywords = htmlspecialchars($_POST['seo_keywords']);
@@ -317,11 +317,11 @@ function AdminPagesEditor(){
 	$title = '';
 	$text = '<p></p>';
 	$copy = '';
-	$auto_br = array(false, false);
+	$auto_br = false;
 	$info = array(false, false, false, false, false);
 	$view = array(1=>false, 2=>false, 3=>false, 4=>false);
-	$enabled = array(false, false);
-	$showinmenu = array(false, false);
+	$enabled = true;
+	$showinmenu = true;
 
 	//Модуль SEO
 	$seo_title = '';
@@ -330,10 +330,7 @@ function AdminPagesEditor(){
 	//
 
 	if(!isset($_GET['id']) && !isset($_POST['method'])){
-		$auto_br[0] = true;
 		$view[4] = true;
-		$enabled[1] = true;
-		$showinmenu[1] = true;
 		$alname = 'Добавить';
 		$met = 'add';
 		$url = '';
@@ -347,12 +344,12 @@ function AdminPagesEditor(){
 		$title = SafeDB($pg['title'], 255, str);
 		$text = SafeDB($pg['text'], 0, str, false);
 		$copy = SafeDB($pg['copyright'], 255, str);
-		$auto_br[SafeDB($pg['auto_br'], 1, int)] = true;
+		$auto_br = SafeDB($pg['auto_br'], 1, bool);
 		$inf = SafeDB($pg['info_showmode'], 5, str);
 		$info = array($inf[0], $inf[1], $inf[2], $inf[3], $inf[4]);
 		$view[SafeDB($pg['view'], 1, int)] = true;
-		$enabled[SafeDB($pg['enabled'], 1, int)] = true;
-		$showinmenu[SafeDB($pg['showinmenu'], 1, int)] = true;
+		$enabled = SafeDB($pg['enabled'], 1, bool);
+		$showinmenu = SafeDB($pg['showinmenu'], 1, bool);
 		//Модуль SEO
 		$seo_title = SafeDB($pg['seo_title'], 255, str);
 		$seo_keywords = SafeDB($pg['seo_keywords'], 255, str);
@@ -403,11 +400,10 @@ function AdminPagesEditor(){
 	FormRow('[seo] Описание', $site->Edit('seo_description', $seo_description, false, 'style="width:400px;"'));
 	//
 	FormTextRow('Текст (HTML)', $site->HtmlEditor('text', $text, 600, 400));
-	FormRow('Вставлять тег &lt;br&gt;<br />автоматически',
-		'<label>'.$site->Radio('auto_br', 'on', $auto_br[1]).'Да</label>&nbsp;'
-		.'<label>'.$site->Radio('auto_br', 'off', $auto_br[0]).'Нет</label>');
+	FormRow('Преобразовать текст в HTML', System::admin()->Select('auto_br', GetEnData($auto_br, 'Да', 'Нет')));
+
 	FormRow('Авторское право', $site->Edit('copy', htmlspecialchars($copy), false, 'style="width:400px;" maxlength="255"'));
-	FormRow('Вставить информацию<br />на страницу',
+	FormRow('Вставить информацию на страницу',
 		'<label>'.$site->Check('ins_title', '1', $info[0]).'Заголовок</label><br />'
 		.'<label>'.$site->Check('ins_copy', '1', $info[1]).'Авторские права</label><br />'
 		.'<label>'.$site->Check('ins_date', '1', $info[2]).'Дата добавления</label><br />'
@@ -415,12 +411,9 @@ function AdminPagesEditor(){
 		.'<label>'.$site->Check('ins_counter', '1', $info[4]).'Количество просмотров</label>'
 	);
 	FormRow('Кто видит', $site->Select('view', $visdata));
-	FormRow('Показать в меню',
-		'<label>'.$site->Radio('showinmenu', 'off', $showinmenu[0]).'Нет</label>&nbsp;&nbsp;'
-		.'<label>'.$site->Radio('showinmenu', 'on', $showinmenu[1]).'Да</label>');
-	FormRow('Включить',
-		'<label>'.$site->Radio('enabled', 'off', $enabled[0]).'Нет</label>&nbsp;&nbsp;'
-		.'<label>'.$site->Radio('enabled', 'on', $enabled[1]).'Да</label>');
+	FormRow('Показать в меню', System::admin()->Select('showinmenu', GetEnData($showinmenu, 'Да', 'Нет')));
+	FormRow('Включить', System::admin()->Select('enabled', GetEnData($enabled, 'Да', 'Нет')));
+
 	AddCenterBox($headt);
 	AddForm('<form action="'.$config['admin_file'].'?exe=pages&a=editor'.$url.'" method="post">', $site->Hidden('method', $met).$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Select('action', $acts).$site->Submit('Выполнить'));
 }
@@ -510,12 +503,10 @@ function AdminPagesLinkEditor(){
 		$parent_id = SafeEnv($_GET['parent'], 11, int);
 	}
 	$view = array(1 => false, 2 => false, 3 => false, 4 => false);
-	$enabled = array(false, false);
-	$showinmenu = array(false, false);
+	$enabled = true;
+	$showinmenu = true;
 	if(!isset($_GET['id'])){
 		$view[4] = true;
-		$enabled[1] = true;
-		$showinmenu[1] = true;
 		$form_title = 'Добавление ссылки';
 		$submit = 'Добавить';
 	}else{
@@ -526,8 +517,8 @@ function AdminPagesLinkEditor(){
 		$title = SafeEnv($pg['title'], 255, str);
 		$link = SafeEnv($pg['text'], 255, str);
 		$view[SafeDB($pg['view'], 1, int)] = true;
-		$enabled[SafeDB($pg['enabled'], 1, int)] = true;
-		$showinmenu[SafeDB($pg['showinmenu'], 1, int)] = true;
+		$enabled = SafeDB($pg['enabled'], 1, bool);
+		$showinmenu = SafeDB($pg['showinmenu'], 1, bool);
 		$form_title = 'Редактирование ссылки';
 		$submit = 'Сохранить';
 	}
@@ -553,8 +544,10 @@ function AdminPagesLinkEditor(){
 	FormRow('Ссылка на модуль', $site->Select('module', $modules_data));
 	FormRow('Ссылка (URL)', $site->Edit('link', $link, false, 'style="width:400px;"'));
 	FormRow('Кто видит', $site->Select('view', $visdata));
-	FormRow('Показать в меню', $site->Radio('showinmenu', 'off', $showinmenu[0]).'Нет&nbsp;&nbsp;'.$site->Radio('showinmenu', 'on', $showinmenu[1]).'Да');
-	FormRow('Включить', $site->Radio('enabled', 'off', $enabled[0]).'Нет&nbsp;&nbsp;'.$site->Radio('enabled', 'on', $enabled[1]).'Да');
+
+	FormRow('Показать в меню', System::admin()->Select('showinmenu', GetEnData($showinmenu, 'Да', 'Нет')));
+	FormRow('Включить', System::admin()->Select('enabled', GetEnData($enabled, 'Да', 'Нет')));
+
 	AddCenterBox($form_title);
 	AddForm('<form action="'.$config['admin_file'].'?exe=pages&a=savelink'.($id != -1 ? '&id='.$id : '').'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($submit));
 }
@@ -607,12 +600,10 @@ function AdminPagesCatEditor(){
 		$parent_id = SafeEnv($_GET['parent'], 11, int);
 	}
 	$view = array(1 => false, 2 => false, 3 => false, 4 => false);
-	$enabled = array(false, false);
-	$showinmenu = array(false, false);
+	$enabled = true;
+	$showinmenu = true;
 	if(!isset($_GET['id'])){
 		$view[4] = true;
-		$enabled[1] = true;
-		$showinmenu[1] = true;
 		$form_title = 'Добавление категории';
 		$submit = 'Добавить';
 	}else{
@@ -622,8 +613,8 @@ function AdminPagesCatEditor(){
 		$parent_id = SafeEnv($pg['parent'], 11, int);
 		$title = SafeEnv($pg['title'], 255, str);
 		$view[SafeDB($pg['view'], 1, int)] = true;
-		$enabled[SafeDB($pg['enabled'], 1, int)] = true;
-		$showinmenu[SafeDB($pg['showinmenu'], 1, int)] = true;
+		$enabled = SafeDB($pg['enabled'], 1, bool);
+		$showinmenu = SafeDB($pg['showinmenu'], 1, bool);
 		$form_title = 'Редактирование категории';
 		$submit = 'Сохранить';
 	}
@@ -641,8 +632,10 @@ function AdminPagesCatEditor(){
 	FormRow('Заголовок', System::site()->Edit('title', $title, false, 'style="width:400px;" maxlength="255"'));
 	FormRow('Родительская страница', System::site()->Select('parent_id', $cats_data));
 	FormRow('Кто видит', System::site()->Select('view', $visdata));
-	FormRow('Показать в меню', System::site()->Radio('showinmenu', 'off', $showinmenu[0]).'Нет&nbsp;&nbsp;'.System::site()->Radio('showinmenu', 'on', $showinmenu[1]).'Да');
-	FormRow('Включить', System::site()->Radio('enabled', 'off', $enabled[0]).'Нет&nbsp;&nbsp;'.System::site()->Radio('enabled', 'on', $enabled[1]).'Да');
+
+	FormRow('Показать в меню', System::admin()->Select('showinmenu', GetEnData($showinmenu, 'Да', 'Нет')));
+	FormRow('Включить', System::admin()->Select('enabled', GetEnData($enabled, 'Да', 'Нет')));
+
 	AddCenterBox($form_title);
 	AddForm('<form action="'.ADMIN_FILE.'?exe=pages&a=savecat'.($id != -1 ? '&id='.$id : '').'" method="post">', System::site()->Button('Отмена', 'onclick="history.go(-1)"').System::site()->Submit($submit));
 }

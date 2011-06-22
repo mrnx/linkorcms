@@ -5,8 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-function write_http_referer( $referer )
-{
+function write_http_referer( $referer ){
 	global $db, $user;
 	if(trim($referer) != '' && !IsMainHost($referer)){
 		$referer = SafeEnv(Url($referer), 255, str);

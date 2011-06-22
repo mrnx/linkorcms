@@ -130,12 +130,12 @@ function AdminNewsMain(){
 	$table->sortdesc = $desc;
 
 	$table->AddColumn('Заголовок');
-	$table->AddColumn('Дата', 'left');
+	$table->AddColumn('Дата', 'left', true, true);
 	$table->AddColumn('Просмотров', 'right');
 	$table->AddColumn('Комментарий', 'right');
 	$table->AddColumn('Кто видит', 'center');
 	$table->AddColumn('Статус', 'center');
-	$table->AddColumn('Функции', 'center', false);
+	$table->AddColumn('Функции', 'center', false, true);
 
 	$newsdb = ArrayPage($newsdb, $num, $page); // Берем только новости с текущей страницы
 	foreach($newsdb as $news){
@@ -172,7 +172,6 @@ function AdminNewsMain(){
 			$func
 		);
 	}
-
 	if(isset($_GET['ajax'])){
 		echo $table->GetOptions();
 		exit;

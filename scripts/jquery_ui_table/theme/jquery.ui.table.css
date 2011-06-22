@@ -1,3 +1,4 @@
+
 .ui-table {
 	width: 100%;
 	margin: 0px;
@@ -17,10 +18,13 @@
 	border: 1px #CCCCCC solid;
 	text-shadow: 0px 1px 0px #fff;
 	font-weight: normal;
+	white-space: nowrap;
+	padding-right: 10px;
 }
 
 .ui-table-column-sortable{
 	cursor: pointer;
+	padding-right: 0;
 }
 
 .ui-table-column-sortable:hover{
@@ -36,6 +40,7 @@
 .ui-table-column-sortable-selected{
 	cursor: pointer;
 	background-position: 0 22px;
+	padding-right: 0;
 }
 
 .ui-table-column-value{
@@ -71,6 +76,10 @@
 	padding: 4px 10px;
 	vertical-align: middle;
 	border-bottom: 1px #CCCCCC solid;
+}
+
+.ui-table-cell-nowrap{
+	white-space: nowrap;
 }
 
 .ui-table-row{

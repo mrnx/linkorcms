@@ -246,7 +246,7 @@ class Starkyt extends HTML{
 
 	/**
 	 * Добавляет массив переменных в блок или субблок блока с определенным именем
-	 * @since 1.3.5
+	 * @since 1.4
 	 */
 	public function SetVars( $Block, $Vars, $SubId = 0 ){
 		if(isset($this->Blocks[$Block])) {
@@ -274,7 +274,7 @@ class Starkyt extends HTML{
 
 	/**
 	 * Добавляет массив переменных-шаблонов в блок или субблок блока с определенным именем
-	 * @since 1.3.5
+	 * @since 1.4
 	 */
 	public function SetTempVars( $Block, $Vars, $SubId = 0 ){
 		if(isset($this->Blocks[$Block])){
@@ -451,7 +451,7 @@ class StarkytSubBlock{
 
 function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 
-	// Защита от рекурсии
+	// Защита от безконечной рекурсии
 	if($level > 64) return '';
 
 	$SBlocks = $starkyt->GetSBlocks($FileName);
@@ -481,13 +481,11 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 					$i = $line[2];
 					if(isset($b['sub'][$i])){
 						$sub = $b['sub'][$i];
-
 						if(!$sub['enabled']){
 							$line[2]++;
 							$start -= 2;
 							continue;
 						}
-
 						$Blocks[$level] = $Blocks[$level-1];
 						$OpenedBlocks[$level] = $OpenedBlocks[$level-1];
 						if(isset($b['vars'])){
@@ -502,15 +500,12 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 						if(isset($b['template'])){
 							$sub['template'] = $b['template'];
 						}
-
 						$sub['vars']['even'] = ($i % 2 == 0);
 						$sub['vars']['odd'] = !$sub['vars']['even'];
 						$sub['vars']['rs'] = ($line[7] == 1);
 						$sub['vars']['re'] = ($i == $line[6] || $line[7] == $line[5]);
-
 						if($sub['plaintext']){
 							$result .= $sub['plaintext'];
-
 							// Устаревшая поддержка таблиц
 							if($b['type'] == STARKYT_TABLE && $i != 0){
 								$result .= '<!-- КОНЕЦ ЯЧЕЙКИ -->'.$starkyt->TableCellClose."\n";
@@ -522,7 +517,6 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 									$result .= '<!-- НАЧАЛО ЯЧЕЙКИ -->'.$tcopen."\n";
 								}
 							}
-
 							$line[2]++;
 							$line[7]++;
 							if($line[7] > $line[5]){
@@ -531,17 +525,14 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 							$start -= 2;
 							continue;
 						}
-
 						if(isset($b['child'])){
 							$Blocks[$level] = array_merge($Blocks[$level], $b['child']);
 						}
 						$Blocks[$level] = array_merge($Blocks[$level], $sub['child']);
 						$OpenedBlocks[$level][$line[3]] = $sub;
 						$OpenedBlocks[$level][$b['alias']] = $sub;
-
 						if($sub['template']){
 							$result .= StarkytCompile($sub['template'], $Blocks, $OpenedBlocks, $level, $starkyt);
-
 							// Устаревшая поддержка таблиц
 							if($b['type'] == STARKYT_TABLE && $i != 0){
 								$result .= '<!-- КОНЕЦ ЯЧЕЙКИ -->'.$starkyt->TableCellClose."\n";
@@ -553,7 +544,6 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 									$result .= '<!-- НАЧАЛО ЯЧЕЙКИ -->'.$tcopen."\n";
 								}
 							}
-
 							$line[2]++;
 							$line[7]++;
 							if($line[7] > $line[5]){
@@ -562,7 +552,6 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 							$start -= 2;
 							continue;
 						}
-
 						// Устаревшая поддержка таблиц
 						if($b['type'] == STARKYT_TABLE && $i != 0){
 							$result .= '<!-- КОНЕЦ ЯЧЕЙКИ -->'.$starkyt->TableCellClose."\n";
@@ -574,7 +563,6 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 								$result .= '<!-- НАЧАЛО ЯЧЕЙКИ -->'.$tcopen."\n";
 							}
 						}
-
 						$line[2]++;
 						$line[7]++; // Колонка таблицы
 						if($line[7] > $line[5]){ // Колонок
@@ -593,25 +581,26 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 					}
 					break;
 				case(STARKYT_START):
-
 					$SBlocks[$line[4]+2][1] = $Blocks[$level][$line[1]];
-
 					// Устаревшая поддержка таблиц
 					if($Blocks[$level][$line[1]]['type'] == STARKYT_TABLE){
 						$tcopen = str_replace('{colspan}', '', $starkyt->TableCellOpen);
 						$tcopen = str_replace('{rowspan}', '', $tcopen);
 						$result .= '<!-- НАЧАЛО ТАБЛИЦЫ -->'.$starkyt->TableOpen.'<tr>'.$tcopen."\n";
 					}
-
 					$level++;
 					$start = $line[4];
 					break;
 				case(STARKYT_COND):
 					$value = $OpenedBlocks[$level][$line[1]]['vars'][$line[2]];
-					if(is_string($value)){
-						$value = strlen($value) != 0;
+					if($line[6] !== false){
+						$value = $value == $line[6];
 					}else{
-						$value = (bool)$value;
+						if(is_string($value)){
+							$value = strlen($value) != 0;
+						}else{
+							$value = (bool)$value;
+						}
 					}
 					if($line[3]) $value = !$value;
 					$level++;
@@ -620,10 +609,14 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 					break;
 				case(STARKYT_SPEED_COND):
 					$value = $OpenedBlocks[$level][$line[1]]['vars'][$line[2]];
-					if(is_string($value)){
-						$value = strlen($value) != 0;
+					if($line[6] !== false){
+						$value = $value == $line[6];
 					}else{
-						$value = (bool)$value;
+						if(is_string($value)){
+							$value = strlen($value) != 0;
+						}else{
+							$value = (bool)$value;
+						}
 					}
 					if($line[3]) $value = !$value;
 					if($value){
@@ -658,6 +651,13 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 			if(strpos($m[1], '(') !== false){//STARKYT_SPEED_COND
 				$m[1] = explode('(', $m[1], 2);
 				$var_name = $m[1][0];
+				$var_name = explode('=', $var_name, 2);
+				if(isset($var_name[1])){
+					$cond_value = $var_name[1];
+				}else{
+					$cond_value = false;
+				}
+				$var_name = $var_name[0];
 				$vals = explode('|', $m[1][1]);
 				if(isset($vals[1])){
 					$vals[1] = substr($vals[1], 0, -1);
@@ -667,10 +667,14 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 				}
 				if(isset($OpenedBlocks[$level][$block_name]['vars'][$var_name])){
 					$value = $OpenedBlocks[$level][$block_name]['vars'][$var_name];
-					if(is_string($value)){
-						$value = strlen($value) != 0;
+					if($cond_value !== false){
+						$value = $value == $cond_value;
 					}else{
-						$value = (bool)$value;
+						if(is_string($value)){
+							$value = strlen($value) != 0;
+						}else{
+							$value = (bool)$value;
+						}
 					}
 					if($inv) $value = !$value;
 					if($value){
@@ -679,24 +683,36 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 						$result .= $vals[1];
 					}
 					$result .= $SBlocks[$start+1];
-					$line = array(STARKYT_SPEED_COND, $block_name, $var_name, $inv, $vals[0], $vals[1]);
+					$line = array(STARKYT_SPEED_COND, $block_name, $var_name, $inv, $vals[0], $vals[1], $cond_value);
 					continue;
 				}
 			}
-			if(isset($OpenedBlocks[$level][$block_name]['vars'][$m[1]])){
-				$value = $OpenedBlocks[$level][$block_name]['vars'][$m[1]];
-				if(is_string($value)){
-					$value = strlen($value) != 0;
+			$var_name = $m[1];
+			$var_name = explode('=', $var_name, 2);
+			if(isset($var_name[1])){
+				$cond_value = $var_name[1];
+			}else{
+				$cond_value = false;
+			}
+			$var_name = $var_name[0];
+			if(isset($OpenedBlocks[$level][$block_name]['vars'][$var_name])){
+				$value = $OpenedBlocks[$level][$block_name]['vars'][$var_name];
+				if($cond_value !== false){
+					$value = $value == $cond_value;
 				}else{
-					$value = (bool)$value;
+					if(is_string($value)){
+						$value = strlen($value) != 0;
+					}else{
+						$value = (bool)$value;
+					}
 				}
 				if($inv) $value = !$value;
 				$name = $line;
-				$closename = '/'.$block_name.':'.$m[1];
+				$closename = '/'.$block_name.':'.$var_name;
 				$findClose = $start;
 				$cols = 1;
 				$Blocks[$level][$name] = Starkyt::CreateBlock($value);
-				$line = array(STARKYT_COND, $block_name, $m[1], $inv, 0, $name);
+				$line = array(STARKYT_COND, $block_name, $var_name, $inv, 0, $name, $cond_value);
 				continue;
 			}
 		}
@@ -705,7 +721,6 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 			$closename = '/'.$line;
 			$findClose = $start;
 			$cols = 1;
-
 			// Устаревшая поддержка таблиц
 			if($Blocks[$level][$line]['type'] == STARKYT_TABLE){
 				$cols = $Blocks[$level][$line]['cols'];
@@ -713,7 +728,6 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 				$tcopen = str_replace('{rowspan}', '', $tcopen);
 				$result .= '<!-- НАЧАЛО ТАБЛИЦЫ -->'.$starkyt->TableOpen.'<tr>'.$tcopen."\n";
 			}
-
 			$line = array(STARKYT_START, $name, $closename, $cols);
 			continue;
 		}

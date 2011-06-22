@@ -1,19 +1,27 @@
 {content.form_open}
 <table class="formtable">
 	{rows}
-		{row:title}
+		{row:type=title}
 		<tr>
 			<td align="left" class="formtabletitle"><b>{row.caption}</b></td>
 		</tr>
-		{/row:title}
-		{row:row}
+		{/row:type}
+		{row:type=row}
 		<tr>
 			<th align="left">{row.caption}</th>
 		</tr>
 		<tr>
 			<td align="left" class="formtabletd">{row.control}</td>
 		</tr>
-		{/row:row}
+		{/row:type}
+		{row:type=wide}
+		<tr>
+			<td align="left" class="form_textcaption_tabletd">{row.caption}</td>
+		</tr>
+		<tr>
+			<td align="left" class="form_text_tabletd">{row.control}</td>
+		</tr>
+		{/row:type}
 	{/rows}
 	<tr>
 		<td align="right" class="fsubmit">{content.form_submit}</td>

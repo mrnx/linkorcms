@@ -108,16 +108,17 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Добавляет подзаголовок в заголовок страницы панели управления
-	 * @param <type> $subtitle
+	 * Добавляет подзаголовок в заголовок страницы панели управления.
+	 * @param $subtitle
 	 */
 	public function AddSubTitle( $subtitle ){
 		$this->Title .= ' > '.$subtitle;
 	}
 
 	/**
-	 * Открывает новый блок контента
-	 * @param <type> $title
+	 * Открывает новый блок контента.
+	 *
+	 * @param $title
 	 */
 	public function AddCenterBox( $title ){
 		$this->BlockContents = $this->BlockContentBox->NewSubBlock(true, array('title'=>$title), array(), '', '')->NewBlock('contents', true, true, 'content');
@@ -135,8 +136,9 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет текстовый блок
-	 * @param <type> $title
-	 * @param <type> $text
+	 *
+	 * @param $title
+	 * @param $text
 	 */
 	public function AddTextBox( $title, $text ){
 		$this->AddCenterBox($title);
@@ -152,7 +154,8 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет новый текстовый блок сообщая пользователю что раздел находится в разработке
-	 * @param <type> $name
+	 *
+	 * @param string $name
 	 */
 	public function NotDeveloping( $name ){
 		$text = 'Раздел <u>'.$name.'</u> не реализован в этой версии программы.';
@@ -161,10 +164,11 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Генерирует код красивой ссылки в виде кнопки
-	 * @param <type> $Title
-	 * @param <type> $Url
-	 * @param <type> $ImgSrc
-	 * @return <type>
+	 *
+	 * @param string $Title
+	 * @param string $Url
+	 * @param string $ImgSrc
+	 * @return string <type>
 	 */
 	public function SpeedButton( $Title, $Url, $ImgSrc = '' ){
 		return '<a title="'.$Title.'" href="'.$Url.'" class="button">'
@@ -174,10 +178,11 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Кнопка - ссылка с предупреждением
-	 * @param  $Title
-	 * @param  $Url
-	 * @param  $ImgSrc
-	 * @param string $Confirm
+	 *
+	 * @param string $Title
+	 * @param string $Url
+	 * @param string $ImgSrc
+	 * @param string $ConfirmMsg
 	 * @return string
 	 */
 	public function SpeedConfirm( $Title, $Url, $ImgSrc = '', $ConfirmMsg = 'Уверены?' ){
@@ -190,9 +195,10 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Кнопка с выполнением JS кода с предупреждением
-	 * @param  $Title Заголовок кнопки
-	 * @param  $ImgSrc Путь к иконке
-	 * @param $OnClick JavaScript код при нажатии
+	 *
+	 * @param string $Title Заголовок кнопки
+	 * @param string $OnClick JavaScript код при нажатии
+	 * @param string $ImgSrc Путь к иконке
 	 * @param string $ConfirmMsg Сообщение предупреждения, если пустое, то не сработает
 	 * @return void
 	 */
@@ -205,6 +211,7 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Генерирует статусную кнопку работающую через AJAX запрос. При изменении статуса может изменить картинку на кнопке.
+	 *
 	 * @param  $EnabledTitle
 	 * @param  $DisabledTitle
 	 * @param  $AjaxUrl
@@ -242,24 +249,37 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет Элемент к форме
-	 * @param <type> $capt
-	 * @param <type> $ctrl
+	 *
+	 * @param $Caption
+	 * @param $Control
+	 * @param bool $Width
+	 * @param string $OtherParams
 	 */
 	public function FormRow( $Caption, $Control, $Width = false, $OtherParams = '' ){
-		$this->FormRows[] = array('row', array('caption'=>$Caption, 'control'=>$Control, 'width'=>$Width, 'other_params'=>$OtherParams, 'title'=>false, 'row'=>true));
+		$this->FormRows[] = array('caption'=>$Caption, 'control'=>$Control, 'width'=>$Width, 'other_params'=>$OtherParams, 'type'=>'row');
 	}
 
+	/**
+	 * Добавляет подзаголовок формы.
+	 *
+	 * @param string $TitleCaption
+	 * @param string $OtherParams
+	 * @return void
+	 */
 	public function FormTitleRow( $TitleCaption, $OtherParams = '' ){
-		$this->FormRows[] = array('row', array('caption'=>$TitleCaption, 'other_params'=>$OtherParams, 'title'=>true, 'row'=>false));
+		$this->FormRows[] = array('caption'=>$TitleCaption, 'other_params'=>$OtherParams, 'type'=>'title');
 	}
 
 	/**
 	 * Добавляет Элемент с удобным расположением для текстового поля
-	 * @param <type> $capt
-	 * @param <type> $ctrl
+	 *
+	 * @param string $Caption
+	 * @param string $Control
+	 * @param string $OtherParams
+	 *
 	 */
-	public function FormTextRow( $capt, $ctrl ){
-		$this->FormRows[] = array('coll', array('caption'=>$capt, 'control'=>$ctrl));
+	public function FormTextRow( $Caption, $Control, $OtherParams = '' ){
+		$this->FormRows[] = array('caption'=>$Caption, 'control'=>$Control, 'other_params'=>$OtherParams, 'type'=>'wide');
 	}
 
 	/**
@@ -271,19 +291,16 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет форму к странице
-	 * @param <type> $open
-	 * @param <type> $submit_btn
+	 *
+	 * @param $open
+	 * @param $submit_btn
 	 */
 	public function AddForm( $open, $submit_btn ){
 		$sub = $this->BlockContents->NewSubBlock(true, array(), array(), 'form.html', '');
 		$rows = $sub->NewBlock('rows', true, true, 'row');
 
 		foreach($this->FormRows as $row){
-			if($row[0] == 'row'){
-				$rows->NewSubBlock(true, $row[1]);
-			}else{
-				$rows->NewSubBlock(true, $row[1], array(), 'form_textarea.html');
-			}
+			$rows->NewSubBlock(true, $row);
 		}
 		$sub->vars = array('form_open'=>$open, 'form_submit'=>$submit_btn);
 		$this->FormClear();
@@ -291,6 +308,10 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Генерирует и выводит верхнее меню администратора
+	 *
+	 * @param $menu
+	 * @param int $parentId
+	 * @return array
 	 */
 	protected function GenAdminMenu(&$menu, $parentId = 0){
 		$menuData = array();
@@ -302,13 +323,11 @@ class AdminPage extends PageTemplate{
 				'id' => SafeDB($item['id'], 11, int),
 				'title' => SafeDB($item['title'], 255, str),
 				'icon' => SafeDB($item['icon'], 255, str),
-
 				'admin_link' => ADMIN_FILE.'?'.SafeDB($item['admin_link'], 255, str),
 				'external_link' => SafeDB($item['external_link'], 255, str),
 				'js' => SafeDB($item['js'], 0, str, false, false),
 				'blank' => $item['blank'],
 				'type' => $item['type'],
-
 				'submenu'   => $this->GenAdminMenu($menu, $item['id'])
 			);
 		}
@@ -316,12 +335,13 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Выводит данные верхнего меню в формате JSON сразу в шаблон
+	 * Выводит данные верхнего меню в формате JSON сразу в шаблон.
+	 *
 	 * @return
 	 */
 	function AddAdminMenu(){
 		if(IsAjax()) return;
-		$menu = System::database()->Select('admin_menu', "`enabled`='1'");
+		$menu = System::database()->Select('adminmenu', "`enabled`='1'");
 		SortArray($menu, 'order');
 		$items = array(); // Элементы меню по родительским индексам
 		foreach($menu as &$item){
@@ -331,22 +351,27 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Добавляет внутреннюю ссылку админ-панели в левое меню. Может загружаться с помощью AJAX
+	 * Добавляет внутреннюю ссылку админ-панели в левое меню.
+	 * Может загружаться с помощью AJAX.
+	 *
 	 * @param  $Title Видимое имя ссылки
 	 * @param  $AdminLocation Параметры админ-панели. Например "exe=news&a=add"
+	 * @param bool $Active
 	 * @return void
 	 */
-	public function SideBarAddMenuItemAdmin( $Title, $AdminLocation, $Active = false ){
+	public function SideBarAddMenuItem( $Title, $AdminLocation, $Active = false ){
 		$url = ADMIN_FILE.'?'.$AdminLocation;
 		$js = "return Admin.LoadPage('$url', event);";
 		$this->SideBarMenuLinks[] = array('title'=>$Title, 'js'=>$js, 'url'=>$url, 'active'=>$Active);
 	}
 
 	/**
-	 * Добавляет внешнюю ссылку в левое меню
+	 * Добавляет внешнюю ссылку в левое меню.
+	 *
 	 * @param  $Title Видимое имя ссылки
 	 * @param  $Url Адрес
 	 * @param bool $External Открыть в новом окне/вкладке
+	 * @param bool $Active
 	 * @return void
 	 */
 	public function SideBarAddMenuItemLink( $Title, $Url, $External = false, $Active = false ){
@@ -359,9 +384,11 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Добавляет ссылку в левое меню. При нажатии на ссылку будет выполнен JavaScript код
+	 * Добавляет ссылку в левое меню. При нажатии на ссылку будет выполнен JavaScript код.
+	 *
 	 * @param  $Title Видимое имя ссылки
 	 * @param  $JavaScript Код который будет выполнен при нажатии на ссылку
+	 * @param bool $Active
 	 * @return void
 	 */
 	public function SideBarAddMenuItemJs( $Title, $JavaScript, $Active = false ){
@@ -369,7 +396,8 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Добавляет разделитель в левое меню
+	 * Добавляет разделитель в левое меню.
+	 *
 	 * @return void
 	 */
 	public function SideBarAddMenuItemDelimiter(){
@@ -377,14 +405,16 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Добавляет меню в левой колонке
-	 * @param <type> $title
-	 * @param <type> $text
+	 * Добавляет меню в левой колонке.
+	 *
+	 * @param string $Title
+	 * @param bool $ActiveItemActive
 	 * @return StarkytBlock
 	 */
-	public function SideBarAddMenuBlock( $Title = '' ){
+	public function SideBarAddMenuBlock( $Title = '', $ActiveItemActive = true ){
 		$menu = $this->BlockAdminBlocks->NewSubBlock(true, array('title'=>$Title), array(), 'block/menu.html')->NewBlock('menu_items', true, true, 'item');
 		foreach($this->SideBarMenuLinks as $link){
+			$link['active'] = ($link['active'] == $ActiveItemActive);
 			$menu->NewSubBlock(true, $link);
 		}
 		$this->SideBarMenuLinks = array();
@@ -393,9 +423,10 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Добавляет текстовый блок в левой колонке
-	 * @param <type> $Title
-	 * @param <type> $Text
+	 * Добавляет текстовый блок в левой колонке.
+	 *
+	 * @param $Title
+	 * @param $Text
 	 * @return StarkytSubBlock
 	 */
 	public function SideBarAddTextBlock( $Title, $Text ){
@@ -404,7 +435,8 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Добавляет блок с шаблоном в левую колонку
+	 * Добавляет блок с шаблоном в левую колонку.
+	 *
 	 * @param  $Title
 	 * @param  $TemplateFile
 	 * @return StarkytSubBlock
@@ -415,7 +447,7 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
-	 * Выводит данные пользователю
+	 * Выводит данные пользователю.
 	 */
 	public function TEcho(){
 		global $script_start_time;
@@ -444,7 +476,7 @@ function TAddToolLink( $name, $param_val, $url ){
 	}else{
 		$sel = $param_val == 'main';
 	}
-	System::admin()->SideBarAddMenuItemAdmin($name, 'exe='.$url, $sel);
+	System::admin()->SideBarAddMenuItem($name, 'exe='.$url, $sel);
 }
 function TAddToolBox( $cur_param_val ){System::admin()->SideBarAddMenuBlock();}
 function FormRow( $capt, $ctrl ){System::admin()->FormRow($capt, $ctrl);}

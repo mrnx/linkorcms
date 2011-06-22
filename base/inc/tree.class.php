@@ -20,18 +20,28 @@ $FCatsData = array();
 class Tree{
 
 	/**
-	 * @var string Имя таблицы с категориями.
+	 * Имя таблицы с категориями
+	 * @var string
 	 */
 	public $Table;
 
-	public $Cats; // Записи по родительским индексам
-	public $IdCats; // Записи по собственным индексам
+	/**
+	 * Записи по родительским индексам
+	 * @var array
+	 */
+	public $Cats;
+
+	/**
+	 * Записи по собственным индексам
+	 * @var array
+	 */
+	public $IdCats;
 
 	public $childs = array();
 	public $sel_id = 0;
 
 	public $IdKey = 'id';
-	public $ParentKey = 'parent_id';
+	public $ParentKey = 'parent';
 	public $TitleKey = 'title';
 	public $FileCounterKey = 'file_counter';
 	public $CatCounterKey = 'cat_counter';
@@ -42,18 +52,17 @@ class Tree{
 	public $TopCatName = ' /';
 
 	/**
-	 * Конструктор класса, загружает дерево.
-	 * @param variable $Table Массив записей таблицы или имя таблицы дерева
+	 * Конструктор объекта, загружает дерево
 	 *
+	 * @param variable $Table Массив записей таблицы или имя таблицы дерева
 	 * @param string $IdKey
 	 * @param string $ParentKey
 	 * @param string $TitleKey
 	 * @param string $FileCounterKey
 	 * @param string $CatCounterKey
-	 * @return void
+	 * @return \Tree
 	 */
-	function  __construct( $Table, $IdKey = 'id', $ParentKey = 'parent',
-			$TitleKey = 'title', $FileCounterKey = 'file_counter', 
+	function  __construct( $Table, $IdKey = 'id', $ParentKey = 'parent', $TitleKey = 'title', $FileCounterKey = 'file_counter',
 			$CatCounterKey = 'cat_counter')
 	{
 		global $db;
@@ -95,8 +104,13 @@ class Tree{
 		$this->IdCats = &$cats2;
 	}
 
-	/*
-	 * Строит дерево
+	/**
+	 * Возвращает дочернее дерево элементов
+	 *
+	 * @param int $parent_id Идентификатор родительского объекта
+	 * @param array $source Массив объектов отсортированных по
+	 * родительским идентификаторам для сортировки в виде дерева
+	 * @return array
 	 */
 	public function NewTree( $parent_id, $source ){
 		//Если есть дочерние
@@ -116,11 +130,27 @@ class Tree{
 		}
 	}
 
+	/**
+	 * Возвращает дочернее дерево элементов
+	 *
+	 * @param int $pid Идентификатор родительского объекта
+	 * @return array Массив объектов, у каждого объекта есть
+	 * поле TREE_CHILD_ID с массивом дочерних объектов
+	 */
 	public function GetChildTree( $pid ){
 		return $this->NewTree($pid, $this->Cats);
 	}
 
-	public function ToCatsTree( $tree, $level, $callbackFunc ){
+	/**
+	 * Обходит дерево с вызовом пользовательской функции
+	 *
+	 * @param array $tree
+	 * @param int $level
+	 * @param string|array $callbackFunc
+	 * @see ListingTree
+	 * @return void
+	 */
+	protected function ToCatsTree( $tree, $level, $callbackFunc ){
 		if(isset($tree[TREE_CHILD_ID])){
 			for($i = 0, $c = count($tree[TREE_CHILD_ID]); $i < $c; $i++){
 				call_user_func_array($callbackFunc, array($tree[TREE_CHILD_ID][$i], $level));
@@ -129,22 +159,17 @@ class Tree{
 		}
 	}
 
-	// Системная функция, используется в GetAllChildId
-	public function GetIds( $tree, &$result ){
-		if(isset($tree[TREE_CHILD_ID])){
-			for($i = 0, $c = count($tree[TREE_CHILD_ID]); $i < $c; $i++){
-				$result[] = $tree[TREE_CHILD_ID][$i][$this->IdKey];
-				$this->GetIds($tree[TREE_CHILD_ID][$i], $result);
-			}
-		}
-	}
-
-	/*
+	/**
 	 * Обходит дерево с вызовом пользовательской функции
 	 * Пример пользовательской функции
-	 * function UserFunc($cat,$level){
-	 * $cat - Текущий элемент дерева
-	 * $level - Уровень вложенности
+	 * function UserFunc($cat, $level){
+	 *  $cat - Текущий элемент дерева
+	 *  $level - Уровень вложенности
+	 * }
+	 *
+	 * @param int $pid Идентификатор родительского объекта с которого нужно начинать обход
+	 * @param string|array $callbackFunc Имя функции или массив с именем класса и метода
+	 * @return bool Возвращает true в случае успешного обхода
 	 */
 	public function ListingTree( $pid, $callbackFunc ){
 		$tree = $this->GetChildTree($pid);
@@ -165,9 +190,29 @@ class Tree{
 		}
 	}
 
-	/*
-	 * Возвращает все вложенные индексы элемента дерева
+	/**
+	 * Системная функция, используется в GetAllChildId
+	 *
+	 * @param array $tree
+	 * @param array $result
+	 * @see GetAllChildId
+	 * @return void
+	 */
+	protected function GetIds( $tree, &$result ){
+		if(isset($tree[TREE_CHILD_ID])){
+			for($i = 0, $c = count($tree[TREE_CHILD_ID]); $i < $c; $i++){
+				$result[] = $tree[TREE_CHILD_ID][$i][$this->IdKey];
+				$this->GetIds($tree[TREE_CHILD_ID][$i], $result);
+			}
+		}
+	}
+
+	/**
+	 * Возвращает все вложенные индексы элемента дерева.
 	 * Так же возвращает индекс родительского каталога $pid.
+	 *
+	 * @param int $pid Идентификатор объекта
+	 * @return array
 	 */
 	public function GetAllChildId( $pid ){
 		$tree = $this->GetChildTree($pid);
@@ -183,8 +228,11 @@ class Tree{
 		return $result;
 	}
 
-	/*
-	 * Возвращает индекс родительского элемента
+	/**
+	 * Возвращает идентификатор родительского элемента
+	 *
+	 * @param int $curId Идентификатор объекта
+	 * @return int Идентификатор родительского объекта
 	 */
 	public function GetParentId( $curId ){
 		if(isset($this->IdCats[$curId])){
@@ -194,8 +242,12 @@ class Tree{
 		}
 	}
 
-	/*
+	/**
 	 * Выводит путь до элемента
+	 *
+	 * @param int $curId Идентификатор объекта
+	 * @param bool $reverse В обратном порядке
+	 * @return array|bool Массив объектов в определенном порядке
 	 */
 	public function GetAllParent( $curId, $reverse = true ){
 		if(count($this->IdCats) > 0){
@@ -206,7 +258,6 @@ class Tree{
 				if(isset($this->IdCats[$curId])){
 					$result[] = $this->IdCats[$curId];
 					$curId = $this->IdCats[$curId][$this->ParentKey];
-					$find = true;
 				}else{
 					$find = false;
 				}
@@ -225,9 +276,13 @@ class Tree{
 		}
 	}
 
-	/*
+	/**
 	 * Увеличивает индекс количества элементов в каталоге
 	 * используя параметры и указанные настройки класса
+	 *
+	 * @param int $id Идентификатор объекта
+	 * @param int $inc Значение инкремента
+	 * @return void
 	 */
 	public function CalcFileCounter( $id, $inc ){
 		global $db;
@@ -247,8 +302,13 @@ class Tree{
 		}
 	}
 
-	public function GetCountersRecursive( $id )
-	{
+	/**
+	 * Подсчитывает количество дочерних категорий и объектов
+	 *
+	 * @param int $id Идентификатор объекта
+	 * @return array
+	 */
+	public function GetCountersRecursive( $id ){
 		$childs = $this->GetAllChildId($id);
 		$file_counter = 0;
 		$cat_counter = 0;
@@ -259,9 +319,13 @@ class Tree{
 		return array('files'=>$file_counter, 'cats'=>$cat_counter);
 	}
 
-	/*
+	/**
 	 * Увеличивает индекс количества субкаталогов в каталоге
 	 * используя параметры и указанные настройки класса
+	 *
+	 * @param int $id Идентификатор объекта
+	 * @param int $inc Значение инкремента
+	 * @return void
 	 */
 	public function CalcCatCounter( $id, $inc ){
 		global $db;
@@ -281,7 +345,13 @@ class Tree{
 		}
 	}
 
-	// Это системная фунцкци используется в GetCatsData
+	/**
+	 * Это системная фунцкци используется в GetCatsData
+	 *
+	 * @param  $tree
+	 * @param  $level
+	 * @return void
+	 */
 	public function CatsData( $tree, $level ){
 		global $site, $FCatsData;
 		if(in_array($tree[$this->IdKey], $this->childs) === false){
@@ -295,8 +365,15 @@ class Tree{
 		}
 	}
 
-	/*
+	/**
 	 * Возвращает данные формы для выпадающего списка в виде дерева
+	 *
+	 * @param int $sel_id Идентификатор выделенного элемента
+	 * @param boolean $viewitems Показывать рядом в скобках количество дочерних объектов
+	 * @param boolean $root Добавить корневой элемент
+	 * @param int $id Отфильтровать объект с данным идентификатором и все его дочерние элементы
+	 * @param boolean $xor Включить фильтр
+	 * @return array
 	 */
 	public function GetCatsData( $sel_id, $viewitems = false, $root = false, $id = 0, $xor = false ){
 		global $site, $FCatsData;

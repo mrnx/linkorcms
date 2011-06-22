@@ -28,12 +28,13 @@
 		 */
 		public $del = '';
 
-		public function AddColumn( $Title, $Align = 'left', $Sortable = true, $Sorted = false, $Desc = false ){
+		public function AddColumn( $Title, $Align = 'left', $Sortable = true, $NoWrap = false ){
 			$this->columns[] = array(
 				'id' => $this->id,
 				'title' => $Title,
 				'sortable' => $Sortable,
-				'align' => $Align
+				'align' => $Align,
+				'nowrap' => $NoWrap
 			);
 			$this->id++;
 		}

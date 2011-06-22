@@ -39,8 +39,8 @@ function AdminForum( $action ){
 	TAddToolBox($action);
 
 	if($config['forum']['basket']){
-		System::admin()->SideBarAddMenuItemAdmin('Удаляемые темы', 'forum&a=forum_basket_topics');
-		System::admin()->SideBarAddMenuItemAdmin('Удаляемые сообщения', 'forum&a=forum_basket_posts');
+		System::admin()->SideBarAddMenuItem('Удаляемые темы', 'forum&a=forum_basket_topics');
+		System::admin()->SideBarAddMenuItem('Удаляемые сообщения', 'forum&a=forum_basket_posts');
 		System::admin()->SideBarAddMenuBlock('Корзина');
 	}
 

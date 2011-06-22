@@ -36,7 +36,8 @@
 			id: "0", // Уникальный идентификатор для доступа
 			title: "Column Title", // Заголовок
 			sortable: true, // Разрешить сортировку по этому столбцу
-			align: "left" // Выравнивание в ячейках (left, right, center)
+			align: "left", // Выравнивание в ячейках (left, right, center)
+			nowrap: false  // Запретить перенос содержимого ячеек на новую строку
 		},
 
 		default_row_options: {
@@ -255,6 +256,8 @@
 				for(var j = 0; j < ro.data.length; j++){
 					var $cell = $('<td id="ui-table-cell-'+ro.id+'" class="ui-table-cell">'+ro.data[j]+'</td>').appendTo(row);
 					$cell.addClass('ui-table-align-'+this.options.columns[j].align);
+					if(this.options.columns[j].nowrap)
+						$cell.addClass('ui-table-cell-nowrap');
 				}
 			}
 			this.tbody.children(":even").addClass("ui-table-row-even");

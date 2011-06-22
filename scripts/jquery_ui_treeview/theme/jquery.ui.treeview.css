@@ -8,9 +8,9 @@
 }
 
 .toplevel{
+	width: 99%;
 	padding: 5px;
-	width: 95%;
-	margin: 10px 0 27px 27px;
+	margin: 0;
 	border: 1px #cccccc solid;
 	border-top-width: 2px;
 	background-color: #fff;

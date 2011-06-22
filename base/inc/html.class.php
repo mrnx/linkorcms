@@ -29,7 +29,7 @@ class HTML{
 	}
 
 	/**
-	 * Создает обычное однострочное поле для редактирования текста
+	 * Создает однострочное поле для редактирования текста
 	 * @param string $name
 	 * @param string $text
 	 * @param bool $password
@@ -70,8 +70,8 @@ class HTML{
 		return $text;
 	}
 
-	public function DataAdd( &$data, $name, $caption, $selected = false, $other = '' ){
-		$data[] = array('name'=>$name, 'caption'=>$caption, 'selected'=>$selected, 'other'=>$other);
+	public function DataAdd( &$data, $value, $caption, $selected = false, $other = '' ){
+		$data[] = array('name'=>$value, 'caption'=>$caption, 'selected'=>$selected, 'other'=>$other);
 	}
 
 	public function Hidden( $name, $value = '', $other = '' ){
