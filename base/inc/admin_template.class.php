@@ -252,11 +252,10 @@ class AdminPage extends PageTemplate{
 	 *
 	 * @param $Caption
 	 * @param $Control
-	 * @param bool $Width
 	 * @param string $OtherParams
 	 */
-	public function FormRow( $Caption, $Control, $Width = false, $OtherParams = '' ){
-		$this->FormRows[] = array('caption'=>$Caption, 'control'=>$Control, 'width'=>$Width, 'other_params'=>$OtherParams, 'type'=>'row');
+	public function FormRow( $Caption, $Control, $OtherParams = '' ){
+		$this->FormRows[] = array('caption'=>$Caption, 'control'=>$Control, 'other_params'=>$OtherParams, 'type'=>'row');
 	}
 
 	/**

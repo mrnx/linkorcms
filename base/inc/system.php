@@ -10,9 +10,12 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
+// Время в секундах
 define('Min2Sec', 60);
 define('Hour2Sec', 3600);
 define('Day2Sec', 86400);
+
+// Типы данных
 define('int', 'integer');
 define('real', 'float');
 define('bool', 'boolean');
@@ -24,6 +27,8 @@ define('boolmix', 'bool_mix');
 define('strmix', 'str_mix');
 define('obj', 'object');
 define('nil', 'null');
+define('onoff', 'onoff2int');
+
 define('system_cache', 'system');
 
 // Ошибки
@@ -525,54 +530,70 @@ function SafeXSS( &$var ){
  * Добавляет экранирование в зависимости от настройки php и приводит к типу для вставки переменной в запрос к базе данных.
  * Внимание, включение параметра SafeXSS может исказить данные так, что они будут не равны при стравнении.
  *
- * @param Variable $Var // Какая-то переменная
- * @param Integer $maxlength // Длина строкового значения переменной
- * @param Const $type // Константа типа переменной. Константы описаны в system.php
- * @param Bool $addsl // Добавить обратные слэши перед всеми спецсимволами
- * @return Variable
+ * @param mixed $Var Какая-то переменная
+ * @param int $MaxLength Длина строкового значения переменной
+ * @param const $Type Константа типа переменной. Константы описаны в system.php
+ * @param bool $StripTags Вырезать тэги
+ * @param bool $AddSlashes Добавить обратные слэши перед всеми спецсимволами
+ * @param bool $SafeXss Заменить некоторые html эквиваленты обычными символами
+ * @return mixed
  */
-function SafeEnv( $Var, $maxlength, $type, $strip_tags = false, $addsl = true, $safexss = true ){
+function SafeEnv( $Var, $MaxLength, $Type, $StripTags = false, $AddSlashes = true, $SafeXss = true ){
+	$onoff = false;
+	if($Type == onoff){
+		$onoff = true;
+		$Type = str;
+		$MaxLength = 3;
+		$StripTags = false;
+		$SpecialChars = false;
+		$SafeXss = false;
+	}
 	if(is_array($Var)){
-		foreach($Var as $i=>$v){
-			if($maxlength > 0){
-				$v = substr($v, 0, $maxlength);
+		foreach($Var as &$v){
+			if($MaxLength > 0){
+				$v = substr($v, 0, $MaxLength);
 			}
 			$v = trim($v);
-			if($safexss){
+			if($SafeXss){
 				SafeXSS($v);
 			}
-			if($strip_tags){
+			if($StripTags){
 				$v = strip_tags($v);
 			}
-			if($addsl){
+			if($AddSlashes){
 				if(defined("DATABASE")){
 					$v = $db->EscapeString($v);
 				}else{
 					$v = addslashes($v);
 				}
 			}
-			settype($v, $type);
-			$Var[$i] = $v;
+			settype($v, $Type);
+			if($onoff){
+				$v = EnToInt($v);
+			}
 		}
 	}else{
-		if($maxlength > 0){
-			$Var = substr($Var, 0, $maxlength);
+		if($MaxLength > 0){
+			$Var = substr($Var, 0, $MaxLength);
 		}
 		$Var = trim($Var);
-		if($safexss){
+		if($SafeXss){
 			SafeXSS($Var);
 		}
-		if($strip_tags){
+		if($StripTags){
 			$Var = strip_tags($Var);
 		}
-		if($addsl){
+		if($AddSlashes){
 			if(defined("DATABASE")){
 				$Var = System::database()->EscapeString($Var);
 			}else{
 				$Var = addslashes($Var);
 			}
 		}
-		settype($Var,$type);
+		settype($Var, $Type);
+		if($onoff){
+			$Var = EnToInt($Var);
+		}
 	}
 	return $Var;
 }
@@ -581,49 +602,76 @@ function SafeEnv( $Var, $maxlength, $type, $strip_tags = false, $addsl = true, $
  * Фильтрует переменную для безопасного вывода ее содержимого в браузер пользователя.
  * Функция не добавляет экранирование, переменую отфильтрованную данной функцией опасно передавать в запрос к базе данных.
  *
- * @param <type> $Var
- * @param <type> $maxlength
- * @param <type> $type
- * @param <type> $strip_tags
- * @param <type> $specialchars
- * @param <type> $safexss
- * @return <type>
+ * @param mixed $Var
+ * @param int $MaxLength
+ * @param const $Type
+ * @param bool $StripTags
+ * @param bool $SpecialChars
+ * @param bool $SafeXss
+ * @return mixed
  */
-function SafeDB( $Var, $maxlength, $type, $strip_tags = true, $specialchars=true, $safexss = true ){
+function SafeDB( $Var, $MaxLength, $Type, $StripTags = true, $SpecialChars = true, $SafeXss = true ){
 	if(is_array($Var)){
-		for($i=0, $cnt=count($Var); $i<$cnt; $i++){
-			if($maxlength > 0){
-				$Var[$i] = substr($Var[$i], 0, $maxlength);
+		foreach($var as &$v){
+			if($MaxLength > 0){
+				$v = substr($v, 0, $MaxLength);
 			}
-			$Var[$i] = trim($Var[$i]);
-			if($safexss){
-				SafeXSS($Var[$i]);
+			$v = trim($v);
+			if($SafeXss){
+				SafeXSS($v);
 			}
-			if($strip_tags){
-				$Var[$i] = strip_tags($Var[$i]);
+			if($StripTags){
+				$v = strip_tags($v);
 			}
-			if($specialchars){
-				$Var[$i] = htmlspecialchars($Var[$i]);
+			if($SpecialChars){
+				$v = htmlspecialchars($v);
 			}
-			settype($Var[$i],$type);
+			settype($v, $Type);
 		}
 	}else{
-		if($maxlength > 0){
-			$Var = substr($Var, 0, $maxlength);
+		if($MaxLength > 0){
+			$Var = substr($Var, 0, $MaxLength);
 		}
 		$Var = trim($Var);
-		if($safexss){
+		if($SafeXss){
 			SafeXSS($Var);
 		}
-		if($strip_tags){
+		if($StripTags){
 			$Var = strip_tags($Var);
 		}
-		if($specialchars){
+		if($SpecialChars){
 			$Var = htmlspecialchars($Var);
 		}
-		settype($Var,$type);
+		settype($Var, $Type);
 	}
 	return $Var;
+}
+
+/**
+ * Добавляет экранирование в зависимости от настройки php и приводит к типу для вставки переменной в запрос к базе данных.
+ * Внимание, включение параметра SafeXSS может исказить данные так, что они будут не равны при стравнении.
+ *
+ * @param string $Names Имя переменной в массиве $_REQUEST. Можно передать несколько
+ * имен в строке через запятую, тогда результатом будет ассоциативный массив
+ * @param int $MaxLength Длина строкового значения переменных
+ * @param const $Type Тип переменных
+ * @param bool $StripTags Вырезать Html теги
+ * @param bool $AddSlashes Добавить экранирование
+ * @param bool $SafeXss Заменить некоторые html эквиваленты обычными символами
+ * @return mixed|array
+ */
+function SafeR( $Names, $MaxLength, $Type, $StripTags = false, $AddSlashes = true, $SafeXss = true ){
+	$Names = explode(',', $Names);
+	if(count($Names) == 1){
+		return SafeEnv($_REQUEST[trim($Names[0])], $MaxLength, $Type, $StripTags, $AddSlashes, $SafeXss);
+	}else{
+		$Result = array();
+		foreach($Names as $n){
+			$n = trim($n);
+			$Result[$n] = SafeEnv($_REQUEST[$n], $MaxLength, $Type, $StripTags, $AddSlashes, $SafeXss);
+		}
+		return $Result;
+	}
 }
 
 /**

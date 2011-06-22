@@ -2,23 +2,23 @@
 <table class="formtable">
 	{rows}
 		{row:type=title}
-		<tr>
+		<tr {row.other_params}>
 			<td align="left" class="formtabletitle"><b>{row.caption}</b></td>
 		</tr>
 		{/row:type}
 		{row:type=row}
-		<tr>
+		<tr {row.other_params}>
 			<th align="left">{row.caption}</th>
 		</tr>
-		<tr>
+		<tr {row.other_params}>
 			<td align="left" class="formtabletd">{row.control}</td>
 		</tr>
 		{/row:type}
 		{row:type=wide}
-		<tr>
+		<tr {row.other_params}>
 			<td align="left" class="form_textcaption_tabletd">{row.caption}</td>
 		</tr>
-		<tr>
+		<tr {row.other_params}>
 			<td align="left" class="form_text_tabletd">{row.control}</td>
 		</tr>
 		{/row:type}
