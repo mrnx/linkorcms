@@ -702,14 +702,72 @@ function CheckPost(){
 	return true;
 }
 
+/**
+ * Создаёт запрос значений для базы данных из переданных аргементов.
+ * Аргументы должны быть предварительно проэкранированы с помощью функции SafeEnv или SafeR.
+ *
+ * @return string
+ * @example Values('a','b','c'); => "'a','b','c'";
+ */
+function Values(){
+	$args = func_get_args();
+	if(is_array($args[0])){
+		$args = $args[0];
+	}
+	$result = '';
+	foreach($args as $var){
+		$result .= ",'".$var."'";
+	}
+	return substr($result, 1);
+}
+
+/**
+ * Генерирует SET запрос из переданных ассоциативных массивов.
+ * Значения должны быть предварительно проэкранированы с помощью функции SafeEnv или SafeR.
+ *
+ * @return string
+ */
+function MakeSet(){
+	$args = func_get_args();
+	$set = '';
+	foreach($args as $a){
+		foreach($a as $name=>$value){
+			$set .= ",`$name`='$value'";
+		}
+	}
+	return substr($set, 1);
+}
+
+/**
+ * Заменяет в строке имена ключей массивов их значениями.
+ * Удобно использовать для формирования VALUES запроса.
+ *
+ * @param string $Values Строка вида "'','login','pass','order'"
+ * @return string
+ */
+function MakeValues( $Values ){
+	$num = func_num_args();
+	for($i = 1; $i < $num; $i++){
+		$a = func_get_arg($i);
+		foreach($a as $name=>$value){
+			$Values = str_replace($name, $value, $Values);
+		}
+	}
+	return $Values;
+}
+
 $Parser_WhereCache = array();
 $Parser_SetCache = array();
 $Parser_UseCache = true;
 
-#Пример использования:
-#Строка: 	$set="name='name',login='root',pass=''";
-#Результат: array('name','login','pass');-Упорядоченный массив
-#в row должен быть упорядоченный массив из значений поля таблицы
+/**
+ * Преобразует SET строку запроса в упорядоченный массив.
+ *
+ * @param string $set Строка вида "name='name',login='root',pass=''".
+ * @param array $row Упорядоченный массив из значений поля таблицы.
+ * @param array $info Структура информации о таблице.
+ * @return array Упорядоченный массив значений вида array('name','root','').
+ */
 function Parser_ParseSetStr( &$set, &$row, &$info ){
 	$s = str_replace("\\'",'<&#39;>',$set);
 	$maxlength=count($info['cols']);
@@ -745,9 +803,15 @@ function Parser_ParseSetStr( &$set, &$row, &$info ){
 	return $args;
 }
 
-#Пример использования:
-#Строка: 	$values="'name','root',''";
-#Результат: array('name','root','');
+/**
+ * Преобразует SET строку запроса в упорядоченный массив.
+ *
+ * @param string $values Строка вида "'name','root',''".
+ * @param array $Info Структура информации о таблице.
+ * @param bool $isUpdateMethod Обновление, влияет на то устанавливать ли свое новое значение инкремента.
+ * @param bool $lastvals Значения которые были до обновления, при обновлении строки.
+ * @return Упорядоченный массив значений вида array('name','root','').
+ */
 function Parser_ParseValuesStr(&$values, &$Info, $isUpdateMethod = false, $lastvals = false){
 	$values2 = str_replace("\\'",'<&#39;>',$values);
 	$values2 = trim($values2);
@@ -779,15 +843,22 @@ function Parser_ParseValuesStr(&$values, &$Info, $isUpdateMethod = false, $lastv
 	return $args;
 }
 
-#Запросы должны соответствовать синтаксису SQL запросов
-#в row должен быть упорядоченный массив из значений поля таблицы
-#Результат: true если условие выполнено и false если нет
+/**
+ * Выполняет простые WHERE запросы соответствующие синтаксису SQL.
+ *
+ * @param  $where Строка вида "`pass`='1' and `login`='admin'"
+ * @param  $row Упорядоченный массив из значений поля таблицы.
+ * @param  $info Структура информации о таблице.
+ * @param int $index Порядковый номер строки в таблице. Добавляет переменную `index`,
+ * которую можно использовать в запросе.
+ * @return bool Возвращает логическое значение, соответствующее результату выполненного запроса.
+ */
 function Parser_ParseWhereStr( $where, $row, $info, $index = 0 ){
 	if($where == ''){ return true; };
 	global $Parser_UseCache, $Parser_WhereCache;
 	$vars = array();
 	// Значение переменных и имена колонок
-	// fixme: Можно кешировать или ускорить выборку имен
+	// fixme: Можно кэшировать или ускорить выборку имен
 	for($j=0,$ccnt=count($info['cols']);$j<$ccnt;$j++){
 		$n = $info['cols'][$j]['name'];
 		$r = str_replace('&#13', "\r", $row[$j]); // Чтобы данные соотвествовали данным из $db->Select
@@ -822,20 +893,31 @@ function Parser_ParseWhereStr( $where, $row, $info, $index = 0 ){
 	if($Parser_UseCache){
 		$Parser_WhereCache[$where] = $where2;
 	}
-	if($info['name'] == 'rewrite_rules'){
-		echo $where2;
-		print_r($vars);
-	}
 	return Parser_ParseWhereStr2($where2, $vars);
 }
 
 function Parser_ParseWhereStr2(){
 	extract(func_get_arg(1), EXTR_OVERWRITE);
-	eval('if('.func_get_arg(0).'){$result = true;}else{$result = false;}');
+	eval('if('.func_get_arg(0).'){$result=true;}else{$result=false;}');
 	return $result;
 }
 
-// Возвращает массив с информацией о ячейке, который понимают классы для работы с БД.
+/**
+ * Возвращает массив с информацией о ячейке, который понимают классы для работы с БД.
+ *
+ * @param string $cname Имя ячейки (формат SQL).
+ * @param string $type Тип (формат SQL).
+ * @param int $length Максимальная длина.
+ * @param bool $auto_increment Автоматическое приращение (инкремент) значения.
+ * @param string $default Значение ячейки по умолчанию.
+ * @param string $attributes Атрибуты (формат SQL).
+ * @param bool $notnull Не может быть null.
+ * @param bool $primary Индекс колонка по умолчанию.
+ * @param bool $index Простое индексирование.
+ * @param bool $unique Уникальный индекс.
+ * @param bool $fulltext Полнотекстовый индекс.
+ * @return array
+ */
 function GetCollDescription( $cname, $type, $length, $auto_increment=false, $default='', $attributes='', $notnull=true, $primary=false, $index=false, $unique=false, $fulltext=false ){
 	$newcoll = array(
 		'name'=>$cname,
@@ -895,19 +977,18 @@ $system_userranks_cache = null;
 $system_usertypes_cache = null;
 
 /**
- * Возвращает массив данных о пользователях с ключами по id
- * @global $db $db
- * @global <type> $user
- * @global <type> $system_users_cache
- * @return <type>
+ * Возвращает массив данных о пользователях с ключами по id.
+ *
+ * @return array
  */
 function GetUsers(){
-	global $db, $user, $system_users_cache;
+	global $system_users_cache;
 	if($system_users_cache == null){
 		$cache = LmFileCache::Instance();
 		if($cache->HasCache(system_cache, 'users')){
 			$system_users_cache = $cache->Get(system_cache, 'users');
 		}else{
+			$db = System::database();
 			$db->Select('users', '');
 			$system_users_cache = array();
 			foreach($db->QueryResult as $usr){
@@ -921,30 +1002,29 @@ function GetUsers(){
 }
 
 function GetUserRanks(){
-	global $db, $user, $system_userranks_cache;
+	global $system_userranks_cache;
 	if($system_userranks_cache == null){
 		$cache = LmFileCache::Instance();
 		if($cache->HasCache(system_cache, 'userranks')){
 			$system_userranks_cache = $cache->Get(system_cache, 'userranks');
 		}else{
 			$system_users_cache = array();
-			$system_userranks_cache = $db->Select('userranks', '');
+			$system_userranks_cache = System::database()->Select('userranks', '');
 			SortArray($system_userranks_cache, 'min');
 			$cache->Write(system_cache, 'userranks', $system_userranks_cache);
 		}
-
 	}
 	return $system_userranks_cache;
 }
 
 function GetUserTypes(){
-	global $db, $user, $system_usertypes_cache;
+	global $system_usertypes_cache;
 	if($system_usertypes_cache == null){
 		$cache = LmFileCache::Instance();
 		if($cache->HasCache(system_cache, 'usertypes')){
 			$system_usertypes_cache = $cache->Get(system_cache, 'usertypes');
 		}else{
-			$types = $db->Select('usertypes', '');
+			$types = System::database()->Select('usertypes', '');
 			$system_usertypes_cache = array();
 			foreach($types as $type){
 				$system_usertypes_cache[$type['id']] = $type;
@@ -960,20 +1040,19 @@ function GetUserTypes(){
 #Включая ранг, картинку ранга, статус онлайн, имя файла аватара для вывода.
 #Вся информация кэшируется.
 function GetUserInfo($user_id){
-	global $db, $user, $config;
 	$system_users_cache = GetUsers();
 	if(isset($system_users_cache[$user_id])){
 		$usr = $system_users_cache[$user_id];
-		//Аватар
+		// Аватар
 		$usr['avatar_file'] = GetUserAvatar($user_id);
 		$usr['avatar_file_small'] = GetSmallUserAvatar($user_id, $usr['avatar_file']);
 		$usr['avatar_file_smallest'] = GetSmallestUserAvatar($user_id,  $usr['avatar_file']);
-		//Ранг
+		// Ранг
 		$rank = GetUserRank($usr['points'],$usr['type'],$usr['access']);
 		$usr['rank_name'] = $rank[0];
 		$usr['rank_image'] = $rank[1];
-		//Статус онлайн
-		$online = $user->Online();
+		// Статус онлайн
+		$online = System::user()->Online();
 		$usr['online'] = isset($online[$user_id]);
 		return $usr;
 	}else{
@@ -986,16 +1065,15 @@ function GetUserAvatar( $user_id ){
 }
 
 function GetSmallUserAvatar( $user_id, $avatar = '' ){
-	global $config;
 	if($avatar == ''){
 		$avatar = GetPersonalAvatar($user_id);
 	}
-	if($config['user']['secure_avatar_upload'] == '1' && GDVersion() <> 0){
+	if(System::config('user/secure_avatar_upload') && GDVersion() <> 0){
 		return $avatar.'&size=small';
 	}else{
 		$_name = GetFileName($avatar);
 		$_ext = GetFileExt($avatar);
-		$filename = $config['general']['personal_avatars_dir'].$_name.'_64x64'.$_ext;
+		$filename = System::config('user/personal_avatars_dir').$_name.'_64x64'.$_ext;
 		if(is_file($filename)){
 			return $filename;
 		}else{
@@ -1234,7 +1312,13 @@ function GetGalleryAvatars($avatar, $personal){
 }
 
 /**
- * Функция управляет загрузкой аватар ($_FILES['upavatar])
+ * Функция управляет загрузкой аватар ($_FILES['upavatar'])
+ * @param $errors
+ * @param $avatar
+ * @param $a_personal
+ * @param $oldAvatarName
+ * @param $oldAvatarPersonal
+ * @param $editmode
  */
 function UserLoadAvatar(&$errors, &$avatar, &$a_personal, $oldAvatarName, $oldAvatarPersonal, $editmode){
 	global $config;
@@ -1400,6 +1484,7 @@ function DivideWord( $text, $maxWordLength='30' ){
  * массивы такого вида выдаются при запросах к БД
  * @param Integer $coll // номер колонки в массиве по которой его сортировать
  * @param Boolean $OnDecrease // если true то сортировка будет осуществляться в обратном порядке
+ * @return void
  */
 function SortArray( &$array, $coll, $OnDecrease=false ){
 	global $SATempVar;
@@ -1428,24 +1513,6 @@ function SortArray( &$array, $coll, $OnDecrease=false ){
 		usort($array, 'SorterDown');
 	}
 	unset($SATempVar);
-}
-
-/**
- * Создаёт запрос значений для базы данных.
- * @return String : Запрос типа Values
- * @example Values('a','b','c') => "'a','b','c'";
- */
-function Values(){
-	$args = func_get_args();
-	if(is_array($args[0])){
-		$args = $args[0];
-	}
-	$result = '';
-	foreach($args as $var){
-		$result .= ",'".$var."'";
-	}
-	$result = substr($result,1);
-	return $result;
 }
 
 #Переводит уровень в строку
@@ -1482,8 +1549,7 @@ function GetWhereByAccess($param_name, $user_access=null){
 	return $where;
 }
 
-function GetMicroTime()
-{
+function GetMicroTime(){
 	return microtime(true);
 }
 
