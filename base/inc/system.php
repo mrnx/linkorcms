@@ -175,6 +175,7 @@ abstract class System{
 	 * Возвращает объект лога ошибок
 	 * @static
 	 * @param string $Message
+	 * @param bool $exit
 	 * @return Logi
 	 */
 	static public function log_errors( $Message = '', $exit = false ){
@@ -188,6 +189,7 @@ abstract class System{
 	 * Возвращает объект лога сайта
 	 * @static
 	 * @param string $Message
+	 * @param bool $exit
 	 * @return Logi
 	 */
 	static public function log( $Message = '', $exit = false ){
@@ -195,6 +197,10 @@ abstract class System{
 			$GLOBALS['SiteLog']->Write($Message, $exit);
 		}
 		return $GLOBALS['SiteLog'];
+	}
+
+	static function error( $No, $Error, $File, $Line = -1 ){
+		ErrorHandler($No, $Error, $File, $Line);
 	}
 
 }
@@ -898,7 +904,7 @@ function Parser_ParseWhereStr( $where, $row, $info, $index = 0 ){
 
 function Parser_ParseWhereStr2(){
 	extract(func_get_arg(1), EXTR_OVERWRITE);
-	eval('if('.func_get_arg(0).'){$result=true;}else{$result=false;}');
+	eval('if('.func_get_arg(0).'){ $result = true; }else{ $result = false; }');
 	return $result;
 }
 
@@ -1935,6 +1941,13 @@ function GenBPass($length){
 
 /**
  * Отправляет E-mail
+ * @param $ToName
+ * @param $ToEmail
+ * @param $Subject
+ * @param $Text
+ * @param bool $Html
+ * @param string $From
+ * @param string $FromEmail
  */
 function SendMail( $ToName, $ToEmail, $Subject, $Text, $Html=false, $From='', $FromEmail='' ){
 	global $config;
@@ -1955,7 +1968,7 @@ function SendMail( $ToName, $ToEmail, $Subject, $Text, $Html=false, $From='', $F
 
 	$mail->AddTo($ToEmail, Cp1251ToUtf8($ToName));
 	if(!$mail->Send()){
-		 error_handler(USER_ERROR, $mail->ErrorMessage, __FILE__);
+		 ErrorHandler(USER_ERROR, $mail->ErrorMessage, __FILE__);
 	}
 }
 
@@ -1964,6 +1977,10 @@ function SendMail( $ToName, $ToEmail, $Subject, $Text, $Html=false, $From='', $F
  * перейти по указанному адресу.
  * Рекомендуется использовать вместо Header('Location: ...');
  * @param String $address // Адрес перехода.
+ * @param bool $exit
+ * @param int $response_code
+ * @return
+ *
  */
 function GO( $address, $exit = true, $response_code = 303 ){
 	if($address == '') return;
@@ -2010,8 +2027,10 @@ function HistoryGetUrl( $BackSteps ){
 
 /**
  * Сохраняет адрес в сессии и возвращает идентификатор
- * @param <type> $Url
- * @return <type>
+ * @param string $Url
+ *
+ * @internal param $ <type> $Url
+ * @return \String <type>
  */
 function SaveRefererUrl( $Url = '' ){
 	if($Url == ''){
@@ -2024,7 +2043,7 @@ function SaveRefererUrl( $Url = '' ){
 
 /**
  * Выполняет перенаправление по сохраненному в сессии адресу
- * @param <type> $id
+ * @param $id
  */
 function GoRefererUrl( $id ){
 	if(isset($_SESSION['saved_urls'][$id])){
@@ -2258,7 +2277,7 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 	$alloy_exts = array('.gif', '.jpg', '.jpeg', '.png');
 	if(isset($_FILES[$PostName]) && file_exists($_FILES[$PostName]['tmp_name'])){
 		if(in_array($_FILES[$PostName]['type'], $alloy_mime) && in_array(strtolower(GetFileExt($_FILES[$PostName]['name'])), $alloy_exts)) {
-			$file_name = Translit($_FILES[$PostName]['name'], true);
+			$file_name = Translit4Url($_FILES[$PostName]['name']);
 			if(!is_dir($Dir)) {
 				mkdir($Dir, 0777);
 			}
@@ -2317,8 +2336,9 @@ function GetBoolValue($var){
 
 /**
  * Транслитерация ГОСТ 7.79-2000
- * @param <type> $text
- * @return <type>
+ * @param string $text
+ * @param bool $strip_spaces
+ * @return string
  */
 function Translit( $text, $strip_spaces = true ){
 	if($strip_spaces) {
@@ -2365,8 +2385,9 @@ function Translit( $text, $strip_spaces = true ){
 
 /**
  * Ретранслитерация ГОСТ 7.79-2000
- * @param <type> $text
- * @return <type>
+ * @param string $text
+ * @param bool $strip_tospaces
+ * @return string
  */
 function Retranslit( $text, $strip_tospaces = true ){
 	if($strip_tospaces){
@@ -2412,8 +2433,8 @@ function Retranslit( $text, $strip_tospaces = true ){
 
 /**
  * Транслитерация строки для использования в URL
- * @param  $String
- * @return void
+ * @param string $text
+ * @return string
  */
 function Translit4Url( $text ){
 	$text = strtr($text, array(
@@ -2451,8 +2472,8 @@ function Translit4Url( $text ){
 		'ю' => 'yu', 'Ю' => 'YU',
 		'я' => 'ya', 'Я' => 'YA',
 	));
-	$text = preg_replace('/[^a-zA-Z0-9.-_ ]*/', '', $text);
-	$text = trim($text);
+	$text = preg_replace('/[^a-zA-Z0-9\.\-_ ]*/', '', $text);
+	$text = trim($text, ' _');
 	$text = str_replace(' ', '_', $text);
 	return $text;
 }
@@ -2687,7 +2708,7 @@ function BbCodeTag( $tag, $part ){
 /**
  * Парсер ББ кодов
  * @param  $text
- * @return
+ * @return string
  */
 function BbCodePrepare( $text ){
 	$preg = array(
@@ -2779,7 +2800,7 @@ function ErrorsOff(){
 function ErrorHandler( $No, $Error, $File, $Line = -1 ){
 	static $LogedErrors = array();
 	static $First = true;
-	global $ErrorsLog, $SITE_ERRORS;
+	global $SITE_ERRORS;
 	$errortype = array(
 		1 => 'Ошибка', 2 => 'Предупреждение!', 4 => 'Ошибка разборщика', 8 => 'Замечание', 16 => 'Ошибка ядра', 32 => 'Предупреждение ядра!', 64 => 'Ошибка компиляции',
 		128 => 'Предупреждение компиляции!', 256 => 'Пользовательская Ошибка', 512 => 'Пользовательскаое Предупреждение!', 1024 => 'Пользовательскаое Замечание', 2048 => 'Небольшое замечание',
@@ -2794,14 +2815,13 @@ function ErrorHandler( $No, $Error, $File, $Line = -1 ){
 				$First = false;
 				$ErrorText = '---- '.date("d.m.y G:i", time())."\n".$ErrorText;
 			}
-			$ErrorsLog->Write($ErrorText);
+			System::log_errors($ErrorText);
 		}
 	}
 	if(PRINT_ERRORS){
 		print $ErrorHtml;
-		return;
 	}
-	if($SITE_ERRORS && System::config('debug/php_errors')){
+	if(PRINT_ERRORS || ($SITE_ERRORS && System::config('debug/php_errors'))){
 		System::$Errors[] = $ErrorHtml."\n";
 	}
 }
