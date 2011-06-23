@@ -47,6 +47,10 @@ textarea {
 	font-family: 'Consolas', 'Monaco', monospace;
 	font-size: 10pt;
 }
+pre{
+	font-family: 'Consolas', 'Monaco', monospace;
+	font-size: 10pt;
+}
 .clear { clear: both; }
 
 
