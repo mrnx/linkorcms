@@ -52,6 +52,8 @@ class Starkyt extends HTML{
 
 	/**
 	 * Проверяет, существует ли шаблон
+	 * @param $TemplateFile
+	 * @return bool|string
 	 */
 	public function TemplateExists( $TemplateFile ){
 		if($TemplateFile == ''){
@@ -69,6 +71,10 @@ class Starkyt extends HTML{
 	/**
 	 * Устанавливает шаблоны таблиц
 	 * @deprecated
+	 * @param $table_open
+	 * @param $table_close
+	 * @param $table_cell_open
+	 * @param $table_cell_close
 	 */
 	public function SetTableTemplate( $table_open, $table_close, $table_cell_open, $table_cell_close ){
 		$this->TableOpen = file_get_contents($this->TemplateExists($table_open));
@@ -121,6 +127,14 @@ class Starkyt extends HTML{
 
 	/**
 	 * Создает заготовку для нового блока
+	 * @param bool $enabled
+	 * @param bool $poly
+	 * @param string $alias
+	 * @param string $templatefile
+	 * @param string $plaintext
+	 * @param array $child
+	 * @param null $parent
+	 * @return array
 	 */
 	static public function &CreateBlock( $enabled = true, $poly = false, $alias = '', $templatefile = '', $plaintext = '', $child = array(), $parent = null ){
 		if(!$poly){
@@ -142,6 +156,14 @@ class Starkyt extends HTML{
 
 	/**
 	 * Создает заготовку для нового субблока
+	 * @param bool $enabled
+	 * @param array $vars
+	 * @param array $tempvars
+	 * @param string $templatefile
+	 * @param string $plaintext
+	 * @param array $child
+	 * @param null $parent
+	 * @return array
 	 */
 	static public function &CreateSubBlock( $enabled = true, $vars = array(), $tempvars = array(), $templatefile = '', $plaintext = '', $child = array(), $parent = null ){
 		$block = array(
@@ -159,6 +181,12 @@ class Starkyt extends HTML{
 	/**
 	 * Создает заготовку таблицы
 	 * @deprecated
+	 * @param bool $enabled
+	 * @param string $alias
+	 * @param int $cols
+	 * @param string $templatefile
+	 * @param string $plaintext
+	 * @return array
 	 */
 	static public function &CreateTable( $enabled = true, $alias = '', $cols = 5, $templatefile = '', $plaintext = '' ){
 		$new = array('type' => STARKYT_TABLE, 'alias' => $alias, 'sub' =>  array(), 'cols' => $cols);
@@ -174,6 +202,15 @@ class Starkyt extends HTML{
 	/**
 	 * Создает заготовку ячейки таблицы
 	 * @deprecated
+	 * @param bool $enabled
+	 * @param array $vars
+	 * @param array $tempvars
+	 * @param string $templatefile
+	 * @param string $plaintext
+	 * @param int $colspan
+	 * @param int $rowspan
+	 * @param array $child
+	 * @return array
 	 */
 	static public function &CreateTableCell( $enabled = true, $vars = array(), $tempvars = array(), $templatefile = '', $plaintext = '', $colspan = 1, $rowspan = 1, $child = array() ){
 		$table = array(
@@ -191,6 +228,13 @@ class Starkyt extends HTML{
 
 	/**
 	 * Создает и добавляет новый блок
+	 * @param $name
+	 * @param bool $enabled
+	 * @param bool $poly
+	 * @param string $alias
+	 * @param string $templatefile
+	 * @param string $plaintext
+	 * @param array $child
 	 */
 	public function AddBlock( $name, $enabled = true, $poly = false, $alias = '', $templatefile = '', $plaintext = '', $child = array() ){
 		$this->Blocks[$name] = Starkyt::CreateBlock($enabled, $poly, $alias, $templatefile, $plaintext, $child);
@@ -199,6 +243,14 @@ class Starkyt extends HTML{
 
 	/**
 	 * Создает и добавляет новый субблок в блок с определенным именем
+	 * @param $name
+	 * @param bool $enabled
+	 * @param array $vars
+	 * @param array $tempvars
+	 * @param string $templatefile
+	 * @param string $plaintext
+	 * @param array $child
+	 * @return int
 	 */
 	public function AddSubBlock( $name, $enabled = true, $vars = array(), $tempvars = array(), $templatefile = '', $plaintext = '', $child = array() ){
 		$this->Blocks[$name]['sub'][] = Starkyt::CreateSubBlock($enabled, $vars, $tempvars, $templatefile, $plaintext, $child);
@@ -212,6 +264,12 @@ class Starkyt extends HTML{
 	/**
 	 * Создает новый блок-таблицу
 	 * @deprecated
+	 * @param $name
+	 * @param bool $enabled
+	 * @param string $alias
+	 * @param int $cols
+	 * @param string $templatefile
+	 * @param string $plaintext
 	 */
 	public function AddTable( $name, $enabled = true, $alias = '', $cols = 5, $templatefile = '', $plaintext = '' ){
 		$this->Blocks[$name] = Starkyt::CreateTable($enabled, $alias, $cols, $templatefile, $plaintext);
@@ -221,6 +279,16 @@ class Starkyt extends HTML{
 	/**
 	 * Создает новый субблок-ячейку таблицы
 	 * @deprecated
+	 * @param $name
+	 * @param bool $enabled
+	 * @param array $vars
+	 * @param array $tempvars
+	 * @param string $templatefile
+	 * @param string $plaintext
+	 * @param int $colspan
+	 * @param int $rowspan
+	 * @param array $child
+	 * @return int
 	 */
 	public function AddTableCell( $name, $enabled = true, $vars = array(), $tempvars = array(), $templatefile = '', $plaintext = '', $colspan = 1, $rowspan = 1, $child = array() ){
 		$this->Blocks[$name]['sub'][] = Starkyt::CreateTableCell($enabled, $vars, $tempvars, $templatefile, $plaintext, $colspan, $rowspan, $child);
@@ -233,6 +301,10 @@ class Starkyt extends HTML{
 
 	/**
 	 * Добавляет переменную в блок или субблок блока с определенным именем
+	 * @param $block
+	 * @param $varname
+	 * @param $value
+	 * @param int $sub_id
 	 */
 	public function SetVar( $block, $varname, $value, $sub_id = 0 ){
 		if(isset($this->Blocks[$block])) {
@@ -247,6 +319,9 @@ class Starkyt extends HTML{
 	/**
 	 * Добавляет массив переменных в блок или субблок блока с определенным именем
 	 * @since 1.4
+	 * @param $Block
+	 * @param $Vars
+	 * @param int $SubId
 	 */
 	public function SetVars( $Block, $Vars, $SubId = 0 ){
 		if(isset($this->Blocks[$Block])) {
@@ -260,6 +335,10 @@ class Starkyt extends HTML{
 
 	/**
 	 * Добавляет переменную-шаблон в блок или субблок блока с определенным именем
+	 * @param $block
+	 * @param $varname
+	 * @param $template_file
+	 * @param int $sub_id
 	 */
 	public function SetTempVar( $block, $varname, $template_file, $sub_id = 0 ){
 		if(isset($this->Blocks[$block])){
@@ -275,6 +354,9 @@ class Starkyt extends HTML{
 	/**
 	 * Добавляет массив переменных-шаблонов в блок или субблок блока с определенным именем
 	 * @since 1.4
+	 * @param $Block
+	 * @param $Vars
+	 * @param int $SubId
 	 */
 	public function SetTempVars( $Block, $Vars, $SubId = 0 ){
 		if(isset($this->Blocks[$Block])){
@@ -289,6 +371,12 @@ class Starkyt extends HTML{
 
 	/**
 	 * Создает новый блок первого уровня и возвращает указатель на его объект
+	 * @param $name
+	 * @param bool $enabled
+	 * @param bool $poly
+	 * @param string $alias
+	 * @param string $templatefile
+	 * @param string $plaintext
 	 * @return StarkytBlock
 	 */
 	public function NewBlock( $name, $enabled = true, $poly = false, $alias = '', $templatefile = '', $plaintext = '' ){
