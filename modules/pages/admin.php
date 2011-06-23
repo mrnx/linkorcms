@@ -115,7 +115,6 @@ function AdminPagesAjaxTree(){
 	global $pages_tree;
 
 	UseScript('jquery_ui_treeview');
-
 	if(CheckGet('parent')){
 		$parent = SafeEnv($_GET['parent'], 11, int);
 	}else{
@@ -428,7 +427,7 @@ function AdminPagesSave(){
 	$link = SafeEnv($_POST['link'], 255, str);
 	$title = SafeEnv($_POST['title'], 255, str);
 	if($link == ''){
-		$link = SafeEnv(Translit4Url($title), 255, str);
+		$link = Translit4Url($title);
 	}
 	$text = SafeEnv($_POST['text'], 0, str);
 	$copy = SafeEnv($_POST['copy'], 255, str);
@@ -576,7 +575,7 @@ function AdminPagesLinkSave(){
 	}else{
 		$order = AdminPagesNewOrder($parent_id);
 	}
-	$values = Values('', $parent_id, $title, $url, '', time(), time(), '0', '0', '', SafeEnv(Translit4Url($title), 255, str), $view, $enabled, '', '', '', 'link', $order, $showinmenu);
+	$values = Values('', $parent_id, $title, $url, '', time(), time(), '0', '0', '', Translit4Url($title), $view, $enabled, '', '', '', 'link', $order, $showinmenu);
 	if(isset($_GET['id'])){ // Редатирование
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Update('pages', $values, "`id`='".$id."'", true);
@@ -658,7 +657,7 @@ function AdminPagesCatSave(){
 	}else{
 		$order = AdminPagesNewOrder($parent_id);
 	}
-	$values = Values('', $parent_id, $title, '', '', time(), time(), '0', '0', '', SafeEnv(Translit4Url($title), 255, str), $view, $enabled, '', '', '', 'cat', $order, $showinmenu);
+	$values = Values('', $parent_id, $title, '', '', time(), time(), '0', '0', '', Translit4Url($title), $view, $enabled, '', '', '', 'cat', $order, $showinmenu);
 	if(isset($_GET['id'])){ // Редатирование
 		System::database()->Update('pages', $values, "`id`='".$id."'", true);
 	}else{

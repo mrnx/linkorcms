@@ -171,6 +171,7 @@ class AdminPage extends PageTemplate{
 	 * @return string <type>
 	 */
 	public function SpeedButton( $Title, $Url, $ImgSrc = '' ){
+		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		return '<a title="'.$Title.'" href="'.$Url.'" class="button">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
 			.'</a>';
@@ -186,7 +187,8 @@ class AdminPage extends PageTemplate{
 	 * @return string
 	 */
 	public function SpeedConfirm( $Title, $Url, $ImgSrc = '', $ConfirmMsg = 'Уверены?' ){
-		$ConfirmMsg = addslashes($ConfirmMsg);
+		$Title = htmlspecialchars($Title, ENT_QUOTES);
+		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
 		$OnClick = "return Admin.Buttons.Confirm('$ConfirmMsg', this)";
 		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
@@ -203,6 +205,8 @@ class AdminPage extends PageTemplate{
 	 * @return void
 	 */
 	public function SpeedConfirmJs( $Title, $OnClick, $ImgSrc = '', $ConfirmMsg = '' ){
+		$Title = htmlspecialchars($Title, ENT_QUOTES);
+		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
 		$OnClick = "if(confirm('$ConfirmMsg')) $OnClick; return false";
 		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
@@ -221,11 +225,8 @@ class AdminPage extends PageTemplate{
 	 * @return string
 	 */
 	public function SpeedStatus( $EnabledTitle, $DisabledTitle, $AjaxUrl, $Status, $EnabledImage, $DisabledImage ){
-		$EnabledTitle = addslashes($EnabledTitle);
-		$DisabledTitle = addslashes($DisabledTitle);
-		$AjaxUrl = addslashes($AjaxUrl);
-		$EnabledImage = addslashes($EnabledImage);
-		$DisabledImage = addslashes($DisabledImage);
+		$EnabledTitle = htmlspecialchars($EnabledTitle, ENT_QUOTES);
+		$DisabledTitle = htmlspecialchars($DisabledTitle, ENT_QUOTES);
 
 		$ImgSrc = ($Status ? $EnabledImage : $DisabledImage);
 		$Title = ($Status ? $EnabledTitle : $DisabledTitle);
@@ -236,12 +237,11 @@ class AdminPage extends PageTemplate{
 		return $s;
 	}
 
-	public function SpeedAjax($Title, $AjaxUrl, $ImgSrc = '', $ConfirmMessage = '', $OnStart = '', $OnSuccess = '', $Method = 'post', $Params = ''){
-		$AjaxUrl = addslashes($AjaxUrl);
-		$Method = addslashes($Method);
-		$Params = addslashes($Params);
-		$ConfirmMessage = addslashes($ConfirmMessage);
-		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMessage',  this); return false;";
+	public function SpeedAjax($Title, $AjaxUrl, $ImgSrc = '', $ConfirmMsg = '', $OnStart = '', $OnSuccess = '', $Method = 'post', $Params = ''){
+		$Title = htmlspecialchars($Title, ENT_QUOTES);
+		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
+
+		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMsg',  this); return false;";
 		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
 			.'</a>';
