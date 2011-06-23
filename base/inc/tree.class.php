@@ -176,7 +176,7 @@ class Tree{
 		if((!is_array($callbackFunc) && !@function_exists($callbackFunc))
 			|| (is_array($callbackFunc) && !@method_exists($callbackFunc[0], $callbackFunc[1])))
 		{
-			error_handler(NOTICE, 'CallBack функция не предопределена.', 'Tree->ListingTree()');
+			ErrorHandler(NOTICE, 'CallBack функция не предопределена.', 'Tree->ListingTree()');
 			return false;
 		}else{
 			if(count($tree) == 0){

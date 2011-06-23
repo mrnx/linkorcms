@@ -287,13 +287,13 @@ class Posts{
 		}
 
 		if($this->EditPageUrl == ''){
-			error_handler(USER_NOTICE, 'Posts::Posts(): Ќе инициализирован адрес страницы редактировани€ комментариев Posts::$EditPageUrl.', __FILE__);
+			ErrorHandler(USER_NOTICE, 'Posts::Posts(): Ќе инициализирован адрес страницы редактировани€ комментариев Posts::$EditPageUrl.', __FILE__);
 		}
 		if($this->DeletePageUrl == ''){
-			error_handler(USER_NOTICE, 'Posts::Posts(): Ќе инициализирован адрес страницы удалени€ комментариев Posts::$DeletePageUrl.', __FILE__);
+			ErrorHandler(USER_NOTICE, 'Posts::Posts(): Ќе инициализирован адрес страницы удалени€ комментариев Posts::$DeletePageUrl.', __FILE__);
 		}
 		if($this->NavigationUrl == ''){
-			error_handler(USER_NOTICE, 'Posts::Posts(): Ќе инициализирован адрес текущей страницы дл€ постраничной навигации Posts::$NavigationUrl.', __FILE__);
+			ErrorHandler(USER_NOTICE, 'Posts::Posts(): Ќе инициализирован адрес текущей страницы дл€ постраничной навигации Posts::$NavigationUrl.', __FILE__);
 		}
 
 		// ¬ыбираем сообщени€ из базы данных
@@ -362,7 +362,7 @@ class Posts{
 		if($Edit && isset($_GET['post_id'])){
 			$post_id = SafeEnv($_GET['post_id'], 11, int);
 		}elseif($Edit && !isset($_GET['post_id'])){
-			error_handler(USER_ERROR, 'Posts::PostForm(): post_id не инициализирована.', __FILE__);
+			ErrorHandler(USER_ERROR, 'Posts::PostForm(): post_id не инициализирована.', __FILE__);
 			return;
 		}
 		if(!$Edit && !$this->AlloyComments){

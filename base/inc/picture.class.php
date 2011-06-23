@@ -49,7 +49,7 @@ class TPicture
 	public function CreateFromFile( $ImgFileName, $Width = 0, $Height = 0 )
 	{
 		if(!file_exists($ImgFileName)){
-			error_handler(NOTICE, 'Файл не найден', 'TPicture::CreateFromFile');
+			ErrorHandler(NOTICE, 'Файл не найден', 'TPicture::CreateFromFile');
 			return;
 		}
 		if($this->gd != null){
