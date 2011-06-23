@@ -67,7 +67,7 @@ class LcDatabaseMySQL
 		$this->AllErrors[] = $msg;
 		$this->Error = true;
 		if($this->ErrorReporting){
-			error_handler(USER_WARNING, $msg, __FILE__, __LINE__);
+			ErrorHandler(USER_WARNING, $msg, __FILE__, __LINE__);
 
 		}
 		$this->EndQ();
@@ -360,7 +360,7 @@ class LcDatabaseMySQL
 		for($i = 0; $i < $ccnt; $i++){
 			$sql .= $this->CollToSql($query['cols'][$i]);
 			if(isset($query['cols'][$i]['primary'])){
-				
+
 			}elseif(isset($query['cols'][$i]['index'])){
 				if($ckeys > 0){
 					$keys .= ",\n";
@@ -555,7 +555,7 @@ class LcDatabaseMySQL
 				if($zerofill){ $Attribute = 'unsigned zerofill'; }
 
 				$def = ($row["Default"] <> '' ? $row["Default"] : ($row["Null"] == "YES" ? 'NULL' : ''));
-				
+
 				$col = array();
 				$col = array('name' => $row["Field"], 'type' => $match[1]);
 				if(!empty($length)){
@@ -686,7 +686,7 @@ class LcDatabaseMySQL
 				$this->Error('Ошибка. Запрос не выполнен.');
 				return false;
 			}
-			
+
 		}else{
 			return false;
 		}
