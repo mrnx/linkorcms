@@ -174,7 +174,7 @@
 			if(page > totalPages) page = o.page = totalPages;
 			if(page < 1) page = o.page = 1;
 			this.tnav.children().remove();
-			if(totalPages == 1) return;
+			if(totalPages <= 1) return;
 			this._button({
 				             html: '<img src="images/admin/back.png" alt="Назад" /></a>',
 				             title: "Назад",
@@ -241,7 +241,11 @@
 		 */
 		_setData: function( tableData ){
 			this._clear();
-			if(tableData.length == 0) return;
+			if(tableData.length == 0){
+			  var row = $('<tr id="ui-table-row-0" class="ui-table-row">').appendTo(this.tbody);
+				var $cell = $('<td colspan="'+this.options.columns.length+'" id="ui-table-cell-0" class="ui-table-cell">Пусто.</td>').appendTo(row);
+				return;
+			}
 			for(var i = 0; i < tableData.length; i++){
 				var ro = tableData[i];
 				var row = $('<tr id="ui-table-row-'+ro.id+'" class="ui-table-row">').appendTo(this.tbody);
@@ -315,7 +319,7 @@
 				cache: false,
 				success: function(){
 					if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
-					$item.fadeOut('slow', function(){
+					$item.fadeOut('fast', function(){
 						$item.remove();
 						self.tbody.children().removeClass("ui-table-row-even");
 						self.tbody.children(":even").addClass("ui-table-row-even");
