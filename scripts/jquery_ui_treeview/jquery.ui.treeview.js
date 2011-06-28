@@ -65,9 +65,14 @@
 				var $target = $(ui.item).parents('li:first'); // Куда переместили
 				var item_opt = $item.data('options');
 				var target_opt = $target.data('options');
+				if(!target_opt){
+					var target_id = 0;
+				}else{
+					var target_id = target_opt.id;
+				}
 				// Посылаем POST запрос перемещения элементов
 				if(o.move != ''){
-					if(target_opt.isnode && !target_opt.loaded){
+					if(target_opt && target_opt.isnode && !target_opt.loaded){
 						var index = '-1';
 						$item.remove();
 						$target.find('ol').remove();
@@ -78,7 +83,7 @@
 					$.ajax({
 						type: "POST",
 						url: o.move,
-						data: 'item_id='+item_opt.id+'&target_id='+target_opt.id+'&item_new_position='+index,
+						data: 'item_id='+item_opt.id+'&target_id='+target_id+'&item_new_position='+index,
 						cache: false,
 						success: function(){
 							if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
@@ -88,7 +93,7 @@
 					self._updateBullets();
 				}else{
 					// Вырезание и загрузка
-					if(target_opt.isnode && !target_opt.opened){  // Переместили в закрытый элемент
+					if(target_opt && target_opt.isnode && !target_opt.opened){  // Переместили в закрытый элемент
 						var $li = $item.detach();
 						$target.find('ol').remove();
 						self._toggleNode($target, function(){
