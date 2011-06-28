@@ -5,13 +5,17 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Тестирование PHP кода');
+System::admin()->AddSubTitle('Тестирование PHP кода');
 
 if(isset($_GET['a'])){
 	$action = $_GET['a'];
 }else{
 	$action = 'main';
 }
+
+System::admin()->SideBarAddMenuItem('Редактор', 'exe=phptester', 'main');
+System::admin()->SideBarAddMenuItem('Сниппеты', 'exe=phptester&a=snippets', 'snippets');
+System::admin()->SideBarAddMenuBlock('', $action);
 
 switch($action){
 	case 'main':
@@ -20,12 +24,35 @@ switch($action){
 	case 'perform':
 		AdminPhpTesterPerform();
 		break;
-
+	case 'snippets':
+		AdminPhpTesterSnippets();
+		break;
+	case 'add':
+	case 'save':
+		AdminPhpTesterSave();
+		break;
+	case 'delete':
+		AdminPhpTesterDelete();
+		break;
 }
 
 function AdminPhpTester(){
+	UseScript('jquery');
+
+	$code = 'echo Translit4Url("Тест");';
+	$title = '';
+	if(isset($_GET['id'])){
+		$snippet_id = SafeDB($_GET['id'], 11, int);
+		System::database()->Select('snippets', "`id`='$snippet_id'");
+		$s = System::database()->FetchRow();
+		$code = SafeDB($s['code'], 0, str);
+		$title = SafeDB($s['title'], 255, str);
+	}else{
+		$snippet_id = '0';
+	}
 
 	System::admin()->AddJS('
+window.snippet_id = "'.$snippet_id.'";
 function PerformPhpCode(){
 	$("#perform").button("option", "label", "Выполнить код <img src=\"images/ajax-loader.gif\">");
 	$("#result_container").hide();
@@ -34,7 +61,7 @@ function PerformPhpCode(){
 	$.ajax({
 		type: "POST",
 		url: "'.ADMIN_FILE.'?exe=phptester&a=perform",
-		data: {code: $("#phpcode").val()},
+		data: {code: $("#test_code").val(), id: window.snippet_id},
 		success: function(data){
 			$("#perform").button("option", "label", "Выполнить код");
 			$("#perform_result").html("<pre>"+data+"</pre>");
@@ -42,24 +69,46 @@ function PerformPhpCode(){
 			$("#perform_result").slideDown();
 		}
 	});
-}');
+}
+function SavePhpCode(met){
+	if($("#test_title").val() == ""){
+	  alert("Введите короткое описание сниппета.");
+	  return;
+	}
+	var label = $("#"+met).button("option", "label");
+	$("#"+met).button("option", "label", label+" <img src=\"images/ajax-loader.gif\">");
+	$.ajax({
+		type: "POST",
+		url: "'.ADMIN_FILE.'?exe=phptester&a="+met,
+		dataType: "json",
+		data: {code: $("#test_code").val(), title: $("#test_title").val(), id: window.snippet_id},
+		success: function(data){
+			window.snippet_id = data.id;
+			$("#"+met).button("option", "label", label);
+		}
+	});
+}
+');
 
 	$html = <<<HTML
 <div>
-	<div style="width: 800px; ">
-		<textarea id="phpcode" style="width: 791px; height: 200px;">echo Translit4Url('Тест');</textarea>
+	<div style="width: 800px;">
+		<textarea id="test_code" style="width: 791px; height: 200px;">$code</textarea>
+		<div style="width: 72px; float: left; line-height: 25px; padding-left: 2px;"><strong>Описание</strong></div>
+		<input type="text" id="test_title" style="width: 717px;" value="$title">
 	</div>
 	<div style="width: 800px; text-align: right;">
-		<a href="#" id="perform" class="button" onclick="PerformPhpCode(); return false;">Выполнить код</a>
+		<a href="#" id="add" class="button" onclick="SavePhpCode('add'); return false;" title="Добавить сниппет как новый">Добавить</a>
+		<a href="#" id="save" class="button" onclick="SavePhpCode('save'); return false;" title="Добавить новый снипет или сохранить редактируемый">Сохранить</a>
+		<a href="#" id="perform" class="button" onclick="PerformPhpCode(); return false;" title="Отправить код на выполнение и вывести результат">Выполнить код</a>
 	</div>
-	<div id="result_container" style="margin: 10px 0; width: 794px; background-color: #EEE; display: none; text-align: left; border: 3px #DDD solid;
-		border-radius: 3px;-moz-border-radius: 3px;">
+	<div id="result_container" style="margin: 10px 0; width: 794px; background-color: #EEE; display: none; text-align: left; border: 3px #DDD solid; border-radius: 3px;-moz-border-radius: 3px;">
 		<div id="perform_result" style="display: none; padding: 5px; overflow-x: auto;"></div>
 	</div>
 </div>
 HTML;
 
- System::admin()->AddTextBox('Тестирование PHP кода', $html);
+	System::admin()->AddTextBox('Тестирование PHP кода', $html);
 }
 
 function AdminPhpTesterPerform(){
@@ -68,6 +117,101 @@ function AdminPhpTesterPerform(){
 	$source = ob_get_clean();
 	echo htmlspecialchars($source);
 	exit();
+}
+
+function AdminPhpTesterSnippets(){
+	System::admin()->AddSubTitle('Сниппеты');
+	UseScript('jquery_ui_table');
+
+	// Количество новостей на странице
+	if(isset($_REQUEST['onpage'])){
+		$num = intval($_REQUEST['onpage']);
+	}else{
+		$num = 20;
+	}
+	if(isset($_REQUEST['page'])){
+		$page = intval($_REQUEST['page']);
+		if($page > 1){
+			$pageparams = '&page='.$page;
+		}
+	}else{
+		$page = 1;
+		$pageparams = '';
+	}
+
+	$snippets_db = System::database()->Select('snippets');
+	$columns = array('title');
+	$sortby = '';
+	$sortbyid = -1;
+	$desc = true;
+	if(isset($_REQUEST['sortby'])){
+		$sortby = $columns[$_REQUEST['sortby']];
+		$sortbyid = intval($_REQUEST['sortby']);
+		$desc = $_REQUEST['desc'] == '1';
+	}
+	if($sortby != ''){
+		SortArray($snippets_db, $sortby, $desc);
+	}
+
+	// Выводим новости
+	$table = new jQueryUiTable();
+	$table->listing = ADMIN_FILE.'?exe=phptester&a=snippets&ajax';
+	$table->del = ADMIN_FILE.'?exe=phptester&a=delete';
+	$table->total = count($snippets_db);
+	$table->onpage = $num;
+	$table->page = $page;
+	$table->sortby = $sortbyid;
+	$table->sortdesc = $desc;
+
+	$table->AddColumn('Заголовок');
+	$table->AddColumn('Функции', 'center', false, true);
+
+	$snippets_db = ArrayPage($snippets_db, $num, $page); // Берем только новости с текущей страницы
+	foreach($snippets_db as $snip){
+		$id = SafeDB($snip['id'], 11, int);
+		$editlink = ADMIN_FILE.'?exe=phptester&id='.$id;
+
+		$func = '';
+		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
+		$func .= System::admin()->SpeedConfirmJs(
+			'Удалить',
+			'$(\'#news_table\').table(\'deleteRow\', '.$id.');',
+			'images/admin/delete.png',
+			'Уверены, что хотите удалить этот сниппет?'
+		);
+
+		$table->AddRow(
+			$id,
+			'<b><a href="'.$editlink.'">'.SafeDB($snip['title'], 255, str).'</a></b>',
+			$func
+		);
+	}
+	if(isset($_GET['ajax'])){
+		echo $table->GetOptions();
+		exit;
+	}else{
+		System::admin()->AddTextBox('Сниппеты', $table->GetHtml());
+	}
+}
+
+function AdminPhpTesterSave(){
+	$snippet = array(
+		'title'=>Utf8ToCp1251(SafeR('title', 255, str)),
+		'code'=>Utf8ToCp1251(SafeR('code', 0, str)),
+		'id'=>SafeR('id', 11, int)
+	);
+	if($_GET['a'] == 'save' && $snippet['id'] > 0){ // Редактирование
+		System::database()->Update('snippets', MakeSet($snippet), "`id`='{$snippet['id']}'");
+	}else{
+		System::database()->Insert('snippets', MakeValues("'','title','code'", $snippet));
+	}
+	echo JsonEncode(array('id'=>System::database()->GetLastId()));
+	exit();
+}
+
+function AdminPhpTesterDelete(){
+	System::database()->Delete('snippets', "`id`='".SafeR('id', 11, int)."'");
+	exit('OK');
 }
 
 ?>
