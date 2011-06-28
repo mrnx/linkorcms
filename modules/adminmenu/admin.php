@@ -60,10 +60,15 @@ function AdminAdminMenuMain(){
 	foreach($items[$parent] as $item){
 		$id = SafeDB($item['id'], 11, int);
 		$icon = SafeDB($item['icon'], 255, str);
+		$type = SafeDB($item['type'], 255, str);
+		$title = SafeDB($item['title'], 255, str);
 		if($icon == ''){
 			$icon = 'images/page.png';
 		}
-		$title = SafeDB($item['title'], 255, str);
+		if($type == 'delimiter'){
+			$title = '-- Разделитель --';
+		}
+
 
 		$editlink = ADMIN_FILE.'?exe=adminmenu&a=editor&id='.$id;
 

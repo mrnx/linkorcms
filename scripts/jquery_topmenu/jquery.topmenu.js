@@ -162,8 +162,6 @@
 
 				html = '<div class="admin_menu_item">';
 				link_body = icon+arrow+'<div class="admin_menu_item_title">'+menuData[i].title+'</div>';
-
-				href = menuData[i].url;
 				switch(menuData[i].type){
 					case 'admin': html += '<a class="admin_menu_sub_link" href="'+menuData[i].admin_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+menuData[i].admin_link+'\', event);">'+link_body+'</a>';
 					break;
@@ -173,10 +171,9 @@
 					break;
 					case 'node': html += '<a class="admin_menu_sub_link" href="#" onclick="return false">'+link_body+'</a>';
 					break;
-					case 'delimiter': html += ''; // TODO: Здесь какой нибудь особый блок
+					case 'delimiter': html += '<div class="admin_menu_sub_delimiter"></div>';
 					break;
 				}
-
 				html += '</div>';
 
 				// Создаем элемент меню

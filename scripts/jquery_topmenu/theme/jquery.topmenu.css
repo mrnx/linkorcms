@@ -73,14 +73,17 @@ ul.l-topmenu-sub li.sub{
 	min-width: 260px;
 }
 
+ul.l-topmenu-sub div.admin_menu_sub_delimiter{
+	border-top: 1px #ccc dashed;
+	margin:  2px 0;
+}
+
 ul.l-topmenu-sub a.admin_menu_sub_link{
 	display: block;
 	float: none;
 	position: relative;
-
 	padding: 0 0 0 4px;
 	height: 24px;
-
 	color: #444;
 	font-weight: normal;
 	text-decoration: none;
@@ -99,14 +102,12 @@ ul.l-topmenu-sub a.admin_menu_sub_link{
 	ul.l-topmenu-sub div.admin_menu_item_icon{
 		float: left;
 		width: 22px;
-		height: 24px;
+		padding-top: 4px;
 		padding-left: 1px;
-		line-height: 24px;
-		vertical-align: middle;
+		vertical-align: top;
 	}
 	ul.l-topmenu-sub div.admin_menu_item_icon img{
-		line-height: 24px;
-		vertical-align: middle;
+		vertical-align: top;
 	}
 	ul.l-topmenu-sub div.admin_menu_item_noicon{
 		float: left;
@@ -129,21 +130,17 @@ ul.l-topmenu-sub a.admin_menu_sub_link:hover{
 	color: #222;
 	background-color: #DDEAF7;
 	background-image: url(item_bg.png);
-
 	border: 1px #CDDAE7 solid;
 	border-radius: 4px;
 	-moz-border-radius: 4px;
-
 	height: 22px;
 }
 
 	ul.l-topmenu-sub a.admin_menu_sub_link:hover div.admin_menu_item_icon{
 		width: 21px;
 		border-right: 1px #dfdfff solid;
+		padding-top: 3px;
 		padding-left: 0;
-
-		height: 22px;
-		line-height: 22px;
 	}
 	ul.l-topmenu-sub a.admin_menu_sub_link:hover div.admin_menu_item_noicon{
 		width: 21px;
