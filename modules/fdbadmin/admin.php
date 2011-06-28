@@ -18,8 +18,6 @@ if(isset($_GET['a'])){
 	$action = 'main';
 }
 
-AdminFdbAdminGenMenu();
-
 switch($action){
 	case 'main': include(MOD_DIR.'table_list.inc.php');
 		break;
@@ -58,6 +56,9 @@ switch($action){
 	case 'viewcollinfo': include(MOD_DIR.'code_coll.inc.php');
 		break;
 }
+
+AdminFdbAdminGenMenu();
+if($action == 'main') System::admin()->SideBarAddTextBlock('', $top_text);
 
 function AdminFdbAdminGenMenu(){
 	global $action;
