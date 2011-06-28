@@ -213,8 +213,19 @@
 			});
 			for(var i = 0; i < menuData.length; i++){
 				var itemId = menuData[i].id;
-				var $mElement = $('<li>', {"class": 'top', "id": 'topmenu_item_'+itemId})
-					.html('<a class="admin_menu_top_link" href="#" onclick="return false">'+menuData[i].title+'</a>');
+				var html = '';
+				switch(menuData[i].type){
+					case 'admin': html += '<a class="admin_menu_top_link" href="'+menuData[i].admin_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+menuData[i].admin_link+'\', event);">'+menuData[i].title+'</a>';
+					break;
+					case 'external': html += '<a class="admin_menu_top_link" href="'+menuData[i].external_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.Leave(\''+menuData[i].external_link+'\', \''+menuData[i].blank+'\', event);">'+menuData[i].title+'</a>';
+					break;
+					case 'js': html += '<a class="admin_menu_top_link" onclick="return false;" onMouseDown="'+menuData[i].js+'">'+menuData[i].title+'</a>';
+					break;
+					case 'node': html += '<a class="admin_menu_top_link" href="#" onclick="return false">'+menuData[i].title+'</a>';
+					break;
+				}
+
+				var $mElement = $('<li>', {"class": 'top', "id": 'topmenu_item_'+itemId}).html(html);
 				if(menuData[i].submenu.length > 0){
 					GenerateSubMenu($mElement, menuData[i].submenu);
 				}
