@@ -145,10 +145,14 @@ function AdminAdminMenuEditor(){
 function SelectLinkType(type, first){
 	jQuery('.aaml').hide();
 	if(first){
-	  jQuery('.aaml_'+type).show();
+		jQuery('.aaml_'+type).show();
 	}else{
 		jQuery('.aaml_'+type).fadeIn();
 	}
+}
+function SelectModule(mod){
+		var mod = $(mod).find('option:selected').attr('title');
+		$('#item_title').val(mod).focus();
 }
 JS
 );
@@ -181,7 +185,6 @@ JS
 		$js = SafeDB($item['js'], 0, str);
 		$type = SafeDB($item['type'], 255, str);
 		$enabled = SafeDB($item['enabled'], 1, bool);
-
 		$form_title = 'Редактирование элемента';
 		$button = 'Сохранить';
 	}else{
@@ -215,8 +218,8 @@ JS
 	}
 
 	System::admin()->FormRow('Родительский элемент', System::admin()->Select('parent', $parent_data));
-	System::admin()->FormRow('Модуль', System::admin()->Select('module', $modules_data));
-	System::admin()->FormRow('Заголовок', System::site()->Edit('title', $title, false, 'style="width:400px;" maxlength="255"'));
+	System::admin()->FormRow('Модуль', System::admin()->Select('module', $modules_data, false, 'onchange="SelectModule(this);"'));
+	System::admin()->FormRow('Заголовок', System::site()->Edit('title', $title, false, 'id="item_title" style="width:400px;" maxlength="255"'));
 	System::admin()->FormRow('Иконка (16x16)', System::site()->Edit('icon', $icon, false, 'style="width:400px;" maxlength="255"'));
 	System::admin()->FormRow('Тип', System::admin()->Select('type', $types_data, false, 'onchange="SelectLinkType(this.value);"'));
 	System::admin()->FormRow('Внутренняя ссылка', System::site()->Edit('admin_link', $admin_link, false, 'style="width:400px;" maxlength="255"'), 'class="aaml aaml_admin"');

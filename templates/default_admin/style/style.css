@@ -95,7 +95,9 @@ div.admin_logo {
 }
 
 .menu_config_btn:hover{
-	background: #fdfcf6;
+	border: 1px #78A3CC solid;
+	padding: 1px;
+	background: #C5E0F5;
 }
 
 /* Хлебные крошки */

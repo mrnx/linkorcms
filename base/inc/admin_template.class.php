@@ -112,7 +112,7 @@ class AdminPage extends PageTemplate{
 	 * @param $subtitle
 	 */
 	public function AddSubTitle( $subtitle ){
-		$this->Title .= ' > '.$subtitle;
+		$this->Title .= ' &gt; '.$subtitle;
 	}
 
 	/**
