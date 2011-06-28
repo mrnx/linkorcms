@@ -14,7 +14,7 @@ include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';
 class elFinderLogger implements elFinderILogger {
 
 	public function log($cmd, $ok, $context, $err='', $errorData = array()) {
-		if (false != ($fp = fopen('./log.txt', 'a'))) {
+		if (false != ($fp = fopen('../../log/elfinder.log', 'a'))) {
 			if ($ok) {
 				$str = "cmd: $cmd; OK; context: ".str_replace("\n", '', var_export($context, true))."; \n";
 			} else {
@@ -28,23 +28,23 @@ class elFinderLogger implements elFinderILogger {
 }
 
 $opts = array(
-	'root'            => '../../uploads',                       // path to root directory
-	'URL'             => 'uploads/', // root directory URL
-	'rootAlias'       => 'Uploads',       // display this instead of root directory name
+	'root'            => '../../',                       // path to root directory
+	'URL'             => '', // root directory URL
+	'rootAlias'       => 'Root',       // display this instead of root directory name
 	//'uploadAllow'   => array('images/*'),
 	//'uploadDeny'    => array('all'),
 	//'uploadOrder'   => 'deny,allow'
 	// 'disabled'     => array(),      // list of not allowed commands
-	// 'dotFiles'     => false,        // display dot files
+	 'dotFiles'     => true,        // display dot files
 	// 'dirSize'      => true,         // count total directories sizes
-	// 'fileMode'     => 0666,         // new files mode
-	// 'dirMode'      => 0777,         // new folders mode
+	 'fileMode'     => 0666,         // new files mode
+	 'dirMode'      => 0777,         // new folders mode
 	// 'mimeDetect'   => 'internal',       // files mimetypes detection method (finfo, mime_content_type, linux (file -ib), bsd (file -Ib), internal (by extensions))
 	// 'uploadAllow'  => array(),      // mimetypes which allowed to upload
 	// 'uploadDeny'   => array(),      // mimetypes which not allowed to upload
 	// 'uploadOrder'  => 'deny,allow', // order to proccess uploadAllow and uploadAllow options
 	// 'imgLib'       => 'mogrify',       // image manipulation library (imagick, mogrify, gd)
-	// 'tmbDir'       => '.tmb',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
+	 'tmbDir'       => '.thumbs',       // directory name for image thumbnails. Set to "" to avoid thumbnails generation
 	// 'tmbCleanProb' => 1,            // how frequiently clean thumbnails dir (0 - never, 100 - every init request)
 	// 'tmbAtOnce'    => 5,            // number of thumbnails to generate per request
 	// 'tmbSize'      => 48,           // images thumbnails size (px)
