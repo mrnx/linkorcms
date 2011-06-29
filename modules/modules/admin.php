@@ -5,15 +5,122 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Модули');
-
-if(!$user->CheckAccess2('modules', 'modules')){
-	AddTextBox('Ошибка', $config['general']['admin_accd']);
+if(!System::user()->CheckAccess2('modules', 'modules')){
+	AddTextBox('Ошибка', 'Доступ запрещён');
 	return;
 }
 
-function AdminModulesList( $system )
-{
+System::admin()->AddSubTitle('Модули');
+
+$action = isset($_GET['a']) ? $_GET['a'] : 'main';
+
+System::admin()->SideBarAddMenuItem('Расширения', 'exe=modules&a=main', 'main');
+System::admin()->SideBarAddMenuItem('Получить дополнения', 'exe=modules&a=addons', 'addons');
+System::admin()->SideBarAddMenuItem('Установка дополнений', 'exe=modules&a=installlist', 'installlist');
+
+//System::admin()->SideBarAddMenuItem('Модули', 'exe=modules&a=main', 'main');
+//System::admin()->SideBarAddMenuItem('Блоки', 'exe=modules&a=block_types', 'block_types');
+//System::admin()->SideBarAddMenuItem('Плагины', 'exe=modules&a=plugins', 'plugins');
+System::admin()->SideBarAddMenuBlock('Модули', $action);
+
+switch($action){
+	case 'main':
+		AdminModules(false);
+		break;
+	case 'system':
+		AdminModulesList(true);
+		break;
+	case 'installlist':
+		AdminModulesInstallList();
+		break;
+	case 'install':
+		AdminModulesInstall();
+		break;
+	case 'uninstall':
+		AdminModulesUninstall();
+		break;
+	case 'changestatus':
+		AdminModulesChangeStatus();
+		break;
+	case 'config':
+		AdminModulesConfig();
+		break;
+	case 'configsave':
+		AdminModulesConfigSave();
+		break;
+	case 'setorder':
+		AdminModulesOrderSave();
+		break;
+	case 'plugins':
+		AdminPluginsMain();
+		break;
+	case 'changestatus_plugin':
+		AdminPluginsChangeStatus();
+		break;
+	case 'config_plugin':
+		if(isset($_GET['name'])){
+			include_once System::config('inc_dir').'configuration/functions.php';
+			$conf_config_table = 'plugins_config';
+			$conf_config_groups_table = 'plugins_config_groups';
+			$group = SafeEnv((isset($_GET['group']) ? $_GET['group'].'.' : '').$_GET['name'], 255, str);
+			$url = (isset($_GET['group']) ? '&group='.SafeEnv($_GET['group'], 255, str) : '').'&name='.SafeEnv($_GET['name'], 255, str);
+			AdminConfigurationEdit('modules&a=plugins'.$url, $group, false, false, 'Конфигурация плагина', 'a=configsave_plugin');
+		}
+		break;
+	case 'configsave_plugin':
+		if(isset($_GET['name'])){
+			include_once System::config('inc_dir').'configuration/functions.php';
+			$conf_config_table = 'plugins_config';
+			$conf_config_groups_table = 'plugins_config_groups';
+			$group = SafeEnv((isset($_GET['group']) ? $_GET['group'].'.' : '').$_GET['name'], 255, str);
+			AdminConfigurationSave('modules&a=plugins', $group, false);
+		}
+		break;
+	case 'block_types':
+		AdminBlockTypes();
+		break;
+	case 'block_type_save':
+		AdminBlockTypesSave();
+		break;
+	default:
+		AdminModulesList(false);
+}
+
+function AdminModules(){
+	UseScript('jquery_ui');
+	// Выполняем поиск расширений
+
+
+	$modules = '';
+	$blocks = '';
+	$plugins = '';
+	$themes = '';
+
+	// Выводим расширения по вкладкам
+	System::admin()->AddOnLoadJS('
+	$("#tabs").tabs();
+	$(".ui-tabs .ui-tabs-panel")
+		.css("padding", "0")
+		.css("height", "400px")
+		.css("overflow-y", "auto");
+');
+	$html = '<div id="tabs">
+	<ul>
+		<li><a href="#tabs-1">Модули</a></li>
+		<li><a href="#tabs-2">Блоки</a></li>
+		<li><a href="#tabs-3">Плагины</a></li>
+		<li><a href="#tabs-4">Шаблоны</a></li>
+	</ul>
+	<div id="tabs-1">1</div>
+	<div id="tabs-2">2</div>
+	<div id="tabs-3">3</div>
+	<div id="tabs-4">4</div>
+</div>';
+
+	System::admin()->AddTextBox('Расширения', $html);
+}
+
+function AdminModulesList( $system ){
 	global $db, $config, $site;
 	if($system){
 		$title = 'Системные модули';
@@ -62,8 +169,7 @@ function AdminModulesList( $system )
 	AddTextBox($title, $text);
 }
 
-function AdminModulesOrderSave()
-{
+function AdminModulesOrderSave(){
 	global $db, $config;
 	$mods = $db->Select('modules');
 	$count = count($mods);
@@ -79,8 +185,7 @@ function AdminModulesOrderSave()
 	}
 }
 
-function AdminModulesInstallList()
-{
+function AdminModulesInstallList(){
 	global $db, $config, $site;
 	TAddSubTitle('Установка');
 	$db->Select('modules', '');
@@ -121,8 +226,7 @@ function AdminModulesInstallList()
 	AddTextBox('Установка модулей', $text);
 }
 
-function AdminModulesInstall()
-{
+function AdminModulesInstall(){
 	global $config, $db;
 	$cnt = SafeEnv($_POST['count'], 11, int);
 	for($i = 0; $i < $cnt; $i++){
@@ -139,8 +243,7 @@ function AdminModulesInstall()
 }
 
 // Удаление модуля
-function AdminModulesUninstall()
-{
+function AdminModulesUninstall(){
 	global $db, $config;
 	$name = SafeEnv($_GET['name'], 255, str);
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
@@ -162,8 +265,7 @@ function AdminModulesUninstall()
 	}
 }
 
-function AdminModulesChangeStatus()
-{
+function AdminModulesChangeStatus(){
 	global $config, $db;
 	$db->Select('modules', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	$r = $db->FetchRow();
@@ -176,8 +278,7 @@ function AdminModulesChangeStatus()
 	GO($config['admin_file'].'?exe=modules');
 }
 
-function AdminModulesConfig()
-{
+function AdminModulesConfig(){
 	global $config, $db, $site;
 	TAddSubTitle('Конфигурация модуля');
 	$db->Select('modules', "`folder`='".SafeEnv($_GET['name'], 255, str)."'");
@@ -215,8 +316,7 @@ function AdminModulesConfig()
 	AddForm($site->FormOpen($config['admin_file'].'?exe=modules&a=configsave&name='.SafeDB($r['name'], 255, str)), $site->Submit('Сохранить'));
 }
 
-function AdminModulesConfigSave()
-{
+function AdminModulesConfigSave(){
 	global $config, $db;
 	$set = "name='".SafeEnv($_POST['name'], 255, str)."',"
 	."view='".SafeEnv($_POST['view'], 1, int)."',"
@@ -226,49 +326,301 @@ function AdminModulesConfigSave()
 	GO($config['admin_file'].'?exe=modules');
 }
 
-function AdminModules( $action )
-{
-	TAddToolLink('Установленные модули', 'main', 'modules');
-	TAddToolLink('Системные модули', 'system', 'modules&a=system');
-	TAddToolLink('Установка модулей', 'installlist', 'modules&a=installlist');
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminModulesList(false);
+// Плагины
+
+function AdminPluginsPluginType( $type ){
+	switch($type){
+		case PLUG_AUTORUN:
+			return 'Автозапуск';
 			break;
-		case 'system':
-			AdminModulesList(true);
+		case PLUG_ADMIN_AUTORUN:
+			return 'Автозапуск (Админпанель)';
 			break;
-		case 'installlist':
-			AdminModulesInstallList();
+		case PLUG_MAIN_AUTORUN:
+			return 'Автозапуск (Сайт)';
 			break;
-		case 'install':
-			AdminModulesInstall();
+		case PLUG_CALLEE:
+			return 'Вызываемый';
 			break;
-		case 'uninstall':
-			AdminModulesUninstall();
+		case PLUG_MANUAL:
+			return 'Подключаемый';
 			break;
-		case 'changestatus':
-			AdminModulesChangeStatus();
-			break;
-		case 'config':
-			AdminModulesConfig();
-			break;
-		case 'configsave':
-			AdminModulesConfigSave();
-			break;
-		case 'setorder':
-			AdminModulesOrderSave();
+		case PLUG_MANUAL_ONE:
+			return 'Подключаемый';
 			break;
 		default:
-			AdminModulesList(false);
+			return 'Другой';
 	}
 }
 
-if(isset($_GET['a'])){
-	AdminModules($_GET['a']);
-}else{
-	AdminModules('main');
+function AdminPluginsRender( $name, $installed, $configex, $group = '' ){
+	global $config;
+	if($group != ''){
+		$name2 = $group.'/'.$name;
+	}else{
+		$name2 = $name;
+	}
+	include ($config['plug_dir'].$name2.'/info.php');
+	$image = '';
+	$text = '';
+	$options = '';
+	if(isset($plugins[$name]['name-ru'])){
+		$image .= '<b>'.SafeDB(SafeDB($plugins[$name]['name-ru'], 255, str), 255, str).'</b><br />';
+	}
+	if(isset($plugins[$name]['logo'])){
+		$imagename = RealPath2($config['plug_dir'].$name.'/'.SafeDB($plugins[$name]['logo'], 250, str));
+		if(!is_dir($imagename) && file_exists($imagename)){
+			$image .= '<img width="64" height="64" src="'.$imagename.'" /><br />';
+		}
+	}
+	if(isset($plugins[$name]['version'])){
+		$image .= 'Версия: '.SafeDB($plugins[$name]['version'], 255, str).'<br />';
+	}
+	if(isset($plugins[$name]['type'])){
+		$text .= '<b>Тип:</b> '.AdminPluginsPluginType(SafeDB($plugins[$name]['type'], 2, int)).'<br />';
+	}
+	if($group != ''){
+		$text .= '<b>Группа:</b> '.SafeDB($group, 250, str).'<br />';
+	}
+	if(isset($plugins[$name]['description-ru'])){
+		$text .= '<b>Описание:</b> '.SafeDB($plugins[$name]['description-ru'], 255, str).'<br />';
+	}
+	if(isset($plugins[$name]['cms'])){
+		$text .= '<b>LinkorCMS:</b> '.SafeDB($plugins[$name]['cms'], 11, str).'<br />';
+	}
+	if(isset($plugins[$name]['site'])){
+		$text .= '<b>Сайт:</b> <a href="'.SafeDB($plugins[$name]['site'], 255, str).'" target="_blank">'.SafeDB($plugins[$name]['site'], 255, str).'</a><br />';
+	}
+	if($installed){
+		$url = '<a href="'.$config['admin_file'].'?exe=plugins&a=uninstall'.($group != '' ? '&group='.$group : '').'&name='.SafeDB($name, 255, str).'">Отключить</a>';
+		if($configex){
+			$config_url = '<a href="'.$config['admin_file'].'?exe=plugins&a=config'.($group != '' ? '&group='.$group : '').'&name='.SafeDB($name, 255, str).'">Настройки</a>';
+		}
+	}else{
+		$url = '<a href="'.$config['admin_file'].'?exe=plugins&a=install'.($group != '' ? '&group='.$group : '').'&name='.SafeDB($name, 255, str).'">Подключить</a>';
+	}
+	$options = '<b>Опции:</b> ['.$url.']'.(isset($config_url) ? ' ['.$config_url.']' : '');
+	return '<tr><td id="image">'.$image.'</td><td id="text" valign="top">'.$text.$options.'</td></tr>';
+}
+
+function AdminPluginsMain(){
+	System::admin()->AddSubTitle('Все плагины');
+	UseScript('jquery_ui_table');
+
+	$plug_dir = System::config('plug_dir');
+	$plugins_find = GetPlugins(true);
+	$configs_groups = PluginsConfigsGroups();
+
+	$plugins_all = array();
+	foreach($plugins_find['plugins'] as $pl){
+		$name = $pl['name'];
+		include($plug_dir.$name.'/info.php');
+		$plugins = $plugins[$name];
+		$plugins['type'] = AdminPluginsPluginType($plugins['type']);
+		$plugins['group'] = '';
+		$plugins['name'] = $name;
+		$plugins['installed'] = $pl['installed'];
+		$plugins['configex'] = isset($configs_groups[$name]);
+		$plugins_all[] = $plugins;
+	}
+	foreach($plugins_find['groups'] as $group){
+		foreach($group['plugins'] as $pl){
+			$group = $pl['group'];
+			$name = $pl['name'];
+			include($plug_dir.$group.'/'.$name.'/info.php');
+			$plugins = $plugins[$name];
+			$plugins['type'] = AdminPluginsPluginType($plugins['type']);
+			$plugins['group'] = $group;
+			$plugins['name'] = $name;
+			$plugins['installed'] = $pl['installed'];
+			$plugins['configex'] = isset($configs_groups[$group.'.'.$name]);
+			$plugins_all[] = $plugins;
+		}
+	}
+
+	if(isset($_REQUEST['onpage'])){
+		$num = intval($_REQUEST['onpage']);
+	}else{
+		$num = 20;
+	}
+	if(isset($_REQUEST['page'])){
+		$page = intval($_REQUEST['page']);
+	}else{
+		$page = 1;
+	}
+
+	$columns = array('name-ru', 'group', 'type', 'version', 'installed');
+	$sortby = '';
+	$sortbyid = -1;
+	$desc = true;
+	if(isset($_REQUEST['sortby'])){
+		$sortby = $columns[$_REQUEST['sortby']];
+		$sortbyid = intval($_REQUEST['sortby']);
+		$desc = $_REQUEST['desc'] == '1';
+	}
+	if($sortby != ''){
+		SortArray($plugins_all, $sortby, $desc);
+	}
+
+	$table = new jQueryUiTable();
+	$table->listing = ADMIN_FILE.'?exe=modules&a=plugins&ajax';
+	$table->del = '';
+	$table->total = count($plugins_all);
+	$table->onpage = $num;
+	$table->page = $page;
+	$table->sortby = $sortbyid;
+	$table->sortdesc = $desc;
+
+	$table->AddColumn('Имя');
+	$table->AddColumn('Группа', 'center');
+	$table->AddColumn('Тип', 'center');
+	$table->AddColumn('Версия', 'center');
+	$table->AddColumn('Статус', 'center');
+	$table->AddColumn('Функции', 'center', false, true);
+
+	$plugins_all = ArrayPage($plugins_all, $num, $page);
+	foreach($plugins_all as $plugin){
+		$name = SafeDB($plugin['name'], 255, str);
+		$status = System::admin()->SpeedStatus(
+			'Выключить', 'Включить',
+			ADMIN_FILE.'?exe=modules&a=changestatus_plugin&group='.$plugin['group'].'&name='.$plugin['name'], $plugin['installed'],
+			'images/bullet_green.png', 'images/bullet_red.png'
+		);
+		$func = '';
+		if($plugin['configex']){
+			$conf_url = ADMIN_FILE.'?exe=modules&a=config_plugin'.($plugin['group'] != '' ? '&group='.$plugin['group'] : '').'&name='.$name;
+			$func .= System::admin()->SpeedButton('Конфигурация', $conf_url, 'images/admin/config.png');
+		}
+		$table->AddRow(
+			$name,
+			SafeDB($plugin['name-ru'], 255, str),
+			SafeDB($plugin['group'], 255, str),
+			SafeDB($plugin['type'], 255, str),
+			SafeDB($plugin['version'], 255, str),
+			$status,
+			$func
+		);
+	}
+	if(isset($_GET['ajax'])){
+		echo $table->GetOptions();
+		exit;
+	}else{
+		System::admin()->AddTextBox('Плагины', $table->GetHtml());
+	}
+}
+
+function AdminPluginsChangeStatus(){
+	$name = SafeEnv($_GET['name'], 255, str);
+	$group = isset($_GET['group']) ? $_GET['group'] : '';
+	System::database()->Select('plugins', "`name`='$name' and `group`='$group'");
+	if(System::database()->NumRows() > 0){
+		UninstallPlugin($name, $group);
+	}else{
+		InstallPlugin($name, $group);
+	}
+	exit('OK');
+}
+
+/*
+ * Типы блоков
+ */
+function AdminBlockTypes(){
+	System::admin()->AddSubTitle('Типы блоков');
+	UseScript('jquery_ui_table');
+	$blocks_db = System::database()->Select('block_types');
+
+	if(isset($_REQUEST['onpage'])){
+		$num = intval($_REQUEST['onpage']);
+	}else{
+		$num = 20;
+	}
+	if(isset($_REQUEST['page'])){
+		$page = intval($_REQUEST['page']);
+	}else{
+		$page = 1;
+	}
+
+	$columns = array('name', 'folder', 'comment');
+	$sortby = '';
+	$sortbyid = -1;
+	$desc = true;
+	if(isset($_REQUEST['sortby'])){
+		$sortby = $columns[$_REQUEST['sortby']];
+		$sortbyid = intval($_REQUEST['sortby']);
+		$desc = $_REQUEST['desc'] == '1';
+	}
+	if($sortby != ''){
+		SortArray($blocks_db, $sortby, $desc);
+	}
+
+	$table = new jQueryUiTable();
+	$table->listing = ADMIN_FILE.'?exe=modules&a=block_types&ajax';
+	$table->del = ADMIN_FILE.'?exe=modules&a=block_type_delete&ajax';
+	$table->total = count($blocks_db);
+	$table->onpage = $num;
+	$table->page = $page;
+	$table->sortby = $sortbyid;
+	$table->sortdesc = $desc;
+
+	$table->AddColumn('Имя');
+	$table->AddColumn('Папка', 'center');
+	$table->AddColumn('Описание', 'center');
+	$table->AddColumn('Функции', 'center', false, true);
+
+	$blocks_db = ArrayPage($blocks_db, $num, $page);
+	foreach($blocks_db as $block){
+		$id = SafeDB($block['id'], 11, int);
+		$name = SafeDB($block['name'], 255, str);
+		$desc = SafeDB($block['comment'], 0, str);
+		$folder = SafeDB($block['folder'], 255, str);
+
+		$editlink = ADMIN_FILE.'?exe=modules&a=block_type_edit&id='.$id;
+
+		$func = '';
+		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
+		$func .= System::admin()->SpeedConfirmJs(
+			'Удалить',
+			'$(\'#jqueryuitable\').table(\'deleteRow\', '.$id.');',
+			'images/admin/delete.png',
+			'Уверены, что хотите удалить этот тип блока из базы данных?'
+		);
+
+		$table->AddRow(
+			$id,
+			'<b><a href="'.$editlink.'">'.$name.'</a></b>',
+			$folder,
+			$desc,
+			$func
+		);
+	}
+
+	if(isset($_GET['ajax'])){
+		echo $table->GetOptions();
+		exit;
+	}else{
+		System::admin()->AddCenterBox('Установленные типы блоков');
+		System::admin()->AddText($table->GetHtml());
+
+		System::admin()->FormTitleRow('Добавить тип блока');
+		FormRow('Имя', System::admin()->Edit('name', '', false, 'style="width: 220px;"'));
+		FormRow('Папка (относительно blocks_dir)', System::admin()->Edit('folder', '', false, 'style="width: 220px;"'));
+		System::admin()->FormTextRow('Описание', System::site()->TextArea('comment', '', 'style="width:400px;height:100px;"'));
+		AddForm(
+			'<form action="'.ADMIN_FILE.'?exe=modules&a=block_type_save" method="post">',
+			System::admin()->Submit('Добавить')
+		);
+	}
+}
+
+function AdminBlockTypesSave(){
+	$block = SafeR('name, folder', 255, str) + SafeR('comment', 0, str);
+	if(isset($_GET['id'])){ // Редактирование
+		$id = SafeEnv($_GET['id'], 11, int);
+		System::database()->Update('block_types', MakeSet($block), "`id`='$id'");
+	}else{
+		System::database()->Insert('block_types', MakeValues("'','name','comment','folder'", $block));
+	}
+	GO(ADMIN_FILE.'?exe=modules&a=block_types');
 }
 
 ?>
