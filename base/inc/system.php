@@ -664,20 +664,16 @@ function SafeDB( $Var, $MaxLength, $Type, $StripTags = true, $SpecialChars = tru
  * @param bool $StripTags Вырезать Html теги
  * @param bool $AddSlashes Добавить экранирование
  * @param bool $SafeXss Заменить некоторые html эквиваленты обычными символами
- * @return mixed|array
+ * @return array
  */
 function SafeR( $Names, $MaxLength, $Type, $StripTags = false, $AddSlashes = true, $SafeXss = true ){
 	$Names = explode(',', $Names);
-	if(count($Names) == 1){
-		return SafeEnv($_REQUEST[trim($Names[0])], $MaxLength, $Type, $StripTags, $AddSlashes, $SafeXss);
-	}else{
-		$Result = array();
-		foreach($Names as $n){
-			$n = trim($n);
-			$Result[$n] = SafeEnv($_REQUEST[$n], $MaxLength, $Type, $StripTags, $AddSlashes, $SafeXss);
-		}
-		return $Result;
+	$Result = array();
+	foreach($Names as $n){
+		$n = trim($n);
+		$Result[$n] = SafeEnv($_REQUEST[$n], $MaxLength, $Type, $StripTags, $AddSlashes, $SafeXss);
 	}
+	return $Result;
 }
 
 /**
@@ -2682,6 +2678,28 @@ function ObjectCp1251ToUtf8( &$var ){
 	return $var;
 }
 
+/**
+ * Преобразует строки объекта или массива в кодировку CP1251 из UTF8
+ * @param  $var
+ * @return array|string
+ * @since 1.3.5
+ */
+function ObjectUtf8ToCp1251( &$var ){
+	if(is_array($var)){
+		foreach($var as &$v){
+			$v = ObjectUtf8ToCp1251($v);
+		}
+	}elseif(is_object($var)){
+		$vars = get_object_vars($var);
+		foreach($vars as $f=>&$v) {
+			$var->$f = ObjectUtf8ToCp1251($v);
+		}
+	}elseif(is_string($var)){
+		$var = Utf8ToCp1251($var);
+	}
+	return $var;
+}
+
 function BbCodeTag( $tag, $part ){
 	static $first_run = true;
 	if($first_run){
@@ -2943,8 +2961,7 @@ function IncludeSystemPluginsGroup($group, $function = '', $return = false, $ret
  */
 function PluginsConfigsGroups(){
 	global $db;
-	$result = array(
-	);
+	$result = array();
 	$db->Select('plugins_config_groups', '');
 	while($group = $db->FetchRow()){
 		$result[$group['name']] = $group;
