@@ -66,7 +66,7 @@
 			return JsonEncode($options);
 		}
 
-		public function GetHtml( $DivName = 'news_table' ){
+		public function GetHtml( $DivName = 'jqueryuitable' ){
 			return '<div id="'.$DivName.'"></div><script>$("#'.$DivName.'").table('.$this->GetOptions().');</script>';
 		}
 

@@ -5,18 +5,14 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Управление БД');
-
 if(!$user->isSuperUser()){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);
 	return;
 }
 
-if(isset($_GET['a'])){
-	$action = $_GET['a'];
-}else{
-	$action = 'main';
-}
+TAddSubTitle('Управление БД');
+
+$action = isset($_GET['a']) ? $_GET['a'] : 'main';
 
 switch($action){
 	case 'main': include(MOD_DIR.'table_list.inc.php');

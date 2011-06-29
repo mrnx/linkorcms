@@ -54,9 +54,11 @@ JS
 		{/page:tool_menu_block}
 		<div id="main" class="{page:tool_menu_block(main|main_no_blocks)}">
 			<div id="main-wrapper">
-			{page:content_block}
-				{content_box}{/content_box}
-			{/page:content_block}
+				<div id="main-content">
+					{page:content_block}
+						{content_box}{/content_box}
+					{/page:content_block}
+				</div>
 			</div>
 		</div>
 		<div id="footer" class="{page:tool_menu_block(footer|footer_no_blocks)}">

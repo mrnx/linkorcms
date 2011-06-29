@@ -148,11 +148,11 @@ function AdminAdminMenuEditor(){
 	UseScript('jquery');
 	System::admin()->AddJS(<<<JS
 function SelectLinkType(type, first){
-	jQuery('.aaml').hide();
+	$('.aaml').hide();
 	if(first){
-		jQuery('.aaml_'+type).show();
+		$('.aaml_'+type).show();
 	}else{
-		jQuery('.aaml_'+type).fadeIn();
+		$('.aaml_'+type).fadeIn();
 	}
 }
 function SelectModule(mod){
@@ -240,12 +240,12 @@ JS
 }
 
 function AdminAdminMenuSave(){
-	$post = array('parent'=>SafeR('parent', 11,int))
+	$post = SafeR('parent', 11,int)
 	        +SafeR('module, title, icon, admin_link, external_link, js, type', 255, str)
 	        +SafeR('blank, enabled', 3, onoff);
 
 	if(isset($_GET['id'])){
-		$id = SafeR('id', 11, int);
+		$id = SafeEnv($_GET['id'], 11, int);
 		System::database()->Update('adminmenu', MakeSet($post), "`id`='$id'");
 	}else{
 		System::database()->Select('adminmenu', "`parent`='{$post['parent']}'");
@@ -267,7 +267,7 @@ function AdminAdminMenuDelete(){
 	if(!isset($_POST['id'])){
 		exit('ERROR');
 	}
-	$id = SafeR('id', 11, int);
+	$id = SafeEnv($_POST['id'], 11, int);
 	_AdminAdminMenuDelete($id);
 	exit('OK');
 }

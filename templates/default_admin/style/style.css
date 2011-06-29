@@ -8,10 +8,12 @@
 	font-family: "Liberation Sans", Verdana, sans-serif;
 	font-size: 12px;
 }
+
 body {
 	height: 100%;
 	padding: 5px;
 }
+
 #ajaxsplashscreen {
 	height: 30px;
 	padding: 12px;
@@ -33,12 +35,14 @@ body {
 	-webkit-box-shadow: 2px 2px 2px #DDD;
 	-moz-box-shadow: 2px 2px 2px #DDD;
 }
+
 #wrapper {
 	text-align: left;
 	max-width: 1200px;
 	height: 100%;
 	margin: 0 auto;
 }
+
 a:link { color: #334433; text-decoration: none; }
 a:visited { color: #334433; text-decoration: none; }
 a:hover { color: #c66653; }
@@ -47,10 +51,12 @@ textarea {
 	font-family: 'Consolas', 'Monaco', monospace;
 	font-size: 10pt;
 }
+
 pre{
 	font-family: 'Consolas', 'Monaco', monospace;
 	font-size: 10pt;
 }
+
 .clear { clear: both; }
 
 
@@ -154,7 +160,7 @@ div.admin_logo {
 
 #sidebar {
 	float: left;
-	width: 210px;
+	width: 216px;
 }
 
 .sidebar_menu {
@@ -213,7 +219,7 @@ div.admin_logo {
 	-moz-box-shadow: 2px 2px 2px #DDD;
 }
 
-#sidebar .sideNav { }
+#sidebar .sideNav {  }
 
 #sidebar .sideNav li { border-bottom: 1px solid #ddd; }
 
@@ -251,11 +257,9 @@ div.admin_logo {
 .main {
 	margin-left: 224px;
 	background-color: #F6F6F6;
-
 	border: 2px #A5C0D4 solid;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
-
 	box-shadow: 2px 2px 2px #DDD;
 	-webkit-box-shadow: 2px 2px 2px #DDD;
 	-moz-box-shadow: 2px 2px 2px #DDD;
@@ -263,17 +267,21 @@ div.admin_logo {
 
 .main_no_blocks {
 	background-color: #F6F6F6;
-
 	border: 3px #A5C0D4 solid;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
-
 	box-shadow: 2px 2px 2px #DDD;
 	-webkit-box-shadow: 2px 2px 2px #DDD;
 	-moz-box-shadow: 2px 2px 2px #DDD;
 }
 
 #main-wrapper {
+	display: table;
+	width: 100%;
+	border: 1px #ddd solid;
+}
+
+#main-content {
 	padding: 15px;
 }
 
@@ -284,6 +292,8 @@ h3 {
 	padding: 0;
 	margin: 0 0 10px;
 }
+
+/* Подвал */
 
 .footer {
 	margin: 5px 0 0 220px;

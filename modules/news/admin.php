@@ -156,7 +156,7 @@ function AdminNewsMain(){
 		$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=news&a=edit&id='.$id, 'images/admin/edit.png');
 		$func .= System::admin()->SpeedConfirmJs(
 			'Удалить',
-			'$(\'#news_table\').table(\'deleteRow\', '.$id.');',
+			'$(\'#jqueryuitable\').table(\'deleteRow\', '.$id.');',
 			'images/admin/delete.png',
 			'Уверены, что хотите удалить эту новость?'
 		);
@@ -428,7 +428,7 @@ function AdminNewsDelete(){
 function AdminNewsChangeStatus(){
 	global $news_access_editnews;
 
-	if(!isset($_POST['id']) || !$news_access_editnews){
+	if(!isset($_GET['id']) || !$news_access_editnews){
 		exit('ERROR');
 	}
 

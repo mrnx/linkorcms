@@ -123,7 +123,6 @@ function AdminPhpTesterSnippets(){
 	System::admin()->AddSubTitle('Сниппеты');
 	UseScript('jquery_ui_table');
 
-	// Количество новостей на странице
 	if(isset($_REQUEST['onpage'])){
 		$num = intval($_REQUEST['onpage']);
 	}else{
@@ -131,12 +130,8 @@ function AdminPhpTesterSnippets(){
 	}
 	if(isset($_REQUEST['page'])){
 		$page = intval($_REQUEST['page']);
-		if($page > 1){
-			$pageparams = '&page='.$page;
-		}
 	}else{
 		$page = 1;
-		$pageparams = '';
 	}
 
 	$snippets_db = System::database()->Select('snippets');
@@ -153,7 +148,6 @@ function AdminPhpTesterSnippets(){
 		SortArray($snippets_db, $sortby, $desc);
 	}
 
-	// Выводим новости
 	$table = new jQueryUiTable();
 	$table->listing = ADMIN_FILE.'?exe=phptester&a=snippets&ajax';
 	$table->del = ADMIN_FILE.'?exe=phptester&a=delete';
@@ -175,7 +169,7 @@ function AdminPhpTesterSnippets(){
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
 		$func .= System::admin()->SpeedConfirmJs(
 			'Удалить',
-			'$(\'#news_table\').table(\'deleteRow\', '.$id.');',
+			'$(\'#jqueryuitable\').table(\'deleteRow\', '.$id.');',
 			'images/admin/delete.png',
 			'Уверены, что хотите удалить этот сниппет?'
 		);
@@ -195,13 +189,11 @@ function AdminPhpTesterSnippets(){
 }
 
 function AdminPhpTesterSave(){
-	$snippet = array(
-		'title'=>Utf8ToCp1251(SafeR('title', 255, str)),
-		'code'=>Utf8ToCp1251(SafeR('code', 0, str)),
-		'id'=>SafeR('id', 11, int)
-	);
-	if($_GET['a'] == 'save' && $snippet['id'] > 0){ // Редактирование
-		System::database()->Update('snippets', MakeSet($snippet), "`id`='{$snippet['id']}'");
+	$snippet = SafeR('title', 255, str) + SafeR('code', 0, str);
+	ObjectUtf8ToCp1251($snippet);
+	if($_GET['a'] == 'save' && $_POST['id'] > 0){ // Редактирование
+		$id = SafeEnv($_POST['id'], 11, int);
+		System::database()->Update('snippets', MakeSet($snippet), "`id`='$id'");
 	}else{
 		System::database()->Insert('snippets', MakeValues("'','title','code'", $snippet));
 	}
@@ -210,7 +202,7 @@ function AdminPhpTesterSave(){
 }
 
 function AdminPhpTesterDelete(){
-	System::database()->Delete('snippets', "`id`='".SafeR('id', 11, int)."'");
+	System::database()->Delete('snippets', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");
 	exit('OK');
 }
 

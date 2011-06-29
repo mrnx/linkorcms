@@ -11,9 +11,7 @@ include_once ($config['inc_dir'].'forms.inc.php');
 
 // Создает страницу конфигурации в админ панели
 // в group должно быть либо 0, либо имя группы
-function AdminConfigurationEdit( $paddr, $group = '', $showhidden = false, $showtitles = true,
-	$modname = '', $method_name = 'a=configsave' )
-{
+function AdminConfigurationEdit( $paddr, $group = '', $showhidden = false, $showtitles = true, $modname = '', $method_name = 'a=configsave' ){
 	global $config, $db, $site, $conf_config_table, $conf_config_groups_table;
 
 	// Вытаскиваем настройки и отсортировываем по группам
@@ -185,7 +183,7 @@ function AdminConfigurationSave( $paddr, $group = '', $showhidden = false )
 	$cache = LmFileCache::Instance();
 	$cache->Clear('config');
 
-	GO($config['admin_file'].'?exe='.$paddr);
+	GO(ADMIN_FILE.'?exe='.$paddr);
 }
 
 ?>
