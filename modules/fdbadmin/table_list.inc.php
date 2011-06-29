@@ -70,6 +70,5 @@ $top_text .= '<strong>Всего записей</strong>: '.$totalrows.'<br>';
 $top_text .= '<strong>Общий размер</strong>: '.FormatFileSize($totalsize).'<br>';
 
 AddText($text);
-System::admin()->SideBarAddTextBlock('', $top_text);
 
 ?>

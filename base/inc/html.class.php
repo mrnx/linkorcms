@@ -63,7 +63,7 @@ class HTML{
 		$text = '<select name="'.$name.'"'.($multiple ? ' multiple="multiple"' : '').($other != '' ? ' '.$other : '').">\n";
 		foreach($data as $field){
 			if(is_array($field)){
-				$text .= '<option value="'.$field['name'].'"'.($field['selected'] || $data['selected'] == $field['name'] ? ' selected="selected"' : '').($field['other'] ? ' '.$field['other'] : '').'>'.$field['caption']."</option>\n";
+				$text .= '<option value="'.$field['name'].'" title="'.$field['caption'].'"'.($field['selected'] || $data['selected'] == $field['name'] ? ' selected="selected"' : '').($field['other'] ? ' '.$field['other'] : '').'>'.$field['caption']."</option>\n";
 			}
 		}
 		$text .= "</select>\n";
