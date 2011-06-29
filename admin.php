@@ -1,7 +1,7 @@
 <?php
 
 # LinkorCMS
-# © 2006-2009 Галицкий Александр Николаевич (linkorcms@yandex.ru)
+# © 2006-2011 Галицкий Александр Николаевич (linkorcms@yandex.ru)
 # Файл: admin.php
 # Назначение: Главная страница АДМИН-панели
 
@@ -12,7 +12,7 @@ require 'config/init.php'; // Конфигурация и инициализация
 define('ADMIN_FILE', System::config('admin_file')); // Ссылка на админ-панель
 
 // Проверка пользователя
-if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie('admin', true))){ // Не авторизован
+if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie('admin', true))){
 	if(isset($_POST['admin_login'])){ // Проверка логина-пароля
 		$admin_name = SafeEnv($_POST['admin_name'], 255, str);
 		$admin_password = SafeEnv($_POST['admin_password'], 255, str);
@@ -21,18 +21,18 @@ if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie('admin'
 			System::user()->SetAdminCookie($admin_name, $admin_password);
 		}else{
 			System::user()->UnsetCookie('admin');
-			System::admin()->Login('Неверные логин или пароль'); // exit
+			System::admin()->Login('Неверный логин или пароль'); // exit
 		}
 	}else{ // Форма авторизации
 		System::admin()->Login(); // exit
 	}
 }
 
-// Проверка присутствует ли setup.php на сервере
+// Проверка, присутствует ли setup.php на сервере
 if(is_file('setup.php') && !is_file('dev.php')){
 	exit('<html>'."\n".'<head>'."\n".'	<title>'.CMS_NAME.' - !!!Ошибка!!!</title>'."\n".'</head>'."\n".'<body>'."\n".'	<center><h2>Удалите setup.php с сервера.</h2>
 		<br />
-		Админ панель заблокирована.
+		Админ-панель заблокирована.
 		<br />
 		Присутствие <b>setup.php</b> на сервере делает сайт<br />
 		уязвимым, поэтому, перед тем как начать работу,<br />
@@ -59,7 +59,7 @@ System::database()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'"
 // Установлен такой модуль?
 if(System::database()->NumRows() == 0){
 	System::admin()->AddAdminMenu();
-	System::admin()->AddTextBox('Админ панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$ModuleName.'" не найден!</div>');
+	System::admin()->AddTextBox('Админ-панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$ModuleName.'" не найден!</div>');
 	System::admin()->TEcho();
 	exit;
 }

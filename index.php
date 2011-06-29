@@ -1,7 +1,7 @@
 <?php
 
 /*
- * LinkorCMS 1.3.5
+ * LinkorCMS 1.4
  * © 2011 Александр Галицкий (linkorcms@yandex.ru)
  * и LinkorCMS Development Group
  */

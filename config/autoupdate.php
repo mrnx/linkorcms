@@ -18,7 +18,7 @@ if(!isset($config['gb']['show_captcha'])){
 
 // LinkorCMS 1.3.4
 if(!isset($config['general']['ufu'])){
-	$db->Insert("config","'','1','ufu','1','1','Генерировать ЧПУ ссылки','Генерировать ссылки вида /pages/linkorcms.html','combo','function:yes_no','clear_cache','1,bool,false','1'");
+	$db->Insert("config","'','1','ufu','1','1','Генерировать ЧПУ-ссылки','Генерировать ссылки вида /pages/linkorcms.html','combo','function:yes_no','clear_cache','1,bool,false','1'");
 	$config['general']['ufu'] = true;
 	$db->Insert("config","'','1','private_site','0','1','Закрыть сайт для пользователей','Доступ к сайту будут иметь только Администраторы','combo','function:yes_no','','1,bool,false','1'");
 	$config['general']['private_site'] = false;
@@ -28,8 +28,8 @@ if(!isset($config['general']['ufu'])){
 
 	// Обновляем настройки обратной связи
 	$db->Update('config', "`kind`='text:w400px:h200px'", "`group_id`='17'");
-	// Убираем вырезание html тегов в условиях регистрации
-	$db->Update('config', "`type`='0,string,false',`description`='Текст будет показан при регистрации. Текст должен содержать условия, которые пользователь должен будет соблюдать при работе с сайтом. Для форматирования можно использовать HTML теги.'", "`group_id`='7' and `name`='reg_condition'"); 
+	// Убираем вырезание html-тегов в Условиях регистрации
+	$db->Update('config', "`type`='0,string,false',`description`='Текст будет показан при регистрации нового пользователя. Текст должен содержать условия, которые пользователь должен будет соблюдать при работе с сайтом. Для форматирования можно использовать HTML-теги.'", "`group_id`='7' and `name`='reg_condition'"); 
 
 	$db->Insert("modules","'','Кэш','cache','1','0','','','1','1','15','1',''");
 	$updated = true;
