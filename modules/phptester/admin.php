@@ -39,7 +39,7 @@ switch($action){
 function AdminPhpTester(){
 	UseScript('jquery');
 
-	$code = 'echo Translit4Url("Тест");';
+	$code = '';
 	$title = '';
 	if(isset($_GET['id'])){
 		$snippet_id = SafeDB($_GET['id'], 11, int);
