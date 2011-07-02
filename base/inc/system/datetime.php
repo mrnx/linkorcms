@@ -5,13 +5,6 @@ define('Min2Sec', 60);
 define('Hour2Sec', 3600);
 define('Day2Sec', 86400);
 
-/**
- * Устанавливает временную зону указанную в настройках сайта
- */
-function SetDefaultTimezone(){
-	@date_default_timezone_set(System::config('general/default_timeone'));
-}
-
 function GetGmtArray(){
 	$tlist = timezone_identifiers_list();
 	$gmt = array();
