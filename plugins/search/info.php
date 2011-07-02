@@ -3,8 +3,6 @@
 $groups['search'] = array(
 	'name-ru'=>'Search',
 	'description-ru'=>'Плагины для поиска.',
-	'type'=>PLUG_SYSTEM,
+	'type'=>PLUG_MANUAL,
 	'plugins'=>array()
 );
-
-?>

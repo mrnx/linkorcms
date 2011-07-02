@@ -46,9 +46,9 @@ function IndexSearchSearch( $mods, $search_text ){
 	global $search_results;
 	$search_results = array();
 	foreach($mods as $mod){
-		$plugins = IncludeSystemPluginsGroup('search', $mod, true, true);
+		$plugins = IncludePluginsGroup('search', $mod, true);
 		foreach($plugins as $plugin){
-			include($plugin['path'].'index.php');
+			include($plugin.'index.php');
 		}
 	}
 	return $search_results;
