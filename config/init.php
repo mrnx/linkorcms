@@ -88,9 +88,60 @@ $ErrorsLog = null;
 $SITE_ERRORS = true;
 $userAuth = false;
 $userAccess = 4;
+$system_autoload = array();
+$system_files = array();
+define('system_cache', 'system'); // Имя группы системного кэша
 
 require 'config/name_config.php'; // Конфигурация расположений
-require $config['inc_dir'].'system.php'; // Функции
+require 'config/autoload.php'; // Классы для автозагрузки
+
+/**
+ * Функция сборки ядра в один файл
+ * @param bool $IncludeClasses Включая классы
+ * @return void
+ */
+function BuildSystem( $IncludeClasses = false ){
+	$system_files = $GLOBALS['system_files'];
+	$inc_dir = $GLOBALS['config']['inc_dir'];
+	$core_dir = $inc_dir.'system/';
+	$core_build = '';
+	foreach($system_files as $core_file){
+		$core_php = trim(file_get_contents($core_dir.$core_file));
+		if(substr($core_php, 0, 5) == '<'.'?php') $core_php = substr($core_php, 5);
+		if(substr($core_php, -2) == '?'.'>') $core_php = substr($core_php, 0, -2);
+		$core_build .= $core_php;
+	}
+	if($IncludeClasses){
+		foreach($GLOBALS['system_autoload'] as $class_file){
+			$class_php = trim(file_get_contents($class_file));
+			if(substr($class_php, 0, 5) == '<'.'?php') $class_php = substr($class_php, 5);
+			if(substr($class_php, -2) == '?'.'>') $class_php = substr($class_php, 0, -2);
+			$core_build .= $class_php;
+		}
+	}
+	file_put_contents('config/system_build.php', '<'.'?php'.$core_build);
+}
+
+// Сборка ядра
+if(!is_file('config/system_build.php') || FORCE_BUILD_SYSTEM){
+	BuildSystem(BUILD_SYSTEM_WITH_CLASSES);
+}
+
+// Подключение ядра
+if(LOAD_SYSTEM_APART){
+	$system_dir = $GLOBALS['config']['inc_dir'].'system/';
+	foreach($system_files as $system_file){
+		require $system_dir.$system_file;
+	}
+}else{
+	require 'config/system_build.php';
+}
+
+// Подключение системных плагинов
+$plugins = SystemPluginsIncludeGroup('system', '', true);
+foreach($plugins as $plugin){
+	include($plugin.'index.php');
+}
 
 // Обработка ошибок
 set_error_handler('ErrorHandler');
@@ -120,7 +171,7 @@ if(is_file('config/db_config.php')){ // Система установлена
 
 	// Подключение к базе данных
 	define("DATABASE", true);
-	IncludeSystemPluginsGroup('database', 'layer'); // Подключение драйвера базы данных
+	SystemPluginsIncludeGroup('database', 'layer'); // Подключение драйвера базы данных
 	if(method_exists($db, 'Connect')){
 		$db->ErrorReporting = $config['db_errors'];
 		$db->Prefix = $config['db_pref'];
@@ -138,6 +189,13 @@ if(is_file('config/db_config.php')){ // Система установлена
 
 		// Автообновление
 		include('config/autoupdate.php');
+		if($updated){ // Очищаем весь кэш
+			$cache = LmFileCache::Instance();
+			$groups = $cache->GetGroups();
+			foreach($groups as $g){
+				$cache->Clear($g);
+			}
+		}
 
 		// Устанавливаем временную зону сайта по умолчанию
 		$user->CheckCookies();
@@ -150,7 +208,7 @@ if(is_file('config/db_config.php')){ // Система установлена
 		$userAuth = IntVal($user->Get('u_auth'));
 		$userAccess = IntVal($user->Get('u_level'));
 
-		// Подключаем плагины(в автозапуске)
+		// Подключаем плагины(PLUG_AUTORUN, PLUG_ADMIN_AUTORUN, PLUG_MAIN_AUTORUN)
 		if(defined('MAIN_SCRIPT') || defined('ADMIN_SCRIPT')){
 			$pcache = LmFileCache::Instance();
 			if(defined('MAIN_SCRIPT')){
@@ -162,18 +220,18 @@ if(is_file('config/db_config.php')){ // Система установлена
 				$plugins = $pcache->Get('system', $pcache_name);
 			}else{
 				if(defined('MAIN_SCRIPT')){
-					$q = "`type`= 1 or `type`= 3";
-				} elseif(defined('ADMIN_SCRIPT')){
-					$q = "`type`= 1 or `type`= 2";
+					$q = "`type`='1' or `type`='3'";
+				}elseif(defined('ADMIN_SCRIPT')){
+					$q = "`type`='1' or `type`='2'";
 				}
 				$plugins = $db->Select('plugins', $q);
 				$pcache->Write('system', $pcache_name, $plugins);
 			}
 			foreach($plugins as $plugin){
-				$PluginName = RealPath2($config['plug_dir'].SafeDB($plugin['name'], 255, str));
-				if(file_exists($PluginName.'/index.php') && is_dir($PluginName)){
-					include $PluginName.'/index.php';
-				} else{
+				$PluginName = RealPath2($config['plug_dir'].$plugin['name'].'/index.php');
+				if(is_file($PluginName)){
+					include $PluginName;
+				}else{
 					UninstallPlugin($plugin['name']);
 				}
 			}
@@ -183,5 +241,3 @@ if(is_file('config/db_config.php')){ // Система установлена
 	Header("Location: setup.php");
 	exit();
 }
-
-?>

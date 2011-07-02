@@ -29,18 +29,10 @@ if(!isset($config['general']['ufu'])){
 	// Обновляем настройки обратной связи
 	$db->Update('config', "`kind`='text:w400px:h200px'", "`group_id`='17'");
 	// Убираем вырезание html-тегов в Условиях регистрации
-	$db->Update('config', "`type`='0,string,false',`description`='Текст будет показан при регистрации нового пользователя. Текст должен содержать условия, которые пользователь должен будет соблюдать при работе с сайтом. Для форматирования можно использовать HTML-теги.'", "`group_id`='7' and `name`='reg_condition'"); 
+	$db->Update('config', "`type`='0,string,false',`description`='Текст будет показан при регистрации нового пользователя. Текст должен содержать условия, которые пользователь должен будет соблюдать при работе с сайтом. Для форматирования можно использовать HTML-теги.'", "`group_id`='7' and `name`='reg_condition'");
 
 	$db->Insert("modules","'','Кэш','cache','1','0','','','1','1','15','1',''");
 	$updated = true;
-}
-
-if($updated){ // Очищаем весь кэш
-	$cache = LmFileCache::Instance();
-	$groups = $cache->GetGroups();
-	foreach($groups as $g){
-		$cache->Clear($g);
-	}
 }
 
 ?>

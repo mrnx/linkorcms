@@ -1,14 +1,18 @@
 <?php
 
+$config['admin_file'] = 'admin.php';
 $config['config_dir'] = 'config/';
+
 $config['mod_dir'] = 'modules/';
 $config['blocks_dir'] = 'blocks/';
-$config['inc_dir'] = 'base/inc/';
-$config['tpl_dir'] = 'templates/';
-$config['apanel_dir'] = $config['inc_dir'];
-$config['log_dir'] = 'log/';
 $config['plug_dir'] = 'plugins/';
+$config['tpl_dir'] = 'templates/';
+$config['sys_plug_dir'] = 'base/plugins/';
+
+$config['inc_dir'] = 'base/inc/';
+$config['apanel_dir'] = $config['inc_dir'];
+
+$config['log_dir'] = 'log/';
 $config['cache_dir'] = 'cache/';
-$config['admin_file'] = 'admin.php';
 
 ?>
