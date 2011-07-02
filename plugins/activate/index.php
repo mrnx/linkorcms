@@ -13,11 +13,11 @@ if(isset($_GET['code'])){
 	if($db->NumRows() > 0){
 		$auser = $db->FetchRow();
 		$db->Update('users', "active='1',activate=''", "`id`='".SafeDB($auser['id'], 11, int)."'");
-		include_once($config['inc_dir'].'index_template.inc.php');
+		include_once($config['inc_dir'].'index_template.class.php');
 		$site->AddTextBox('Информация', '<center>Ваша регистрация была успешно активирована.</center>');
 		$site->TEcho();
 	}else{
-		include_once($config['inc_dir'].'index_template.inc.php');
+		include_once($config['inc_dir'].'index_template.class.php');
 		$site->AddTextBox('Ошибка', '<center>Неверный код активации.</center>');
 		$site->TEcho();
 	}

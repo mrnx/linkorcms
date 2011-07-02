@@ -25,7 +25,7 @@ if($_GET['a'] == 'login'){
 		}
 	}else{
 		$SiteLog->Write('Plugin:login  Неверный вход. Логин: '.SafeEnv($_POST['login'], 30, str).', Пароль: '.SafeEnv($_POST['pass'], 32, str));
-		include_once($config['inc_dir'].'index_template.inc.php');
+		include_once($config['inc_dir'].'index_template.class.php');
 		$site->Login($r);
 		$site->TEcho();
 	}

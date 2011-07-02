@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-include_once($config['inc_dir'].'index_template.inc.php');
+include_once($config['inc_dir'].'index_template.class.php');
 
 $url = SafeDB($_GET['url'], 255, str);
 $url = Url(SafeDB($url, 255, str));
