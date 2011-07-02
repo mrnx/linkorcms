@@ -15,9 +15,8 @@ System::admin()->AddSubTitle('Модули');
 $action = isset($_GET['a']) ? $_GET['a'] : 'main';
 
 System::admin()->SideBarAddMenuItem('Расширения', 'exe=modules&a=main', 'main');
-System::admin()->SideBarAddMenuItem('Получить дополнения', 'exe=modules&a=addons', 'addons');
-System::admin()->SideBarAddMenuItem('Установка дополнений', 'exe=modules&a=installlist', 'installlist');
-
+System::admin()->SideBarAddMenuItem('Установить', 'exe=modules&a=install', 'install');
+//System::admin()->SideBarAddMenuItem('Установка дополнений', 'exe=modules&a=installlist', 'installlist');
 //System::admin()->SideBarAddMenuItem('Модули', 'exe=modules&a=main', 'main');
 //System::admin()->SideBarAddMenuItem('Блоки', 'exe=modules&a=block_types', 'block_types');
 //System::admin()->SideBarAddMenuItem('Плагины', 'exe=modules&a=plugins', 'plugins');
@@ -88,17 +87,40 @@ switch($action){
 
 function AdminModules(){
 	UseScript('jquery_ui');
+	$mod_dir = System::config('mod_dir');
+	$blocks_dir = System::config('blocks_dir');
 	// Выполняем поиск расширений
 
 
-	$modules = '';
-	$blocks = '';
-	$plugins = '';
-	$themes = '';
+	$module = array(); // $module['name'] = array();
+	$block = array(); // $block['name'] = array();
+	$plugins = array(); // $plugins['name'] = array();
+	$template = array(); // $template['name'] = array();
+
+	$mod_dirs = GetFolders($mod_dir);
+	foreach($mod_dirs as $dir){
+		$info_php = $mod_dir.$dir.'/info.php';
+		if(is_file($info_php)){
+			include($info_php);
+		}
+	}
+	System::log()->Dump($module);
+
+	$blocks_dirs = GetFolders($blocks_dir);
+	foreach($blocks_dirs as $dir){
+		$info_php = $blocks_dir.$dir.'/info.php';
+		if(is_file($info_php)){
+			include($info_php);
+		}
+	}
+	System::log()->Dump($block);
+
+	$modules_html = '';
+
 
 	// Выводим расширения по вкладкам
 	System::admin()->AddOnLoadJS('
-	$("#tabs").tabs();
+	$("#tabs").tabs({event: "mousedown"}).css("width", "700px");
 	$(".ui-tabs .ui-tabs-panel")
 		.css("padding", "0")
 		.css("height", "400px")
@@ -106,10 +128,10 @@ function AdminModules(){
 ');
 	$html = '<div id="tabs">
 	<ul>
-		<li><a href="#tabs-1">Модули</a></li>
-		<li><a href="#tabs-2">Блоки</a></li>
-		<li><a href="#tabs-3">Плагины</a></li>
-		<li><a href="#tabs-4">Шаблоны</a></li>
+		<li><a href="#tabs-1"><img src="images/widgets.png" style="vertical-align: bottom;"> Модули</a></li>
+		<li><a href="#tabs-2"><img src="images/block.png" style="vertical-align: bottom;"> Блоки</a></li>
+		<li><a href="#tabs-3"><img src="images/plugin.png" style="vertical-align: bottom;"> Плагины</a></li>
+		<li><a href="#tabs-4"><img src="images/skins.png" style="vertical-align: bottom;"> Шаблоны</a></li>
 	</ul>
 	<div id="tabs-1">1</div>
 	<div id="tabs-2">2</div>
