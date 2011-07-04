@@ -6,8 +6,9 @@ if(!defined('VALID_RUN')){
 	header("HTTP/1.1 404 Not Found");
 	exit;
 }
-if(defined('SETUP_SCRIPT')) return;
+
 $updated = false;
+if(defined('SETUP_SCRIPT')) return;
 
 // LinkorCMS 1.3.2
 if(!isset($config['gb']['show_captcha'])){
@@ -34,5 +35,3 @@ if(!isset($config['general']['ufu'])){
 	$db->Insert("modules","'','Êýø','cache','1','0','','','1','1','15','1',''");
 	$updated = true;
 }
-
-?>

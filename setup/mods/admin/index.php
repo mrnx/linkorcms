@@ -22,15 +22,15 @@ switch($p){
 		$text = '<table width="80%">
 			<tr>
 				<td id="l">Логин: </td>
-				<td><input type="text" name="login" value="admin"></td>
+				<td><input type="text" name="login" value="admin" style="width: 200px;"></td>
 			</tr>
 			<tr>
 				<td id="l">Пароль: </td>
-				<td><input type="text" name="pass" value="'.GenBPass(8).'"></td>
+				<td><input type="text" name="pass" value="'.GenBPass(8).'" style="width: 200px;"></td>
 			</tr>
 			<tr>
 				<td id="l">E-mail: </td>
-				<td><input type="text" name="email" value="support@'.getenv("HTTP_HOST").'"></td>
+				<td><input type="text" name="email" value="support@'.getenv("HTTP_HOST").'" style="width: 200px;"></td>
 			</tr>
 		</table>
 		<br /><br />Запишите или запомните введенные данные!';
@@ -79,5 +79,3 @@ switch($p){
 		}
 		break;
 }
-
-?>

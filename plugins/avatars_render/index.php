@@ -29,9 +29,12 @@ if(!file_exists($avatar) || is_dir($avatar)){
 	$avatar = $config['general']['avatars_dir'].'noavatar.gif';
 }
 
-function SendAvatar( $avatar, $saveTo = '', $width = 0, $height = 0 )
-{
+function _SendAvatar( $avatar, $saveTo = '', $width = 0, $height = 0 ){
+	global $config;
 	$avatar_image = new TPicture($avatar);
+	if(!is_dir($config['general']['personal_avatars_dir'])){
+		mkdir($config['general']['personal_avatars_dir']);
+	}
 	if($saveTo != ''){
 		$avatar_image->SetImageSize($width, $height);
 		$avatar_image->SaveToFile($saveTo);
@@ -50,27 +53,25 @@ if(isset($_GET['size'])){
 	switch ($_GET['size']){
 		case 'small':
 			if(is_file($_avatar64)){
-				SendAvatar($_avatar64);
+				_SendAvatar($_avatar64);
 			}else{
-				SendAvatar($avatar, $_avatar64, 64, 64);
+				_SendAvatar($avatar, $_avatar64, 64, 64);
 			}
 			break;
 		case 'smallest':
 			if(is_file($_avatar24)){
-				SendAvatar($_avatar24);
+				_SendAvatar($_avatar24);
 			}else{
-				SendAvatar($avatar, $_avatar24, 24, 24);
+				_SendAvatar($avatar, $_avatar24, 24, 24);
 			}
 			break;
 		default:
 			$size = 0;
 	}
 }else{
-	SendAvatar($avatar);
+	_SendAvatar($avatar);
 }
 
 // Восстанавливаем Referer
 $user->Def('REFERER', $_SERVER['HTTP_REFERER']);
 exit();
-
-?>
