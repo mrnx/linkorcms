@@ -95,45 +95,34 @@ define('system_cache', 'system'); // Имя группы системного кэша
 require 'config/name_config.php'; // Конфигурация расположений
 require 'config/autoload.php'; // Классы для автозагрузки
 
-/**
- * Функция сборки ядра в один файл
- * @param bool $IncludeClasses Включая классы
- * @return void
- */
-function BuildSystem( $IncludeClasses = false ){
-	$system_files = $GLOBALS['system_files'];
-	$inc_dir = $GLOBALS['config']['inc_dir'];
-	$core_dir = $inc_dir.'system/';
-	$core_build = '';
-	foreach($system_files as $core_file){
-		$core_php = trim(file_get_contents($core_dir.$core_file));
-		if(substr($core_php, 0, 5) == '<'.'?php') $core_php = substr($core_php, 5);
-		if(substr($core_php, -2) == '?'.'>') $core_php = substr($core_php, 0, -2);
-		$core_build .= $core_php;
-	}
-	if($IncludeClasses){
-		foreach($GLOBALS['system_autoload'] as $class_file){
-			$class_php = trim(file_get_contents($class_file));
-			if(substr($class_php, 0, 5) == '<'.'?php') $class_php = substr($class_php, 5);
-			if(substr($class_php, -2) == '?'.'>') $class_php = substr($class_php, 0, -2);
-			$core_build .= $class_php;
-		}
-	}
-	file_put_contents('config/system_build.php', '<'.'?php'.$core_build);
-}
-
-// Сборка ядра
-if(!is_file('config/system_build.php') || FORCE_BUILD_SYSTEM){
-	BuildSystem(BUILD_SYSTEM_WITH_CLASSES);
-}
-
 // Подключение ядра
-if(LOAD_SYSTEM_APART){
+if(LOAD_SYSTEM_APART){ // Подключать каждый файл по отдельности
 	$system_dir = $GLOBALS['config']['inc_dir'].'system/';
 	foreach($system_files as $system_file){
 		require $system_dir.$system_file;
 	}
-}else{
+}else{ // Сборка ядра
+	if(!is_file('config/system_build.php') || FORCE_BUILD_SYSTEM){
+		$system_files = $GLOBALS['system_files'];
+		$inc_dir = $GLOBALS['config']['inc_dir'];
+		$core_dir = $inc_dir.'system/';
+		$core_build = '';
+		foreach($system_files as $core_file){
+			$core_php = trim(file_get_contents($core_dir.$core_file));
+			if(substr($core_php, 0, 5) == '<'.'?php') $core_php = substr($core_php, 5);
+			if(substr($core_php, -2) == '?'.'>') $core_php = substr($core_php, 0, -2);
+			$core_build .= $core_php;
+		}
+		if(BUILD_SYSTEM_WITH_CLASSES){
+			foreach($GLOBALS['system_autoload'] as $class_file){
+				$class_php = trim(file_get_contents($class_file));
+				if(substr($class_php, 0, 5) == '<'.'?php') $class_php = substr($class_php, 5);
+				if(substr($class_php, -2) == '?'.'>') $class_php = substr($class_php, 0, -2);
+				$core_build .= $class_php;
+			}
+		}
+		file_put_contents('config/system_build.php', '<'.'?php'.$core_build);
+	}
 	require 'config/system_build.php';
 }
 
@@ -203,7 +192,7 @@ if(is_file('config/db_config.php')){ // Система установлена
 		if($user->Auth && $user->Get('u_timezone')){
 			@date_default_timezone_set($user->Get('u_timezone'));
 		}else{
-			SetDefaultTimezone();
+			@date_default_timezone_set(System::config('general/default_timezone'));
 		}
 		$userAuth = IntVal($user->Get('u_auth'));
 		$userAccess = IntVal($user->Get('u_level'));
@@ -220,9 +209,9 @@ if(is_file('config/db_config.php')){ // Система установлена
 				$plugins = $pcache->Get('system', $pcache_name);
 			}else{
 				if(defined('MAIN_SCRIPT')){
-					$q = "`type`='1' or `type`='3'";
+					$q = "(`type`='1' or `type`='3') and `enabled`='1'";
 				}elseif(defined('ADMIN_SCRIPT')){
-					$q = "`type`='1' or `type`='2'";
+					$q = "(`type`='1' or `type`='2') and `enabled`='1'";
 				}
 				$plugins = $db->Select('plugins', $q);
 				$pcache->Write('system', $pcache_name, $plugins);

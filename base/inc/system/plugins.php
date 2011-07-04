@@ -18,6 +18,7 @@ define('PLUG_MANUAL_ONE', 7); // Подключается один какой-то плагин из группы. Ис
  */
 function PluginsClearCache(){
 	$cache = LmFileCache::Instance();
+	$cache->Delete('system', 'plugins');
 	$cache->Delete('system', 'plugins_auto_main');
 	$cache->Delete('system', 'plugins_auto_admin');
 }
@@ -26,26 +27,32 @@ function PluginsClearCache(){
  * Подключает группу плагинов
  * @param $group группа
  * @param string $function подгруппа
- * @param bool $return возвратить имена файлов плагинов вместо автоматического подкочения
+ * @param bool $return возвратить пути к папкам плагинов вместо автоматического подкочения
  * @return array
  */
 function IncludePluginsGroup($group, $function = '', $return = false){
-	global $config, $db;
-	$plugins = GetPlugins();
+	global $config, $db; // В поддержку старых плагинов
+	global $include_plugin_path; // эта переменная будет доступна из плагина
+	static $plugins = null, $plug_dir;
+	$plug_dir = $config['plug_dir'];
+	if(LmFileCache::Instance()->HasCache('system', 'plugins')){
+		$plugins = LmFileCache::Instance()->Get('system', 'plugins');
+	}
+	if(!isset($plugins)){
+		$plugins = System::database()->Select('plugins', "(`type`='5' or `type`='7') and `enabled`='1'");
+		LmFileCache::Instance()->Write('system', 'plugins', $plugins, Day2Sec);
+	}
 	$result = array();
-	if(isset($plugins['groups'][$group])){
-		$plugins = $plugins['groups'][$group]['plugins'];
-		foreach($plugins as $plugin){
-			if(($plugin['installed'] && $function == '') || ($plugin['installed'] && isset($plugin['function']) && $function == $plugin['function'])){
-				global $include_plugin_path; // эта переменная будет доступна из плагина
-				$include_plugin_path = RealPath2($config['plug_dir'].$group.'/'.$plugin['name']).'/';
-				if($return){
-					$result[] = $include_plugin_path;
-				}else{
-					include ($include_plugin_path.'index.php');
-				}
+	foreach($plugins as $plugin){
+		if($group == $plugin['group'] && $function == $plugin['function']){
+			$include_plugin_path = RealPath2($plug_dir.$group.'/'.$plugin['name']).'/';
+			if($return){
+				$result[] = $include_plugin_path;
+			}else{
+				include $include_plugin_path.'index.php';
 			}
 		}
 	}
+
 	return $result;
 }

@@ -15,7 +15,7 @@ if(!isset($_GET['p'])){
 }
 
 //Проверяем доступен ли данный плагин
-System::database()->Select('plugins', "`name`='$PluginName' and `type`='4");
+System::database()->Select('plugins', "`name`='$PluginName' and `type`='4'");
 if(System::database()->NumRows() > 0){
 	$p = System::database()->FetchRow();
 	$Name = $p['name'];

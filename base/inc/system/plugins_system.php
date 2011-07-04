@@ -32,8 +32,7 @@ function SystemPluginsLoad( $ClearCache = false ){
 	}
 
 	if(LmFileCache::Instance()->HasCache('system', 'system_plugins')){
-		$resultcache = LmFileCache::Instance()->Get('system', 'system_plugins');
-		return $resultcache;
+		return LmFileCache::Instance()->Get('system', 'system_plugins');
 	}
 
 	$plugins = array();

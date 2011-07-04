@@ -5,12 +5,13 @@
 # LinkorCMS Development Group
 # www.linkorcms.ru
 # Лицензия LinkorCMS 1.2.
-	
-$module['forum'] = array(
+
+return array(
 	'name' => 'Форум',
-	'comment' => ' - ',
-	'copyright' => 'LinkorCMS Development Group',
-	'system' => '0'
+	'description' => ' - ',
+	'author' => 'LinkorCMS Development Group',
+	'site' => 'http://linkorcms.ru/forum_about.html',
+	'version' => '1.4'
 );
 
 ?>
