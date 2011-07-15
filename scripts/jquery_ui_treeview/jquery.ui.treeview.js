@@ -56,7 +56,6 @@
 			var self = this;
 			var o = this.options;
 			var ns = o.nestedSortableOptions;
-
 			if(ns.update){
 				ns._update = ns.update;
 			}
@@ -71,46 +70,33 @@
 					var target_id = target_opt.id;
 				}
 				// Посылаем POST запрос перемещения элементов
-				if(o.move != ''){
-					if(target_opt && target_opt.isnode && !target_opt.loaded){
-						var index = '-1';
-						$item.remove();
-						$target.find('ol').remove();
-					}else{
-						var index = $(ui.item).parent().children().index(ui.item);
-					}
-					if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
-					$.ajax({
-						type: "POST",
-						url: o.move,
-						data: 'item_id='+item_opt.id+'&target_id='+target_id+'&item_new_position='+index,
-						cache: false,
-						success: function(){
-							if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
-						}
-					});
-					// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
-					self._updateBullets();
+				if(target_opt && target_opt.isnode && !target_opt.loaded){
+					var index = '-1';
+					$item.remove();
+					$target.find('ol').remove();
 				}else{
-					// Вырезание и загрузка
-					if(target_opt && target_opt.isnode && !target_opt.opened){  // Переместили в закрытый элемент
-						var $li = $item.detach();
-						$target.find('ol').remove();
-						self._toggleNode($target, function(){
-							$target.find('ol').append($li);
-							self._updateBullets();
-						});
-					}else{  // Переместили в открытый элемент, просто обновляем буллеты
-						self._updateBullets();
-					}
+					var index = $(ui.item).parent().children().index(ui.item);
 				}
+				if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
+				$.ajax({
+					type: "POST",
+					url: o.move,
+					data: 'item_id='+item_opt.id+'&target_id='+target_id+'&item_new_position='+index,
+					cache: false,
+					success: function(){
+						if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
+					}
+				});
+				// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
+				self._updateBullets();
 				if(ns._update){
 					ns._update(event, ui);
 				}
 			}
-
 			this.tree = this._generateList(this.element, o.tree, true);// Генерируем список
-			$(this.tree).nestedSortable(ns);// Делаем дерево сортируемым
+			if(o.move != ''){
+				$(this.tree).nestedSortable(ns);// Делаем дерево сортируемым
+			}
 		},
 
 		_destroy: function(){
@@ -148,7 +134,7 @@
 			var $node = $element.find("ol:first");
 			var $bullet = $('#item_bullet_'+item_id);
 			if('opened' in opt && opt.opened){ // скрыть
-				$node.slideUp();
+				$node.hide();
 				opt.opened = false;
 				// Меняем значёк на кнопке
 				$bullet.removeClass('node_open');
@@ -168,7 +154,7 @@
 						}
 					}
 				} else{
-					$node.slideDown();
+					$node.show();
 					if(end_toggle != undefined){
 						end_toggle.call($element);
 					}
@@ -264,7 +250,7 @@
 			// Элемент списка с вложенным дивом
 			var element_options = {id: "item_"+opt.id};
 			if(opt.nonest){
-				element_options.class = "no-nest";
+				element_options['class'] = "no-nest";
 			}
 			var $element = $('<li>', element_options);
 			var $div_helper = $('<div>').appendTo($element); // Вспомогательный див в который отдельно будут помещены и элементы и кнопка узла
@@ -290,13 +276,13 @@
 			} else{
 				if(opt.opened){
 					$.extend(bullet_options, {
-						"class": "node_button node_open", click: function(){
+						"class": "node_button node_open", mousedown: function(){
 							self._toggleNode(opt.id);
 						}
 					});
 				} else{
 					$.extend(bullet_options, {
-						"class": "node_button node_close", click: function(){
+						"class": "node_button node_close", mousedown: function(){
 							self._toggleNode(opt.id);
 						}
 					});
@@ -306,7 +292,10 @@
 
 			// Иконка div.item_icon img
 			if('icon' in opt && opt.icon != ''){
-				$('<div class="item_icon" id="item_icon_'+opt.id+'"><img src="'+opt.icon+'" title="Переместить" /></div>').appendTo($div);
+				var $icon = $('<div class="item_icon" id="item_icon_'+opt.id+'"><img src="'+opt.icon+'" title="Переместить" /></div>').appendTo($div);
+			}
+			if(this.options.move != ''){
+				$icon.css("cursor", "move");
 			}
 
 			//Заголовок div.item_title
@@ -358,16 +347,16 @@
 			var $placeholder = this._loadingStart($parentElement);
 			var self = this;
 			$.ajax({
-				       url: loadUrl,
-				       dataType: "json",
-				       success: function(data){
-					       self._loadingEnd($parentElement, self._generateList($parentElement, data, false, true), $placeholder);
-					       $parentElement.data('options').loaded = true;
-					       if(endLoad != undefined){
-						       endLoad.call($parentElement);
-					       }
-				       }
-			       });
+					url: loadUrl,
+					dataType: "json",
+					success: function(data){
+						self._loadingEnd($parentElement, self._generateList($parentElement, data, false, true), $placeholder);
+						$parentElement.data('options').loaded = true;
+						if(endLoad != undefined){
+							endLoad.call($parentElement);
+						}
+					}
+				});
 		},
 
 		/**

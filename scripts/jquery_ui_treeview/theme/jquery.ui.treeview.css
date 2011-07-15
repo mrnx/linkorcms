@@ -70,7 +70,6 @@
 
 .treeview .item_icon{
 	margin: 2px 5px 0 5px;
-	cursor: move;
 	display: inline-block;
 }
 .treeview .item_icon img{
