@@ -87,9 +87,7 @@ class HTML{
 	}
 
 	public function FFile( $name, $other = '' ){
-		return '<input type="file" name="$name"'.($other ? ' '.$other : '').">\n";
+		return '<input type="file" name="'.$name.'"'.($other ? ' '.$other : '').">\n";
 	}
 
 }
-
-?>
