@@ -388,7 +388,7 @@ class PageTemplate extends Starkyt{
 			$persent = 100 / $end_time;
 			$memory = memory_get_peak_usage(true);
 			$MB = $memory / 1024 / 1024;
-			$info = 'Страница сгенерирована за '.sprintf("%01.4f", $end_time).' сек. Шаблонизатор: '.sprintf("%01.4f", $end - $start).' сек.<br>'
+			$info = 'Страница сгенерирована за '.sprintf("%01.4f", $end_time).' сек. Шаблонизатор: '.sprintf("%01.4f", $end - $start).' сек. Инициализация ядра: '.sprintf("%01.4f", INIT_CORE_END - INIT_CORE_START).' сек.<br>'
 					.'Память: '.sprintf("%01.2f", $MB).'М./'.get_cfg_var('memory_limit').'. '
 			        .'БД: '.System::database()->NumQueries.' запросов за '.sprintf("%01.4f", System::database()->QueryTotalTime).' сек. ( PHP: '.round($persent * $php_time).'% БД: '.round($persent * System::database()->QueryTotalTime).'% )';
 		}else{
@@ -406,5 +406,3 @@ class PageTemplate extends Starkyt{
 	}
 
 }
-
-?>

@@ -73,16 +73,15 @@ function GetFiles( $folder, $use_subfolders = false, $use_mask = false, $mask = 
 }
 
 /**
- * Возвращает список поддиректорий из заданной директории.
+ * Возвращает список поддиректорий из заданной директории
  *
- * @param String $folder Путь до папки с последним слешем.
+ * @param String $folder Путь до папки с последним слешем
  */
 function GetFolders( $folder ){
 	$result = array();
 	if(!is_dir($folder)){
 		return $result;
 	}
-
 	$files = scandir($folder);
 	foreach($files as $p){
 		if(($p != ".") && ($p != "..")){

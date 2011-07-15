@@ -27,15 +27,15 @@ function IndexSearchMain(){
 	$vars['searchstr'] = (isset($_GET['searchstr']) ? SafeEnv($_GET['searchstr'], 255, str) : '');
 	$site->Blocks['search_form']['vars'] = $vars;
 	$site->AddBlock('search_modules', true, true, 'mod');
-	$plugins = LoadPlugins();
-	$plugins = $plugins['groups']['search']['plugins'];
+
+	$plugins = PluginsGetInfo('search');
 	foreach($plugins as $mod){
 		$vars = array();
-		$vars['title'] = $mod['mod_title'];
-		$vars['name'] = $mod['function'];
-		$vars['checked'] = in_array($vars['name'], $mods) || $all;
+		$vars['title'] = $mod['name'];
+		$vars['name'] = $mod['folder'];
+		$vars['checked'] = in_array($vars['folder'], $mods) || $all;
 		if($all){
-			$mods[] = $vars['name'];
+			$mods[] = $vars['folder'];
 		}
 		$site->AddSubBlock('search_modules', true, $vars);
 	}
@@ -116,5 +116,3 @@ switch($op){
 	default:
 		HackOff();
 }
-
-?>

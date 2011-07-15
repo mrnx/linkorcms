@@ -1,9 +1,9 @@
 <?php
 
-# LinkorCMS
-# © 2006-2011 Галицкий Александр Николаевич (linkorcms@yandex.ru)
-# Файл: index.php
-# Назначение: Инсталлятор
+/*
+ * LinkorCMS 1.4
+ * © 2011 LinkorCMS Development Group
+ */
 
 define("SETUP_SCRIPT", true);
 define("VALID_RUN", true);
@@ -46,4 +46,3 @@ if(isset($_GET['mod'])){
 }
 $setup->Page($mod);
 
-?>

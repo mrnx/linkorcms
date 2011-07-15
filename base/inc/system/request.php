@@ -114,7 +114,7 @@ function SafeEnv( $Var, $MaxLength, $Type, $StripTags = false, $AddSlashes = tru
 			}
 			if($AddSlashes){
 				if(defined("DATABASE")){
-					$v = $db->EscapeString($v);
+					$v = System::database()->EscapeString($v);
 				}else{
 					$v = addslashes($v);
 				}

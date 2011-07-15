@@ -44,7 +44,6 @@ function _SendAvatar( $avatar, $saveTo = '', $width = 0, $height = 0 ){
 	}
 }
 
-include_once($config['inc_dir'].'picture.class.php');
 if(isset($_GET['size'])){
 	$_name = GetFileName($avatar);
 	$_ext = GetFileExt($avatar);

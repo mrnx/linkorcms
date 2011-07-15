@@ -2,8 +2,7 @@
 
 /*
  * LinkorCMS 1.4
- * © 2011 Александр Галицкий (linkorcms@yandex.ru)
- * и LinkorCMS Development Group
+ * © 2011 LinkorCMS Development Group
  */
 
 define('MAIN_SCRIPT', true);
@@ -98,5 +97,3 @@ if($valid_init){
 		mod_finalization();
 	}
 }
-
-?>

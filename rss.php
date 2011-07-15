@@ -1,9 +1,9 @@
 <?php
 
-# LinkorCMS
-# © 2006-2009 Галицкий Александр Николаевич (linkorcms@yandex.ru)
-# Файл: rss.php
-# Назначение: Генератор RSS
+/*
+ * LinkorCMS 1.4
+ * © 2011 LinkorCMS Development Group
+ */
 
 define('RSS_SCRIPT', true);
 define('VALID_RUN', true);
@@ -35,5 +35,3 @@ foreach($news as $s){
 }
 
 echo $rss->Generate();
-
-?>

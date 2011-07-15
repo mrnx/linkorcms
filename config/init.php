@@ -10,6 +10,8 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
+define('INIT_CORE_START', microtime(true));
+
 @error_reporting(E_ALL);
 @ini_set('display_errors', true);
 @ini_set('html_errors', false);
@@ -160,7 +162,7 @@ if(is_file('config/db_config.php')){ // Система установлена
 
 	// Подключение к базе данных
 	define("DATABASE", true);
-	SystemPluginsIncludeGroup('database', 'layer'); // Подключение драйвера базы данных
+	SystemPluginsIncludeGroup('database'); // Подключение драйвера базы данных
 	if(method_exists($db, 'Connect')){
 		$db->ErrorReporting = $config['db_errors'];
 		$db->Prefix = $config['db_pref'];
@@ -168,7 +170,7 @@ if(is_file('config/db_config.php')){ // Система установлена
 		if(!$db->Connected){
 			exit('<html><head><title>Ошибка</title></head><body><center>Проблемы с базой данных, проверьте настройки базы данных.</center></body></html>');
 		}
-	} else{
+	}else{
 		exit('<html><head><title>Ошибка</title></head><body><center>Проблема с подключением драйвера базы данных.</center></body></html>');
 	}
 	if($db->DbSelected){
@@ -230,3 +232,5 @@ if(is_file('config/db_config.php')){ // Система установлена
 	Header("Location: setup.php");
 	exit();
 }
+
+define('INIT_CORE_END', microtime(true));

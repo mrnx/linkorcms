@@ -189,8 +189,8 @@ class AdminPage extends PageTemplate{
 	public function SpeedConfirm( $Title, $Url, $ImgSrc = '', $ConfirmMsg = 'Уверены?' ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
-		$OnClick = "return Admin.Buttons.Confirm('$ConfirmMsg', this)";
-		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'">'
+		$OnClick = "event.cancelBubble = true; event.stopPropagation(); return Admin.Buttons.Confirm('$ConfirmMsg', this);";
+		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
 			.'</a>';
 	}
@@ -207,8 +207,8 @@ class AdminPage extends PageTemplate{
 	public function SpeedConfirmJs( $Title, $OnClick, $ImgSrc = '', $ConfirmMsg = '' ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
-		$OnClick = "if(confirm('$ConfirmMsg')) $OnClick; return false";
-		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'">'
+		$OnClick = "if(confirm('$ConfirmMsg')) $OnClick; event.cancelBubble = true; event.stopPropagation(); return false";
+		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
 			.'</a>';
 	}
@@ -230,8 +230,8 @@ class AdminPage extends PageTemplate{
 
 		$ImgSrc = ($Status ? $EnabledImage : $DisabledImage);
 		$Title = ($Status ? $EnabledTitle : $DisabledTitle);
-		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); return false;";
-		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'">'
+		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); event.cancelBubble = true; event.stopPropagation(); return false;";
+		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
 			.'</a>';
 		return $s;
@@ -241,8 +241,8 @@ class AdminPage extends PageTemplate{
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
 
-		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMsg',  this); return false;";
-		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'">'
+		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMsg',  this); event.cancelBubble = true; event.stopPropagation(); return false;";
+		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
 			.'</a>';
 	}
@@ -484,5 +484,3 @@ function AddForm( $open, $submit_btn ){System::admin()->AddForm($open, $submit_b
 function FormClear(){System::admin()->FormClear();}
 function GenAdminMenu(){System::admin()->AddAdminMenu();}
 function TEcho(){System::admin()->TEcho();}
-
-?>

@@ -438,8 +438,8 @@ function AdminUserAvatarsGallery()
 	AddText($text);
 	if(!$personal && $galeryedit){
 		$text .= '<br />.: Загрузить аватар :.';
-		FormRow('Имя файла', $site->FFile('avatar'));
-		AddForm($site->FormOpen($config['admin_file'].'?exe=user&a=saveavatar', 'post', 'multipart/form-data'), $site->Submit('Загрузить'));
+		FormRow('Выберите файл', $site->FFile('avatar'));
+		AddForm($site->FormOpen($config['admin_file'].'?exe=user&a=saveavatar', 'post', true), $site->Submit('Загрузить'));
 	}
 	AddText('<br />');
 }
@@ -632,5 +632,3 @@ if(!AdminUser($a)){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);
 	return;
 }
-
-?>
