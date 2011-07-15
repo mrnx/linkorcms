@@ -113,8 +113,13 @@ HTML;
 
 function AdminPhpTesterPerform(){
 	ob_start();
-	eval(Utf8ToCp1251($_POST['code']));
+	$test = eval(Utf8ToCp1251($_POST['code']));
 	$source = ob_get_clean();
+	if($source == ''){
+		ob_start();
+		print_r($test);
+		$source = ob_get_clean();
+	}
 	echo htmlspecialchars($source);
 	exit();
 }
@@ -205,5 +210,3 @@ function AdminPhpTesterDelete(){
 	System::database()->Delete('snippets', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");
 	exit('OK');
 }
-
-?>
