@@ -104,6 +104,7 @@ function GetRefererUrl( $id ){
 
 /**
  * Возвращает относительную директорию, в которую установлен сайт.
+ * @param bool $EndSlash Добавить последний слэш
  * @return String
  * @since 1.3.3
  */
@@ -117,12 +118,19 @@ function GetSiteDir( $EndSlash = true ){
 	return $dir;
 }
 
+/**
+ * Возвращает абсолютный путь до корня сайта.
+ * @param bool $EndSlash Добавить последний слэш
+ * @return string
+ */
 function GetSiteRoot( $EndSlash = true ){
-	$doc = $_SERVER['DOCUMENT_ROOT'];
-	$dir = GetSiteDir($EndSlash);
-	if(substr($doc, -1) != '/' && substr($dir, 0, 1) != '/') $doc .= '/';
-	$root = $doc.$dir;
-	return $root;
+	$dir = $_SERVER['DOCUMENT_ROOT'].GetSiteDir(true);
+	if(substr($dir, -1) != '/' && $EndSlash){
+		$dir .= '/';
+	}elseif(substr($dir, -1) == '/' && !$EndSlash){
+		$dir = substr($dir, 0, -1);
+	}
+	return $dir;
 }
 
 /**
