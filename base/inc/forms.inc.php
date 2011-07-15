@@ -14,31 +14,28 @@ $user_funcs2 = array();
 $plugins = array();
 
 //Подключаем плагины
-	$user_funcs = get_defined_functions();
-	$user_funcs = $user_funcs['user'];
-	$plugins = GetFiles($forms_plugins_dir, false, true, '.php', true);
-	foreach($plugins as $pl){
-		include ($forms_plugins_dir.$pl);
-	}
+$user_funcs = get_defined_functions();
+$user_funcs = $user_funcs['user'];
 
-	$user_funcs2 = get_defined_functions();
-	$user_funcs2 = $user_funcs2['user'];
-	$a_plugins = array();
-	$a_plugins = array_diff($user_funcs2, $user_funcs);
-	unset($user_funcs, $user_funcs2, $plugins);
+// Подключаем плагины
+SystemPluginsIncludeGroup('forms');
 
-	$cl_plugins = array();
-	$cs_plugins = array();
-	$ll = strlen(CONF_GET_PREFIX);
-	$sl = strlen(CONF_SAVE_PREFIX);
-	foreach($a_plugins as $pl){
-		if(substr($pl, 0, $ll) == CONF_GET_PREFIX){
-			$cl_plugins[] = array(substr($pl, $ll), $pl);
-		}elseif(substr($pl, 0, $sl) == CONF_SAVE_PREFIX){
-			$cs_plugins[] = array(substr($pl, $sl), $pl);
-		}
+$user_funcs2 = get_defined_functions();
+$user_funcs2 = $user_funcs2['user'];
+$a_plugins = array();
+$a_plugins = array_diff($user_funcs2, $user_funcs);
+
+$cl_plugins = array();
+$cs_plugins = array();
+$ll = strlen(CONF_GET_PREFIX);
+$sl = strlen(CONF_SAVE_PREFIX);
+foreach($a_plugins as $pl){
+	if(substr($pl, 0, $ll) == CONF_GET_PREFIX){
+		$cl_plugins[] = array(substr($pl, $ll), $pl);
+	}elseif(substr($pl, 0, $sl) == CONF_SAVE_PREFIX){
+		$cs_plugins[] = array(substr($pl, $sl), $pl);
 	}
-	unset($sl, $sl, $pl);
+}
 ///////////////
 
 // Приводим переменную к нужному типу
@@ -252,4 +249,3 @@ function FormsGetControl( $name, $value, $kind, $type, $values )
 	}
 	return $control;
 }
-?>

@@ -1,9 +1,9 @@
 <?php
 
-# LinkorCMS
-# © 2006-2011 Галицкий Александр Николаевич (linkorcms@yandex.ru)
-# Файл: admin.php
-# Назначение: Главная страница АДМИН-панели
+/*
+ * LinkorCMS 1.4
+ * © 2011 LinkorCMS Development Group
+ */
 
 define('ADMIN_SCRIPT', true);
 define('VALID_RUN', true);
@@ -84,4 +84,3 @@ if(is_file(MOD_FILE)){
 // Вывод данных
 System::admin()->TEcho();
 
-?>

@@ -15,25 +15,25 @@ System::admin()->AddSubTitle('Модули');
 $action = isset($_GET['a']) ? $_GET['a'] : 'main';
 
 System::admin()->SideBarAddMenuItem('Расширения', 'exe=modules&a=main', 'main');
-System::admin()->SideBarAddMenuItem('Установить', 'exe=modules&a=install', 'install');
-//System::admin()->SideBarAddMenuItem('Установка дополнений', 'exe=modules&a=installlist', 'installlist');
-//System::admin()->SideBarAddMenuItem('Модули', 'exe=modules&a=main', 'main');
-//System::admin()->SideBarAddMenuItem('Блоки', 'exe=modules&a=block_types', 'block_types');
-//System::admin()->SideBarAddMenuItem('Плагины', 'exe=modules&a=plugins', 'plugins');
-System::admin()->SideBarAddMenuBlock('Модули', $action);
+System::admin()->SideBarAddMenuItem('Установить', 'exe=modules&a=installlist', 'installlist');
+System::admin()->SideBarAddMenuBlock('', $action);
 
 switch($action){
 	case 'main':
-		AdminModules(false);
-		break;
-	case 'system':
-		AdminModulesList(true);
+		AdminModules();
 		break;
 	case 'installlist':
 		AdminModulesInstallList();
 		break;
 	case 'install':
 		AdminModulesInstall();
+		break;
+	case 'upload':
+		AdminModulesUpload();
+	break;
+//////////////////////////////////
+	case 'system':
+		AdminModulesList(true);
 		break;
 	case 'uninstall':
 		AdminModulesUninstall();
@@ -85,61 +85,619 @@ switch($action){
 		AdminModulesList(false);
 }
 
+/*
+ * Список всех установленных расширений.
+ */
 function AdminModules(){
 	UseScript('jquery_ui');
 	$mod_dir = System::config('mod_dir');
 	$blocks_dir = System::config('blocks_dir');
-	// Выполняем поиск расширений
+	$plug_dir = System::config('plug_dir');
+	$tpl_dir = System::config('tpl_dir');
 
+	// Стили
+	$style = '<style>
+	.ex-mod{ border-bottom: 1px #ccf solid; background-color: #F5F5FF; cursor: pointer; }
+	.ex-mod:hover{ background-color: #DDEAF7; }
+	.ex-mod-info { padding-top: 4px; }
+	.ex-mod-info-description { padding-top: 0; margin-bottom: 5px; }
+	.mod_info { margin-bottom: 5px; }
+	</style>';
 
-	$module = array(); // $module['name'] = array();
-	$block = array(); // $block['name'] = array();
-	$plugins = array(); // $plugins['name'] = array();
-	$template = array(); // $template['name'] = array();
-
-	$mod_dirs = GetFolders($mod_dir);
-	foreach($mod_dirs as $dir){
-		$info_php = $mod_dir.$dir.'/info.php';
-		if(is_file($info_php)){
-			include($info_php);
-		}
+	// JS
+	System::site()->AddJS('
+	window.last_mod_id = "";
+	function ShowModInfo(id){
+	  $(".mod_info").slideUp().parents().css("cursor", "pointer");
+	  if(last_mod_id != id){
+	  	$("#mod_info_"+id).slideDown().parents().css("cursor", "default");
+	  	last_mod_id = id;
+	  }else{
+	    last_mod_id = "";
+	  }
 	}
-	System::log()->Dump($module);
-
-	$blocks_dirs = GetFolders($blocks_dir);
-	foreach($blocks_dirs as $dir){
-		$info_php = $blocks_dir.$dir.'/info.php';
-		if(is_file($info_php)){
-			include($info_php);
-		}
+	window.last_block_id = "";
+	function ShowBlockInfo(id){
+	  $(".mod_info").slideUp().parents().css("cursor", "pointer");
+	  if(last_block_id != id){
+	  	$("#mod_info_"+id).slideDown().parents().css("cursor", "default");
+	  	last_block_id = id;
+	  }else{
+	    last_block_id = "";
+	  }
 	}
-	System::log()->Dump($block);
+	');
 
-	$modules_html = '';
+	// Модули
+	$modules_html = '<div style="border-top: 1px #ccf solid; ">';
+	$mods = System::database()->Select('modules', "`system`='0'");
+	foreach($mods as $mod){
+		$info = ExtLoadInfo($mod_dir.$mod['folder']);
+		if($info === false) continue;
 
+		$mid = SafeEnv($mod['id'], 11, int);
+		$func = '';
+		$func .= System::admin()->SpeedStatus(
+			'Отключить', 'Подключить',
+			ADMIN_FILE.'?exe=modules&a=changestatus&id='.$mid,
+			$mod['enabled'] == '1',
+			'images/bullet_green.png', 'images/bullet_red.png'
+		);
+
+		// Показываем кнопку удаления, только тогда, когда существует программа удаления
+		if(is_file($mod_dir.$mod['folder'].'/uninstall.php')){
+			$func .= System::admin()->SpeedConfirm(
+				'Удалить',
+				'#',
+				'images/admin/delete.png',
+				'Полностью удалить модуль '.$mod['name'].'?'
+			);
+		}
+		if(isset($info['icon'])){
+			$icon = $info['icon'];
+		}else{
+			$icon = 'images/application.png';
+		}
+		if(isset($info['version'])){
+			$version = SafeDB($info['version'], 255, str);
+		}else{
+			$version = CMS_VERSION;
+		}
+		if(isset($info['author'])){
+			$author = SafeDB($info['author'], 255, str);
+		}else{
+			$author = '';
+		}
+		if(isset($info['site'])){
+			$site = SafeDB($info['site'], 255, str);
+		}else{
+			$site = '';
+		}
+		if(isset($info['description'])){
+			$description = SafeDB($info['description'], 0, str, false, false);
+		}else{
+			$description = 'Нет описания.';
+		}
+
+		$modules_html .= '<table width="100%" class="ex-mod">
+		<tr onmousedown="ShowModInfo(\'mod'.$mid.'\');">
+			<td style="padding-left: 11px; vertical-align: top;">
+				<div style="float: left;">
+					<div style="float:left; padding-top: 6px;"><img src="'.$icon.'"></div>
+					<div style="float:left; padding-top: 7px;">&nbsp;'.$mod['name'].' (v'.$version.')</div>
+				</div>
+			</td>
+			<td width="62" align="center" style="padding: 3px; padding-bottom: 2px;">
+				<div style="float: left">'.$func.'</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div class="mod_info" id="mod_info_mod'.$mid.'" style="display: none; padding: 4px; padding-left: 11px;">
+					<div class="ex-mod-info-description">'.$description.'</div>
+		      '.($author != '' ? '<div class="ex-mod-info">Автор: '.$author.'</div>' : '').'
+		      '.($site != '' ? '<div class="ex-mod-info">Сайт: <a href="'.$site.'" target="_blank">'.$site.'</a></div>' : '').'
+				</div>
+			</td>
+		</tr>
+		</table>';
+	}
+	$modules_html .= '</div>';
+
+	// Блоки
+	$blocks_html = '<div style="border-top: 1px #ccf solid; ">';
+	$mods = System::database()->Select('block_types');
+	foreach($mods as $mod){
+		$info = ExtLoadInfo($blocks_dir.$mod['folder']);
+		if($info === false) continue;
+
+		$mid = SafeEnv($mod['id'], 11, int);
+		$func = '';
+		// Показываем кнопку удаления, только тогда, когда существует программа удаления
+		if(is_file($blocks_dir.$mod['folder'].'/uninstall.php')){
+			$func .= System::admin()->SpeedConfirm(
+				'Удалить',
+				'#',
+				'images/admin/delete.png',
+				'Полностью удалить модуль '.$mod['name'].'?'
+			);
+		}
+		if(isset($info['icon']) && $info['icon'] != ''){
+			$icon = $info['icon'];
+		}else{
+			$icon = 'images/application.png';
+		}
+		if(isset($info['version'])){
+			$version = SafeDB($info['version'], 255, str);
+		}else{
+			$version = CMS_VERSION;
+		}
+		if(isset($info['author']) && $info['author'] != ''){
+			$author = SafeDB($info['author'], 255, str);
+		}else{
+			$author = '';
+		}
+		if(isset($info['site']) && $info['site'] != ''){
+			$site = SafeDB($info['site'], 255, str);
+		}else{
+			$site = '';
+		}
+		if(isset($info['description']) && $info['description'] != '' && $info['description'] != ' - '){
+			$description = SafeDB($info['description'], 0, str, false, false);
+		}else{
+			$description = 'Нет описания.';
+		}
+
+		$blocks_html .= '<table width="100%" class="ex-mod">
+		<tr onmousedown="ShowBlockInfo(\'block'.$mid.'\');">
+			<td style="padding-left: 11px; vertical-align: top;">
+				<div style="float: left;">
+					<div style="float:left; padding-top: 6px;"><img src="'.$icon.'"></div>
+					<div style="float:left; padding-top: 7px;">&nbsp;'.$mod['name'].' (v'.$version.')</div>
+				</div>
+			</td>
+			<td width="62" align="center" style="padding: 3px; padding-bottom: 2px;">
+				<div style="float: left">'.$func.'</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div class="mod_info" id="mod_info_block'.$mid.'" style="display: none; padding: 4px; padding-left: 11px;">
+					<div class="ex-mod-info-description">'.$description.'</div>
+		      '.($author != '' ? '<div class="ex-mod-info">Автор: '.$author.'</div>' : '').'
+		      '.($site != '' ? '<div class="ex-mod-info">Сайт: <a href="'.$site.'" target="_blank">'.$site.'</a></div>' : '').'
+				</div>
+			</td>
+		</tr>
+		</table>';
+	}
+	$blocks_html .= '</div>';
+
+	// Плагины
+	$plugins_html = '<div style="border-top: 1px #ccf solid; ">';
+	$mods = System::database()->Select('plugins');
+	foreach($mods as $mod){
+		if($mod['group'] != ''){
+			$path = $plug_dir.$mod['group'].'/'.$mod['name'];
+		}else{
+			$path = $plug_dir.$mod['name'];
+		}
+		$info = ExtLoadInfo($path);
+		if($info === false) continue;
+
+		$mid = SafeEnv($mod['id'], 11, int);
+		$func = '';
+		// Показываем кнопку удаления, только тогда, когда существует программа удаления
+		if(isset($info['1.3']) || is_file($plug_dir.$mod['name'].'/uninstall.php')){
+			$func .= System::admin()->SpeedConfirm(
+				'Удалить',
+				'#',
+				'images/admin/delete.png',
+				'Полностью удалить плагин '.$mod['name'].'?'
+			);
+		}
+		if(isset($info['icon']) && $info['icon'] != ''){
+			$icon = $info['icon'];
+		}else{
+			$icon = 'images/application.png';
+		}
+		if(isset($info['version'])){
+			$version = SafeDB($info['version'], 255, str);
+		}else{
+			$version = CMS_VERSION;
+		}
+		if(isset($info['author']) && $info['author'] != ''){
+			$author = SafeDB($info['author'], 255, str);
+		}else{
+			$author = '';
+		}
+		if(isset($info['site']) && $info['site'] != ''){
+			$site = SafeDB($info['site'], 255, str);
+		}else{
+			$site = '';
+		}
+		if(isset($info['description']) && $info['description'] != '' && $info['description'] != ' - '){
+			$description = SafeDB($info['description'], 0, str, false, false);
+		}else{
+			$description = 'Нет описания.';
+		}
+
+		$plugins_html .= '<table width="100%" class="ex-mod">
+		<tr onmousedown="ShowBlockInfo(\'plug'.$mid.'\');">
+			<td style="padding-left: 11px; vertical-align: top;">
+				<div style="float: left;">
+					<div style="float:left; padding-top: 6px;"><img src="'.$icon.'"></div>
+					<div style="float:left; padding-top: 7px;">&nbsp;'.$mod['name'].' (v'.$version.')</div>
+				</div>
+			</td>
+			<td width="62" align="center" style="padding: 3px; padding-bottom: 2px;">
+				<div style="float: left">'.$func.'</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div class="mod_info" id="mod_info_plug'.$mid.'" style="display: none; padding: 4px; padding-left: 11px;">
+					<div class="ex-mod-info-description">'.$description.'</div>
+		      '.($author != '' ? '<div class="ex-mod-info">Автор: '.$author.'</div>' : '').'
+		      '.($site != '' ? '<div class="ex-mod-info">Сайт: <a href="'.$site.'" target="_blank">'.$site.'</a></div>' : '').'
+				</div>
+			</td>
+		</tr>
+		</table>';
+	}
+	$plugins_html .= '</div>';
+
+	// Шаблоны
+	$templates_html = '<div style="border-top: 1px #ccf solid; ">';
+	$mods = System::database()->Select('templates');
+	foreach($mods as $mod){
+		$info = ExtLoadInfo($tpl_dir.$mod['folder']);
+		if($info === false) continue;
+
+		$mid = SafeEnv($mod['id'], 11, int);
+		$func = '';
+		$func .= System::admin()->SpeedConfirm(
+			'Удалить',
+			'#',
+			'images/admin/delete.png',
+			'Удалить шаблон '.$info['name'].'?'
+		);
+		if(isset($info['icon']) && $info['icon'] != ''){
+			$icon = $info['icon'];
+		}else{
+			$icon = 'images/application.png';
+		}
+		if(isset($info['version'])){
+			$version = SafeDB($info['version'], 255, str);
+		}else{
+			$version = '';
+		}
+		if(isset($info['author']) && $info['author'] != ''){
+			$author = SafeDB($info['author'], 255, str);
+		}else{
+			$author = '';
+		}
+		if(isset($info['site']) && $info['site'] != ''){
+			$site = SafeDB($info['site'], 255, str);
+		}else{
+			$site = '';
+		}
+		if(isset($info['description']) && $info['description'] != '' && $info['description'] != ' - '){
+			$description = SafeDB($info['description'], 0, str, false, false);
+		}else{
+			$description = 'Нет описания.';
+		}
+
+		$templates_html .= '<table width="100%" class="ex-mod">
+		<tr onmousedown="ShowBlockInfo(\'tpl'.$mid.'\');">
+			<td style="padding-left: 11px; vertical-align: top;">
+				<div style="float: left;">
+					<div style="float:left; padding-top: 6px;"><img src="'.$icon.'"></div>
+					<div style="float:left; padding-top: 7px;">&nbsp;'.$info['name'].($version != '' ?  ' (v'.$version.')' : '').($mod['admin'] == '1' ? ' (Админ-панель)' : '').'</div>
+				</div>
+			</td>
+			<td width="62" align="center" style="padding: 3px; padding-bottom: 2px;">
+				<div style="float: left">'.$func.'</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div class="mod_info" id="mod_info_tpl'.$mid.'" style="display: none; padding: 4px; padding-left: 11px;">
+					<div class="ex-mod-info-description">'.$description.'</div>
+		      '.($author != '' ? '<div class="ex-mod-info">Автор: '.$author.'</div>' : '').'
+		      '.($site != '' ? '<div class="ex-mod-info">Сайт: <a href="'.$site.'" target="_blank">'.$site.'</a></div>' : '').'
+				</div>
+			</td>
+		</tr>
+		</table>';
+	}
+	$templates_html .= '</div>';
 
 	// Выводим расширения по вкладкам
 	System::admin()->AddOnLoadJS('
 	$("#tabs").tabs({event: "mousedown"}).css("width", "700px");
 	$(".ui-tabs .ui-tabs-panel")
 		.css("padding", "0")
+		.css("padding-top","3px")
 		.css("height", "400px")
 		.css("overflow-y", "auto");
 ');
 	$html = '<div id="tabs">
 	<ul>
-		<li><a href="#tabs-1"><img src="images/widgets.png" style="vertical-align: bottom;"> Модули</a></li>
-		<li><a href="#tabs-2"><img src="images/block.png" style="vertical-align: bottom;"> Блоки</a></li>
-		<li><a href="#tabs-3"><img src="images/plugin.png" style="vertical-align: bottom;"> Плагины</a></li>
-		<li><a href="#tabs-4"><img src="images/skins.png" style="vertical-align: bottom;"> Шаблоны</a></li>
+		<li><a href="#tabs-1"><img src="images/widgets.png" style="vertical-align: bottom;">&nbsp;Модули</a></li>
+		<li><a href="#tabs-2"><img src="images/block.png" style="vertical-align: bottom;">&nbsp;Блоки</a></li>
+		<li><a href="#tabs-3"><img src="images/plugin.png" style="vertical-align: bottom;">&nbsp;Плагины</a></li>
+		<li><a href="#tabs-4"><img src="images/skins.png" style="vertical-align: bottom;">&nbsp;Шаблоны</a></li>
 	</ul>
-	<div id="tabs-1">1</div>
-	<div id="tabs-2">2</div>
-	<div id="tabs-3">3</div>
-	<div id="tabs-4">4</div>
+	<div id="tabs-1">'.$modules_html.'</div>
+	<div id="tabs-2">'.$blocks_html.'</div>
+	<div id="tabs-3">'.$plugins_html.'</div>
+	<div id="tabs-4">'.$templates_html.'</div>
 </div>';
 
-	System::admin()->AddTextBox('Расширения', $html);
+	System::admin()->AddTextBox('Расширения', $style.$html);
+}
+
+/*
+ * Список расширений доступных для установки.
+ */
+function AdminModulesInstallList(){
+	global $db, $config, $site;
+
+	$mod_dir = $config['mod_dir'];
+	$plug_dir = $config['plug_dir'];
+	$block_dir = $config['blocks_dir'];
+	$temp_dir = $config['tpl_dir'];
+	$list = array();
+
+	$title = 'Установка расширений';
+	System::admin()->AddSubTitle($title);
+
+	// Загружаем информацию об установленных модулях
+	$installed_mods = array();
+	$installed_plugins = array();
+	$installed_blocks = array();
+	$installed_templates = array();
+	System::database()->Select('modules');
+	while($mod = System::database()->FetchRow()){
+		$installed_mods[] = $mod['folder'];
+	}
+	System::database()->Select('plugins');
+	while($mod = System::database()->FetchRow()){
+		$installed_plugins[] = ($mod['group'] != '' ? $mod['group'].'/' : '').$mod['name'];
+	}
+	System::database()->Select('block_types');
+	while($mod = System::database()->FetchRow()){
+		$installed_blocks[] = $mod['folder'];
+	}
+	System::database()->Select('templates');
+	while($mod = System::database()->FetchRow()){
+		$installed_templates[] = $mod['folder'];
+	}
+
+	// Поиск модулей
+	$mod_folders = GetFolders($mod_dir);
+	foreach($mod_folders as $folder){
+		if(!in_array($folder, $installed_mods)){
+			$info = ExtLoadInfo($mod_dir.$folder);
+			if($info !== false){
+				$info['type'] = EXT_MODULE;
+				$info['path'] = $mod_dir.$folder.'/';
+				$info['folder'] = $folder;
+				if(is_file($info['path'].'install.php') && is_file($info['path'].'uninstall.php')){
+					$list[] = $info;
+				}
+			}
+		}
+	}
+
+	// Поиск плагинов
+	$plug_folders = GetFolders($plug_dir);
+	foreach($plug_folders as $folder){
+		if(!is_file($plug_dir.$folder.'/info.php')){ // Возможно группа
+			$plug_folders2 = GetFolders($plug_dir.$folder.'/');
+			foreach($plug_folders2 as $folder2){
+				if(!in_array($folder.'/'.$folder2, $installed_plugins)){
+					$info = ExtLoadInfo($plug_dir.$folder.'/'.$folder2);
+					if($info !== false){
+						$info['type'] = EXT_PLUGIN;
+						$info['path'] = $plug_dir.$folder.'/'.$folder2.'/';
+						$info['group'] = $folder;
+						$info['folder'] = $folder2;
+						if(isset($info['1.3']) || (is_file($info['path'].'install.php') && is_file($info['path'].'uninstall.php'))){
+							$list[] = $info;
+						}
+					}
+				}
+			}
+		}
+		if(!in_array($folder, $installed_plugins)){
+			$info = ExtLoadInfo($plug_dir.$folder);
+			if($info !== false){
+				$info['type'] = EXT_PLUGIN;
+				$info['path'] = $plug_dir.$folder.'/';
+				$info['folder'] = $folder;
+				if(isset($info['1.3']) || (is_file($info['path'].'install.php') && is_file($info['path'].'uninstall.php'))){
+					$list[] = $info;
+				}
+			}
+		}
+	}
+
+	// Поиск блоков
+	$block_folders = GetFolders($block_dir);
+	foreach($block_folders as $folder){
+		if(!in_array($folder, $installed_blocks)){
+			$info = ExtLoadInfo($block_dir.$folder);
+			if($info !== false){
+				$info['type'] = EXT_BLOCK;
+				$info['path'] = $block_dir.$folder.'/';
+				$info['folder'] = $folder;
+				if(is_file($info['path'].'install.php') && is_file($info['path'].'uninstall.php')){
+					$list[] = $info;
+				}
+			}
+		}
+	}
+
+	// Поиск шаблонов
+	$temp_folders = GetFolders($temp_dir);
+	foreach($temp_folders as $folder){
+		$info = ExtLoadInfo($temp_dir.$folder);
+		if($info !== false){
+			$info['type'] = EXT_TEMPLATE;
+			$info['path'] = $temp_dir.$folder.'/';
+			$info['folder'] = $folder;
+			$list[] = $info;
+		}
+	}
+
+	$count = count($list);
+	$text = '<form action="'.ADMIN_FILE.'?exe=modules&a=install" method="post">';
+	$text .= '<table cellspacing="0" cellpadding="0" class="cfgtable">';
+	$text .= '<tr><th>Установка</th><th>Тип</th><th>Имя</th><th>Описание</th><th>Автор</th><th>Сайт</th></tr>';
+
+	foreach($list as $i=>$ext){
+		switch($ext['type']){
+			case 1: $type = '<img src="images/widgets.png" title="Модуль">';
+				break;
+			case 2: $type = '<img src="images/plugin.png" title="Плагин">';
+				break;
+			case 3: $type = '<img src="images/block.png" title="Блок">';
+				break;
+			case 4: $type = '<img src="images/skins.png" title="Шаблон">';
+				break;
+		}
+		$text .= '<tr>
+		<td>'
+			.$site->Check('install_'.$i, $list[$i])
+			.$site->Hidden('folder_'.$i, $ext['folder'])
+			.$site->Hidden('type_'.$i, $ext['type'])
+			.($ext['type'] == EXT_PLUGIN ? $site->Hidden('group_'.$i, $ext['group']) : '')
+		.'</td>
+		<td>'.$type.'</td>
+		<td>'.SafeDB($ext['name'], 255, str).'</td>
+		<td>'.(isset($ext['description']) && $ext['description'] != '' && $ext['description'] != ' - ' ? SafeDB($ext['description'], 255, str) : 'Нет описания').'</td>
+		<td>'.(isset($ext['author']) && $ext['author'] != '' ? SafeDB($ext['author'], 255, str) : '&nbsp;').'</td>
+		<td>'.(isset($ext['site']) && $ext['site'] != '' ? '<a href="'.$ext['site'].'" target="_blank">Перейти</a>' : 'Нет').'</td>
+		</tr>';
+	}
+
+	$text .= '</table>';
+	$text .= '<div style="margin-bottom: 25px;">'.$site->Hidden('count', $count).$site->Submit('Установить выделенные').'</div>';
+	$text .= '</form>';
+
+	System::admin()->AddCenterBox($title.' ('.$count.' готово к установке)');
+	System::admin()->AddText($text);
+
+	System::admin()->FormTitleRow('Загрузить новое');
+	System::admin()->FormRow('', $site->FFile('extension'));
+	System::admin()->AddForm(System::admin()->FormOpen(ADMIN_FILE.'?exe=modules&a=upload', 'post', true), System::admin()->Submit('Загрузить'));
+}
+
+/*
+ * Установка расширений.
+ */
+function AdminModulesInstall(){
+	global $db, $config, $site;
+	$count = SafeEnv($_POST['count'], 11, int);
+	$new_installed = array();
+	for($i = 0; $i < $count; $i++){
+		if(isset($_POST['install_'.$i])){
+			$type = $_POST['type_'.$i];
+			$folder = RealPath2($_POST['folder_'.$i], 255, str);
+			switch($type){
+				case EXT_PLUGIN:
+					$group = $_POST['group_'.$i];
+					$path = RealPath2(System::config('plug_dir').$group.'/'.$folder);
+					$info = ExtLoadInfo($path);
+					if(isset($info['1.3'])){ // Установка старой версии плагина
+						ExtInstallPlugin($group, $folder, $info['function'], $info['type']);
+						if(is_file($path.'/install.php')){
+							include $path.'/install.php';
+						}
+						$new_installed[] = $info; // здесь в любом случае
+					}else{
+						if(is_file($path.'/install.php')){
+							include $path.'/install.php';
+							$new_installed[] = $info;  // Наличие install.php обязательно
+						}
+					}
+				break;
+				case EXT_BLOCK:
+					$path = RealPath2(System::config('blocks_dir').$folder);
+					$info = ExtLoadInfo($path);
+					include $path.'/install.php';
+					$new_installed[] = $info;
+				break;
+				case EXT_MODULE:
+					$path = RealPath2(System::config('mod_dir').$folder);
+					$info = ExtLoadInfo($path);
+					include $path.'/install.php';
+					if(isset($info['1.3'])){
+						// Добавляем пункт меню
+						$folder = SafeEnv($folder, 255, str);
+						$mod_name = SafeEnv($info['name'], 255, str);
+						System::database()->Select('adminmenu', "`parent`='5'");
+						$order = System::database()->NumRows();
+						System::database()->Insert('adminmenu',"'','5','$order','$folder','$mod_name','images/application.png','exe=$folder','','0','','admin','1'");
+					}
+					$new_installed[] = $info;
+				break;
+				case EXT_TEMPLATE:
+					// Установка тем оформления происходит автоматически
+					$path = RealPath2(System::config('tpl_dir').$folder);
+					$info = ExtLoadInfo($path);
+					$admin = is_file($path.'/theme_admin.html') ? '1' : '0';
+					//ExtInstallTemplate($folder, $admin);
+					$new_installed[] = $info;
+				break;
+			}
+		}
+	}
+
+	$html = '';
+	$html .= '<div style="border: 1px #cfcfcf solid; width: 50%; background-color: #fff;">';
+	if(count($new_installed) > 0){
+		foreach($new_installed as $info){
+			$html .= '
+			<table style="width: 100%;">
+				<tr>
+					<td style="padding: 5px;">'.SafeDB($info['name'], 255, str).'</td>
+					<td style="width: 120px; padding: 5px;"><img src="images/admin/accept.png" style="vertical-align: middle;" /> Установлено</td>
+				</tr>
+			</table>';
+		}
+		$html .= '</div>'.System::admin()->Button('Назад', 'onclick="history.go(-1);"')
+						 .System::admin()->Button('Далее', "onclick=\"Admin.LoadPage('".ADMIN_FILE."?exe=modules');\"");
+		$cache = LmFileCache::Instance();
+		$cache->Clear('config');
+	}else{
+		$html .= '<div style="padding:  5px;">Вы не выбрали расширения для установки. Нажмите "назад" и отметьте галочками расширения которые нужно установить.</div>';
+		$html .= '</div>'.System::admin()->Button('Назад', 'onclick="history.go(-1);"');
+	}
+	System::admin()->AddTextBox('Установка расширений', $html);
+}
+
+/*
+ * Загрузка и распаковка новых модулей.
+ */
+function AdminModulesUpload(){
+	$extension = $_FILES['extension'];
+	$file_ext = GetFileExt($extension['name']);
+	if($file_ext == '.lex'){
+		if($extension['error'] != 0){
+			System::admin()->AddTextBox('Ошибка', 'Ошибка при загрузке файла. Код ошибки: '.$extension['error'].'.');
+			return;
+		}
+		// Распаковываем архив
+		if(!ExtExtract($extension['tmp_name'])){
+			System::admin()->AddTextBox('Ошибка', 'Не удалось прочитать файл. Неверный формат.');
+			return;
+		}
+	}else{
+		System::admin()->AddTextBox('Ошибка', 'Неверное расширение файла.');
+	}
 }
 
 function AdminModulesList( $system ){
@@ -205,63 +763,6 @@ function AdminModulesOrderSave(){
 	}else{
 		GO($config['admin_file'].'?exe=modules');
 	}
-}
-
-function AdminModulesInstallList(){
-	global $db, $config, $site;
-	TAddSubTitle('Установка');
-	$db->Select('modules', '');
-	while($mod = $db->FetchRow()){
-		$imod[] = SafeDB($mod['folder'], 255, str);// Сортируем по папкам
-	}
-	$list = array(); //Список неустановленных модулей
-	$dir = opendir($config['mod_dir']);
-	while($file = @readdir($dir)){
-		$fn = $config['mod_dir'].$file;
-		if(is_dir($fn) && ($file != ".") && ($file != "..")){
-			if(array_search($file, $imod) === FALSE){ // Если не установлен
-				if(is_file($fn.'/info.php')){
-					$list[] = $file;
-				}
-			}
-		}
-	}
-	@closedir($dir);
-	$cnt = count($list);
-	if($cnt > 0){
-		$text = '<form action="'.$config['admin_file'].'?exe=modules&a=install" method="post"><table cellspacing="0" cellpadding="0" class="cfgtable">';
-		$text .= '<tr><th>М</th><th>Имя</th><th>Комментарий</th><th>Папка</th><th>Системный</th><th>Автор</th></tr>';
-		for($i = 0; $i < $cnt; $i++){
-			include ($config['mod_dir'].$list[$i].'/info.php');
-			switch($module[$list[$i]]['system']){
-				case '1':
-					$sys = "Да";
-				case '0':
-					$sys = "Нет";
-			}
-			$text .= '<tr><td>'.$site->Check('no'.$i, $list[$i]).'</td><td>'.SafeDB($module[$list[$i]]['name'], 255, str).'</td><td>'.SafeDB($module[$list[$i]]['comment'], 255, str).'</td><td>'.$list[$i].'</td><td>'.$sys.'</td><td>'.SafeDB($module[$list[$i]]['copyright'], 255, str).'</td></tr>';
-		}
-		$text .= '</table>'.$site->Hidden('count', $cnt).$site->Submit('Установить выделенные');
-	}else{
-		$text = '<br />Новых модулей не найдено!<br /><br />';
-	}
-	AddTextBox('Установка модулей', $text);
-}
-
-function AdminModulesInstall(){
-	global $config, $db;
-	$cnt = SafeEnv($_POST['count'], 11, int);
-	for($i = 0; $i < $cnt; $i++){
-		if(isset($_POST['no'.$i])){
-			$n = $config['mod_dir'].$_POST['no'.$i].'/install.php';
-			if(file_exists($n)){
-				include_once ($config['mod_dir'].SafeEnv($_POST['no'.$i], 255, str).'/install.php');
-				$cache = LmFileCache::Instance();
-				$cache->Clear('config');
-			}
-		}
-	}
-	GO($config['admin_file'].'?exe=modules');
 }
 
 // Удаление модуля
@@ -644,5 +1145,3 @@ function AdminBlockTypesSave(){
 	}
 	GO(ADMIN_FILE.'?exe=modules&a=block_types');
 }
-
-?>
