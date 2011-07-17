@@ -179,9 +179,13 @@ function ExtInstallTemplate( $Folder, $Admin = '0' ){
 /**
  * Удаляет регистрацию шаблона из базы данных.
  * @param string $Folder Имя папки шаблона в директории шаблонов
+ * @param bool $DelFiles
  * @return void
  */
-function ExtDeleteTemplate( $Folder ){
-	$Folder = SafeEnv($Folder, 255, str);
-	System::database()->Delete('templates', "`folder`='$Folder'");
+function ExtDeleteTemplate( $Folder, $DelFiles = false ){
+	$FolderEnv = SafeEnv($Folder, 255, str);
+	System::database()->Delete('templates', "`folder`='$FolderEnv'");
+	if($DelFiles){ // Удаляем папку шаблона
+		RmDirRecursive(RealPath2(System::config('tpl_dir').$Folder));
+	}
 }

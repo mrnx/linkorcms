@@ -30,16 +30,28 @@ switch($action){
 		break;
 	case 'upload':
 		AdminModulesUpload();
-	break;
-//////////////////////////////////
-	case 'system':
-		AdminModulesList(true);
 		break;
 	case 'uninstall':
 		AdminModulesUninstall();
 		break;
+
+	// Модули
 	case 'changestatus':
 		AdminModulesChangeStatus();
+		break;
+	case 'config':
+		AdminModulesConfig();
+		break;
+	case 'configsave':
+		AdminModulesConfigSave();
+		break;
+
+//////////////////////////////////
+//////////////////////////////////
+//////////////////////////////////
+
+	case 'system':
+		AdminModulesList(true);
 		break;
 	case 'config':
 		AdminModulesConfig();
@@ -62,7 +74,7 @@ switch($action){
 			$conf_config_table = 'plugins_config';
 			$conf_config_groups_table = 'plugins_config_groups';
 			$group = SafeEnv((isset($_GET['group']) ? $_GET['group'].'.' : '').$_GET['name'], 255, str);
-			$url = (isset($_GET['group']) ? '&group='.SafeEnv($_GET['group'], 255, str) : '').'&name='.SafeEnv($_GET['name'], 255, str);
+			$url = (isset($_GET['group']) ? '&group='.SafeDB($_GET['group'], 255, str) : '').'&name='.SafeDB($_GET['name'], 255, str);
 			AdminConfigurationEdit('modules&a=plugins'.$url, $group, false, false, 'Конфигурация плагина', 'a=configsave_plugin');
 		}
 		break;
@@ -148,13 +160,13 @@ function AdminModules(){
 		if(is_file($mod_dir.$mod['folder'].'/uninstall.php')){
 			$func .= System::admin()->SpeedConfirm(
 				'Удалить',
-				'#',
+				ADMIN_FILE.'?exe=modules&a=uninstall&type='.EXT_MODULE.'&name='.SafeDB($mod['folder'], 255, str),
 				'images/admin/delete.png',
 				'Полностью удалить модуль '.$mod['name'].'?'
 			);
 		}
 		if(isset($info['icon'])){
-			$icon = $info['icon'];
+			$icon = SafeDB($info['icon'], 255, str);
 		}else{
 			$icon = 'images/application.png';
 		}
@@ -217,13 +229,13 @@ function AdminModules(){
 		if(is_file($blocks_dir.$mod['folder'].'/uninstall.php')){
 			$func .= System::admin()->SpeedConfirm(
 				'Удалить',
-				'#',
+				ADMIN_FILE.'?exe=modules&a=uninstall&type='.EXT_BLOCK.'&name='.SafeDB($mod['folder'], 255, str),
 				'images/admin/delete.png',
 				'Полностью удалить модуль '.$mod['name'].'?'
 			);
 		}
 		if(isset($info['icon']) && $info['icon'] != ''){
-			$icon = $info['icon'];
+			$icon = SafeDB($info['icon'], 255, str);
 		}else{
 			$icon = 'images/application.png';
 		}
@@ -291,13 +303,14 @@ function AdminModules(){
 		if(isset($info['1.3']) || is_file($plug_dir.$mod['name'].'/uninstall.php')){
 			$func .= System::admin()->SpeedConfirm(
 				'Удалить',
-				'#',
+				ADMIN_FILE.'?exe=modules&a=uninstall&type='.EXT_PLUGIN.'&name='.SafeDB($mod['name'], 255, str).($mod['group']!=''?'&group='.SafeDB($mod['group'], 255, str) : ''),
 				'images/admin/delete.png',
 				'Полностью удалить плагин '.$mod['name'].'?'
 			);
 		}
+		$name = SafeDB($info['name'], 255, str);
 		if(isset($info['icon']) && $info['icon'] != ''){
-			$icon = $info['icon'];
+			$icon = SafeDB($info['icon'], 255, str);
 		}else{
 			$icon = 'images/application.png';
 		}
@@ -327,7 +340,7 @@ function AdminModules(){
 			<td style="padding-left: 11px; vertical-align: top;">
 				<div style="float: left;">
 					<div style="float:left; padding-top: 6px;"><img src="'.$icon.'"></div>
-					<div style="float:left; padding-top: 7px;">&nbsp;'.$mod['name'].' (v'.$version.')</div>
+					<div style="float:left; padding-top: 7px;">&nbsp;'.$name.' (v'.$version.')</div>
 				</div>
 			</td>
 			<td width="62" align="center" style="padding: 3px; padding-bottom: 2px;">
@@ -358,7 +371,7 @@ function AdminModules(){
 		$func = '';
 		$func .= System::admin()->SpeedConfirm(
 			'Удалить',
-			'#',
+			ADMIN_FILE.'?exe=modules&a=uninstall&type='.EXT_TEMPLATE.'&name='.SafeDB($mod['folder'], 255, str),
 			'images/admin/delete.png',
 			'Удалить шаблон '.$info['name'].'?'
 		);
@@ -614,12 +627,12 @@ function AdminModulesInstall(){
 					if(isset($info['1.3'])){ // Установка старой версии плагина
 						ExtInstallPlugin($group, $folder, $info['function'], $info['type']);
 						if(is_file($path.'/install.php')){
-							include $path.'/install.php';
+							require $path.'/install.php';
 						}
 						$new_installed[] = $info; // здесь в любом случае
 					}else{
 						if(is_file($path.'/install.php')){
-							include $path.'/install.php';
+							require $path.'/install.php';
 							$new_installed[] = $info;  // Наличие install.php обязательно
 						}
 					}
@@ -627,13 +640,13 @@ function AdminModulesInstall(){
 				case EXT_BLOCK:
 					$path = RealPath2(System::config('blocks_dir').$folder);
 					$info = ExtLoadInfo($path);
-					include $path.'/install.php';
+					require $path.'/install.php';
 					$new_installed[] = $info;
 				break;
 				case EXT_MODULE:
 					$path = RealPath2(System::config('mod_dir').$folder);
 					$info = ExtLoadInfo($path);
-					include $path.'/install.php';
+					require $path.'/install.php';
 					if(isset($info['1.3'])){
 						// Добавляем пункт меню
 						$folder = SafeEnv($folder, 255, str);
@@ -649,7 +662,7 @@ function AdminModulesInstall(){
 					$path = RealPath2(System::config('tpl_dir').$folder);
 					$info = ExtLoadInfo($path);
 					$admin = is_file($path.'/theme_admin.html') ? '1' : '0';
-					//ExtInstallTemplate($folder, $admin);
+					ExtInstallTemplate($folder, $admin);
 					$new_installed[] = $info;
 				break;
 			}
@@ -685,7 +698,7 @@ function AdminModulesInstall(){
 function AdminModulesUpload(){
 	$extension = $_FILES['extension'];
 	$file_ext = GetFileExt($extension['name']);
-	if($file_ext == '.lex'){
+	if(strtolower($file_ext) == '.zip'){
 		if($extension['error'] != 0){
 			System::admin()->AddTextBox('Ошибка', 'Ошибка при загрузке файла. Код ошибки: '.$extension['error'].'.');
 			return;
@@ -697,6 +710,155 @@ function AdminModulesUpload(){
 		}
 	}else{
 		System::admin()->AddTextBox('Ошибка', 'Неверное расширение файла.');
+	}
+}
+
+/*
+ * Удаление расширения
+ */
+function AdminModulesUninstall(){
+	global $db, $config, $user; // Для старых модулей
+	$ext_type = $_GET['type'];
+	$folder = $_GET['name'];
+	if(isset($_GET['group'])) $group = $_GET['group'];
+	switch($ext_type){
+		case EXT_MODULE:
+			$mod_path = RealPath2(System::config('mod_dir').$folder);
+			$info = ExtLoadInfo($mod_path);
+			if(isset($_POST['ok']) || isset($info['1.3'])){
+				$uninstall = $mod_path.'/uninstall.php';
+				if(file_exists($uninstall)){
+					$delete_tables = isset($_POST['delete_tables']);
+					$delete_files = isset($_POST['delete_files']);
+					include $uninstall;
+					LmFileCache::Instance()->Clear('config');
+					if(isset($info['1.3'])){ // Удаляем пункт меню
+						$folder = SafeEnv($folder, 255, str);
+						System::database()->Delete('adminmenu', "`module`='$folder'");
+					}
+				}
+				GO(ADMIN_FILE.'?exe=modules#tabs-1');
+			}else{
+				$folder = SafeEnv($folder, 255, str);
+				System::database()->Select('modules', "`folder`='$folder'");
+				if($db->NumRows() == 0){
+					AddTextBox('Ошибка', 'Модуль не установлен.');
+					return;
+				}
+				$mod = System::database()->FetchRow();
+				$name = SafeDB($mod['name'], 255, str);
+				$text = '';
+				$text .= '<form method="post">';
+				$text .= '<div style="padding: 10px 0 10px 25px;">';
+				$text .= '<div style="padding-bottom: 10px">';
+				$text .= '<label><input type="checkbox" name="delete_tables" checked>&nbsp;Удалить таблицы БД</label><br>';
+				$text .= '<label><input type="checkbox" name="delete_files" checked>&nbsp;Удалить файлы модуля</label>';
+				$text .= '</div>';
+				$text .= System::admin()->Hidden('ok', '1');
+				$text .= '<div>'.System::admin()->Button('Отмена', 'onclick="history.go(-1)"').System::admin()->Submit('Удалить').'</div>';
+				$text .= '</div></form>';
+				AddTextBox('Удаление модуля "'.$name.'"', $text);
+			}
+			break;
+		case EXT_BLOCK:
+			$mod_path = RealPath2(System::config('blocks_dir').$folder);
+			if(isset($_POST['ok'])){
+				$uninstall = $mod_path.'/uninstall.php';
+				if(file_exists($uninstall)){
+					$delete_tables = isset($_POST['delete_tables']);
+					$delete_files = isset($_POST['delete_files']);
+					include $uninstall;
+					LmFileCache::Instance()->Clear('config');
+				}
+				GO(ADMIN_FILE.'?exe=modules#tabs-2');
+			}else{
+				$folder = SafeEnv($folder, 255, str);
+				System::database()->Select('block_types', "`folder`='$folder'");
+				if($db->NumRows() == 0){
+					AddTextBox('Ошибка', 'Блок не установлен.');
+					return;
+				}
+				$mod = System::database()->FetchRow();
+				$name = SafeDB($mod['name'], 255, str);
+				$text = '';
+				$text .= '<form method="post">';
+				$text .= '<div style="padding: 10px 0 10px 25px;">';
+				$text .= '<div style="padding-bottom: 10px">';
+				$text .= '<label><input type="checkbox" name="delete_tables" checked>&nbsp;Удалить таблицы БД</label><br>';
+				$text .= '<label><input type="checkbox" name="delete_files" checked>&nbsp;Удалить файлы</label>';
+				$text .= '</div>';
+				$text .= System::admin()->Hidden('ok', '1');
+				$text .= '<div>'.System::admin()->Button('Отмена', 'onclick="history.go(-1)"').System::admin()->Submit('Удалить').'</div>';
+				$text .= '</div></form>';
+				AddTextBox('Удаление модуля "'.$name.'"', $text);
+			}
+			break;
+		case EXT_PLUGIN:
+			if(isset($_GET['group'])){
+				$group = $_GET['group'].'/';
+				$groupenv = SafeEnv($_GET['group'], 255, str);
+			}else{
+				$group = '';
+				$groupenv = '';
+			}
+			$mod_path = RealPath2(System::config('plug_dir').$group.$folder);
+			$info = ExtLoadInfo($mod_path);
+			if(isset($_POST['ok']) || isset($info['1.3'])){
+				$uninstall = $mod_path.'/uninstall.php';
+				if(file_exists($uninstall)){
+					$delete_tables = isset($_POST['delete_tables']);
+					$delete_files = isset($_POST['delete_files']);
+					include $uninstall;
+					LmFileCache::Instance()->Clear('config'); // FIXME: plugin config
+				}
+				if(isset($info['1.3'])){
+					$folder = SafeEnv($folder, 255, str);
+					System::database()->Delete('plugins', "`name`='$folder' and `group`='$groupenv'");
+				}
+				// FIXME: delete plugins cache
+				GO(ADMIN_FILE.'?exe=modules#tabs-3');
+			}else{
+				$folder = SafeEnv($folder, 255, str);
+				System::database()->Select('plugins', "`name`='$folder' and `group`='$groupenv'");
+				if($db->NumRows() == 0){
+					AddTextBox('Ошибка', 'Плагин не установлен.');
+					return;
+				}
+				$mod = System::database()->FetchRow();
+				$name = SafeDB($info['name'], 255, str);
+				$text = '';
+				$text .= '<form method="post">';
+				$text .= '<div style="padding: 10px 0 10px 25px;">';
+				$text .= '<div style="padding-bottom: 10px">';
+				$text .= '<label><input type="checkbox" name="delete_tables" checked>&nbsp;Удалить таблицы БД</label><br>';
+				$text .= '<label><input type="checkbox" name="delete_files" checked>&nbsp;Удалить файлы</label>';
+				$text .= '</div>';
+				$text .= System::admin()->Hidden('ok', '1');
+				$text .= '<div>'.System::admin()->Button('Отмена', 'onclick="history.go(-1)"').System::admin()->Submit('Удалить').'</div>';
+				$text .= '</div></form>';
+				AddTextBox('Удаление модуля "'.$name.'"', $text);
+			}
+			break;
+		case EXT_TEMPLATE:
+			$mod_path = RealPath2(System::config('tpl_dir').$folder);
+			if(isset($_POST['ok'])){
+				ExtDeleteTemplate($folder, isset($_POST['delete_files']));
+				GO(ADMIN_FILE.'?exe=modules#tabs-4');
+			}else{
+				$info = ExtLoadInfo($mod_path);
+				$name = SafeDB($info['name'], 255, str);
+				$text = '';
+				$text .= '<form method="post">';
+				$text .= '<div style="padding: 10px 0 10px 25px;">';
+				$text .= '<div style="padding-bottom: 10px">';
+				$text .= '<label><input type="checkbox" name="delete_files" checked>&nbsp;Удалить файлы</label>';
+				$text .= '</div>';
+				$text .= System::admin()->Hidden('ok', '1');
+				$text .= '<div>'.System::admin()->Button('Отмена', 'onclick="history.go(-1)"').System::admin()->Submit('Удалить').'</div>';
+				$text .= '</div></form>';
+				AddTextBox('Удаление шаблона "'.$name.'"', $text);
+			}
+			break;
 	}
 }
 
@@ -762,29 +924,6 @@ function AdminModulesOrderSave(){
 		GO($config['admin_file'].'?exe=modules&a=system');
 	}else{
 		GO($config['admin_file'].'?exe=modules');
-	}
-}
-
-// Удаление модуля
-function AdminModulesUninstall(){
-	global $db, $config;
-	$name = SafeEnv($_GET['name'], 255, str);
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$u_name = RealPath2($config['mod_dir'].$name.'/uninstall.php');
-		if(file_exists($u_name)){
-			include_once($u_name);
-			$cache = LmFileCache::Instance();
-			$cache->Clear('config');
-		}
-		GO($config['admin_file'].'?exe=modules');
-	}else{
-		$db->Select('modules', "`folder`='$name'");
-		$mod = $db->FetchRow();
-		$text = 'Вы действительно хотите удалить модуль "'.SafeDB($mod['name'], 255, str).'"?<br />'
-		.'<a href="'.$config['admin_file'].'?exe=modules&a=uninstall&name='.$name.'&ok=1">Да</a>'
-		.' &nbsp;&nbsp;&nbsp; '
-		.'<a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание", $text);
 	}
 }
 
