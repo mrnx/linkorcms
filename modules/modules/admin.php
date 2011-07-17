@@ -696,18 +696,53 @@ function AdminModulesInstall(){
  * Загрузка и распаковка новых модулей.
  */
 function AdminModulesUpload(){
+	if(!isset($_FILES['extension'])){
+			System::admin()->AddTextBox('Ошибка', 'Файл не выбран.');
+			return;
+	}
 	$extension = $_FILES['extension'];
 	$file_ext = GetFileExt($extension['name']);
-	if(strtolower($file_ext) == '.zip'){
-		if($extension['error'] != 0){
+	$error_log = '';
+	$to_unpack = array();
+
+	if($extension['error'] != 0){
 			System::admin()->AddTextBox('Ошибка', 'Ошибка при загрузке файла. Код ошибки: '.$extension['error'].'.');
 			return;
 		}
-		// Распаковываем архив
-		if(!ExtExtract($extension['tmp_name'])){
-			System::admin()->AddTextBox('Ошибка', 'Не удалось прочитать файл. Неверный формат.');
-			return;
+	if(strtolower($file_ext) == '.zip'){
+		$path = '';
+		$archive = $extension['tmp_name'];
+		$zip = new ZipArchive;
+		if($zip->open($archive) === true){
+			for($i = 0; $i < $zip->numFiles; $i++){
+				$filename = $zip->getNameIndex($i);
+				$fileinfo = pathinfo($filename);
+				if(!is_writable($path.$fileinfo['dirname'])){
+					$errors_log .= 'Нет прав на запись в папку '.$path.$fileinfo['dirname']."\n";
+					continue;
+				}
+				if(substr($path.$filename, -1) == '/'){
+					if(!is_dir($path.$filename)){
+						mkdir($path.$filename, 0777);
+					}
+				}else{
+					$to_unpack[] = array('zip://'.$archive."#".$filename, $path.$filename);
+				}
+			}
+			$zip->close();
+		}else{
+			$errors_log .= 'Не удалось прочитать файл. Неверный формат.';
 		}
+	}
+	// Распаковываем архив
+	if($errors_log != ''){
+		System::admin()->AddTextBox('Ошибка, не удалось распаковать архив', nl2br($errors_log));
+	}elseif(isset($_FILES['archive'])){
+		// Распаковываем файлы
+		foreach($to_unpack as $file){
+			copy($file[0], $file[1]);
+		}
+		GO(ADMIN_FILE.'?exe=modules&a=installlist');
 	}else{
 		System::admin()->AddTextBox('Ошибка', 'Неверное расширение файла.');
 	}
