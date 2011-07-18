@@ -39,62 +39,34 @@ switch($action){
 	case 'changestatus':
 		AdminModulesChangeStatus();
 		break;
-	case 'config':
+	case 'mod_config':
 		AdminModulesConfig();
 		break;
-	case 'configsave':
+	case 'mod_configsave':
 		AdminModulesConfigSave();
 		break;
 
-//////////////////////////////////
-//////////////////////////////////
-//////////////////////////////////
-
-	case 'system':
-		AdminModulesList(true);
-		break;
-	case 'config':
-		AdminModulesConfig();
-		break;
-	case 'configsave':
-		AdminModulesConfigSave();
-		break;
-	case 'setorder':
-		AdminModulesOrderSave();
-		break;
-	case 'plugins':
-		AdminPluginsMain();
-		break;
-	case 'changestatus_plugin':
-		AdminPluginsChangeStatus();
-		break;
-	case 'config_plugin':
+	case 'plug_config':
 		if(isset($_GET['name'])){
 			include_once System::config('inc_dir').'configuration/functions.php';
 			$conf_config_table = 'plugins_config';
 			$conf_config_groups_table = 'plugins_config_groups';
 			$group = SafeEnv((isset($_GET['group']) ? $_GET['group'].'.' : '').$_GET['name'], 255, str);
 			$url = (isset($_GET['group']) ? '&group='.SafeDB($_GET['group'], 255, str) : '').'&name='.SafeDB($_GET['name'], 255, str);
-			AdminConfigurationEdit('modules&a=plugins'.$url, $group, false, false, 'Конфигурация плагина', 'a=configsave_plugin');
+			AdminConfigurationEdit('modules'.$url, $group, false, false, 'Конфигурация плагина', 'a=plug_configsave');
 		}
 		break;
-	case 'configsave_plugin':
+	case 'plug_configsave':
 		if(isset($_GET['name'])){
 			include_once System::config('inc_dir').'configuration/functions.php';
 			$conf_config_table = 'plugins_config';
 			$conf_config_groups_table = 'plugins_config_groups';
 			$group = SafeEnv((isset($_GET['group']) ? $_GET['group'].'.' : '').$_GET['name'], 255, str);
-			AdminConfigurationSave('modules&a=plugins', $group, false);
+			AdminConfigurationSave('modules#tabs-3', $group, false);
 		}
 		break;
-	case 'block_types':
-		AdminBlockTypes();
-		break;
-	case 'block_type_save':
-		AdminBlockTypesSave();
-		break;
 	default:
-		AdminModulesList(false);
+		AdminModules();
 }
 
 /*
@@ -120,9 +92,9 @@ function AdminModules(){
 	System::site()->AddJS('
 	window.last_mod_id = "";
 	function ShowModInfo(id){
-	  $(".mod_info").slideUp().parents().css("cursor", "pointer");
+	  $(".mod_info").slideUp().parents(".ex-mod").css("cursor", "pointer");
 	  if(last_mod_id != id){
-	  	$("#mod_info_"+id).slideDown().parents().css("cursor", "default");
+	  	$("#mod_info_"+id).slideDown().parents(".ex-mod").css("cursor", "default");
 	  	last_mod_id = id;
 	  }else{
 	    last_mod_id = "";
@@ -130,9 +102,9 @@ function AdminModules(){
 	}
 	window.last_block_id = "";
 	function ShowBlockInfo(id){
-	  $(".mod_info").slideUp().parents().css("cursor", "pointer");
+	  $(".mod_info").slideUp().parents(".ex-mod").css("cursor", "pointer");
 	  if(last_block_id != id){
-	  	$("#mod_info_"+id).slideDown().parents().css("cursor", "default");
+	  	$("#mod_info_"+id).slideDown().parents(".ex-mod").css("cursor", "default");
 	  	last_block_id = id;
 	  }else{
 	    last_block_id = "";
@@ -155,6 +127,7 @@ function AdminModules(){
 			$mod['enabled'] == '1',
 			'images/bullet_green.png', 'images/bullet_red.png'
 		);
+		$func .= System::admin()->SpeedButton('Настройки', ADMIN_FILE.'?exe=modules&a=mod_config&name='.SafeDB($mod['folder'], 255, str), 'images/admin/config.png');
 
 		// Показываем кнопку удаления, только тогда, когда существует программа удаления
 		if(is_file($mod_dir.$mod['folder'].'/uninstall.php')){
@@ -199,7 +172,7 @@ function AdminModules(){
 					<div style="float:left; padding-top: 7px;">&nbsp;'.$mod['name'].' (v'.$version.')</div>
 				</div>
 			</td>
-			<td width="62" align="center" style="padding: 3px; padding-bottom: 2px;">
+			<td width="90" align="center" style="padding: 3px; padding-bottom: 2px;">
 				<div style="float: left">'.$func.'</div>
 			</td>
 		</tr>
@@ -288,6 +261,7 @@ function AdminModules(){
 	// Плагины
 	$plugins_html = '<div style="border-top: 1px #ccf solid; ">';
 	$mods = System::database()->Select('plugins');
+	$configs_groups = PluginsConfigsGroups();
 	foreach($mods as $mod){
 		if($mod['group'] != ''){
 			$path = $plug_dir.$mod['group'].'/'.$mod['name'];
@@ -299,6 +273,9 @@ function AdminModules(){
 
 		$mid = SafeEnv($mod['id'], 11, int);
 		$func = '';
+		if(isset($configs_groups[($mod['group'] != '' ? $mod['group'].'.' : '').$mod['name']])){
+			$func .= System::admin()->SpeedButton('Настройки', ADMIN_FILE.'?exe=modules&a=plug_config&name='.SafeDB($mod['name'], 255, str).'&group='.SafeDB($mod['group'], 255, str), 'images/admin/config.png');
+		}
 		// Показываем кнопку удаления, только тогда, когда существует программа удаления
 		if(isset($info['1.3']) || is_file($plug_dir.$mod['name'].'/uninstall.php')){
 			$func .= System::admin()->SpeedConfirm(
@@ -603,9 +580,11 @@ function AdminModulesInstallList(){
 	System::admin()->AddCenterBox($title.' ('.$count.' готово к установке)');
 	System::admin()->AddText($text);
 
-	System::admin()->FormTitleRow('Загрузить новое');
-	System::admin()->FormRow('', $site->FFile('extension'));
-	System::admin()->AddForm(System::admin()->FormOpen(ADMIN_FILE.'?exe=modules&a=upload', 'post', true), System::admin()->Submit('Загрузить'));
+	if($user->isSuperUser()){
+		System::admin()->FormTitleRow('Загрузить новое');
+		System::admin()->FormRow('', $site->FFile('extension'));
+		System::admin()->AddForm(System::admin()->FormOpen(ADMIN_FILE.'?exe=modules&a=upload', 'post', true), System::admin()->Submit('Загрузить'));
+	}
 }
 
 /*
@@ -696,6 +675,10 @@ function AdminModulesInstall(){
  * Загрузка и распаковка новых модулей.
  */
 function AdminModulesUpload(){
+	if(!$user->isSuperUser()){
+		System::admin()->AddTextBox('Ошибка', 'Эта функция доступна только супер администраторам.');
+		return;
+	}
 	if(!isset($_FILES['extension'])){
 			System::admin()->AddTextBox('Ошибка', 'Файл не выбран.');
 			return;
@@ -897,425 +880,63 @@ function AdminModulesUninstall(){
 	}
 }
 
-function AdminModulesList( $system ){
-	global $db, $config, $site;
-	if($system){
-		$title = 'Системные модули';
-	}else{
-		$title = 'Установленные модули';
-	}
-	TAddSubTitle($title);
-	$db->Select('modules', ($system ? '`system`=\'1\'' : '`system`=\'0\''));
-	$text = '';
-	$text .= $site->FormOpen($config['admin_file'].'?exe=modules&a=setorder'.($system ? '&system=1' : ''));
-	$text .= '<table cellspacing="0" cellpadding="0" class="cfgtable">';
-	$text .= '<tr><th>Название</th><th>Папка</th><th>Положение в меню</th>'.($system ? '' : '<th>Кто видит</th><th>Статус</th><th>Функции</th>').'</tr>';
-	$i = 0;
-	SortArray($db->QueryResult, 'order');
-	while($row = $db->FetchRow()){
-		$mid = SafeDB($row['id'], 11, int);
-		$vi = ViewLevelToStr(SafeDB($row['view'], 1, int));
-		switch($row['enabled']){
-			case "1":
-				$st = '<a href="'.$config['admin_file'].'?exe=modules&a=changestatus&id='.$mid.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
-				break;
-			case "0":
-				$st = '<a href="'.$config['admin_file'].'?exe=modules&a=changestatus&id='.$mid.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
-				break;
-		}
-		if(!$system){
-			$funcs = '';
-			$funcs .= SpeedButton('Конфигурация', $config['admin_file'].'?exe=modules&a=config&name='.SafeDB($row['folder'], 255, str), 'images/admin/config.png');
-			if(is_file($config['mod_dir'].SafeDB($row['folder'], 255, str).'/uninstall.php')){
-				$funcs .= SpeedButton('Удалить', $config['admin_file'].'?exe=modules&a=uninstall&name='.SafeDB($row['folder'], 255, str), 'images/admin/delete.png');
-			}
-		}
-		$text .= '
-		<tr>
-		<td>'.(!$system ? '<a href="'.$config['admin_file'].'?exe=modules&a=config&name='.SafeDB($row['folder'], 255, str).'">' : '').'<b>'.SafeDB($row['name'], 255, str).'</b>'.(!$system ? '</a>' : '').'</td>
-		<td>'.SafeDB($row['folder'], 255, str).'</td>
-		<td>'.$site->Edit(SafeDB($row['folder'], 255, str), SafeDB($row['order'], 11, int), false, 'style="width:32px;" maxlength="11"').'</td>'.($system ? '' : '<td>'.$vi.'</td>
-		<td>'.$st.'</td>
-		<td>'.$funcs.'</td>').'
-		</tr>';
-		$i++;
-	}
-	$text .= '</table><br />';
-	$text .= $site->Submit('Зафиксировать положение').'<br /><br />';
-	$text .= $site->FormClose();
-	AddTextBox($title, $text);
-}
-
-function AdminModulesOrderSave(){
-	global $db, $config;
-	$mods = $db->Select('modules');
-	$count = count($mods);
-	for($i = 1; $i <= $count; $i++){
-		if(isset($_POST[$mods[$i]['folder']]) && $_POST[$mods[$i]['folder']] != $mods[$i]['order']){
-			$db->Update('modules', "`order`='".SafeEnv($_POST[$mods[$i]['folder']], 11, str)."'", "`folder`='".SafeEnv($mods[$i]['folder'], 255, str)."'");
-		}
-	}
-	if(isset($_GET['system'])){
-		GO($config['admin_file'].'?exe=modules&a=system');
-	}else{
-		GO($config['admin_file'].'?exe=modules');
-	}
-}
-
+/*
+ * Обработка Ajax изменения статуса модуля
+ */
 function AdminModulesChangeStatus(){
-	global $config, $db;
-	$db->Select('modules', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	$r = $db->FetchRow();
-	if($r['enabled'] == 1){
+	$id = SafeEnv($_GET['id'], 11, int);
+	System::database()->Select('modules', "`id`='$id'");
+	$mod = System::database()->FetchRow();
+	if($mod['enabled'] == 1){
 		$en = '0';
 	}else{
 		$en = '1';
 	}
-	$db->Update('modules', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int, false, false)."'");
-	GO($config['admin_file'].'?exe=modules');
+	System::database()->Update('modules', "enabled='$en'", "`id`='$id'");
+	echo 'OK';
+	exit();
 }
 
+/*
+ * Страница общих настроек модуля
+ */
 function AdminModulesConfig(){
-	global $config, $db, $site;
-	TAddSubTitle('Конфигурация модуля');
-	$db->Select('modules', "`folder`='".SafeEnv($_GET['name'], 255, str)."'");
-	$r = $db->FetchRow();
+	System::admin()->AddSubTitle('Конфигурация модуля');
+	$name = SafeEnv($_GET['name'], 255, str);
+	System::database()->Select('modules', "`folder`='".$name."'");
+	$mod = System::database()->FetchRow();
 
-	FormRow('Имя', $site->Edit('name', $r['name'], false, 'style="width:200px;"'));
-
-	$dir = $config['tpl_dir'].$config['general']['site_template'].'/themes/';
+	System::admin()->FormRow('Имя', System::admin()->Edit('name', $mod['name'], false, 'style="width:200px;"'));
+	$dir = System::config('tpl_dir').System::config('general/site_template').'/themes/';
 	if(is_dir($dir)){
 		$templates = GetFiles($dir, false, true, ".html");
 	}else{
 		$templates = array();
 	}
-	$site->DataAdd($templates_data, '', 'Стандартный "theme.html"', $r['theme'] == '');
+	System::admin()->DataAdd($templates_data, '', 'Стандартный "theme.html"', $mod['theme'] == '');
 	foreach($templates as $template){
-		$site->DataAdd($templates_data, $template, $template, $r['theme'] == $template);
+		System::admin()->DataAdd($templates_data, $template, $template, $mod['theme'] == $template);
 	}
-	FormRow('Шаблон страницы', $site->Select('theme', $templates_data));
+	System::admin()->FormRow('Шаблон страницы', System::admin()->Select('theme', $templates_data));
 
-	$m_vi = array(false, false, false, false, false);
-	$m_vi[$r['view']] = true;
-	$site->DataAdd($visdata, '1', 'Только администраторы', $m_vi[1]);
-	$site->DataAdd($visdata, '2', 'Только пользователи', $m_vi[2]);
-	$site->DataAdd($visdata, '3', 'Только гости', $m_vi[3]);
-	$site->DataAdd($visdata, '4', 'Все', $m_vi[4]);
-	FormRow('Кто видит', $site->Select('view', $visdata));
+	System::admin()->FormRow('Кто видит', System::admin()->Select('view', GetUserTypesFormData(SafeDB($mod['view'], 1, int))));
+	System::admin()->FormRow('Включить', System::admin()->Select('enabled', GetEnData((bool)$mod['enabled'], 'Да', 'Нет')));
 
-	$m_en = array(false, false);
-	$m_en[$r['enabled']] = true;
-	$site->DataAdd($endata, '1', 'Да', $m_en[1]);
-	$site->DataAdd($endata, '0', 'Нет', $m_en[0]);
-	FormRow('Включить', $site->Select('enabled', $endata));
-
-	AddCenterBox('Настройка модуля "'.SafeDB($r['name'], 255, str).'"');
-	AddForm($site->FormOpen($config['admin_file'].'?exe=modules&a=configsave&name='.SafeDB($r['name'], 255, str)), $site->Submit('Сохранить'));
-}
-
-function AdminModulesConfigSave(){
-	global $config, $db;
-	$set = "name='".SafeEnv($_POST['name'], 255, str)."',"
-	."view='".SafeEnv($_POST['view'], 1, int)."',"
-	."enabled='".SafeEnv($_POST['enabled'], 1, int)."',"
-	."theme='".RealPath2(SafeEnv($_POST['theme'], 255, str))."'";
-	$db->Update('modules', $set, "`name`='".SafeEnv($_GET['name'], 255, str)."'");
-	GO($config['admin_file'].'?exe=modules');
-}
-
-// Плагины
-
-function AdminPluginsPluginType( $type ){
-	switch($type){
-		case PLUG_AUTORUN:
-			return 'Автозапуск';
-			break;
-		case PLUG_ADMIN_AUTORUN:
-			return 'Автозапуск (Админпанель)';
-			break;
-		case PLUG_MAIN_AUTORUN:
-			return 'Автозапуск (Сайт)';
-			break;
-		case PLUG_CALLEE:
-			return 'Вызываемый';
-			break;
-		case PLUG_MANUAL:
-			return 'Подключаемый';
-			break;
-		case PLUG_MANUAL_ONE:
-			return 'Подключаемый';
-			break;
-		default:
-			return 'Другой';
-	}
-}
-
-function AdminPluginsRender( $name, $installed, $configex, $group = '' ){
-	global $config;
-	if($group != ''){
-		$name2 = $group.'/'.$name;
-	}else{
-		$name2 = $name;
-	}
-	include ($config['plug_dir'].$name2.'/info.php');
-	$image = '';
-	$text = '';
-	$options = '';
-	if(isset($plugins[$name]['name-ru'])){
-		$image .= '<b>'.SafeDB(SafeDB($plugins[$name]['name-ru'], 255, str), 255, str).'</b><br />';
-	}
-	if(isset($plugins[$name]['logo'])){
-		$imagename = RealPath2($config['plug_dir'].$name.'/'.SafeDB($plugins[$name]['logo'], 250, str));
-		if(!is_dir($imagename) && file_exists($imagename)){
-			$image .= '<img width="64" height="64" src="'.$imagename.'" /><br />';
-		}
-	}
-	if(isset($plugins[$name]['version'])){
-		$image .= 'Версия: '.SafeDB($plugins[$name]['version'], 255, str).'<br />';
-	}
-	if(isset($plugins[$name]['type'])){
-		$text .= '<b>Тип:</b> '.AdminPluginsPluginType(SafeDB($plugins[$name]['type'], 2, int)).'<br />';
-	}
-	if($group != ''){
-		$text .= '<b>Группа:</b> '.SafeDB($group, 250, str).'<br />';
-	}
-	if(isset($plugins[$name]['description-ru'])){
-		$text .= '<b>Описание:</b> '.SafeDB($plugins[$name]['description-ru'], 255, str).'<br />';
-	}
-	if(isset($plugins[$name]['cms'])){
-		$text .= '<b>LinkorCMS:</b> '.SafeDB($plugins[$name]['cms'], 11, str).'<br />';
-	}
-	if(isset($plugins[$name]['site'])){
-		$text .= '<b>Сайт:</b> <a href="'.SafeDB($plugins[$name]['site'], 255, str).'" target="_blank">'.SafeDB($plugins[$name]['site'], 255, str).'</a><br />';
-	}
-	if($installed){
-		$url = '<a href="'.$config['admin_file'].'?exe=plugins&a=uninstall'.($group != '' ? '&group='.$group : '').'&name='.SafeDB($name, 255, str).'">Отключить</a>';
-		if($configex){
-			$config_url = '<a href="'.$config['admin_file'].'?exe=plugins&a=config'.($group != '' ? '&group='.$group : '').'&name='.SafeDB($name, 255, str).'">Настройки</a>';
-		}
-	}else{
-		$url = '<a href="'.$config['admin_file'].'?exe=plugins&a=install'.($group != '' ? '&group='.$group : '').'&name='.SafeDB($name, 255, str).'">Подключить</a>';
-	}
-	$options = '<b>Опции:</b> ['.$url.']'.(isset($config_url) ? ' ['.$config_url.']' : '');
-	return '<tr><td id="image">'.$image.'</td><td id="text" valign="top">'.$text.$options.'</td></tr>';
-}
-
-function AdminPluginsMain(){
-	System::admin()->AddSubTitle('Все плагины');
-	UseScript('jquery_ui_table');
-
-	$plug_dir = System::config('plug_dir');
-	$plugins_find = GetPlugins(true);
-	$configs_groups = PluginsConfigsGroups();
-
-	$plugins_all = array();
-	foreach($plugins_find['plugins'] as $pl){
-		$name = $pl['name'];
-		include($plug_dir.$name.'/info.php');
-		$plugins = $plugins[$name];
-		$plugins['type'] = AdminPluginsPluginType($plugins['type']);
-		$plugins['group'] = '';
-		$plugins['name'] = $name;
-		$plugins['installed'] = $pl['installed'];
-		$plugins['configex'] = isset($configs_groups[$name]);
-		$plugins_all[] = $plugins;
-	}
-	foreach($plugins_find['groups'] as $group){
-		foreach($group['plugins'] as $pl){
-			$group = $pl['group'];
-			$name = $pl['name'];
-			include($plug_dir.$group.'/'.$name.'/info.php');
-			$plugins = $plugins[$name];
-			$plugins['type'] = AdminPluginsPluginType($plugins['type']);
-			$plugins['group'] = $group;
-			$plugins['name'] = $name;
-			$plugins['installed'] = $pl['installed'];
-			$plugins['configex'] = isset($configs_groups[$group.'.'.$name]);
-			$plugins_all[] = $plugins;
-		}
-	}
-
-	if(isset($_REQUEST['onpage'])){
-		$num = intval($_REQUEST['onpage']);
-	}else{
-		$num = 20;
-	}
-	if(isset($_REQUEST['page'])){
-		$page = intval($_REQUEST['page']);
-	}else{
-		$page = 1;
-	}
-
-	$columns = array('name-ru', 'group', 'type', 'version', 'installed');
-	$sortby = '';
-	$sortbyid = -1;
-	$desc = true;
-	if(isset($_REQUEST['sortby'])){
-		$sortby = $columns[$_REQUEST['sortby']];
-		$sortbyid = intval($_REQUEST['sortby']);
-		$desc = $_REQUEST['desc'] == '1';
-	}
-	if($sortby != ''){
-		SortArray($plugins_all, $sortby, $desc);
-	}
-
-	$table = new jQueryUiTable();
-	$table->listing = ADMIN_FILE.'?exe=modules&a=plugins&ajax';
-	$table->del = '';
-	$table->total = count($plugins_all);
-	$table->onpage = $num;
-	$table->page = $page;
-	$table->sortby = $sortbyid;
-	$table->sortdesc = $desc;
-
-	$table->AddColumn('Имя');
-	$table->AddColumn('Группа', 'center');
-	$table->AddColumn('Тип', 'center');
-	$table->AddColumn('Версия', 'center');
-	$table->AddColumn('Статус', 'center');
-	$table->AddColumn('Функции', 'center', false, true);
-
-	$plugins_all = ArrayPage($plugins_all, $num, $page);
-	foreach($plugins_all as $plugin){
-		$name = SafeDB($plugin['name'], 255, str);
-		$status = System::admin()->SpeedStatus(
-			'Выключить', 'Включить',
-			ADMIN_FILE.'?exe=modules&a=changestatus_plugin&group='.$plugin['group'].'&name='.$plugin['name'], $plugin['installed'],
-			'images/bullet_green.png', 'images/bullet_red.png'
-		);
-		$func = '';
-		if($plugin['configex']){
-			$conf_url = ADMIN_FILE.'?exe=modules&a=config_plugin'.($plugin['group'] != '' ? '&group='.$plugin['group'] : '').'&name='.$name;
-			$func .= System::admin()->SpeedButton('Конфигурация', $conf_url, 'images/admin/config.png');
-		}
-		$table->AddRow(
-			$name,
-			SafeDB($plugin['name-ru'], 255, str),
-			SafeDB($plugin['group'], 255, str),
-			SafeDB($plugin['type'], 255, str),
-			SafeDB($plugin['version'], 255, str),
-			$status,
-			$func
-		);
-	}
-	if(isset($_GET['ajax'])){
-		echo $table->GetOptions();
-		exit;
-	}else{
-		System::admin()->AddTextBox('Плагины', $table->GetHtml());
-	}
-}
-
-function AdminPluginsChangeStatus(){
-	$name = SafeEnv($_GET['name'], 255, str);
-	$group = isset($_GET['group']) ? $_GET['group'] : '';
-	System::database()->Select('plugins', "`name`='$name' and `group`='$group'");
-	if(System::database()->NumRows() > 0){
-		UninstallPlugin($name, $group);
-	}else{
-		InstallPlugin($name, $group);
-	}
-	exit('OK');
+	System::admin()->AddCenterBox('Настройка модуля "'.SafeDB($mod['name'], 255, str).'"');
+	System::admin()->AddForm(
+		System::admin()->FormOpen(ADMIN_FILE.'?exe=modules&a=mod_configsave&name='.SafeDB($mod['folder'], 255, str)),
+		System::admin()->Button('Отмена', 'onclick="history.go(-1)"')
+		.System::admin()->Submit('Сохранить')
+	);
 }
 
 /*
- * Типы блоков
+ * Сохранение настроек модуля
  */
-function AdminBlockTypes(){
-	System::admin()->AddSubTitle('Типы блоков');
-	UseScript('jquery_ui_table');
-	$blocks_db = System::database()->Select('block_types');
-
-	if(isset($_REQUEST['onpage'])){
-		$num = intval($_REQUEST['onpage']);
-	}else{
-		$num = 20;
-	}
-	if(isset($_REQUEST['page'])){
-		$page = intval($_REQUEST['page']);
-	}else{
-		$page = 1;
-	}
-
-	$columns = array('name', 'folder', 'comment');
-	$sortby = '';
-	$sortbyid = -1;
-	$desc = true;
-	if(isset($_REQUEST['sortby'])){
-		$sortby = $columns[$_REQUEST['sortby']];
-		$sortbyid = intval($_REQUEST['sortby']);
-		$desc = $_REQUEST['desc'] == '1';
-	}
-	if($sortby != ''){
-		SortArray($blocks_db, $sortby, $desc);
-	}
-
-	$table = new jQueryUiTable();
-	$table->listing = ADMIN_FILE.'?exe=modules&a=block_types&ajax';
-	$table->del = ADMIN_FILE.'?exe=modules&a=block_type_delete&ajax';
-	$table->total = count($blocks_db);
-	$table->onpage = $num;
-	$table->page = $page;
-	$table->sortby = $sortbyid;
-	$table->sortdesc = $desc;
-
-	$table->AddColumn('Имя');
-	$table->AddColumn('Папка', 'center');
-	$table->AddColumn('Описание', 'center');
-	$table->AddColumn('Функции', 'center', false, true);
-
-	$blocks_db = ArrayPage($blocks_db, $num, $page);
-	foreach($blocks_db as $block){
-		$id = SafeDB($block['id'], 11, int);
-		$name = SafeDB($block['name'], 255, str);
-		$desc = SafeDB($block['comment'], 0, str);
-		$folder = SafeDB($block['folder'], 255, str);
-
-		$editlink = ADMIN_FILE.'?exe=modules&a=block_type_edit&id='.$id;
-
-		$func = '';
-		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-		$func .= System::admin()->SpeedConfirmJs(
-			'Удалить',
-			'$(\'#jqueryuitable\').table(\'deleteRow\', '.$id.');',
-			'images/admin/delete.png',
-			'Уверены, что хотите удалить этот тип блока из базы данных?'
-		);
-
-		$table->AddRow(
-			$id,
-			'<b><a href="'.$editlink.'">'.$name.'</a></b>',
-			$folder,
-			$desc,
-			$func
-		);
-	}
-
-	if(isset($_GET['ajax'])){
-		echo $table->GetOptions();
-		exit;
-	}else{
-		System::admin()->AddCenterBox('Установленные типы блоков');
-		System::admin()->AddText($table->GetHtml());
-
-		System::admin()->FormTitleRow('Добавить тип блока');
-		FormRow('Имя', System::admin()->Edit('name', '', false, 'style="width: 220px;"'));
-		FormRow('Папка (относительно blocks_dir)', System::admin()->Edit('folder', '', false, 'style="width: 220px;"'));
-		System::admin()->FormTextRow('Описание', System::site()->TextArea('comment', '', 'style="width:400px;height:100px;"'));
-		AddForm(
-			'<form action="'.ADMIN_FILE.'?exe=modules&a=block_type_save" method="post">',
-			System::admin()->Submit('Добавить')
-		);
-	}
-}
-
-function AdminBlockTypesSave(){
-	$block = SafeR('name, folder', 255, str) + SafeR('comment', 0, str);
-	if(isset($_GET['id'])){ // Редактирование
-		$id = SafeEnv($_GET['id'], 11, int);
-		System::database()->Update('block_types', MakeSet($block), "`id`='$id'");
-	}else{
-		System::database()->Insert('block_types', MakeValues("'','name','comment','folder'", $block));
-	}
-	GO(ADMIN_FILE.'?exe=modules&a=block_types');
+function AdminModulesConfigSave(){
+	$post = SafeR('view', 11,int)
+	        +SafeR('name, theme', 255, str)
+	        +SafeR('enabled', 3, onoff);
+	System::database()->Update('modules', MakeSet($post), "`folder`='".SafeEnv($_GET['name'], 255, str)."'");
+	GO(ADMIN_FILE.'?exe=modules');
 }

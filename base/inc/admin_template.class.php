@@ -172,7 +172,7 @@ class AdminPage extends PageTemplate{
 	 */
 	public function SpeedButton( $Title, $Url, $ImgSrc = '' ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
-		return '<a title="'.$Title.'" href="'.$Url.'" class="button">'
+		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
 			.'</a>';
 	}
