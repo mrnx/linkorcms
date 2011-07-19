@@ -1,6 +1,6 @@
 
 @import "textstyles.css";
-@var basecolor: "#FFCC88";
+
 
 body{
 	padding: 10px;
@@ -59,8 +59,8 @@ textarea {padding: 2px 0 2px 4px;background-color: #FAFAFA;border: 1px solid #CC
 /* Боксы */
 	.box { margin: 0; padding: 0; margin-top: 15px; background-color: #FFFFFF;}
 	.boxtd { padding: 5px; }
-	.boxth { color: #000000;font-size: 11pt;font-weight: bold;background-color: var(basecolor);-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;padding: 9px;}
-	.msg { padding: 20px;margin-top: 15px;background-color: var(basecolor);-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
+	.boxth { color: #000000;font-size: 11pt;font-weight: bold;background-color: #FFCC88;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;padding: 9px;}
+	.msg { padding: 20px;margin-top: 15px;background-color: #FFCC88;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
 	.msgtd { padding: 10px 0 0 0;}
 	.msgth{ color: #3C64B4; font-size: 12pt; text-align: left; font-family: sans-serif, Arial, Verdana, Tahoma; }
 	.alert { width: 90%; padding: 10px; background-color: #FFCCCC; margin: 10px auto 10px auto; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
@@ -70,7 +70,7 @@ textarea {padding: 2px 0 2px 4px;background-color: #FAFAFA;border: 1px solid #CC
 
 /* Блоки */
 	.block_table { border: none; margin-top: 15px; width: 210px; }
-	.block_title {color: #000000;font-size: 10pt;font-weight: bold;background-color: var(basecolor);padding: 10px;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
+	.block_title {color: #000000;font-size: 10pt;font-weight: bold;background-color: #FFCC88;padding: 10px;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
 	.block_client { border-top: none; padding: 12px 0 0 6px; }
 
 	.block_center { border: none; margin-top: 15px; width: 100%; }
@@ -80,7 +80,7 @@ textarea {padding: 2px 0 2px 4px;background-color: #FAFAFA;border: 1px solid #CC
 	ul.block_menu li{ list-style: none; }
 	ul.block_menu a{ width: 95%; display: inline-block; padding: 4px; }
 	ul.block_menu span { font-weight: bold; width: 95%; display: inline-block; padding: 4px; }
-	ul.block_menu a:hover, .block_menu_selected{ color: #3C64B4; background-color: var(basecolor); text-decoration: none; -moz-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px; }
+	ul.block_menu a:hover, .block_menu_selected{ color: #3C64B4; background-color: #FFCC88; text-decoration: none; -moz-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px; }
 
 /* Комментарии */
 	.postform_title{ padding: 0; font-size: 10pt; font-weight: bold; margin-top: 20px; }
@@ -162,7 +162,7 @@ textarea {padding: 2px 0 2px 4px;background-color: #FAFAFA;border: 1px solid #CC
 	.article_read { padding: 10px; }
 	.article_read_info { padding-left: 20px; }
 	.article_read_info span{ color: #00506D; }
-	.article_read_rating{text-align: center;padding: 7px;margin-top: 10px;color: #000000;background-color: var(basecolor);-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
+	.article_read_rating{text-align: center;padding: 7px;margin-top: 10px;color: #000000;background-color: #FFCC88;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
 
 /* Архив файлов */
 	.downloadtable{ margin-top: 10px; margin-bottom: 20px; border: 1px #DED8F8 solid; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
@@ -175,10 +175,10 @@ textarea {padding: 2px 0 2px 4px;background-color: #FAFAFA;border: 1px solid #CC
 	.downloadinfo_table{ border: 1px #DED8F8 solid; border-spacing: 2px; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; margin-bottom: 10px; }
 	.downloadinfo_table td{ text-align: center; }
 	.downloadinfo_table th{ font-size: 8pt; padding: 4px; background-color: #DED8F8; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
-	.download_rating{ text-align: center; padding: 7px; margin-top: 10px; color: #000000; background-color: var(basecolor); -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
+	.download_rating{ text-align: center; padding: 7px; margin-top: 10px; color: #000000; background-color: #FFCC88; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
 
 /* Web-формы */
-	.formtitle { padding: 5px; font-size: 10pt; font-weight: bold; padding: 10px; background-color: var(basecolor); -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
+	.formtitle { padding: 5px; font-size: 10pt; font-weight: bold; padding: 10px; background-color: #FFCC88; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; }
 	.formsdesc { padding: 10px; }
 	.forms_hname { padding: 5px 0 5px 10px; }
 	.forms_submit { text-align: center; padding-top: 15px; }
@@ -186,10 +186,10 @@ textarea {padding: 2px 0 2px 4px;background-color: #FAFAFA;border: 1px solid #CC
 /* Гостевая книга */
 	.commform { margin-top: 10px; }
 	.commform td { padding: 5px 0 5px 5px; }
-	.commform_title { color: #AA0000; font-size: 10pt; border: none; background-color: var(basecolor); -moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
+	.commform_title { color: #AA0000; font-size: 10pt; border: none; background-color: #FFCC88; -moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
 
 	.msgtable { padding: 5px; margin-bottom: 5px; margin-top: 5px; }
-	.tpmsghd { padding: 4px 0 6px 4px; background-color: var(basecolor); -moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
+	.tpmsghd { padding: 4px 0 6px 4px; background-color: #FFCC88; -moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
 	.tpmsghd img{ vertical-align: bottom; }
 	.btmsghd { font-size: 7pt; color: #808080; padding: 3px; }
 	.msgclient { padding: 4px; background-color: #FFFFFF; }
@@ -235,6 +235,6 @@ textarea {padding: 2px 0 2px 4px;background-color: #FAFAFA;border: 1px solid #CC
 /* Каталоги */
 	div.cat{width: 48%;padding: 2px;float: left;margin: 0 5px 5px 0;}
 	.cat_image { margin: 3px 4px 4px 0; }
-	.cat_path{padding: 7px;margin-top: -5px;color: #000000;background-color: var(basecolor);-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
+	.cat_path{padding: 7px;margin-top: -5px;color: #000000;background-color: #FFCC88;-moz-border-radius: 6px;-webkit-border-radius: 6px;border-radius: 6px;}
 
 /* end. */
