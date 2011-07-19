@@ -141,4 +141,6 @@ if(isset($_GET['umask'])){
 	     .'<br />Системная umask: ', exec('umask'), "\n";
 }
 
-?>
+if(isset($_GET['build'])){ // Сборка новой версии системы
+
+}

@@ -83,4 +83,3 @@ if(is_file(MOD_FILE)){
 
 // Вывод данных
 System::admin()->TEcho();
-

@@ -580,7 +580,7 @@ function AdminModulesInstallList(){
 	System::admin()->AddCenterBox($title.' ('.$count.' готово к установке)');
 	System::admin()->AddText($text);
 
-	if($user->isSuperUser()){
+	if(System::user()->isSuperUser()){
 		System::admin()->FormTitleRow('Загрузить новое');
 		System::admin()->FormRow('', $site->FFile('extension'));
 		System::admin()->AddForm(System::admin()->FormOpen(ADMIN_FILE.'?exe=modules&a=upload', 'post', true), System::admin()->Submit('Загрузить'));
@@ -675,7 +675,7 @@ function AdminModulesInstall(){
  * Загрузка и распаковка новых модулей.
  */
 function AdminModulesUpload(){
-	if(!$user->isSuperUser()){
+	if(!System::user()->isSuperUser()){
 		System::admin()->AddTextBox('Ошибка', 'Эта функция доступна только супер администраторам.');
 		return;
 	}

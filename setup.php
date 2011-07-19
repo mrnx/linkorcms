@@ -45,4 +45,3 @@ if(isset($_GET['mod'])){
 	$mod = '';
 }
 $setup->Page($mod);
-
