@@ -66,6 +66,7 @@ if(get_magic_quotes_gpc()){
 	}
 	$_POST = array_map('hstripslashes', $_POST);
 	$_GET = array_map('hstripslashes', $_GET);
+	$_REQUEST = array_map('hstripslashes', $_REQUEST);
 }
 
 // Буферизация вывода /////////////////////////////////////////////////////////////////////////////

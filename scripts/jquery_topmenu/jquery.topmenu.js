@@ -163,15 +163,20 @@
 				html = '<div class="admin_menu_item">';
 				link_body = icon+arrow+'<div class="admin_menu_item_title">'+menuData[i].title+'</div>';
 				switch(menuData[i].type){
-					case 'admin': html += '<a class="admin_menu_sub_link" href="'+menuData[i].admin_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+menuData[i].admin_link+'\', event);">'+link_body+'</a>';
+					case 'admin':
+						html += '<a class="admin_menu_sub_link" href="'+menuData[i].admin_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+menuData[i].admin_link+'\', event);">'+link_body+'</a>';
 					break;
-					case 'external': html += '<a class="admin_menu_sub_link" href="'+menuData[i].external_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.Leave(\''+menuData[i].external_link+'\', \''+menuData[i].blank+'\', event);">'+link_body+'</a>';
+					case 'external':
+						html += '<a class="admin_menu_sub_link" href="'+menuData[i].external_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.Leave(\''+menuData[i].external_link+'\', '+menuData[i].blank+', event);">'+link_body+'</a>';
 					break;
-					case 'js': html += '<a class="admin_menu_sub_link" onclick="return false;" onMouseDown="'+menuData[i].js+'">'+link_body+'</a>';
+					case 'js':
+						html += '<a class="admin_menu_sub_link" onclick="return false;" onMouseDown="'+menuData[i].js+'">'+link_body+'</a>';
 					break;
-					case 'node': html += '<a class="admin_menu_sub_link" href="#" onclick="return false">'+link_body+'</a>';
+					case 'node':
+						html += '<a class="admin_menu_sub_link" href="#" onclick="return false">'+link_body+'</a>';
 					break;
-					case 'delimiter': html += '<div class="admin_menu_sub_delimiter"></div>';
+					case 'delimiter':
+						html += '<div class="admin_menu_sub_delimiter"></div>';
 					break;
 				}
 				html += '</div>';
@@ -215,13 +220,17 @@
 				var itemId = menuData[i].id;
 				var html = '';
 				switch(menuData[i].type){
-					case 'admin': html += '<a class="admin_menu_top_link" href="'+menuData[i].admin_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+menuData[i].admin_link+'\', event);">'+menuData[i].title+'</a>';
+					case 'admin':
+						html += '<a class="admin_menu_top_link" href="'+menuData[i].admin_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+menuData[i].admin_link+'\', event);">'+menuData[i].title+'</a>';
 					break;
-					case 'external': html += '<a class="admin_menu_top_link" href="'+menuData[i].external_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.Leave(\''+menuData[i].external_link+'\', \''+menuData[i].blank+'\', event);">'+menuData[i].title+'</a>';
+					case 'external':
+						html += '<a class="admin_menu_top_link" href="'+menuData[i].external_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.Leave(\''+menuData[i].external_link+'\', '+menuData[i].blank+', event);">'+menuData[i].title+'</a>';
 					break;
-					case 'js': html += '<a class="admin_menu_top_link" onclick="return false;" onMouseDown="'+menuData[i].js+'">'+menuData[i].title+'</a>';
+					case 'js':
+						html += '<a class="admin_menu_top_link" onclick="return false;" onMouseDown="'+menuData[i].js+'">'+menuData[i].title+'</a>';
 					break;
-					case 'node': html += '<a class="admin_menu_top_link" href="#" onclick="return false">'+menuData[i].title+'</a>';
+					case 'node':
+						html += '<a class="admin_menu_top_link" href="#" onclick="return false">'+menuData[i].title+'</a>';
 					break;
 				}
 

@@ -29,7 +29,7 @@ switch($action){
 		break;
 	case 'add':
 	case 'save':
-		AdminPhpTesterSave();
+		AdminPhpTesterSave($action);
 		break;
 	case 'delete':
 		AdminPhpTesterDelete();
@@ -193,10 +193,10 @@ function AdminPhpTesterSnippets(){
 	}
 }
 
-function AdminPhpTesterSave(){
+function AdminPhpTesterSave($action){
 	$snippet = SafeR('title', 255, str) + SafeR('code', 0, str);
 	ObjectUtf8ToCp1251($snippet);
-	if($_GET['a'] == 'save' && $_POST['id'] > 0){ // Редактирование
+	if($action == 'save'){ // Редактирование
 		$id = SafeEnv($_POST['id'], 11, int);
 		System::database()->Update('snippets', MakeSet($snippet), "`id`='$id'");
 	}else{

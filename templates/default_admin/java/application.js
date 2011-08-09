@@ -52,10 +52,10 @@
 		 * @param event
 		 */
 		Leave: function( Url, Blank, event ){
-			if(Blank){
-				window.open(Url);
-			}else{
+			if(!Blank){
 				location = Url;
+			}else{
+				window.open(Url);
 			}
 			return false;
 		},

@@ -325,7 +325,7 @@ class AdminPage extends PageTemplate{
 				'admin_link' => ADMIN_FILE.'?'.SafeDB($item['admin_link'], 255, str),
 				'external_link' => SafeDB($item['external_link'], 255, str),
 				'js' => SafeDB($item['js'], 0, str, false, false),
-				'blank' => $item['blank'],
+				'blank' => $item['blank'] == '1' ? 'true' : 'false',
 				'type' => $item['type'],
 				'submenu'   => $this->GenAdminMenu($menu, $item['id'])
 			);
