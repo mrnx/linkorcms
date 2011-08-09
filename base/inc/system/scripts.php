@@ -2,6 +2,9 @@
 
 /**
  * Функция автоматически подключает скрипты из папки script к странице. Принимает произвольное количество параметров или массив.
+ * @param $FileName1
+ * @param string $FileName2
+ * @param string $FileName3
  * @return void
  */
 function UseScript( $FileName1, $FileName2 = '', $FileName3 = '' ){

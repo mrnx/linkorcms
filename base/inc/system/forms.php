@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Генерирует массив опций для HTML::Select функции сорержащий все часовые пояса
+ * @param $val
+ * @return array
+ */
 function GetGmtData($val){
 	global $site;
 	$tlist = timezone_identifiers_list();
@@ -55,7 +60,7 @@ function EnToInt($onoff){
 }
 
 /**
- * Генерирует данные "Да", "Нет" для Html::Select
+ * Генерирует данные "Да", "Нет" для HTML::Select
  * @param bool $selected
  * @param string $on
  * @param string $off

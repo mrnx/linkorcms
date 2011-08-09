@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Выполняет поиск в строке, находит слово и подсвечивает его. Так-же укорачивает исходную строку для вывода в результатах поиска и возвращает ее.
+ * @param $text
+ * @param $search
+ * @return string
+ */
 function SCoincidence($text, $search){
 	$swords = explode(' ',$search);
 	$text = strip_tags($text);
@@ -42,6 +48,12 @@ function SCoincidence($text, $search){
 	return $result_text;
 }
 
+/**
+ * Выполняет поиск сразу нескольких слов в строке и возвращает истину только если все слова в ней присутствуют.
+ * @param $text
+ * @param $search
+ * @return bool
+ */
 function SSearch($text, $search){
 	if($search == ''){
 		return false;

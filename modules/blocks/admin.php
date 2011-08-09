@@ -12,26 +12,34 @@ if(!$user->CheckAccess2('blocks', 'blocks')){
 	return;
 }
 
-function AdminBlocksUpdate( )
-{
-global $config, $db, $site;
-$mdb = $db->GetTableColumns('blocks');
-foreach($mdb as $column) {
-	$m_column[] = $column['name'];
+function AdminBlocksUpdate(){
+	global $config, $db, $site;
+	$mdb = $db->GetTableColumns('blocks');
+	foreach($mdb as $column){
+		$m_column[] = $column['name'];
+	}
+	if(!in_array('showin', $m_column)){
+		$db->InsertColl('blocks', Unserialize('a:3:{s:4:"name";s:6:"showin";s:4:"type";s:4:"text";s:7:"notnull";b:1;}'), 10);
+		$coll = GetCollDescription('showin_uri', 'text', '', '', 'a:1:{i:0;s:0:"";}', false, '');
+		$db->InsertColl('blocks', Unserialize('a:3:{s:4:"name";s:10:"showin_uri";s:4:"type";s:4:"text";s:7:"notnull";b:1;}'), 11);
+		$text = "Обновление успешно . Зайдите в Блоки и настройте их поведение";
+	}else{
+		$text = "Обновление уже установлено . ";
+	}
+	AddTextBox("Внимание", $text);
 }
-if(!in_array('showin', $m_column)) {
-$db->InsertColl('blocks', Unserialize('a:3:{s:4:"name";s:6:"showin";s:4:"type";s:4:"text";s:7:"notnull";b:1;}'), 10);$coll = GetCollDescription('showin_uri','text','','','a:1:{i:0;s:0:"";}',false,'');
-$db->InsertColl('blocks', Unserialize('a:3:{s:4:"name";s:10:"showin_uri";s:4:"type";s:4:"text";s:7:"notnull";b:1;}'), 11);	$text = "Обновление успешно . Зайдите в Блоки и настройте их поведение";
-} else {
-	$text = "Обновление уже установлено . ";
+
+/**
+ * Возвращает имена шаблонов блоков, которые имеет текущий шаблон сайта
+ * @return Array
+ */
+function GetBlockTemplates(){
+	global $config, $db;
+	$TemplateDir = $config['tpl_dir'].$config['general']['site_template'].'/block/';
+	return GetFiles($TemplateDir, false, true, '.html.htm.tpl', true);
 }
 
-		AddTextBox("Внимание", $text);
-
-};
-
-function AdminBlocks( $action )
-{
+function AdminBlocks( $action ){
 	switch($action){
 		case 'main':
 			AdminBlocksMain();

@@ -122,7 +122,7 @@ class User{
 	}
 
 	public function isAdmin(){
-		if($this->Get('u_level') == '1'){
+		if($this->Get('u_level') == ACCESS_ADMIN){
 			return true;
 		}else{
 			return false;
@@ -135,7 +135,7 @@ class User{
 	 */
 	public function AccessLevel(){
 		if($this->Get('u_level') === false){
-			return 4;
+			return ACCESS_ALL;
 		}else{
 			return $this->Get('u_level');
 		}
@@ -153,11 +153,11 @@ class User{
 		if($user_access == null){
 			$user_access = $this->AccessLevel();
 		}
-		if($user_access == 1){
+		if($user_access == ACCESS_ADMIN){
 			return true;
-		}elseif($user_access == 2 && ($viewlevel == 4 || $viewlevel == 2)){
+		}elseif($user_access == ACCESS_MEMBER && ($viewlevel == ACCESS_ALL || $viewlevel == ACCESS_MEMBER)){
 			return true;
-		}elseif($user_access == 3 && ($viewlevel == 4 || $viewlevel == 3)){
+		}elseif($user_access == ACCESS_GUEST && ($viewlevel == ACCESS_ALL || $viewlevel == ACCESS_GUEST)){
 			return true;
 		}elseif($user_access == $viewlevel){
 			return true;

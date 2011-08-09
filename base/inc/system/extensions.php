@@ -11,22 +11,6 @@ define('EXT_BLOCK', '3');
 define('EXT_TEMPLATE', '4');
 
 /**
- * Распаковка архива расширения или обновления в корневую директорию сайта
- * @param $ArchiveFileName
- * @return void
- */
-function ExtExtract( $ArchiveFileName ){
-	$zip = new ZipArchive();
-	if($zip->open($ArchiveFileName) === true){
-		$zip->extractTo(GetSiteRoot());
-		$zip->close();
-		return true;
-	}else{
-		return false;
-	}
-}
-
-/**
  * Загружает информацию о расширении и возвращает массив
  * @param $ExtPath Путь к папке с информационным файлом
  * @return array
@@ -80,7 +64,7 @@ function ExtLoadInfo( $ExtPath ){
 
 /**
  * Регистрация модуля в БД.
- * Рекомендуется использовать эту функцию вместо прямого внесения изменений в базу дыннх.
+ * Рекомендуется использовать эту функцию вместо прямого внесения изменений в базу данных.
  * @param string $Name Имя модуля
  * @param string $Folder Имя папки модуля в директории модулей
  * @param string $IsIndex Модуль работает на index.php (1|0)
@@ -109,7 +93,7 @@ function ExtDeleteModule( $Folder ){
 
 /**
  * Регистрация плагина в БД.
- * Рекомендуется использовать эту функцию вместо прямого внесения изменений в базу дыннх.
+ * Рекомендуется использовать эту функцию вместо прямого внесения изменений в базу данных.
  * @param string $Group Имя группы, может быть пустым если плагин не входит в группы
  * @param string $Name Имя папки плагина в директории плагинов или директории группы плагинов
  * @param string $Function Функция плагина. Плагины в группках могут быть разбиты по функциям
@@ -133,7 +117,7 @@ function ExtInstallPlugin( $Group, $Name, $Function, $Type, $Enabled = '1' ){
  * @param string $Name Имя плагина
  * @return void
  */
-function ExtDeletePlugin( $Group, $Name){
+function ExtDeletePlugin( $Group, $Name ){
 	$Group = SafeEnv($Group, 250, str);
 	$Name = SafeEnv($Name, 255, str);
 	System::database()->Delete('plugins', "`name`='$Name' and `group`='$Group'");
@@ -142,9 +126,9 @@ function ExtDeletePlugin( $Group, $Name){
 
 /**
  * Регистрация блока в БД.
- * Рекомендуется использовать эту функцию вместо прямого внесения изменений в базу дыннх.
- * @param string $Name
- * @param string $Folder
+ * Рекомендуется использовать эту функцию вместо прямого внесения изменений в базу данных.
+ * @param string $Name Имя типа блока
+ * @param string $Folder Имя папки блока в директории блоков
  * @return void
  */
 function ExtInstallBlock( $Name, $Folder ){
@@ -165,8 +149,8 @@ function ExtDeleteBlock( $Folder ){
 
 /**
  * Регистрация шаблона в БД.
- * Рекомендуется использовать эту функцию вместо прямого внесения изменений в базу дыннх.
- * @param $Folder Имя папка блока в директории блоков
+ * Рекомендуется использовать эту функцию вместо прямого внесения изменений в базу данных.
+ * @param string $Folder Имя папка шаблона в директории шаблонов
  * @param string $Admin Шаблон для админ-панели
  * @return void
  */
@@ -179,7 +163,7 @@ function ExtInstallTemplate( $Folder, $Admin = '0' ){
 /**
  * Удаляет регистрацию шаблона из базы данных.
  * @param string $Folder Имя папки шаблона в директории шаблонов
- * @param bool $DelFiles
+ * @param bool $DelFiles Удалить все файлы шаблона
  * @return void
  */
 function ExtDeleteTemplate( $Folder, $DelFiles = false ){

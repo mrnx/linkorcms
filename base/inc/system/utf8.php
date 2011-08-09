@@ -1,9 +1,19 @@
 <?php
 
+/**
+ * Конвертирует строку в кодировку UTF-8
+ * @param $String
+ * @return string
+ */
 function Cp1251ToUtf8( $String ){
 	return iconv("windows-1251", "utf-8//IGNORE//TRANSLIT", $String);
 }
 
+/**
+ * Конвертирует строку из UTF-8 кодировки в Cp1251
+ * @param $Unicode
+ * @return string
+ */
 function Utf8ToCp1251( $Unicode ){
 	return iconv("utf-8", "windows-1251", $Unicode);
 }
@@ -31,7 +41,7 @@ function ObjectCp1251ToUtf8( &$var ){
 }
 
 /**
- * Преобразует строки объекта или массива в кодировку CP1251 из UTF8
+ * Преобразует строки объекта или массива из UTF-8 кодировки в CP1251
  * @param  $var
  * @return array|string
  * @since 1.3.5

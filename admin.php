@@ -14,8 +14,8 @@ define('ADMIN_FILE', System::config('admin_file')); // Ссылка на админ-панель
 // Проверка пользователя
 if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie('admin', true))){
 	if(isset($_POST['admin_login'])){ // Проверка логина-пароля
-		$admin_name = SafeEnv($_POST['admin_name'], 255, str);
-		$admin_password = SafeEnv($_POST['admin_password'], 255, str);
+		$admin_name = $_POST['admin_name'];
+		$admin_password = $_POST['admin_password'];
 		$a = System::user()->Login($admin_name, $admin_password, false, true);
 		if($a === true && System::user()->SecondLoginAdmin){
 			System::user()->SetAdminCookie($admin_name, $admin_password);
@@ -50,7 +50,7 @@ if(!isset($_GET['exe'])){
 	define('INDEX_PHP', false);
 	$ModuleName = SafeEnv($_GET['exe'], 255, str);
 	if($ModuleName == 'exit'){ // Выход
-		$user->UnsetCookie('admin');
+		System::user()->UnsetCookie('admin');
 		GO(Ufu('index.php')); // exit
 	}
 }

@@ -199,7 +199,7 @@ function AdminDownloadsFileEditor( $action )
 	FormRow('Кто видит', $site->Select('view', $visdata));
 	FormRow('Активен', $site->Radio('active', 'on', $active[1]).' Да&nbsp;<br />'.$site->Radio('active', 'off', $active[0]).' Нет');
 	AddCenterBox($top);
-	AddForm('<form action="'.$config['admin_file'].'?exe=downloads&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
+	AddForm('<form action="'.$config['admin_file'].'?exe=downloads&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data" name="edit_form">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
 }
 
 function AdminDownloadsSaveFile( $action )

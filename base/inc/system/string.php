@@ -1,14 +1,19 @@
 <?php
 
-#Разрезает слова, которые длиннее заданного параметра, на части
+/**
+ * Режет слова, которые длиннее заданного параметра, на части
+ * @param string $text
+ * @param string $maxWordLength
+ * @return string
+ */
 function DivideWord( $text, $maxWordLength='30' ){
 	return wordwrap($text, $maxWordLength, chr(13), 1);
 }
 
 /**
  * Возвращает случайную строку произвольной длины
- *
- * @param Integer $length // Длинна строки
+ * @param int $length Длинна строки
+ * @param string $chars
  * @return String
  */
 function GenRandomString($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'){
@@ -23,8 +28,7 @@ function GenRandomString($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij
 
 /**
  * Генерирует легко запоминающийся пароль
- *
- * @param Integer $length // Длина пароля
+ * @param int $length Длина пароля
  * @return String
  */
 function GenBPass($length){

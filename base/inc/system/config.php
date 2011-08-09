@@ -1,28 +1,28 @@
 <?php
 
 /**
- * Загружает натройки из базы данных
- * @global  $db
- * @param var $config_var Переменная в которую будут записаны настройки
- * @param <type> $cfg_table
- * @param <type> $grp_table
+ * Загружает натройки из базы данных.
+ * @param $ConfigVar Переменная в которую будут записаны настройки
+ * @param string $ConfigTable
+ * @param string $GroupsTable
+ * @return
  */
-function LoadSiteConfig( &$config_var, $cfg_table = 'config', $grp_table = 'config_groups' ){
+function LoadSiteConfig( &$ConfigVar, $ConfigTable = 'config', $GroupsTable = 'config_groups' ){
 	global $db;
 
 	$cache = LmFileCache::Instance();
-	if($cache->HasCache('config', $cfg_table)){
-		$config_var = $cache->Get('config', $cfg_table);
+	if($cache->HasCache('config', $ConfigTable)){
+		$ConfigVar = $cache->Get('config', $ConfigTable);
 		return;
 	}
 
-	$temp = $db->Select($cfg_table, "`autoload`='1'");
+	$temp = $db->Select($ConfigTable, "`autoload`='1'");
 	foreach($temp as $i){
 		$configs[$i['group_id']][] = $i;
 	}
 
 	# Вытаскиваем группы настроек
-	$config_groups = $db->Select($grp_table,'');
+	$config_groups = $db->Select($GroupsTable, '');
 	foreach($config_groups as $group){
 		if(isset($configs[$group['id']])){
 			foreach($configs[$group['id']] as $config){
@@ -47,25 +47,25 @@ function LoadSiteConfig( &$config_var, $cfg_table = 'config', $grp_table = 'conf
 					$cvalue = '0';
 				}
 
-				$config_var[$gname][$cname] = $cvalue;
+				$ConfigVar[$gname][$cname] = $cvalue;
 			}
 		}
 	}
 
-	$cache->Write('config', $cfg_table, $config_var);
+	$cache->Write('config', $ConfigTable, $ConfigVar);
 }
 
 /**
- * Устанавливет значение одной настройки.
- * @param <type> $group
- * @param <type> $cname
- * @param <type> $newValue
+ * Устанавливет значение настройки в таблице config.
+ * @param $Group
+ * @param $ConfigName
+ * @param $NewValue
  */
-function ConfigSetValue( $group, $cname, $newValue ){
+function ConfigSetValue( $Group, $ConfigName, $NewValue ){
 	global $config, $db;
-	$group = $db->Select('config_groups', "`name`='$group'");
-	$gid = SafeEnv($group[0]['id'], 11, int);
-	$db->Update('config', "`value`='$newValue'",  "`group_id`='$gid' and `name`='$cname'");
+	$Group = $db->Select('config_groups', "`name`='$Group'");
+	$gid = SafeEnv($Group[0]['id'], 11, int);
+	$db->Update('config', "`value`='$NewValue'",  "`group_id`='$gid' and `name`='$ConfigName'");
 	// Очищаем кэш настроек
 	$cache = LmFileCache::Instance();
 	$cache->Clear('config');

@@ -28,13 +28,13 @@ function ArrayPage( &$ObjArray, $OnPage, $Page ){
  * Сортирует массив по ключу. Для вывода массива отсортированного этой функцией
  * рекомендуется использовать цикл для обхода массива foreach.
  *
- * @param Array $array // массив типа $array = array(array(col1=1,col2=2,...),arr...)
+ * @param Array $Array // массив типа $array = array(array(col1=1,col2=2,...),arr...)
  * массивы такого вида выдаются при запросах к БД
- * @param Integer $coll // номер колонки в массиве по которой его сортировать
+ * @param Integer $Coll // номер колонки в массиве по которой его сортировать
  * @param Boolean $OnDecrease // если true то сортировка будет осуществляться в обратном порядке
  * @return void
  */
-function SortArray( &$array, $coll, $OnDecrease=false ){
+function SortArray( &$Array, $Coll, $OnDecrease=false ){
 	global $SATempVar;
 	if(!function_exists('SorterUp')){
 		function SorterUp($a,$b)
@@ -51,17 +51,22 @@ function SortArray( &$array, $coll, $OnDecrease=false ){
 			return ($a[$SATempVar] > $b[$SATempVar]) ? -1 : 1;
 		}
 	}
-	$SATempVar = $coll;
+	$SATempVar = $Coll;
 	if(!$OnDecrease){
-		usort($array, 'SorterUp');
+		usort($Array, 'SorterUp');
 	}else{
-		usort($array, 'SorterDown');
+		usort($Array, 'SorterDown');
 	}
 	unset($SATempVar);
 }
 
 /**
  * Добавляет элемент в определенную позицию массива
+ * @param $Array
+ * @param $Value
+ * @param null $AfterKey
+ * @param null $Key
+ * @return array
  */
 function InsertToArray( $Array, $Value, $AfterKey = null, $Key = null ){
 	$newarray = array();
@@ -83,7 +88,11 @@ function InsertToArray( $Array, $Value, $AfterKey = null, $Key = null ){
 }
 
 /**
- * Добавляет элемент в начало массива
+ * Добавляет элемент в начало массива.
+ * @param $Array
+ * @param $Value
+ * @param null $Key
+ * @return array
  */
 function InsertToArrayFirst( $Array, $Value, $Key = null){
 	$newarray = array();
@@ -102,6 +111,13 @@ function InsertToArrayFirst( $Array, $Value, $Key = null){
 	return $newarray;
 }
 
+/**
+ * Удаляет элемент с определенным ключом из массива
+ * @param $Array Массив
+ * @param $Key Ключ элемента который нужно удалить
+ * @param bool $SaveKeys Сохранять ключи элементов исходного массива
+ * @return void
+ */
 function DeleteFromArray( $Array, $Key, $SaveKeys = true ){
 	$newarray = array();
 	foreach($Array as $k=>$row){
@@ -112,5 +128,6 @@ function DeleteFromArray( $Array, $Key, $SaveKeys = true ){
 			$newarray[] = $row;
 		}
 	}
+	return $newarray;
 }
 

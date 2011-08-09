@@ -1,6 +1,10 @@
 <?php
 
-// Удаляет протокол у http ссылок.
+/**
+ * Удаляет протокол у http ссылок.
+ * @param $url
+ * @return mixed
+ */
 function Url( $url ){
 	$url = preg_replace('/^https:\/\//', '', $url);
 	$url = preg_replace('/^http:\/\//', '', $url);

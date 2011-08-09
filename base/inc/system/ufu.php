@@ -2,13 +2,12 @@
 
 /**
  * Возвращает все правила замены, либо добавляет новое правило в кэш
- * @global $db $db
+ * @param null $id
+ * @param string $UfuTemplate
+ * @param string $Pattern
+ * @param string $Params
  * @staticvar <type> $UfuRewriteRules
- * @param <type> $id
- * @param <type> $UfuTemplate
- * @param <type> $Pattern
- * @param <type> $Params
- * @return <type>
+ * @return array <type>
  */
 function &UfuGetRules( $id = null, $UfuTemplate = '', $Pattern = '', $Params = ''){
 	global $db;
@@ -25,6 +24,12 @@ function &UfuGetRules( $id = null, $UfuTemplate = '', $Pattern = '', $Params = '
 	return $UfuRewriteRules;
 }
 
+/**
+ * Генерирует и добавляет новое правило в БД
+ * @param $UfuTemplate
+ * @param $params
+ * @return void
+ */
 function UfuAddRewriteRule( $UfuTemplate, $params ){
 	global $db;
 	// Определяем позиции параметров в шаблоне чтобы установить параметры замены в нужном месте
@@ -63,9 +68,17 @@ function UfuAddRewriteRule( $UfuTemplate, $params ){
 
 	// Добавляем запись в базу данных
 	$db->Insert('rewrite_rules', Values('', SafeEnv($UfuTemplate, 255, str), SafeEnv($Pattern, 255, str), SafeEnv($ReplacePattern, 255, str)));
-	UfuGetRules( $db->GetLastId(), $UfuTemplate, $Pattern, $ReplacePattern); // Добавляем правило в кэш
+	UfuGetRules($db->GetLastId(), $UfuTemplate, $Pattern, $ReplacePattern); // Добавляем правило в кэш
 }
 
+/**
+ * Безопасная функция для вывода ЧПУ ссылок
+ * @param $Url
+ * @param string $UfuTemplate
+ * @param bool $NavLink
+ * @param string $NavParam
+ * @return string
+ */
 function Ufu( $Url, $UfuTemplate = '', $NavLink = false, $NavParam = 'page' ){
 	global $config;
 	if($config['general']['ufu']){
@@ -111,7 +124,8 @@ function Ufu( $Url, $UfuTemplate = '', $NavLink = false, $NavParam = 'page' ){
 /**
  * Сравнивает путь с сохраненными правилами автозамены,
  * ищет совпадения и генерирует массив параметров
- * @param <type> $Path
+ * @param $Path
+ * @return array
  */
 function UfuRewrite( $Path ){
 	$Rules = UfuGetRules();

@@ -4,14 +4,18 @@
  * Автозагрузка классов
  */
 
+/**
+ * Автозагрузка классов
+ * @param $ClassName
+ */
 function __autoload( $ClassName ){
 	require_once $GLOBALS['system_autoload'][$ClassName];
 }
 
 /**
  * Регистрация класса для автозагрузки
- * @param Строка $ClassName Название класса
- * @param Строка $FileName Имя файла
+ * @param $ClassName Название класса
+ * @param $FileName Имя файла
  */
 function RegisterClass( $ClassName, $FileName ){
 	$GLOBALS['system_autoload'][$ClassName] = $FileName;
@@ -19,8 +23,8 @@ function RegisterClass( $ClassName, $FileName ){
 
 /**
  * Регистрация массива классов для автозагрузки
- * @param Массив $ClassesArray Ассоциативный массив имен классов и файлов
- * @param Строка $Path Путь к файлам
+ * @param $ClassesArray Ассоциативный массив имен классов и файлов
+ * @param string $Path Путь к файлам
  */
 function RegisterClassesArray( $ClassesArray, $Path = '' ){
 	foreach($ClassesArray as $class=>$file){

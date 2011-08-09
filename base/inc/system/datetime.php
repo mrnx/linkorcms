@@ -20,19 +20,20 @@ function GetMicroTime(){
 
 /**
  * Выводит дату в строковом формате
- *
- * @param Timestamp $time // Время timestamp
- * @return unknown
+ * @param $Time
+ * @param bool $Full
+ * @param bool $Logic
+ * @return string
  */
-function TimeRender($time, $full=true, $logic=true){
+function TimeRender( $Time, $Full=true, $Logic=true){
 	global $config;
-	if($time==false || !is_numeric($time)){
+	if($Time==false || !is_numeric($Time)){
 		return 'Нет данных';
 	}
 	$format = '';
 	$now = time();
-	$ld = round(($now / 86400) - ($time / 86400));
-	if($ld>1 || $now<$time || !$logic){
+	$ld = round(($now / 86400) - ($Time / 86400));
+	if($ld>1 || $now<$Time || !$Logic){
 		$fdate = 'd.m.Y';
 	}elseif($ld==0){
 		$fdate = 'Сегодня';
@@ -41,25 +42,25 @@ function TimeRender($time, $full=true, $logic=true){
 	}else{
 		return 'Нет данных';
 	}
-	if($full){
-		$date = date($fdate.' '.$config['general']['datetime_delemiter'].' H:i', $time);
+	if($Full){
+		$date = date($fdate.' '.$config['general']['datetime_delemiter'].' H:i', $Time);
 	}else{
-		$date = date($fdate,$time);
+		$date = date($fdate,$Time);
 	}
 	return $date;
 }
 
 /**
  * Определяет промежуток времени между двумя датами и выводит
- * результат в виде массива, где есть количество минут, часов, дней
+ * результат в виде массива, где есть количество часов и дней
  * прошедших между датами и их строковые обозначения.
  *
- * @param Time $runtime // Время старта в секундах
- * @param Time $endtime // Время остановки в секундах
+ * @param Time $RunTime Время старта в секундах
+ * @param Time $EndTime Время остановки в секундах
  * @return array('days'=>Количество дней,'hours'=>Количество часов,'sdays'=>Обозначение дней,'shours'=>Обозначение часов)
  */
-function TotalTime($runtime, $endtime){
-	$right = $endtime - $runtime;
+function TotalTime( $RunTime, $EndTime ){
+	$right = $EndTime - $RunTime;
 	if($right<0){return false;}
 
 	$str = '';

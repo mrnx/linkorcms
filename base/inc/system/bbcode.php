@@ -35,10 +35,10 @@ function BbCodeTag( $tag, $part ){
 
 /**
  * Парсер ББ кодов
- * @param  $text
+ * @param  $Text
  * @return string
  */
-function BbCodePrepare( $text ){
+function BbCodePrepare( $Text ){
 	$preg = array(
 		'~\[s\](.*?)\[\/s\]~si' => '<del>$1</del>',
 		'~\[b\](.*?)\[\/b\]~si' => '<strong>$1</strong>',
@@ -95,7 +95,7 @@ function BbCodePrepare( $text ){
 		'~\[quote\](.*?)\[\/quote\]~si' => '<div class="bbcode_quote">$1</div>',
 		'~\[quote=(?:&quot;|"|\')?(.*?)["\']?(?:&quot;|"|\')?\](.*?)\[\/quote\]~si' => '<div class="bbcode_quote"><strong>$1:</strong>$2</div>',
 	);
-	$text = preg_replace(array_keys($preg), array_values($preg), $text);
-	return $text;
+	$Text = preg_replace(array_keys($preg), array_values($preg), $Text);
+	return $Text;
 }
 

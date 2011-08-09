@@ -1,39 +1,50 @@
 <?php
 
-#Регистрирует таблицу комментариев
-function RegisterCommentTable($name, $objTable, $ObjIdColl, $objCounterColl, $objCounterCollIndex){
+/**
+ * Регистрирует таблицу комментариев.
+ * @param $Name
+ * @param $ObjTable
+ * @param $ObjIdColl
+ * @param $ObjCounterColl
+ * @param $ObjCounterCollIndex
+ */
+function RegisterCommentTable( $Name, $ObjTable, $ObjIdColl, $ObjCounterColl, $ObjCounterCollIndex ){
 	global $db;
-	$name = SafeEnv($name, 64, str);
-	$db->Insert('comments', Values('', $name, $objTable, $ObjIdColl, $objCounterColl, $objCounterCollIndex));
+	$name = SafeEnv($Name, 255, str);
+	$db->Insert('comments', Values('', $Name, $ObjTable, $ObjIdColl, $ObjCounterColl, $ObjCounterCollIndex));
 }
 
-#Освобождает таблицу комментариев
-function UnRegisterCommentTable($name, $delete=false){
+/**
+ * Освобождает таблицу комментариев
+ * @param $Name
+ * @param bool $Delete
+ * @return void
+ */
+function UnRegisterCommentTable( $Name, $Delete=false ){
 	global $db;
-	$name = SafeEnv($name, 64, str);
-	$db->Delete('comments', "`table`='$name'");
-	if($delete){
-		$db->DropTable($name);
+	$Name = SafeEnv($Name, 255, str);
+	$db->Delete('comments', "`table`='$Name'");
+	if($Delete){
+		$db->DropTable($Name);
 	}
 }
 
 /**
  * Функция обновляет данные пользователя во всех комментариях.
- * При передаче параметров фильтровать их функцией SafeEnv.
- * @global <type> $db
- * @param <type> $uid
- * @param <type> $newUid
- * @param <type> $Name
- * @param <type> $email
- * @param <type> $hEmail
- * @param <type> $homePage
- * @param <type> $uIP
+ * При передаче параметров необходимо фильтровать их функцией SafeEnv.
+ * @param $UserId
+ * @param $NewUserId
+ * @param $Name
+ * @param $Email
+ * @param $HideEmail
+ * @param $HomePage
+ * @param null $UserIp
  */
-function UpdateUserComments($uid, $newUid, $Name, $email, $hEmail, $homePage, $uIP=null){
+function UpdateUserComments( $UserId, $NewUserId, $Name, $Email, $HideEmail, $HomePage, $UserIp=null ){
 	global $db;
-	$set = "user_id='$newUid',user_name='$Name',user_homepage='$homePage',user_email='$email',"
-	."user_hideemail='$hEmail'".($uIP<>null?",user_ip='$uIP'":'');
-	$where = "`user_id`='$uid'";
+	$set = "user_id='$NewUserId',user_name='$Name',user_homepage='$HomePage',user_email='$Email',"
+	."user_hideemail='$HideEmail'".($UserIp<>null?",user_ip='$UserIp'":'');
+	$where = "`user_id`='$UserId'";
 	$ctables = $db->Select('comments', '');
 	foreach($ctables as $table){
 		$db->Update($table['table'], $set, $where);
@@ -41,14 +52,14 @@ function UpdateUserComments($uid, $newUid, $Name, $email, $hEmail, $homePage, $u
 }
 
 /**
- * Удаляет все коментарии пользователя
- * @param  $uid
+ * Удаляет все коментарии пользователя.
+ * @param int $UserId
  * @return void
  */
-function DeleteAllUserComments( $uid ){
+function DeleteAllUserComments( $UserId ){
 	global $db;
-	$uid = SafeEnv($uid, 11, int);
-	$where = "`user_id`='$uid'";
+	$UserId = SafeEnv($UserId, 11, int);
+	$where = "`user_id`='$UserId'";
 	$ctables = $db->Select('comments','');
 	foreach($ctables as $table){
 		$comms = $db->Select(SafeEnv($table['table'], 255, str), $where);
@@ -73,13 +84,19 @@ function DeleteAllUserComments( $uid ){
 	}
 }
 
-// Изменяет поле счетчика у объекта
-function CalcCounter($objTable, $whereObj, $objCounterColl, $calcVal){
+/**
+ * Изменяет поле счетчика в БД.
+ * @param $ObjTable
+ * @param $WhereObj
+ * @param $ObjCounterColl
+ * @param $CalcVal
+ */
+function CalcCounter( $ObjTable, $WhereObj, $ObjCounterColl, $CalcVal ){
 	global $db;
-	$objCounterColl = SafeEnv($objCounterColl, 255, str);
-	$db->Select($objTable, $whereObj);
+	$ObjCounterColl = SafeEnv($ObjCounterColl, 255, str);
+	$db->Select($ObjTable, $WhereObj);
 	if($db->NumRows() > 0){
-		$counterVal = $db->QueryResult[0][$objCounterColl] + $calcVal;
-		$db->Update($objTable, "$objCounterColl='$counterVal'", $whereObj);
+		$counterVal = $db->QueryResult[0][$ObjCounterColl] + $CalcVal;
+		$db->Update($ObjTable, "$ObjCounterColl='$counterVal'", $WhereObj);
 	}
 }

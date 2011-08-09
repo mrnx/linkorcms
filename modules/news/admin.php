@@ -302,7 +302,7 @@ function AdminNewsEditor(){
 
 	AddCenterBox($title);
 	AddForm(
-		'<form name="news_editor" action="'.ADMIN_FILE.'?exe=news&a=save'.$met.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">',
+		'<form name="news_editor" action="'.ADMIN_FILE.'?exe=news&a=save'.$met.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data" name="news_editor">',
 	  System::admin()->Button('Отмена', 'onclick="history.go(-1)"')
 	  .System::admin()->Button('Предпросмотр', 'onclick="NewsPreviewOpen();"')
 	  .System::admin()->Submit($caption)
@@ -494,7 +494,7 @@ function AdminNewsTopics(){
 	FormRow('Название раздела', System::admin()->Edit('topic_name', '', false, 'maxlength="255" style="width:400px;"'));
 	FormTextRow('Описание (HTML)', System::admin()->HtmlEditor('topic_description', '', 600, 200));
 	AdminImageControl('Изображение', 'Загрузить изображение', '', $icons_dir, 'topic_image', 'up_photo', 'topicsform');
-	AddForm('<form name="topicsform" action="'.ADMIN_FILE.'?exe=news&a=addtopic" method="post" enctype="multipart/form-data">', System::admin()->Submit('Создать'));
+	AddForm('<form name="topicsform" action="'.ADMIN_FILE.'?exe=news&a=addtopic" method="post" enctype="multipart/form-data" name="topicsform">', System::admin()->Submit('Создать'));
 }
 
 function AdminNewsTopicSave(){
@@ -561,7 +561,7 @@ function AdminNewsEditTopic(){
 	FormTextRow('Описание (HTML)', System::admin()->HtmlEditor('topic_description', SafeDB($topic['description'], 255, str), 600, 200));
 	AdminImageControl('Изображение', 'Загрузить изображение', RealPath2(SafeDB($topic['image'], 255, str)), RealPath2(System::config('news/icons_dirs')), 'topic_image', 'up_photo', 'topicsform');
 	AddForm(
-		'<form name="topicsform" action="'.ADMIN_FILE.'?exe=news&a=savetopic&id='.$id.'" method="post" enctype="multipart/form-data">',
+		'<form name="topicsform" action="'.ADMIN_FILE.'?exe=news&a=savetopic&id='.$id.'" method="post" enctype="multipart/form-data" name="topicsform">',
 		System::admin()->Button('Отмена', 'onclick="history.go(-1);"').System::admin()->Submit('Сохранить')
 	);
 }

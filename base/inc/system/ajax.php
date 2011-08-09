@@ -14,20 +14,20 @@ function IsAjax(){
 
 /**
  * Кодирует объект в формат JSON
- * @param  $value
+ * @param  $Value
  * @return string
  * @since 1.3.5
  */
-function JsonEncode( $value ){
-	return json_encode(ObjectCp1251ToUtf8($value));
+function JsonEncode( $Value ){
+	return json_encode(ObjectCp1251ToUtf8($Value));
 }
 
 /**
  * Декодирует объект из строки в формате JSON
- * @param  $json
+ * @param  $Json
  * @return mixed
  * @since 1.3.5
  */
-function JsonDecode( $json ){
-	return json_decode($json);
+function JsonDecode( $Json ){
+	return json_decode($Json);
 }

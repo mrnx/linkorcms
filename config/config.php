@@ -10,4 +10,5 @@ define('FORCE_BUILD_SYSTEM', false); // Собирать ядро при каждом запуске
 define('BUILD_SYSTEM_WITH_CLASSES', true); // Собирать ядро вместе с классами
 define('LOAD_SYSTEM_APART', true); // Загружать каждый модуль ядра отдельно (полезно при отладке)
 
-define('CHECK_UPDATE_URL', ''); // Адрес страницы проверки новой версии системы
+// FIXME: Адрес страницы может измениться, а обновлять сий файл нельзя
+define('CHECK_UPDATE_URL', 'http://updates.linkorcms.ru/index.php?api=checkupdate'); // Адрес страницы проверки новой версии системы

@@ -11,7 +11,7 @@ define('realmix', 'real_mix');
 define('boolmix', 'bool_mix');
 define('strmix', 'str_mix');
 define('obj', 'object');
-define('nil', 'null');
+define('nil', null);
 define('onoff', 'onoff2int');
 
 // Функция преобразует значение к типу boolean.
@@ -223,7 +223,7 @@ function SafeR( $Names, $MaxLength, $Type, $StripTags = false, $AddSlashes = tru
 }
 
 /**
- * Проверяет массив GET на наличие нужных ключей
+ * Проверяет массив $_GET на наличие нужных ключей
  * @return bool
  */
 function CheckGet(){

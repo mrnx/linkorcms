@@ -24,14 +24,7 @@ define('SCRIPT_START_TIME', microtime(true));
 
 // Низкоуровневая конфигурация (конфигурационные константы)
 require 'config/config.php';
-
 setlocale(LC_ALL, LOCALE);
-
-// Отпечатки пальцев LinkorCMS
-require 'config/version.php';
-if(isset($_GET['checklcsite'])){
-	exit(CMS_VERSION_STR);
-}
 
 // Проверка версии интерпретатора
 if(version_compare(phpversion(), '5.0.0', '<')){
@@ -84,7 +77,7 @@ $user = null;
 $site = null;
 $config = array();
 $plug_config = array();
-$system = array('no_templates'=>false, 'no_messages'=>false, 'no_echo'=>false, 'stop_hit'=>false);
+$system = array('no_templates'=>false, 'no_messages'=>false, 'no_echo'=>false);
 $SiteLog = null;
 $ErrorsLog = null;
 $SITE_ERRORS = true;
@@ -126,6 +119,11 @@ if(LOAD_SYSTEM_APART){ // Подключать каждый файл по отдельности
 		file_put_contents('config/system_build.php', '<'.'?php'.$core_build);
 	}
 	require 'config/system_build.php';
+}
+
+// Отпечатки пальцев LinkorCMS
+if(isset($_GET['checklcsite'])){
+	exit(CMS_VERSION_STR);
 }
 
 // Подключение системных плагинов

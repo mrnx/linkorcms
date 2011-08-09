@@ -102,13 +102,13 @@ function Parser_ParseSetStr( &$set, &$row, &$info ){
 }
 
 /**
- * ѕреобразует SET строку запроса в упор€доченный массив.
+ * ѕреобразует VALUES строку запроса в упор€доченный массив.
  *
  * @param string $values —трока вида "'name','root',''".
  * @param array $Info —труктура информации о таблице.
  * @param bool $isUpdateMethod ќбновление, вли€ет на то устанавливать ли свое новое значение инкремента.
  * @param bool $lastvals «начени€ которые были до обновлени€, при обновлении строки.
- * @return ”пор€доченный массив значений вида array('name','root','').
+ * @return array ”пор€доченный массив значений вида array('name','root','').
  */
 function Parser_ParseValuesStr(&$values, &$Info, $isUpdateMethod = false, $lastvals = false){
 	$values2 = str_replace("\\'",'<&#39;>',$values);
@@ -145,7 +145,7 @@ function Parser_ParseValuesStr(&$values, &$Info, $isUpdateMethod = false, $lastv
  * ¬ыполн€ет простые WHERE запросы соответствующие синтаксису SQL.
  *
  * @param  $where —трока вида "`pass`='1' and `login`='admin'"
- * @param  $row ”пор€доченный массив из значений пол€ таблицы.
+ * @param  $row ”пор€доченный массив из значений строки таблицы.
  * @param  $info —труктура информации о таблице.
  * @param int $index ѕор€дковый номер строки в таблице. ƒобавл€ет переменную `index`,
  * которую можно использовать в запросе.

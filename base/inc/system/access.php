@@ -4,18 +4,23 @@
  * Уровни доступа
  */
 
+define('ACCESS_ADMIN', 1);
+define('ACCESS_MEMBER', 2);
+define('ACCESS_GUEST', 3);
+define('ACCESS_ALL', 4);
+
 /**
  * Вызывается при запросе несуществующей
  * страницы или ошибки и использования спецсимволов в параметрах
  * @param bool $LowProtect
- * @param bool $redirect
+ * @param bool $Redirect
  * @return void
  */
-function HackOff( $LowProtect=false, $redirect=true ){
+function HackOff( $LowProtect=false, $Redirect=true ){
 	global $user, $config;
 	if($user->isAdmin() || $LowProtect){
 		if(defined('MAIN_SCRIPT') || defined('PLUG_SCRIPT') || !defined('ADMIN_SCRIPT')){
-			if($redirect){
+			if($Redirect){
 				GO(Ufu('index.php'));
 			}
 		}elseif(defined('ADMIN_SCRIPT')){
@@ -29,7 +34,7 @@ function HackOff( $LowProtect=false, $redirect=true ){
 			действия с Вашей стороны. Если Вы считаете, что это произошло по ошибке, - обратитесь
 			в службу поддержки по e-mail '.$config['general']['site_email'].'.');
 		}else{
-			if($redirect){
+			if($Redirect){
 				GO(Ufu('index.php'));
 			}
 		}
@@ -38,47 +43,46 @@ function HackOff( $LowProtect=false, $redirect=true ){
 
 /**
  * Переводит уровень доступа в строку
- * @param $level
- * @param string $s_admins
- * @param string $s_members
- * @param string $s_guests
- * @param string $s_all
+ * @param $Level
+ * @param string $Admins
+ * @param string $Members
+ * @param string $Guests
+ * @param string $All
  * @return string
  */
-function ViewLevelToStr($level,$s_admins='',$s_members='',$s_guests='',$s_all=''){
-	switch($level){
-		case 1:	$s_admins=='' ? $vi='<font color="#FF0000">Админы</font>' : $vi=$s_admins;
+function ViewLevelToStr( $Level, $Admins='', $Members='', $Guests='', $All='' ){
+	switch($Level){
+		case 1:	$Admins == '' ? $view = '<span style="color: #FF0000;">Администраторы</span>' : $view = $Admins;
 		break;
-		case 2:	$s_members=='' ? $vi='<font color="#0080FF">Пользователи</font>' : $vi=$s_members;
+		case 2:	$Members == '' ? $view = '<span style="color: #0080FF;">Пользователи</span>' : $view = $Members;
 		break;
-		case 3: $s_guests=='' ? $vi='<font color="#A0A000">Гости</font>' : $vi=$s_guests;
+		case 3: $Guests == '' ? $view = '<span style="color: #A0A000;">Гости</span>' : $view = $Guests;
 		break;
-		case 4:	$s_all=='' ? $vi='<font color="#008000">Все</font>' : $vi=$s_all;
-		break;
-		default: $s_all=='' ? $vi='<font color="#008000">Все</font>' : $vi=$s_all;
+		case 4:
+		default: $All == '' ? $view = '<span style="color: #008000;">Все</span>' : $view = $All;
 	}
-	return $vi;
+	return $view;
 }
 
 /**
  * Создаст запрос базы данных чтобы получить только те объекты (данные),
  * которые пользователь с данным доступом может видеть
- * @param $param_name
- * @param null $user_access
+ * @param $ParamName Имя параметра с уровнем доступа объекта в базе данных
+ * @param null $UserAccess Уровень доступа пользлвателя
  * @return string
  */
-function GetWhereByAccess($param_name, $user_access=null){
-	if($user_access == null){
+function GetWhereByAccess( $ParamName, $UserAccess=null ){
+	if($UserAccess == null){
 		global $user;
-		$user_access = $user->AccessLevel();
+		$UserAccess = $user->AccessLevel();
 	}
-	$where = "`$param_name`='4'";
-	if($user_access == '1'){//Администратор
+	$where = "`$ParamName`='4'";
+	if($UserAccess == ACCESS_ADMIN){ // Администратор
 		$where = '';
-	}elseif($user_access == '2'){//Пользователь
-		$where .= " or `$param_name`='2'";
-	}else{//Гость
-		$where .= " or `$param_name`='3'";
+	}elseif($UserAccess == ACCESS_MEMBER){ // Пользователь
+		$where .= " or `$ParamName`='2'";
+	}else{ // Гость
+		$where .= " or `$ParamName`='3'";
 	}
 	return $where;
 }

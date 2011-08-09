@@ -6,7 +6,6 @@ $system_usertypes_cache = null;
 
 /**
  * Возвращает массив данных о пользователях с ключами по id.
- *
  * @return array
  */
 function GetUsers(){
@@ -29,6 +28,10 @@ function GetUsers(){
 	return $system_users_cache;
 }
 
+/**
+ * Возвращает ранги пользователей
+ * @return array|null|string
+ */
 function GetUserRanks(){
 	global $system_userranks_cache;
 	if($system_userranks_cache == null){
@@ -45,19 +48,10 @@ function GetUserRanks(){
 	return $system_userranks_cache;
 }
 
-function GetRatingImage( $votes_amount, $votes ){
-	$default = 'images/rating_system/rating.gif';
-	if($votes_amount==0){
-		return $default;
-	}
-	$rating = round($votes/$votes_amount);
-	if($rating>=1 && $rating<=5){
-		return 'images/rating_system/rating'.$rating.'.gif';
-	}else{
-		return $default;
-	}
-}
-
+/**
+ * Возвращает типы пользователей
+ * @return array
+ */
 function GetUserTypes(){
 	global $system_usertypes_cache;
 	if($system_usertypes_cache == null){
@@ -76,6 +70,14 @@ function GetUserTypes(){
 	return $system_usertypes_cache;
 }
 
+/**
+ * Поверка E-mail пользователя используемая при регистрации
+ * @param $Email
+ * @param $error_out
+ * @param bool $CheckExist
+ * @param int $xor_id
+ * @return bool
+ */
 function CheckUserEmail( $Email, &$error_out, $CheckExist=false, $xor_id=0 ){
 	global $db, $config;
 	if($Email == ''){
@@ -98,11 +100,11 @@ function CheckUserEmail( $Email, &$error_out, $CheckExist=false, $xor_id=0 ){
 
 /**
  * Проверяет логин на корректность
- *
- * @param String $login // Логин
- * @param $error_out // Переменная в которую произвести вывод ошибок
- * @param $CheckExist // Произвести проверку на занятость логина
- * @return Boolean // Истина если логин верный
+ * @param String $login Логин
+ * @param $error_out Переменная в которую произвести вывод ошибок
+ * @param bool $CheckExist Произвести проверку на занятость логина
+ * @param int $xor_id
+ * @return Boolean Истина если логин верный
  */
 function CheckLogin( $login, &$error_out, $CheckExist=false, $xor_id=0 ){
 	global $db, $config;
@@ -132,11 +134,11 @@ function CheckLogin( $login, &$error_out, $CheckExist=false, $xor_id=0 ){
 
 /**
  * Проверяет никнейм на корректность
- *
- * @param String $nikname // Никнейм
- * @param $error_out // Переменная в которую произвести вывод ошибок
- * @param $CheckExist // Произвести проверку на занятость логина
- * @return Boolean // Истина если пароль верный
+ * @param String $nikname Никнейм
+ * @param $error_out Переменная в которую произвести вывод ошибок
+ * @param bool $CheckExist Произвести проверку на занятость логина
+ * @param int $xor_id
+ * @return Boolean Истина если пароль верный
  */
 function CheckNikname( $nikname, &$error_out, $CheckExist=false, $xor_id=0 ){
 	global $db, $config;
@@ -161,10 +163,9 @@ function CheckNikname( $nikname, &$error_out, $CheckExist=false, $xor_id=0 ){
 
 /**
  * Проверяет пароль на корректность
- *
- * @param String $pass // Пароль
- * @param $error_out // Переменная в которую произвести вывод ошибок (массив)
- * @return Boolean // Истина если пароль верный
+ * @param String $pass Пароль
+ * @param $error_out Переменная в которую произвести вывод ошибок (массив)
+ * @return Boolean Истина если пароль верный
  */
 function CheckPass($pass,&$error_out){
 	global $config;
@@ -181,9 +182,12 @@ function CheckPass($pass,&$error_out){
 	return $result;
 }
 
-#Возвращает полную информацию о пользователе
-#Включая ранг, картинку ранга, статус онлайн, имя файла аватара для вывода.
-#Вся информация кэшируется.
+
+/**
+ * Возвращает полную информацию о пользователе включая ранг, картинку ранга, статус онлайн, имя файла аватара для вывода. Вся информация кэшируется.
+ * @param $user_id
+ * @return array|bool
+ */
 function GetUserInfo($user_id){
 	$system_users_cache = GetUsers();
 	if(isset($system_users_cache[$user_id])){
@@ -205,10 +209,21 @@ function GetUserInfo($user_id){
 	}
 }
 
+/**
+ * Возвращает имя файла аватара пользователя. Алиас к GetPersonalAvatar.
+ * @param $user_id
+ * @return string
+ */
 function GetUserAvatar( $user_id ){
 	return GetPersonalAvatar($user_id);
 }
 
+/**
+ * Возвращает имя файла уменьшенной копии аватара пользователя в 64px
+ * @param $user_id
+ * @param string $avatar
+ * @return string
+ */
 function GetSmallUserAvatar( $user_id, $avatar = '' ){
 	if($avatar == ''){
 		$avatar = GetPersonalAvatar($user_id);
@@ -227,6 +242,12 @@ function GetSmallUserAvatar( $user_id, $avatar = '' ){
 	}
 }
 
+/**
+ * Возвращает имя файла сильно уменьшенной копии аватара пользователя в 24px
+ * @param $user_id
+ * @param string $avatar
+ * @return string
+ */
 function GetSmallestUserAvatar( $user_id, $avatar = '' ){
 	global $config;
 	if($avatar == ''){
@@ -246,6 +267,11 @@ function GetSmallestUserAvatar( $user_id, $avatar = '' ){
 	}
 }
 
+/**
+ * Возвращает имя файла аватара пользователя
+ * @param $user_id
+ * @return string
+ */
 function GetPersonalAvatar($user_id){
 	global $db, $config;
 	if($user_id == 0){
@@ -277,6 +303,11 @@ function GetPersonalAvatar($user_id){
 	}
 }
 
+/**
+ * Возвращает адрес аватара из галереи по имени файла
+ * @param $filename
+ * @return string
+ */
 function GetGalleryAvatar($filename){
 	global $config;
 	if(!defined('SETUP_SCRIPT')){
@@ -294,7 +325,13 @@ function GetGalleryAvatar($filename){
 }
 
 
-// Возвращает название, картинку и идентификатор ранга
+/**
+ * Возвращает название, картинку и идентификатор ранга пользователя
+ * @param $points
+ * @param $type
+ * @param $access
+ * @return array
+ */
 function GetUserRank($points, $type, $access){
 	global $config, $db;
 	static $admintypes = null;
@@ -326,6 +363,16 @@ function GetUserRank($points, $type, $access){
 	}
 }
 
+/**
+ * Отправка письма для активации по E-mail
+ * @param $username
+ * @param $user_mail
+ * @param $login
+ * @param $pass
+ * @param $code
+ * @param $regtime
+ * @return void
+ */
 function UserSendActivationMail($username, $user_mail, $login, $pass, $code, $regtime){
 	global $config;
 	$time = $regtime+604800;
@@ -345,6 +392,15 @@ function UserSendActivationMail($username, $user_mail, $login, $pass, $code, $re
 	SendMail($username, $user_mail, 'Регистрация на '.$config['general']['site_name'], $text);
 }
 
+/**
+ * Отправка письма по завершении регистрации
+ * @param $user_mail
+ * @param $name
+ * @param $login
+ * @param $pass
+ * @param $regtime
+ * @return void
+ */
 function UserSendEndRegMail($user_mail, $name, $login, $pass, $regtime){
 	global $config;
 	$text = 'Здравствуйте, ['.$name.']!
@@ -364,6 +420,14 @@ function UserSendEndRegMail($user_mail, $name, $login, $pass, $regtime){
 	SendMail($name, $user_mail, '['.$config['general']['site_url'].'] Регистрация', $text);
 }
 
+/**
+ * Отправка письма с новым паролем
+ * @param $user_mail
+ * @param $name
+ * @param $login
+ * @param $pass
+ * @return void
+ */
 function UserSendForgotPassword($user_mail, $name, $login, $pass){
 	global $config;
 	$ip = getip();
@@ -378,7 +442,7 @@ function UserSendForgotPassword($user_mail, $name, $login, $pass){
 логин: '.$login.'
 пароль: '.$pass.'
 
-Изменить данные аккаунта можете по адресу:
+Изменить данные аккаунта вы можете по адресу:
 '.GetSiteUrl().Ufu('index.php?name=user&op=editprofile', 'user/{op}/').'
 
 IP-адрес, с которого был запрошен пароль: '.$ip.'
@@ -387,6 +451,12 @@ IP-адрес, с которого был запрошен пароль: '.$ip.'
 	SendMail($name, $user_mail, '['.$config['general']['site_url'].'] Напоминание пароля', $text);
 }
 
+/**
+ * Выполняет поиск аватар в галерее и генерирует данные для HTML::Select
+ * @param $avatar
+ * @param $personal
+ * @return array
+ */
 function GetGalleryAvatarsData($avatar, $personal){
 	global $config, $site;
 	$avatars = GetFiles($config['general']['avatars_dir'], false, true, '.gif.jpg.jpeg.png');
@@ -408,29 +478,6 @@ function GetGalleryAvatarsData($avatar, $personal){
 	return array(
 		$avd, $avatars[$selindex]
 	);
-}
-
-function GetGalleryAvatars($avatar, $personal){
-	global $config, $site;
-	$avatars = GetFiles($config['general']['avatars_dir'], false, true, '.gif.jpg.jpeg.png');
-	$selindex = 0;
-	$avd = array(
-	);
-	if($personal == '1'){
-		$site->DataAdd($avd, '', 'Персональный', true);
-	}
-	for($i = 0, $c = count($avatars); $i < $c; $i++){
-		if($avatar == $avatars[$i]){
-			$sel = true;
-			$selindex = $i;
-		} else{
-			$sel = false;
-		}
-		$vars['name'] = $avatars[$i];
-		$vars['selected'] = $sel;
-		$vars['caption'] = $avatars[$i];
-	}
-	return $vars;
 }
 
 /**
@@ -493,6 +540,11 @@ function UserLoadAvatar(&$errors, &$avatar, &$a_personal, $oldAvatarName, $oldAv
 	}
 }
 
+/**
+ * Удаляет все размеры аватара по его имени
+ * @param $AvatarFileName
+ * @return void
+ */
 function UnlinkUserAvatarFiles($AvatarFileName){
 	global $config;
 	$AvatarFileName = RealPath2($config['general']['personal_avatars_dir'].$AvatarFileName);
@@ -720,7 +772,7 @@ function AdminUserEditor($save_link, $a = 'adduser', $id = 0, $isadmin = false){
 }
 
 /**
- * Сохраняет изменения данных пользователя в БД из функции AdminUserEditor
+ * Сохраняет данные формы сгенерированной фукцией AdminUserEditor
  * @param  $back_link
  * @param string $a
  * @param int $id
@@ -959,7 +1011,10 @@ function AdminUserEditSave($back_link, $a = 'insert', $id = 0, $isadmin = false)
 	}
 }
 
-# Возвращает ИП адрес пользователя
+/**
+ * Возвращает IP адрес пользователя
+ * @return array
+ */
 function getip(){
 	global $_SERVER, $config;
 	if(!isset($config['info']['ip'])){

@@ -3,11 +3,11 @@
 /**
  * Проверяет адрес электронной почты на корректность
  *
- * @param String $email // e-mail адрес
+ * @param String $Email // e-mail адрес
  * @return Boolean
  */
-function CheckEmail( $email ){
-	return (preg_match('/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i',trim($email)));
+function CheckEmail( $Email ){
+	return (preg_match('/^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$/i',trim($Email)));
 }
 
 /**
@@ -43,12 +43,12 @@ function SendMail( $ToName, $ToEmail, $Subject, $Text, $Html=false, $From='', $F
 	}
 }
 
-function AntispamEmail($email, $addjava=true){
+function AntispamEmail( $Email, $AddJava=true ){
 	global $site;
 	static $javaAdd = false;
-	if(!$javaAdd && $addjava){
+	if(!$javaAdd && $AddJava){
 		$site->AddJS('
-		function email(login,domain){
+		function email(login, domain){
 			mail = login+"@"+domain;
 			mail = \'<a href="mailto:\'+mail+\'" target="_blank">\'+mail+\'</a>\';
 			document.write(mail);
@@ -56,9 +56,9 @@ function AntispamEmail($email, $addjava=true){
 		');
 		$javaAdd = true;
 	}
-	$email = explode('@', $email);
-	if(count($email) == 2){
-		return '<script>email(\''.$email[0].'\',\''.$email[1].'\');</script>';
+	$Email = explode('@', $Email);
+	if(count($Email) == 2){
+		return '<script>email(\''.$Email[0].'\',\''.$Email[1].'\');</script>';
 	}else{
 		return '';
 	}

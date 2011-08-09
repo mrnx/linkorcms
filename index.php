@@ -30,10 +30,10 @@ if(!isset($_GET['name'])){
 	define('INDEX_PHP', false);
 	$ModuleName = SafeEnv($_GET['name'], 255, str);
 }
-$db->Select('modules', "`enabled`='1' and `folder`='$ModuleName'"); // Проверяем доступен ли данный модуль
+System::database()->Select('modules', "`enabled`='1' and `folder`='$ModuleName'"); // Проверяем доступен ли данный модуль
 
 // Установлен такой модуль?
-if($db->NumRows() == 0){
+if(System::database()->NumRows() == 0){
 	System::site()->InitPage();
 	System::site()->AddTextBox('Ошибка', '<center>Данная страница ('.SafeDB($ModuleName, 255, str).') не существует или не доступна в данный момент.</center>');
 	System::site()->TEcho();
@@ -41,8 +41,8 @@ if($db->NumRows() == 0){
 }
 
 // Проверка на доступ
-$mod = $db->FetchRow();
-if(!$user->AccessIsResolved($mod['view'], $userAccess)){
+$mod = System::database()->FetchRow();
+if(!System::user()->AccessIsResolved($mod['view'], $userAccess)){
 	System::site()->InitPage();
 	System::site()->AddTextBox('Ошибка', '<center>Доступ запрещен.</center>');
 	System::site()->TEcho();

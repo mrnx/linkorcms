@@ -3,24 +3,24 @@
 /**
  * Извлекает из полного имени файла его расширение
  *
- * @param String $file // Полное имя файла
- * @param bool $removeDot // Удалить ведущую точку
+ * @param String $File // Полное имя файла
+ * @param bool $RemoveDot // Удалить ведущую точку
  * @return String
  */
-function GetFileExt( $file, $removeDot = false ){
-	$pos = strrpos($file, '.');
-	if($removeDot) $pos++;
+function GetFileExt( $File, $RemoveDot = false ){
+	$pos = strrpos($File, '.');
+	if($RemoveDot) $pos++;
 	if(!($pos===false)){
-		return substr($file, $pos);
+		return substr($File, $pos);
 	}else{
 		return '';
 	}
 }
 
 /**
- * Извлекает из полного имени файла его имя без расширения
- *
- * @param Itring $Name // Полное имя файла
+ * Извлекает из полного имени файла его имя
+ * @param string $Name Полное имя файла
+ * @param bool $RemoveExt Удалить расширение
  * @return String
  */
 function GetFileName( $Name, $RemoveExt = true ){
@@ -35,13 +35,13 @@ function GetFileName( $Name, $RemoveExt = true ){
 /**
  * Рекурсивно обходит каталог и возвращает массив с относительными именами файлов просматриваемого каталога
  *
- * @param String $folder // Имя папки с последним слэшем
- * @param Boolean $use_subfolders // Искать в подпапках
- * @param Boolean $use_mask // Использовать маску поиска
- * @param String $mask // Маска поиска. Вы можете указать расширения (с точкой) через запятую.
- * @param Boolean $newSearch // Начать ли новый поиск (статическая переменная будет перезаписана)
- * @param String $parentf // Не обращайте внимания. Нужна для работы функции.
- * @return Array // Список найденных файлов
+ * @param String $folder Имя папки с последним слэшем
+ * @param Boolean $use_subfolders Искать в подпапках
+ * @param Boolean $use_mask Использовать маску поиска
+ * @param String $mask Маска поиска. Вы можете указать расширения (с точкой) через запятую.
+ * @param Boolean $newSearch Начать ли новый поиск (статическая переменная будет перезаписана)
+ * @param String $parentf Не обращайте внимания. Нужна для работы функции.
+ * @return Array Список найденных файлов
  */
 function GetFiles( $folder, $use_subfolders = false, $use_mask = false, $mask = '', $newSearch = true, $parentf = '' ){
 	static $sfiles = array();
@@ -74,18 +74,18 @@ function GetFiles( $folder, $use_subfolders = false, $use_mask = false, $mask = 
 
 /**
  * Возвращает список поддиректорий из заданной директории
- *
- * @param String $folder Путь до папки с последним слешем
+ * @param string $Folder Путь до папки с последним слешем
+ * @return array
  */
-function GetFolders( $folder ){
+function GetFolders( $Folder ){
 	$result = array();
-	if(!is_dir($folder)){
+	if(!is_dir($Folder)){
 		return $result;
 	}
-	$files = scandir($folder);
+	$files = scandir($Folder);
 	foreach($files as $p){
 		if(($p != ".") && ($p != "..")){
-			if(is_dir($folder.$p)){
+			if(is_dir($Folder.$p)){
 				$result[] = $p;
 			}
 		}
@@ -93,12 +93,12 @@ function GetFolders( $folder ){
 	return $result;
 }
 
-function GetFolderSize( $folder ){
+function GetFolderSize( $Folder ){
 	$file_size = 0;
-	$files = scandir($folder);
+	$files = scandir($Folder);
 	foreach($files as $file){
 		if (($file!='.') && ($file!='..')){
-			$f = $folder.'/'.$file;
+			$f = $Folder.$file;
 			if(is_dir($f)){
 				$file_size += GetFolderSize($f);
 			}else{
@@ -111,7 +111,7 @@ function GetFolderSize( $folder ){
 
 /**
  * Удаляет папку со всеми вложениями
- * @param  $Path
+ * @param string $Path
  * @return bool
  */
 function RmDirRecursive( $Path ){
@@ -119,7 +119,7 @@ function RmDirRecursive( $Path ){
 	$dir = @opendir($Path);
 	if(!$dir) return false;
 	while($file = @readdir($dir)){
-		$fn = $Path.'/'.$file;
+		$fn = $Path.$file;
 		if(is_file($fn) || is_link($fn)){
 			if(!unlink($fn)) return false;
 		}elseif(is_dir($fn) && ($file != '.') && ($file != '..')){
@@ -134,12 +134,12 @@ function RmDirRecursive( $Path ){
 /**
  * Возвращает канонизированный путь к папке,
  * удаляет слэши из начала и конца пути
- * @param  $path
+ * @param  $Path
  * @return mixed|string
  */
-function RealPath2($path){
-	$path = str_replace('\\', '/',$path);
-	$path_array = explode('/', $path);
+function RealPath2( $Path ){
+	$Path = str_replace('\\', '/',$Path);
+	$path_array = explode('/', $Path);
 	$path_result = array();
 	foreach($path_array as $name){
 		$name2 = str_replace('.', '', $name);
@@ -150,20 +150,20 @@ function RealPath2($path){
 	return implode('/', $path_result);
 }
 
-function FormatFileSize( $size, $sizeType = 'b' ){
-	if($sizeType == 'b'){
+function FormatFileSize( $Size, $SizeType = 'b' ){
+	if($SizeType == 'b'){
 		$mb = 1024*1024;
-		if($size>$mb){$size = sprintf("%01.2f",$size/$mb).' Мб';
-		}elseif($size>=1024){$size = sprintf("%01.2f",$size/1024).' Кб';
-		}else{$size = $size.' Байт';}
+		if($Size>$mb){$Size = sprintf("%01.2f",$Size/$mb).' Мб';
+		}elseif($Size>=1024){$Size = sprintf("%01.2f",$Size/1024).' Кб';
+		}else{$Size = $Size.' Байт';}
 	}else{
-		if($sizeType == 'k'){
-			$size = $size.' Кб';
-		}elseif($sizeType == 'm'){
-			$size = $size.' Мб';
+		if($SizeType == 'k'){
+			$Size = $Size.' Кб';
+		}elseif($SizeType == 'm'){
+			$Size = $Size.' Мб';
 		}else{
-			$size = $size.' Гб';
+			$Size = $Size.' Гб';
 		}
 	}
-	return $size;
+	return $Size;
 }

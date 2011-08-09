@@ -28,5 +28,5 @@ $system_files = array(
 	'email.php','errors.php','extensions.php','filesystem.php','forms.php',
 	'images.php','location.php','plugins.php','plugins_system.php','request.php',
 	'scripts.php','search.php','smilies.php','string.php','translit.php',
-	'ufu.php','url.php','user.php','utf8.php'
+	'ufu.php','url.php','user.php','utf8.php','version.php'
 );

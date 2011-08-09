@@ -36,7 +36,7 @@ function AdminImageControl( $Title, $LoadTitle, $FileName, $Dir, $Name = 'image'
 		}else{
 			$sel = false;
 		}
-		$site->DataAdd($images_data,$images[$i],$images[$i],$sel);
+		$site->DataAdd($images_data, $images[$i], $images[$i], $sel);
 	}
 
 	$select = $site->Select($Name,$images_data,false,'onchange="document.'.$FormName.'.iconview.src=\''.$Dir.'\'+document.'.$FormName.'.'.$Name.'.value;"');
@@ -70,15 +70,5 @@ function PrintEmail($email, $nik = ''){
 	} else{
 		return '<a href="mailto:'.$email.'">'.$email.'</a>';
 	}
-}
-
-/**
- * Возвращает имена шаблонов блоков, которые имеет текущий шаблон сайта
- * @return Array
- */
-function GetBlockTemplates(){
-	global $config, $db;
-	$TemplateDir = $config['tpl_dir'].$config['general']['site_template'].'/block/';
-	return GetFiles($TemplateDir, false, true, '.html.htm.tpl', true);
 }
 
