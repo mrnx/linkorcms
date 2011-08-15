@@ -167,7 +167,7 @@
 						html += '<a class="admin_menu_sub_link" href="'+menuData[i].admin_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+menuData[i].admin_link+'\', event);">'+link_body+'</a>';
 					break;
 					case 'external':
-						html += '<a class="admin_menu_sub_link" href="'+menuData[i].external_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.Leave(\''+menuData[i].external_link+'\', '+menuData[i].blank+', event);">'+link_body+'</a>';
+						html += '<a class="admin_menu_sub_link" href="'+menuData[i].external_link+'"'+(menuData[i].blank == 'true' ? ' target="_blank"' : '')+'>'+link_body+'</a>';
 					break;
 					case 'js':
 						html += '<a class="admin_menu_sub_link" onclick="return false;" onMouseDown="'+menuData[i].js+'">'+link_body+'</a>';
@@ -224,7 +224,7 @@
 						html += '<a class="admin_menu_top_link" href="'+menuData[i].admin_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+menuData[i].admin_link+'\', event);">'+menuData[i].title+'</a>';
 					break;
 					case 'external':
-						html += '<a class="admin_menu_top_link" href="'+menuData[i].external_link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.Leave(\''+menuData[i].external_link+'\', '+menuData[i].blank+', event);">'+menuData[i].title+'</a>';
+						html += '<a class="admin_menu_top_link" href="'+menuData[i].external_link+'"'+(menuData[i].blank == 'true' ? ' target="_blank"' : '')+'>'+menuData[i].title+'</a>';
 					break;
 					case 'js':
 						html += '<a class="admin_menu_top_link" onclick="return false;" onMouseDown="'+menuData[i].js+'">'+menuData[i].title+'</a>';
