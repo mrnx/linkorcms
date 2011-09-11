@@ -85,7 +85,7 @@ $SITE_ERRORS = true;
 $userAuth = false;
 $userAccess = 4;
 $system_autoload = array();
-$system_files = array();
+$system_modules = array();
 define('system_cache', 'system'); // Имя группы системного кэша
 
 require 'config/name_config.php'; // Конфигурация расположений
@@ -94,16 +94,16 @@ require 'config/autoload.php'; // Классы для автозагрузки
 // Подключение ядра
 if(LOAD_SYSTEM_APART){ // Подключать каждый файл по отдельности
 	$system_dir = $GLOBALS['config']['inc_dir'].'system/';
-	foreach($system_files as $system_file){
+	foreach($system_modules as $system_file){
 		require $system_dir.$system_file;
 	}
 }else{ // Сборка ядра
 	if(!is_file('config/system_build.php') || FORCE_BUILD_SYSTEM){
-		$system_files = $GLOBALS['system_files'];
+		$system_modules = $GLOBALS['system_files'];
 		$inc_dir = $GLOBALS['config']['inc_dir'];
 		$core_dir = $inc_dir.'system/';
 		$core_build = '';
-		foreach($system_files as $core_file){
+		foreach($system_modules as $core_file){
 			$core_php = trim(file_get_contents($core_dir.$core_file));
 			if(substr($core_php, 0, 5) == '<'.'?php') $core_php = substr($core_php, 5);
 			if(substr($core_php, -2) == '?'.'>') $core_php = substr($core_php, 0, -2);

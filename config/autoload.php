@@ -22,7 +22,7 @@ $system_autoload = array(
 	'Posts'      => $config['inc_dir'].'posts.class.php'
 );
 
-$system_files = array(
+$system_modules = array(
 	'access.php','admin.php','ajax.php','array.php','autoload.php',
 	'bbcode.php','comments.php','config.php','database.php','datetime.php',
 	'email.php','errors.php','extensions.php','filesystem.php','forms.php',
@@ -30,3 +30,5 @@ $system_files = array(
 	'scripts.php','search.php','smilies.php','string.php','translit.php',
 	'ufu.php','url.php','user.php','utf8.php','version.php'
 );
+
+include 'config/autoload_user.php'; // Пользовательские классы

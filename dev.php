@@ -23,11 +23,9 @@ function GetFileExt($file){
 }
 
 function GetFiles($folder, $use_subfolders = false, $use_mask = false, $mask = '', $withFolders = false, $newSearch = true, $parentf = ''){
-	static $sfiles = array(
-	);
+	static $sfiles = array();
 	if($newSearch){
-		$sfiles = array(
-		);
+		$sfiles = array();
 	}
 	$mask = strtolower($mask);
 	if($parentf == ''){
@@ -58,7 +56,7 @@ function GetFiles($folder, $use_subfolders = false, $use_mask = false, $mask = '
 // Очищает и приводит в порядок файлы
 if(isset($_GET['clean'])){
 	$allfiles = GetFiles('./', true, true, '.php,.html,.FRM,.MYD');
-	//$allfiles = GetFiles('./', true, true, '.php');
+	// $allfiles = GetFiles('./', true, true, '.php');
 	$length = 0;
 	foreach($allfiles as $i=>$href){
 		if(is_writable($href)){
@@ -97,18 +95,30 @@ function RmDirRecursive($Path){
 	return true;
 }
 
-//Готовит систему к переустановке
+// Готовит систему к переустановке
 if(isset($_GET['reinstall'])){
 	if(is_file('config/db_config.php')){
 		include 'config/db_config.php';
 		unlink('config/db_config.php');
 		unlink('config/salt.php');
+		chmod($config['db_host'].$config['db_name'], 0777);
 		if($config['db_type'] == 'FilesDB'){
 			RmDirRecursive($config['db_host'].$config['db_name']);
 		}
 	}
 	Header("Location: setup.php");
 	exit;
+}
+
+if(isset($_GET['delete'])){
+	$file = $_GET['delete'];
+	if(is_file($file)){
+		chmod($file, 0777);
+		unlink($file);
+	}elseif(is_dir($file)){
+		chmod($file, 0777);
+		RmDirRecursive($file);
+	}
 }
 
 if(isset($_GET['permissions'])){

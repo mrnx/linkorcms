@@ -1,8 +1,8 @@
 <?php
 
-# LinkorCMS
-# © 2011 Александр Галицкий (linkorcms@yandex.ru)
-# Назначение: Шаблонизатор для админ-панели
+// LinkorCMS
+// © 2011 Александр Галицкий (linkorcms@yandex.ru)
+// Назначение: Шаблонизатор для админ-панели
 
 class AdminPage extends PageTemplate{
 
@@ -52,7 +52,7 @@ class AdminPage extends PageTemplate{
 
 		if($ajax){ // Загрузка страницы посредством AJAX запроса
 			$this->InitStarkyt($TemplateDir, $PageTemplate);
-		} else{
+		}else{
 			$this->SetRoot($TemplateDir);
 			$this->DefaultRoot = $DefaultTemplateDir;
 			$this->SetTempVar('head', 'body', $PageTemplate);
@@ -81,7 +81,6 @@ class AdminPage extends PageTemplate{
 		$vars['admin_avatar_smallest']  = System::user()->Get('u_avatar_smallest');
 		$vars['cms_name']               = CMS_NAME;
 		$vars['cms_version']            = CMS_VERSION;
-		$vars['cms_version_id']         = CMS_VERSION_ID;
 		$vars['cms_build']              = CMS_BUILD;
 		$vars['cms_version_str']        = CMS_VERSION_STR;
 		$vars['site']                   = System::config('general/site_name');

@@ -1,24 +1,25 @@
 <?php
+	UseScript('admin'); // Обязательно
 	UseScript('jquery_topmenu');
-	System::admin()->AddJSFile('application.js');
+
 	System::admin()->AddCSSFile('style.css');
 
 	System::admin()->AddOnLoadJS(<<<JS
-		(function($){
-			// Обработка элементов с интервалом
-		  Admin.Live(".cfgtable tr:nth-child(even)", function(){ $(this).addClass('cfgtable_even').hover(
-				function(){ $(this).addClass('cfgtable_hover'); },
-				function(){ $(this).removeClass('cfgtable_hover'); }
-			)});
-		  Admin.Live(".cfgtable tr:nth-child(odd)", function(){ $(this).addClass('cfgtable_odd').hover(
-				function(){ $(this).addClass('cfgtable_hover'); },
-				function(){ $(this).removeClass('cfgtable_hover'); }
-			);});
-		  Admin.Live("#sidebar .sideNav li a", function(){
-		    $(this).mousedown(function(e){if(e.which == 1)$(this).addClass('activate'); });
-		  });
-			Admin.Live(".button, input[type=button], input[type=submit]", function(){ $(this).button(); });
-		})(jQuery);
+			(function($){
+				// Обработка элементов с интервалом
+			  Admin.Live(".cfgtable tr:nth-child(even)", function(){ $(this).addClass('cfgtable_even').hover(
+					function(){ $(this).addClass('cfgtable_hover'); },
+					function(){ $(this).removeClass('cfgtable_hover'); }
+				)});
+			  Admin.Live(".cfgtable tr:nth-child(odd)", function(){ $(this).addClass('cfgtable_odd').hover(
+					function(){ $(this).addClass('cfgtable_hover'); },
+					function(){ $(this).removeClass('cfgtable_hover'); }
+				);});
+			  Admin.Live("#sidebar .sideNav li a", function(){
+				$(this).mousedown(function(e){if(e.which == 1)$(this).addClass('activate'); });
+			  });
+				Admin.Live(".button, input[type=button], input[type=submit]", function(){ $(this).button(); });
+			})(jQuery);
 JS
 );
 ?>
@@ -34,14 +35,14 @@ JS
 		<div class="menu" id="admin_menu"><a class="menu_config_btn" href="admin.php?exe=adminmenu" title="Настроить меню"><img src="images/admin/config.png"></a></div>
 	</div>
 
-<!--	<div class="breadcrumb">-->
-<!--		<ul>-->
-<!--			<li class="crumb"><a href="admin.php"><img src="images/logo16.png">&nbsp;&nbsp;<span>Админ-панель</span></a><a href="#" class="crumb"><img src="images/chevron.png"></a></li>-->
-<!--			<li class="crumb"><a href="#"><img src="modules/news/news.png">&nbsp;&nbsp;<span>Новости</span></a><a href="#" class="crumb"><img src="images/chevron.png"></a></li>-->
-<!--			<li class="crumb"><a href="#"><span>Добавить новость</span></a></li>-->
-<!--		</ul>-->
-<!--		<div style="clear: both;"></div>-->
-<!--	</div>-->
+	<!--	<div class="breadcrumb">-->
+	<!--		<ul>-->
+	<!--			<li class="crumb"><a href="admin.php"><img src="images/logo16.png">&nbsp;&nbsp;<span>Админ-панель</span></a><a href="#" class="crumb"><img src="images/chevron.png"></a></li>-->
+	<!--			<li class="crumb"><a href="#"><img src="modules/news/news.png">&nbsp;&nbsp;<span>Новости</span></a><a href="#" class="crumb"><img src="images/chevron.png"></a></li>-->
+	<!--			<li class="crumb"><a href="#"><span>Добавить новость</span></a></li>-->
+	<!--		</ul>-->
+	<!--		<div style="clear: both;"></div>-->
+	<!--	</div>-->
 
 	<div id="container">
 		{page:tool_menu_block}
@@ -53,23 +54,24 @@ JS
 			<div id="main-wrapper">
 				<div id="main-content">
 					{page:content_block}
-						{content_box}{/content_box}
+					{content_box}{/content_box}
 					{/page:content_block}
 				</div>
 			</div>
 		</div>
 		<div id="footer" class="{page:tool_menu_block(footer|footer_no_blocks)}">
 			<div style="float: right; font-size: 8pt;">
-				Система управления контентом {page.cms_name} v{page.cms_version}<br />
+				Система управления контентом {page.cms_name} v{page.cms_version}<br/>
 				© 2011, LinkorCMS Development Group
 			</div>
 			{page:showinfo}%info%{/page:showinfo}
 		</div>
 	</div>
 </div>
-<div id="ajaxsplashscreen"><img src="images/ajax-loader.gif" style="vertical-align: middle;"><span style="vertical-align: middle;padding-left: 10px;">выполняется запрос <span id="ajaxsplashscreen_progress">0/0</span></span></div>
+<div id="ajaxsplashscreen"><img src="images/ajax-loader.gif" style="vertical-align: middle;"><span
+  style="vertical-align: middle;padding-left: 10px;">выполняется запрос <span id="ajaxsplashscreen_progress">0/0</span></span>
+</div>
 <script type="text/javascript">
 	$("#admin_menu").topmenu({page.menu_data});
 </script>
-</body>
-{/template}
+</body>{/template}
