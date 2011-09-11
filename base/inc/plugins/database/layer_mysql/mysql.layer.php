@@ -232,7 +232,7 @@ class LcDatabaseMySQL
 		$this->User = $user;
 		$this->Password = $pass;
 		ErrorsOff();
-		$this->DbAccess = @mysql_connect($this->Server, $this->User, $this->Password);
+		$this->DbAccess = @mysql_connect($this->Server, $this->User, $this->Password, true);
 		ErrorsOn();
 		if($this->DbAccess){
 			$this->Connected = true;
