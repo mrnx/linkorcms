@@ -162,6 +162,24 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
+	 * Выводит информационное сообщение
+	 * @param $Text
+	 * @return void
+	 */
+	public function Highlight( $Text ){
+		$this->BlockContents->NewSubBlock(true, array('text'=>$Text), array(), 'highlight.html');
+	}
+
+	/**
+	 * Выводит сообщение об ошибке
+	 * @param $Text
+	 * @return void
+	 */
+	public function HighlightError( $Text ){
+		$this->BlockContents->NewSubBlock(true, array('text'=>$Text), array(), 'highlight_error.html');
+	}
+
+	/**
 	 * Генерирует код красивой ссылки в виде кнопки
 	 *
 	 * @param string $Title
@@ -460,6 +478,14 @@ class AdminPage extends PageTemplate{
 
 }
 
+// Старые функции для добавления левого меню очень удобны
+function TAddToolLink( $name, $param_val, $url ){
+	System::admin()->SideBarAddMenuItem($name, 'exe='.$url, $param_val);
+}
+function TAddToolBox( $cur_param_val, $Title = '' ){
+	System::admin()->SideBarAddMenuBlock($Title, $cur_param_val);
+}
+
 // Поддержка старого API
 function AddCenterBox( $title ){System::admin()->AddCenterBox($title);}
 function AddText( $text ){System::admin()->AddText($text);}
@@ -468,15 +494,6 @@ function NotDeveloping( $name ){System::admin()->NotDeveloping($name);}
 function SpeedButton( $Title, $Url, $ImgSrc ){return System::admin()->SpeedButton($Title, $Url, $ImgSrc);}
 function TAddSubTitle( $subtitle ){System::admin()->AddSubTitle($subtitle);}
 function AddNavigation(){System::admin()->AddNavigation();}
-function TAddToolLink( $name, $param_val, $url ){
-	if(isset($_GET['a'])){
-		$sel = $_GET['a'] == $param_val;
-	}else{
-		$sel = $param_val == 'main';
-	}
-	System::admin()->SideBarAddMenuItem($name, 'exe='.$url, $sel);
-}
-function TAddToolBox( $cur_param_val ){System::admin()->SideBarAddMenuBlock();}
 function FormRow( $capt, $ctrl ){System::admin()->FormRow($capt, $ctrl);}
 function FormTextRow( $capt, $ctrl ){System::admin()->FormTextRow($capt, $ctrl);}
 function AddForm( $open, $submit_btn ){System::admin()->AddForm($open, $submit_btn);}
