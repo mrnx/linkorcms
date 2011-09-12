@@ -249,3 +249,7 @@ function CheckPost(){
 	}
 	return true;
 }
+
+function RequestMethod(){
+	return $_SERVER['REQUEST_METHOD'];
+}
