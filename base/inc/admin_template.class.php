@@ -8,6 +8,7 @@ class AdminPage extends PageTemplate{
 
 	public $SideBarMenuLinks = array();
 	public $FormRows = array();
+	public $ConfigGroups = array();
 
 	/**
 	 * Текущий субблок контента
@@ -323,6 +324,160 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
+	 * Добавляет группу настроек в форму конфигурации
+	 * @param $Groups
+	 * @param bool $ShowTitles
+	 * @return void
+	 */
+	public function ConfigGroups( $Groups, $ShowTitles = false ){
+		if(!is_array($Groups)){
+			$Groups = explode(',', $Groups);
+		}
+		foreach($Groups as $group){
+			$this->ConfigGroups[] = array($group, $ShowTitles);
+		}
+	}
+
+	/**
+	 * Добавляет форму конфигурации на страницу
+	 * @return void
+	 */
+	public function AddConfigsForm( $Action, $ConfigTable = 'config', $GroupsTable = 'config_groups' ){
+		include_once System::config('inc_dir').'forms.inc.php';
+
+		// Вытаскиваем настройки и отсортировываем по группам
+		$configsdb = System::database()->Select($ConfigTable, "`visible`='1'");
+		$configs = array();
+		foreach($configsdb as $conf){
+			$configs[$conf['group_id']][] = $conf;
+		}
+
+		// Вытаскиваем группы настроек
+		$groupsdb = System::database()->Select($GroupsTable);
+		$groups = array();
+		foreach($groupsdb as $gr){
+			$groups[$gr['name']] = $gr;
+		}
+
+		// Добавляем форму и начинаем генерировать текст
+		$form = $this->BlockContents->NewSubBlock(true, array('action'=>$Action, 'submit'=>$this->Submit('Сохранить')), array(), 'config.html');
+		$form_groups = $form->NewBlock('config_groups', true, true, 'group');
+
+		foreach($this->ConfigGroups as $cgroup){
+			$group = $groups[$cgroup[0]];
+			if($cgroup[1]){
+				$title = SafeDB($group['hname'], 255, str);
+			}else{
+				$title = false;
+			}
+			$aconfigs = isset($configs[$group['id']]);
+			$form_group = $form_groups->NewSubBlock(true, array('title'=>$title, 'noconfigs'=>!$aconfigs));
+			$form_configs = $form_group->NewBlock('config_group_configs', $aconfigs, true, 'config');
+			if($aconfigs){
+				foreach($configs[$group['id']] as $conf){
+					$hname = SafeDB($conf['hname'], 255, str);
+					$desc = SafeDB($conf['description'], 255, str);
+					$name = SafeDB($group['name'], 255, str).'/'.SafeDB($conf['name'], 255, str);
+					$value = $conf['value'];
+					$kind = $conf['kind'];
+					$type = $conf['type'];
+					$values = $conf['values'];
+					$vars = array(
+						'title' => $hname,
+						'description' => $desc,
+						'controlvalue' => FormsGetControl($name, $value, $kind, $type, $values),
+					);
+					$form_configs->NewSubBlock(true, $vars);
+				}
+			}
+		}
+	}
+
+	public function SaveConfigs( $SaveGroups, $ConfigTable = 'config', $GroupsTable = 'config_groups' ){
+		if(!is_array($SaveGroups)){
+			$SaveGroups = explode(',', $SaveGroups);
+		}
+
+		// Вытаскиваем настройки и отсортировываем по группам
+		$configsdb = System::database()->Select($ConfigTable, "`visible`='1'");
+		$configs = array();
+		foreach($configsdb as $conf){
+			$configs[$conf['group_id']][] = $conf;
+		}
+
+		// Вытаскиваем группы настроек
+		$groupsdb = System::database()->Select($GroupsTable);
+		$groups = array();
+		foreach($groupsdb as $gr){
+			$groups[$gr['name']] = $gr['id'];
+		}
+
+		foreach($SaveGroups as $gname){
+			$gid = $groups[$gname];
+			foreach($configs[$gid] as $conf){
+				$cname = $conf['name'];
+				$postname = $gname.'/'.$cname;
+				if(isset($_POST[$postname])){
+					$name = $cname;
+					$kind = explode(':', $conf['kind']);
+					$kind = trim(strtolower($kind[0]));
+					$savefunc = trim($conf['savefunc']);
+					$type = trim($conf['type']);
+					if($type != ''){
+						$type = explode(',', $type);
+					}else{
+						$type = array(255, str, false);
+					}
+					switch($kind){
+						case 'edit':
+						case 'radio':
+						case 'combo':
+						case 'text':
+							if(FormsConfigCheck2Func('function', $savefunc, 'save')){
+								$savefunc = CONF_SAVE_PREFIX.$savefunc;
+								$value = $savefunc(FormsCheckType($_POST[$postname], $type));
+							}else{
+								$value = FormsCheckType($_POST[$postname], $type);
+							}
+							break;
+						case 'check':
+						case 'list':
+							if(FormsConfigCheck2Func('function', $savefunc, 'save')){
+								$savefunc = CONF_SAVE_PREFIX.$savefunc;
+								$value = $savefunc(FormsCheckType($_POST[$postname], $type));
+							}else{
+								if(isset($_POST[$postname])){
+									$c = count($_POST[$postname]);
+								}else{
+									$c = 0;
+								}
+								$value = '';
+								for($k = 0; $k < $c; $k++){
+									$value .= ',';
+									$value .= FormsCheckType($_POST[$postname][$k], $type);
+								}
+								$value = substr($value, 1);
+							}
+							break;
+						default:
+							if(FormsConfigCheck2Func('function', $savefunc, 'save')){
+								$savefunc = CONF_SAVE_PREFIX.$savefunc;
+								$value = $savefunc(FormsCheckType($_POST[$postname], $type));
+							}else{
+								$value = FormsCheckType($_POST[$postname], $type);
+							}
+					}
+					$where = "`name`='".SafeEnv($cname, 255, str)."' and `group_id`='".SafeEnv($gid, 11, int)."'";
+					System::database()->Update($ConfigTable, "`value`='$value'", $where); // FIXME: Использовать транзакцию
+				}
+			}
+		}
+		// Очищаем кэш настроек
+		$cache = LmFileCache::Instance();
+		$cache->Clear('config');
+	}
+
+	/**
 	 * Генерирует и выводит верхнее меню администратора
 	 *
 	 * @param $menu
@@ -479,11 +634,11 @@ class AdminPage extends PageTemplate{
 }
 
 // Старые функции для добавления левого меню очень удобны
-function TAddToolLink( $name, $param_val, $url ){
-	System::admin()->SideBarAddMenuItem($name, 'exe='.$url, $param_val);
+function TAddToolLink( $Title, $Action, $Exe ){
+	System::admin()->SideBarAddMenuItem($Title, 'exe='.$Exe, $Action);
 }
-function TAddToolBox( $cur_param_val, $Title = '' ){
-	System::admin()->SideBarAddMenuBlock($Title, $cur_param_val);
+function TAddToolBox( $CurrentAction, $Title = '' ){
+	System::admin()->SideBarAddMenuBlock($Title, $CurrentAction);
 }
 
 // Поддержка старого API

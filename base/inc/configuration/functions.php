@@ -5,13 +5,25 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
+// AdminConfigurationEdit('config', 0, false, true, 'Настройки сайта');
+// AdminConfigurationEdit('news', 'news', false, false, 'Конфигурация модуля "Новости"');
+
 $conf_config_table = 'config';
 $conf_config_groups_table = 'config_groups';
-include_once ($config['inc_dir'].'forms.inc.php');
+include_once $config['inc_dir'].'forms.inc.php';
 
-// Создает страницу конфигурации в админ панели
-// в group должно быть либо 0, либо имя группы
-function AdminConfigurationEdit( $paddr, $group = '', $showhidden = false, $showtitles = true, $modname = '', $method_name = 'a=configsave' ){
+/**
+ * Создает страницу конфигурации в админ панели
+ * @param $Exe Значение параметра URL exe
+ * @param string $Group Либо 0, либо имя группы
+ * @param bool $ShowHiddenGroups Отображать скрытые группы
+ * @param bool $ShowTitles Отображать заголовки у групп
+ * @param string $ModuleName Заголовок текстового блока
+ * @param string $SavePageParam Параметр ссылки на функию сохранения настроек
+ * @return void
+ */
+function AdminConfigurationEdit( $Exe, $Group = '', $ShowHiddenGroups = false, $ShowTitles = true, $ModuleName = '', $SavePageParam = 'a=configsave' ){
+
 	global $config, $db, $site, $conf_config_table, $conf_config_groups_table;
 
 	// Вытаскиваем настройки и отсортировываем по группам
@@ -23,18 +35,18 @@ function AdminConfigurationEdit( $paddr, $group = '', $showhidden = false, $show
 	unset($temp);
 
 	// Вытаскиваем группы настроек
-	if($group == ''){
+	if($Group == ''){
 		$q = '';
 	}else{
-		$q = "`name`='$group'";
+		$q = "`name`='$Group'";
 	}
 	$cfg_grps = $db->Select($conf_config_groups_table, $q);
 
 	// Добавляем форму и начинаем генерировать текст
-	$text = '<form action="'.$config['admin_file'].'?exe='.$paddr.'&'.$method_name.'" method="post">';
+	$text = '<form action="'.$config['admin_file'].'?exe='.$Exe.'&'.$SavePageParam.'" method="post">';
 	for($i = 0, $cnt = count($cfg_grps); $i < $cnt; $i++){
 		// Если эта группа невидима то пропускаем её
-		if($group === 0){
+		if($Group === 0){
 			if($cfg_grps[$i]['visible'] == 0)
 				continue;
 		}
@@ -46,16 +58,15 @@ function AdminConfigurationEdit( $paddr, $group = '', $showhidden = false, $show
 		}
 		// Добавляем таблицу и заголовок группы настроек
 		$text .= '<table cellspacing="1" cellpadding="0" class="configtable">';
-		if($showtitles){
-			$text .= '<tr><th colspan="3" height="30">'.SafeDB($cfg_grps[$i]['hname'], 255, str).'</th></tr>';
+		if($ShowTitles){
+			$text .= '<tr><th colspan="2" class="configtableth">'.SafeDB($cfg_grps[$i]['hname'], 255, str).'</th></tr>';
 		}
-		// $text .= '<tr><th>Настройка</th><th>Значение</th></tr>';
 
 		// Добавляем настройки группы
 		if($jcnt > 0){
 			for($j = 0; $j < $jcnt; $j++){
-				#Если настройка невидима то пропускаем её
-				if($configs[$cfg_grps[$i]['id']][$j]['visible'] == '0' && !$showhidden)
+				// Если настройка невидима то пропускаем её
+				if($configs[$cfg_grps[$i]['id']][$j]['visible'] == '0' && !$ShowHiddenGroups)
 					continue;
 				$name = SafeDB($configs[$cfg_grps[$i]['id']][$j]['name'], 255, str, false, false);
 				$desc = SafeDB($configs[$cfg_grps[$i]['id']][$j]['description'], 255, str, false, false);
@@ -72,22 +83,27 @@ function AdminConfigurationEdit( $paddr, $group = '', $showhidden = false, $show
 		}else{
 			$text .= '<tr><td class="leftc" align="center"> В этой группе пока нет настроек. </td></tr>';
 		}
-
 		//Закрываем таблицу группы
 		$text .= '</table><br />';
 	}
 	$text .= '<table class="configsubmit"><tr><td>'.$site->Submit('Сохранить').'</td></tr></table>';
 	$text .= '</form>';
-	if($modname != ''){
-		$modname = $modname;
+	if($ModuleName != ''){
+		$ModuleName = $ModuleName;
 	}else{
-		$modname = 'Конфигурация';
+		$ModuleName = 'Конфигурация';
 	}
-	AddTextBox($modname, $text);
+	AddTextBox($ModuleName, $text);
 }
 
-// Сохраняет конфигурацию в базе данных
-function AdminConfigurationSave( $paddr, $group = '', $showhidden = false )
+/**
+ * Сохраняет конфигурацию в базе данных
+ * @param $Exe
+ * @param string $Group
+ * @param bool $ShowHidden
+ * @return void
+ */
+function AdminConfigurationSave( $Exe, $Group = '', $ShowHidden = false )
 {
 	global $config, $db, $conf_config_table, $conf_config_groups_table;
 	// Вытаскиваем настройки и отсортировываем по группам
@@ -97,15 +113,15 @@ function AdminConfigurationSave( $paddr, $group = '', $showhidden = false )
 	}
 	unset($temp);
 	// Вытаскиваем группы настроек
-	if($group == ''){
+	if($Group == ''){
 		$q = '';
 	}else{
-		$q = "`name`='".$group."'";
+		$q = "`name`='".$Group."'";
 	}
 	$cfg_grps = $db->Select($conf_config_groups_table, $q);
 	for($i = 0, $cnt = count($cfg_grps); $i < $cnt; $i++){
 		// Если эта группа невидима то пропускаем её
-		if($group == ''){
+		if($Group == ''){
 			if($cfg_grps[$i]['visible'] == 0)
 				continue;
 		}
@@ -115,7 +131,7 @@ function AdminConfigurationSave( $paddr, $group = '', $showhidden = false )
 		}
 		for($j = 0, $jcnt = count($configs[$cfg_grps[$i]['id']]); $j < $jcnt; $j++){
 			// Если настройка невидима то пропускаем её
-			if($configs[$cfg_grps[$i]['id']][$j]['visible'] == 0 && !$showhidden)
+			if($configs[$cfg_grps[$i]['id']][$j]['visible'] == 0 && !$ShowHidden)
 				continue;
 			$name = $configs[$cfg_grps[$i]['id']][$j]['name'];
 			$kind = explode(':', $configs[$cfg_grps[$i]['id']][$j]['kind']);
@@ -175,7 +191,7 @@ function AdminConfigurationSave( $paddr, $group = '', $showhidden = false )
 							$value = FormsCheckType($_POST[$name], $type);
 						}
 				}
-				$db->Update($conf_config_table, 'value=\''.$value.'\'', $where);
+				$db->Update($conf_config_table, 'value=\''.$value.'\'', $where); // FIXME: Использовать транзакцию
 			}
 		}
 	}
@@ -183,7 +199,5 @@ function AdminConfigurationSave( $paddr, $group = '', $showhidden = false )
 	$cache = LmFileCache::Instance();
 	$cache->Clear('config');
 
-	GO(ADMIN_FILE.'?exe='.$paddr);
+	GO(ADMIN_FILE.'?exe='.$Exe);
 }
-
-?>

@@ -1,0 +1,27 @@
+<form action="{content.action}" method="post">
+	{config_groups}
+	<table cellspacing="0" cellpadding="0" class="configtable">
+		{group:title}
+		<tr>
+			<th colspan="2" class="configtableth">{group.title}</th>
+		</tr>
+		{/group:title}
+		{config_group_configs}
+		<tr>
+			<td class="leftc">{config.title}<br /><span class="configdesc">{config.description}</span></td>
+			<td class="rightc">{config.controlvalue}</td>
+		</tr>
+		{/config_group_configs}
+		{group:noconfigs}
+		<tr>
+			<td colspan="2" class="leftc" align="center">В этой группе пока нет настроек.</td>
+		</tr>
+		{/group:noconfigs}
+	</table>
+	{/config_groups}
+	<table class="configsubmit">
+		<tr>
+			<td>{content.submit}</td>
+		</tr>
+	</table>
+</form>
