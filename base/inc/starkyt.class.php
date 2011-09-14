@@ -729,7 +729,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 			continue;
 		}
 		if(strpos($line, ':') !== false){ // Условный блок
-			$m = explode(':', $line);
+			$m = explode(':', $line, 2);
 			$block_name = $m[0];
 			$inv = false;
 			if($m[0]{0} === '!'){
@@ -746,7 +746,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 					$cond_value = false;
 				}
 				$var_name = $var_name[0];
-				$vals = explode('|', $m[1][1]);
+				$vals = explode('|', $m[1][1], 2);
 				if(isset($vals[1])){
 					$vals[1] = substr($vals[1], 0, -1);
 				}else{
@@ -820,7 +820,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 			continue;
 		}
 		if(strpos($line, '[') !== false){ // Блок таблица
-			$m = explode('[', $line);
+			$m = explode('[', $line, 2);
 			$m[1] = substr($m[1], 0, -1);
 			if(isset($Blocks[$level][$m[0]])){
 				$name = $m[0];
@@ -832,7 +832,7 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 			}
 		}
 		if(strpos($line, '.') !== false){ // Переменная
-			$m = explode('.', $line);
+			$m = explode('.', $line, 2);
 			if(isset($OpenedBlocks[$level][$m[0]]['tempvars'][$m[1]])){
 				$result .= StarkytCompile($OpenedBlocks[$level][$m[0]]['tempvars'][$m[1]], $Blocks, $OpenedBlocks, $level, $starkyt)
 				           .$SBlocks[$start+1];

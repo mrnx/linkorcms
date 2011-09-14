@@ -50,7 +50,12 @@
 							ajaxcssjs.loadCSS(data.css, function(){
 								// Загружаем JS
 								ajaxcssjs.loadJS(data.js, function(){
-									$('#sidebar').html(data.sidebar);
+									if(data.show_sidebar){
+										$('#sidebar').html(data.sidebar);
+										self.SideBarShow();
+									}else{
+										self.SideBarHide();
+									}
 									$('#main-content').html(data.content);
 									eval(data.js_inline);
 									self.HideSplashScreen();
@@ -80,6 +85,18 @@
 				window.open(Url);
 			}
 			return false;
+		},
+
+		SideBarHide: function(){
+			$("#sidebar").hide();
+			$("#main").removeClass("main").addClass("main_no_blocks");
+			$("footer").removeClass("footer").addClass("footer_no_blocks");
+		},
+
+		SideBarShow: function(){
+			$("#sidebar").show();
+			$("#main").removeClass("main_no_blocks").addClass("main");
+			$("footer").removeClass("footer_no_blocks").addClass("footer");
 		},
 
 		/**

@@ -634,14 +634,23 @@ class AdminPage extends PageTemplate{
 		if($this->AjaxMode){
 			$start = microtime(true);
 			$response = array(
-				'content'=>$this->AjaxContentTemplate->Compile(),
-				'sidebar'=>$this->AjaxSidebarTemplate->Compile(),
+				'content'=>'',
+				'sidebar'=>'',
+				'show_sidebar'=>false,
 				'css'=>array(),
 				'js'=>array(),
 				'js_inline'=>'',
 				'errors'=>'',
 				'info'=>'',
 			);
+			$response['content'] = $this->AjaxContentTemplate->Compile();
+			if($this->tool_menu_block){
+				$response['sidebar'] = $this->AjaxSidebarTemplate->Compile();
+			}else{
+				$response['sidebar'] = '';
+			}
+			$response['show_sidebar'] = $this->tool_menu_block;
+
 			foreach($this->css as $file){
 				$response['css'][] = $file;
 			}

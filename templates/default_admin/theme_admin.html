@@ -45,11 +45,9 @@ JS
 	<!--	</div>-->
 
 	<div id="container">
-		{page:tool_menu_block}
-		<div id="sidebar">
+		<div id="sidebar" {!page:tool_menu_block(style="display: none;")}>
 			{admin_blocks}{/admin_blocks}
 		</div>
-		{/page:tool_menu_block}
 		<div id="main" class="{page:tool_menu_block(main|main_no_blocks)}">
 			<div id="main-wrapper">
 				<div id="main-content">
