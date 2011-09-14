@@ -90,13 +90,13 @@
 		SideBarHide: function(){
 			$("#sidebar").hide();
 			$("#main").removeClass("main").addClass("main_no_blocks");
-			$("footer").removeClass("footer").addClass("footer_no_blocks");
+			$("#footer").removeClass("footer").addClass("footer_no_blocks");
 		},
 
 		SideBarShow: function(){
 			$("#sidebar").show();
 			$("#main").removeClass("main_no_blocks").addClass("main");
-			$("footer").removeClass("footer_no_blocks").addClass("footer");
+			$("#footer").removeClass("footer_no_blocks").addClass("footer");
 		},
 
 		/**

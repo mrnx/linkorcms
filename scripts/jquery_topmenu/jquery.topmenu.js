@@ -239,14 +239,32 @@
 				if(menuData[i].submenu.length > 0){
 					GenerateSubMenu($mElement, menuData[i].submenu);
 				}
-				$mElement.mousedown(function(event){
-					EventTopItemClick(event);
-				}).hover(function(event){
-					EventTopItemEnter(event);
-				},
-				function(event){
-					EventTopItemLeave(event);
-				});
+				$mElement.mousedown((function(type){
+				  return function(event){
+					  if(type != 'node'){
+						  HideSubMenus();
+						  active = false;
+					  }else{
+						  EventTopItemClick(event);
+					  }
+				  }
+				})(menuData[i].type));
+				$mElement.hover(
+				  (function(type){
+					  return function(event){
+						  if(type == 'node'){
+							  EventTopItemEnter(event);
+						  }
+					  }
+				  })(menuData[i].type),
+				  (function(type){
+					  return function(event){
+						  if(type == 'node'){
+							  EventTopItemLeave(event);
+						  }
+					  }
+				  })(menuData[i].type)
+				);
 				$mElement.appendTo($menu);
 			}
 			$menu.appendTo($parentElement);
