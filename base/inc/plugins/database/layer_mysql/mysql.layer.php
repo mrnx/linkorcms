@@ -853,4 +853,3 @@ class LcDatabaseMySQL
 	}
 
 }
-?>

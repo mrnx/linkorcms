@@ -5,8 +5,6 @@
 		exit;
 	}
 
-	UseScript('ajaxcssjs');
-
-	System::site()->AddJSFile('scripts/admin/admin.js', true);
+	System::site()->AddJSFile('scripts/ajaxcssjs/ajaxcssjs.js', true);
 
 ?>

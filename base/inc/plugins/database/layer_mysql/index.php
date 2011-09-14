@@ -11,5 +11,3 @@ if($config['db_type'] == 'MySQL'){
 	include_once ($include_plugin_path.'mysql.layer.php');
 	$db = new LcDatabaseMySQL();
 }
-
-?>

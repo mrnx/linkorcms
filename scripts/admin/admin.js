@@ -38,7 +38,29 @@
 		 */
 		LoadPage: function( Url, event ){
 			if(this.CheckButton(1, event)){ // Только левая кнопка мыши
-				document.location = Url;
+				if(this.Ajax){
+					self = this;
+					self.ShowSplashScreen();
+					$.ajax({
+						type: "GET",
+						url: Url,
+						dataType: "json",
+						success: function(data){
+							// Загружаем СSS
+							ajaxcssjs.loadCSS(data.css, function(){
+								// Загружаем JS
+								ajaxcssjs.loadJS(data.js, function(){
+									$('#sidebar').html(data.sidebar);
+									$('#main-content').html(data.content);
+									eval(data.js_inline);
+									self.HideSplashScreen();
+								});
+							});
+						}
+					});
+				}else{
+					document.location = Url;
+				}
 				return true;
 			}else{
 				return false;
@@ -213,7 +235,7 @@
 		end: {}
 	};
 
-	window.Admin = new AdminFn('admin.php', false); // FIXME: admin.php, ajax ?
+	window.Admin = new AdminFn('admin.php', true); // FIXME: admin.php, ajax ?
 	window.Admin._liveRun();
 
 })(window, jQuery);

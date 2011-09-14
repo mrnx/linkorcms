@@ -11,5 +11,3 @@ if($config['db_type'] == 'FilesDB'){
 	include_once($include_plugin_path.'filesdb.layer.php');
 	$db = new LcDatabaseFilesDB();
 }
-
-?>

@@ -12,4 +12,3 @@ function getconf_Polls_list( $name )
 	return $polls_data;
 }
 
-?>

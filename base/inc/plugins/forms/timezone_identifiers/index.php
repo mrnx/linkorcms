@@ -10,5 +10,3 @@ function getconf_TimeZone_Identifiers( $name )
 
 	return $result;
 }
-
-?>

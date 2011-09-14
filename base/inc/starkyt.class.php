@@ -852,5 +852,3 @@ function StarkytCompile( $FileName, $Blocks, $OpenedBlocks, $level, $starkyt ){
 	}
 	return str_replace(array('&#123;', '&#125;'), array('{', '}'), $result);
 }
-
-?>

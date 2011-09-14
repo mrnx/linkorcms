@@ -367,6 +367,24 @@ class PageTemplate extends Starkyt{
 		$this->SetVar('head', 'text', $this->GenerateHead());
 	}
 
+	public function GetPageInfo( $CompileStartTime ){
+		if(!defined('SETUP_SCRIPT') && System::config('general/show_script_time')){
+			$end = GetMicroTime();
+			$end_time = GetMicroTime();
+			$end_time = $end_time - SCRIPT_START_TIME;
+			$php_time = $end_time - System::database()->QueryTotalTime;
+			$persent = 100 / $end_time;
+			$memory = memory_get_peak_usage(true);
+			$MB = $memory / 1024 / 1024;
+			$info = 'Страница сгенерирована за '.sprintf("%01.4f", $end_time).' сек. Шаблонизатор: '.sprintf("%01.4f", $end - $CompileStartTime).' сек. Инициализация ядра: '.sprintf("%01.4f", INIT_CORE_END - INIT_CORE_START).' сек.<br>'
+					.'Память: '.sprintf("%01.2f", $MB).'М./'.get_cfg_var('memory_limit').'. '
+			        .'БД: '.System::database()->NumQueries.' запросов за '.sprintf("%01.4f", System::database()->QueryTotalTime).' сек. ( PHP: '.round($persent * $php_time).'% БД: '.round($persent * System::database()->QueryTotalTime).'% )';
+		}else{
+			$info = '';
+		}
+		return $info;
+	}
+
 	/**
 	 * Компилирует шаблоны и выводит результат в браузер
 	 * @return void
@@ -377,24 +395,10 @@ class PageTemplate extends Starkyt{
 		}
 		$start = microtime(true);
 		$contents = $this->Compile(); // Компиляция всей страницы
-		$end = microtime(true);
 		if(ob_get_level() > 0 && ob_get_length() > 0){
 			$contents = ob_get_clean().$contents;
 		}
-		if(!defined('SETUP_SCRIPT') && System::config('general/show_script_time')){
-			$end_time = GetMicroTime();
-			$end_time = $end_time - SCRIPT_START_TIME;
-			$php_time = $end_time - System::database()->QueryTotalTime;
-			$persent = 100 / $end_time;
-			$memory = memory_get_peak_usage(true);
-			$MB = $memory / 1024 / 1024;
-			$info = 'Страница сгенерирована за '.sprintf("%01.4f", $end_time).' сек. Шаблонизатор: '.sprintf("%01.4f", $end - $start).' сек. Инициализация ядра: '.sprintf("%01.4f", INIT_CORE_END - INIT_CORE_START).' сек.<br>'
-					.'Память: '.sprintf("%01.2f", $MB).'М./'.get_cfg_var('memory_limit').'. '
-			        .'БД: '.System::database()->NumQueries.' запросов за '.sprintf("%01.4f", System::database()->QueryTotalTime).' сек. ( PHP: '.round($persent * $php_time).'% БД: '.round($persent * System::database()->QueryTotalTime).'% )';
-		}else{
-			$info = '';
-		}
-		$contents = str_replace('%info%', $info, $contents);
+		$contents = str_replace('%info%', $this->GetPageInfo($start), $contents);
 		if($this->GZipCompressPage && $this->SupportGZip){
 			@Header('Content-Encoding: gzip');
 			ob_start('ob_gzhandler');

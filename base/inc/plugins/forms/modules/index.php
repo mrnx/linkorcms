@@ -14,4 +14,3 @@ function getconf_MainModules( $name )
 	return $r;
 }
 
-?>

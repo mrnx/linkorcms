@@ -10,4 +10,3 @@ function saveconf_Clear_Cache( $Value )
 	return $Value;
 }
 
-?>

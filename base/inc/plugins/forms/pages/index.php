@@ -11,4 +11,3 @@ function getconf_Pages( $name )
 	return $r;
 }
 
-?>

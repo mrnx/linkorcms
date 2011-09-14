@@ -11,6 +11,20 @@ class AdminPage extends PageTemplate{
 	public $ConfigGroups = array();
 
 	/**
+	 * Режим Ajax
+	 * @var Bool
+	 */
+	public $AjaxMode;
+	/**
+	 * @var Starkyt
+	 */
+	public $AjaxSidebarTemplate;
+	/**
+	 * @var Starkyt
+	 */
+	public $AjaxContentTemplate;
+
+	/**
 	 * Текущий субблок контента
 	 * @var StarkytSubBlock
 	 */
@@ -36,64 +50,66 @@ class AdminPage extends PageTemplate{
 	 */
 	public $BlockAdminBlocks;
 
+	private $content_block = false;
+	private $tool_menu_block = false;
+
 	/**
 	 * Инициализация класса
 	 * @param  $PageTemplate Шаблон используемый в качестве главного(body)
 	 * @return void
 	 */
 	public function Init( $PageTemplate ){
-		$ajax = IsAjax();
-		$this->InitPageTemplate($ajax);
+		$this->AjaxMode = IsAjax();
+		$this->InitPageTemplate($this->AjaxMode);
 		$this->SetGZipCompressionEnabled(System::config('general/gzip_status') == '1');
-
 		// Папка с шаблоном
 		$Template = 'default_admin'; // fixme: Вынести в конфигурацию сата
 		$TemplateDir = System::config('tpl_dir').$Template.'/';
 		$DefaultTemplateDir = System::config('tpl_dir').'default_admin'.'/'; // fixme: доработать
-
-		if($ajax){ // Загрузка страницы посредством AJAX запроса
-			$this->InitStarkyt($TemplateDir, $PageTemplate);
+		$this->SetRoot($TemplateDir);
+		$this->DefaultRoot = $DefaultTemplateDir;
+		$this->Title = 'Админ-панель';
+		if($this->AjaxMode){ // Загрузка страницы посредством AJAX запроса
+			$this->AjaxSidebarTemplate = new Starkyt();
+			$this->AjaxSidebarTemplate->InitStarkyt($TemplateDir, 'sidebar_ajax.html');
+			$this->AjaxContentTemplate = new Starkyt();
+			$this->AjaxContentTemplate->InitStarkyt($TemplateDir, 'content_box_ajax.html');
 		}else{
-			$this->SetRoot($TemplateDir);
-			$this->DefaultRoot = $DefaultTemplateDir;
 			$this->SetTempVar('head', 'body', $PageTemplate);
-			$this->Title = 'Админ-панель';
 		}
 	}
 
 	public function InitPage(){
-		if(IsAjax()){
-			$PageTemplate = 'theme_ajax.html';
-		}else{
-			$PageTemplate = 'theme_admin.html';
-		}
-		$this->Init($PageTemplate);
-
+		$this->Init('theme_admin.html');
 		// Добавляем блоки и переменные
-		$this->BlockTemplate = $this->NewBlock('template', true, false, 'page');
-		$this->BlockContentBox = $this->NewBlock('content_box', true, true, '', 'content_box.html');
-		$this->BlockAdminBlocks = $this->NewBlock('admin_blocks', true, true, 'block');
-		$vars = array();
-		$vars['dir']                    = $this->Root;
-		$vars['admin_file']             = ADMIN_FILE;
-		$vars['admin_name']             = System::user()->Get('u_name');
-		$vars['admin_avatar']           = System::user()->Get('u_avatar');
-		$vars['admin_avatar_small']     = System::user()->Get('u_avatar_small');
-		$vars['admin_avatar_smallest']  = System::user()->Get('u_avatar_smallest');
-		$vars['cms_name']               = CMS_NAME;
-		$vars['cms_version']            = CMS_VERSION;
-		$vars['cms_build']              = CMS_BUILD;
-		$vars['cms_version_str']        = CMS_VERSION_STR;
-		$vars['site']                   = System::config('general/site_name');
-		$vars['errors_text']            = '';
-		$vars['tool_menu_block']        = false;
-		$vars['content_block']          = false;
-		$this->BlockTemplate->vars = $vars;
+		if($this->AjaxMode){
+			$this->BlockContentBox = $this->AjaxContentTemplate->NewBlock('content_box', true, true);
+			$this->BlockAdminBlocks = $this->AjaxSidebarTemplate->NewBlock('admin_blocks', true, true, 'block');
+		}else{
+			$this->BlockTemplate = $this->NewBlock('template', true, false, 'page');
+			$this->BlockContentBox = $this->NewBlock('content_box', true, true, '', 'content_box.html');
+			$this->BlockAdminBlocks = $this->NewBlock('admin_blocks', true, true, 'block');
+			$vars = array();
+			$vars['dir']                    = $this->Root;
+			$vars['admin_file']             = ADMIN_FILE;
+			$vars['admin_name']             = System::user()->Get('u_name');
+			$vars['admin_avatar']           = System::user()->Get('u_avatar');
+			$vars['admin_avatar_small']     = System::user()->Get('u_avatar_small');
+			$vars['admin_avatar_smallest']  = System::user()->Get('u_avatar_smallest');
+			$vars['cms_name']               = CMS_NAME;
+			$vars['cms_version']            = CMS_VERSION;
+			$vars['cms_build']              = CMS_BUILD;
+			$vars['cms_version_str']        = CMS_VERSION_STR;
+			$vars['site']                   = System::config('general/site_name');
+			$vars['errors_text']            = '';
+			$vars['tool_menu_block']        = false;
+			$vars['content_block']          = false;
+			$this->BlockTemplate->vars = $vars;
+		}
 	}
 
-	public function Login($AuthMessage = '', $AuthTitle = 'Авторизация администратора'){
+	public function Login( $AuthMessage = '', $AuthTitle = 'Авторизация администратора' ){
 		$this->Init('login.html');
-
 		$this->SetTempVar('head', 'body', 'login.html');
 		$this->AddBlock('template', true, false, 'login');
 		$this->Blocks['template']['vars'] = array(
@@ -122,7 +138,7 @@ class AdminPage extends PageTemplate{
 	 */
 	public function AddCenterBox( $title ){
 		$this->BlockContents = $this->BlockContentBox->NewSubBlock(true, array('title'=>$title), array(), '', '')->NewBlock('contents', true, true, 'content');
-		$this->BlockTemplate->vars['content_block'] = true;
+		$this->content_block = true;
 	}
 
 	/**
@@ -191,8 +207,7 @@ class AdminPage extends PageTemplate{
 	public function SpeedButton( $Title, $Url, $ImgSrc = '' ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
-			.'</a>';
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
 	}
 
 	/**
@@ -209,8 +224,7 @@ class AdminPage extends PageTemplate{
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
 		$OnClick = "event.cancelBubble = true; event.stopPropagation(); return Admin.Buttons.Confirm('$ConfirmMsg', this);";
 		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
-			.'</a>';
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
 	}
 
 	/**
@@ -227,8 +241,7 @@ class AdminPage extends PageTemplate{
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
 		$OnClick = "if(confirm('$ConfirmMsg')) $OnClick; event.cancelBubble = true; event.stopPropagation(); return false";
 		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
-			.'</a>';
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
 	}
 
 	/**
@@ -250,19 +263,16 @@ class AdminPage extends PageTemplate{
 		$Title = ($Status ? $EnabledTitle : $DisabledTitle);
 		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); event.cancelBubble = true; event.stopPropagation(); return false;";
 		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
-			.'</a>';
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
 		return $s;
 	}
 
 	public function SpeedAjax($Title, $AjaxUrl, $ImgSrc = '', $ConfirmMsg = '', $OnStart = '', $OnSuccess = '', $Method = 'post', $Params = ''){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
-
 		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMsg',  this); event.cancelBubble = true; event.stopPropagation(); return false;";
 		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title)
-			.'</a>';
+			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
 	}
 
 	/**
@@ -511,7 +521,7 @@ class AdminPage extends PageTemplate{
 	 * @return
 	 */
 	function AddAdminMenu(){
-		if(IsAjax()) return;
+		if($this->AjaxMode) return; // Меню не генерируется при AJAX запросах
 		$menu = System::database()->Select('adminmenu', "`enabled`='1'");
 		SortArray($menu, 'order');
 		$items = array(); // Элементы меню по родительским индексам
@@ -589,7 +599,7 @@ class AdminPage extends PageTemplate{
 			$menu->NewSubBlock(true, $link);
 		}
 		$this->SideBarMenuLinks = array();
-		$this->BlockTemplate->vars['tool_menu_block'] = true;
+		$this->tool_menu_block = true;
 		return $menu;
 	}
 
@@ -601,7 +611,7 @@ class AdminPage extends PageTemplate{
 	 * @return StarkytSubBlock
 	 */
 	public function SideBarAddTextBlock( $Title, $Text ){
-		$this->BlockTemplate->vars['tool_menu_block'] = true;
+		$this->tool_menu_block = true;
 		return $this->BlockAdminBlocks->NewSubBlock(true, array('title'=>$Title, 'content'=>$Text), array(), 'block/text.html');
 	}
 
@@ -613,7 +623,7 @@ class AdminPage extends PageTemplate{
 	 * @return StarkytSubBlock
 	 */
 	public function SideBarAddTemplatedBlock( $Title, $TemplateFile ){
-		$this->BlockTemplate->vars['tool_menu_block'] = true;
+		$this->tool_menu_block = true;
 		return $this->BlockAdminBlocks->NewSubBlock(true, array('title'=>$Title), array('content'=>$TemplateFile), 'block/text.html');
 	}
 
@@ -621,14 +631,54 @@ class AdminPage extends PageTemplate{
 	 * Выводит данные пользователю.
 	 */
 	public function TEcho(){
-		global $script_start_time;
-		System::user()->OnlineProcess($this->Title);
-		$this->BlockTemplate->vars['showinfo'] = System::config('general/show_script_time');
-		if(IsAjax()){
-			$this->BlockTemplate->vars['head_items'] = $this->GenerateHead();
+		if($this->AjaxMode){
+			$start = microtime(true);
+			$response = array(
+				'content'=>$this->AjaxContentTemplate->Compile(),
+				'sidebar'=>$this->AjaxSidebarTemplate->Compile(),
+				'css'=>array(),
+				'js'=>array(),
+				'js_inline'=>'',
+				'errors'=>'',
+				'info'=>'',
+			);
+			foreach($this->css as $file){
+				$response['css'][] = $file;
+			}
+			foreach($this->css_inc as $file){
+				$response['css'][] = $file;
+			}
+			if($this->JQueryFile != ''){
+				$response['js'][] = $this->JQueryFile;
+				foreach($this->JQueryPlugins as $filename){
+					$response['js'][] = $filename;
+				}
+			}
+			foreach($this->js as $filename){
+				$response['js'][] = $filename;
+			}
+			foreach($this->js_inc as $filename){
+				$response['js'][] = $filename;
+			}
+			$JSInline = '';
+			if($this->JQueryFile != ''){
+				$JSInline .= "jQuery(function(){".$this->OnLoadJavaScript."});\n";
+			}else{
+				$JSInline .= "window.onload = function(){".$this->OnLoadJavaScript."};\n";
+			}
+			$JSInline .= $this->TextJavaScript;
+			$response['js_inline'] = $JSInline;
+			$response['errors'] = implode(System::$Errors);
+			$response['info'] = $this->GetPageInfo($start);
+			echo JsonEncode($response);
+		}else{
+			System::user()->OnlineProcess($this->Title);
+			$this->BlockTemplate->vars['content_block'] = $this->content_block;
+			$this->BlockTemplate->vars['tool_menu_block'] = $this->tool_menu_block;
+			$this->BlockTemplate->vars['showinfo'] = System::config('general/show_script_time');
+			$this->BlockTemplate->vars['errors_text'] = implode(System::$Errors);
+			$this->EchoAll();
 		}
-		$this->BlockTemplate->vars['errors_text'] = implode(System::$Errors);
-		$this->EchoAll();
 	}
 
 }

@@ -16,4 +16,3 @@ function getconf_TemplatesList( $name )
 	return $r;
 }
 
-?>

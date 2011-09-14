@@ -12,4 +12,3 @@ function getconf_Meta_Robots( $name )
 	);
 }
 
-?>

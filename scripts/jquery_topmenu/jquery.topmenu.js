@@ -135,6 +135,7 @@
 		// Событие - клик на элементе
 		function EventItemClick( event ){
 			HideSubMenus();
+			active = false;
 		}
 
 		// Генерация списка второго уровня

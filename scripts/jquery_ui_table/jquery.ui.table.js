@@ -1,12 +1,12 @@
 /*
  * LinkorCMS JQuery Table 1.0
- * Компонент Ajax таблицы
+ * РљРѕРјРїРѕРЅРµРЅС‚ Ajax С‚Р°Р±Р»РёС†С‹
  *
- * Copyright 2011, Александр Галицкий
+ * Copyright 2011, РђР»РµРєСЃР°РЅРґСЂ Р“Р°Р»РёС†РєРёР№
  * Email: linkorcms@yandex.ru
  * Site: http://linkorcms.ru/
  *
- * Зависимости:
+ * Р—Р°РІРёСЃРёРјРѕСЃС‚Рё:
  *
  */
 
@@ -14,44 +14,44 @@
 
 	$.widget("ui.table", {
 		options: {
-			columns: {}, // Описание колонок
-			rows: {}, // Данные таблицы
+			columns: {}, // РћРїРёСЃР°РЅРёРµ РєРѕР»РѕРЅРѕРє
+			rows: {}, // Р”Р°РЅРЅС‹Рµ С‚Р°Р±Р»РёС†С‹
 
-			// Адрес страницы для обновления данных
-			// таблицы (POST: page, itemsonpage, sortby, desc)
+			// РђРґСЂРµСЃ СЃС‚СЂР°РЅРёС†С‹ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РґР°РЅРЅС‹С…
+			// С‚Р°Р±Р»РёС†С‹ (POST: page, itemsonpage, sortby, desc)
 			listing: "",
 
-			// Адрес страницы для удаления элемента таблицы
+			// РђРґСЂРµСЃ СЃС‚СЂР°РЅРёС†С‹ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ СЌР»РµРјРµРЅС‚Р° С‚Р°Р±Р»РёС†С‹
 			//(POST: id)
 			del: "",
 
-			onpage: 10, // Кол-во элементов на странице
-			page: 1, // Текущая страница
-			total: 0, // Количество элементов всего
+			onpage: 10, // РљРѕР»-РІРѕ СЌР»РµРјРµРЅС‚РѕРІ РЅР° СЃС‚СЂР°РЅРёС†Рµ
+			page: 1, // РўРµРєСѓС‰Р°СЏ СЃС‚СЂР°РЅРёС†Р°
+			total: 0, // РљРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ РІСЃРµРіРѕ
 			sortby: -1,
 			sortdesc: false
 		},
 
 		default_column_options: {
-			id: "0", // Уникальный идентификатор для доступа
-			title: "Column Title", // Заголовок
-			sortable: true, // Разрешить сортировку по этому столбцу
-			align: "left", // Выравнивание в ячейках (left, right, center)
-			nowrap: false  // Запретить перенос содержимого ячеек на новую строку
+			id: "0", // РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РґР»СЏ РґРѕСЃС‚СѓРїР°
+			title: "Column Title", // Р—Р°РіРѕР»РѕРІРѕРє
+			sortable: true, // Р Р°Р·СЂРµС€РёС‚СЊ СЃРѕСЂС‚РёСЂРѕРІРєСѓ РїРѕ СЌС‚РѕРјСѓ СЃС‚РѕР»Р±С†Сѓ
+			align: "left", // Р’С‹СЂР°РІРЅРёРІР°РЅРёРµ РІ СЏС‡РµР№РєР°С… (left, right, center)
+			nowrap: false  // Р—Р°РїСЂРµС‚РёС‚СЊ РїРµСЂРµРЅРѕСЃ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ СЏС‡РµРµРє РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ
 		},
 
 		default_row_options: {
-			id: "0", // Идентификатор строки
-			data: [] // Данные ячеек
+			id: "0", // РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё
+			data: [] // Р”Р°РЅРЅС‹Рµ СЏС‡РµРµРє
 		},
 
-		table: null, // Ссылка на таблицу
+		table: null, // РЎСЃС‹Р»РєР° РЅР° С‚Р°Р±Р»РёС†Сѓ
 		thead: null,
 		tbody: null,
 		tfoot: null,
 		tnav: null,
 
-		navStart: 1, // смещение постраничной навигации
+		navStart: 1, // СЃРјРµС‰РµРЅРёРµ РїРѕСЃС‚СЂР°РЅРёС‡РЅРѕР№ РЅР°РІРёРіР°С†РёРё
 
 		_create: function(){
 			var o = this.options,
@@ -60,13 +60,13 @@
 			this.navStart = o.page - 4;
 			if(this.navStart < 1) this.navStart = 1;
 
-			// Генерируем таблицу
+			// Р“РµРЅРµСЂРёСЂСѓРµРј С‚Р°Р±Р»РёС†Сѓ
 			this.table = $('<table class="ui-table"></table>').appendTo(this.element);
 			this.thead = $('<thead class="ui-table-thead"></thead>').appendTo(this.table);
 			this.tfoot = $('<tfoot class="ui-table-tfoot"></tfoot>').appendTo(this.table);
 			this.tbody = $('<tbody class="ui-table-tbody"></tbody>').appendTo(this.table);
 
-			//Генерируем шапку
+			//Р“РµРЅРµСЂРёСЂСѓРµРј С€Р°РїРєСѓ
 			var header = $('<tr>').appendTo(this.thead);
 			for(var i = 0; i < o.columns.length; i++){
 				var col = this.options.columns[i] = $.extend({}, this.default_column_options, o.columns[i]);
@@ -90,23 +90,23 @@
 				}
 			}
 
-			// Подвал таблицы
+			// РџРѕРґРІР°Р» С‚Р°Р±Р»РёС†С‹
 			var footer = $('<tr>').appendTo(this.tfoot);
 			var $ftd = $('<td class="ui-table-footer" colspan="'+o.columns.length+'"></td>').appendTo(footer);
 
-			// Постраничная навигация
+			// РџРѕСЃС‚СЂР°РЅРёС‡РЅР°СЏ РЅР°РІРёРіР°С†РёСЏ
 			var $nav = $('<div class="ui-table-footer-nav"></div>').appendTo($ftd);
 			this.tnav = $('<span class="ui-table-footer-nav-items"></span>').appendTo($nav);
 			this._rebuildNav();
 
 			var $updb = $('<div class="ui-table-footer-panel"></div>').appendTo($ftd);
 			this._button({
-				html: '<img src="images/admin/refresh.png" alt="Обновить" />',
-				title: "Обновить данные таблицы",
+				html: '<img src="images/admin/refresh.png" alt="РћР±РЅРѕРІРёС‚СЊ" />',
+				title: "РћР±РЅРѕРІРёС‚СЊ РґР°РЅРЅС‹Рµ С‚Р°Р±Р»РёС†С‹",
 				click: function(){ self._updateData(); return false; }
 			}).appendTo($updb);
 
-			$('<div class="ui-table-footer-panel">Кол-во на странице:&nbsp;' +
+			$('<div class="ui-table-footer-panel">РљРѕР»-РІРѕ РЅР° СЃС‚СЂР°РЅРёС†Рµ:&nbsp;' +
 			  '<select id="rowsonpage">' +
 			  '<option'+(o.onpage == 10 ? ' selected' : '')+'>10</option>' +
 			  '<option'+(o.onpage == 20 ? ' selected' : '')+'>20</option>' +
@@ -122,9 +122,9 @@
 				self._updateData();
 				self._rebuildNav();
 			});
-			$('<div class="ui-table-footer-panel"><span>Всего объектов: </span><span id="ui-table-footer-total">'+o.total+'</span></div>').appendTo($ftd);
+			$('<div class="ui-table-footer-panel"><span>Р’СЃРµРіРѕ РѕР±СЉРµРєС‚РѕРІ: </span><span id="ui-table-footer-total">'+o.total+'</span></div>').appendTo($ftd);
 
-			// Заполняем
+			// Р—Р°РїРѕР»РЅСЏРµРј
 			this._setData(o.rows);
 		},
 
@@ -176,8 +176,8 @@
 			this.tnav.children().remove();
 			if(totalPages <= 1) return;
 			this._button({
-				             html: '<img src="images/admin/back.png" alt="Назад" /></a>',
-				             title: "Назад",
+				             html: '<img src="images/admin/back.png" alt="РќР°Р·Р°Рґ" /></a>',
+				             title: "РќР°Р·Р°Рґ",
 				             click: function(){self._setPage(o.page-1);return false;}
 			             }).appendTo(this.tnav);
 			if(totalPages > 9)
@@ -192,8 +192,8 @@
 			if(totalPages > 9)
 				this._button({html: "..."+totalPages, mousedown: function(){self.navStart=self.navStart+9;self._rebuildNav();}}).appendTo(this.tnav);
 			this._button({
-				             html: '<img src="images/admin/next.png" alt="Вперед" />',
-				             title: "Вперед",
+				             html: '<img src="images/admin/next.png" alt="Р’РїРµСЂРµРґ" />',
+				             title: "Р’РїРµСЂРµРґ",
 				             click: function(){self._setPage(o.page+1);return false;}
 			             }).appendTo(this.tnav);
 			if(window.Admin.LiveUpdate){
@@ -202,7 +202,7 @@
 		},
 
 		/**
-		 * Очищает таблицу
+		 * РћС‡РёС‰Р°РµС‚ С‚Р°Р±Р»РёС†Сѓ
 		 */
 		_clear: function(){
 			this.tbody.children().remove();
@@ -236,14 +236,14 @@
 		},
 
 		/**
-		 * Генерация контента таблицы
-		 * @param tableData Двухмерный массив или объект
+		 * Р“РµРЅРµСЂР°С†РёСЏ РєРѕРЅС‚РµРЅС‚Р° С‚Р°Р±Р»РёС†С‹
+		 * @param tableData Р”РІСѓС…РјРµСЂРЅС‹Р№ РјР°СЃСЃРёРІ РёР»Рё РѕР±СЉРµРєС‚
 		 */
 		_setData: function( tableData ){
 			this._clear();
 			if(tableData.length == 0){
 			  var row = $('<tr id="ui-table-row-0" class="ui-table-row">').appendTo(this.tbody);
-				var $cell = $('<td colspan="'+this.options.columns.length+'" id="ui-table-cell-0" class="ui-table-cell">Пусто.</td>').appendTo(row);
+				var $cell = $('<td colspan="'+this.options.columns.length+'" id="ui-table-cell-0" class="ui-table-cell">РџСѓСЃС‚Рѕ.</td>').appendTo(row);
 				return;
 			}
 			for(var i = 0; i < tableData.length; i++){
@@ -268,7 +268,7 @@
 		},
 
 		/**
-		 * Загрузка обновленных данных с сервера
+		 * Р—Р°РіСЂСѓР·РєР° РѕР±РЅРѕРІР»РµРЅРЅС‹С… РґР°РЅРЅС‹С… СЃ СЃРµСЂРІРµСЂР°
 		 */
 		_updateData: function(){
 			var self = this,
@@ -297,7 +297,7 @@
 		/* PUBLIC */
 
 		/**
-		 * Удаление строки таблицы
+		 * РЈРґР°Р»РµРЅРёРµ СЃС‚СЂРѕРєРё С‚Р°Р±Р»РёС†С‹
 		 * @param id
 		 */
 		update: function(){
@@ -305,7 +305,7 @@
 		},
 
 		/**
-		 * Посылает запрос на удаление элемента таблицы
+		 * РџРѕСЃС‹Р»Р°РµС‚ Р·Р°РїСЂРѕСЃ РЅР° СѓРґР°Р»РµРЅРёРµ СЌР»РµРјРµРЅС‚Р° С‚Р°Р±Р»РёС†С‹
 		 * @param rowId
 		 */
 		deleteRow: function( rowId ){

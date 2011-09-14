@@ -768,4 +768,3 @@ class LcDatabaseFilesDB
 	}
 
 }
-?>

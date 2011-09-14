@@ -1,12 +1,13 @@
 <?php
 
+// ВНИМАНИЕ! Это устаревшие функции,
+// используйте System::admin()->AddConfigsForm() и System::admin()->SaveConfigs()
+// для вывода и сохранения настроек.
+
 if(!defined('VALID_RUN')){
 	header("HTTP/1.1 404 Not Found");
 	exit;
 }
-
-// AdminConfigurationEdit('config', 0, false, true, 'Настройки сайта');
-// AdminConfigurationEdit('news', 'news', false, false, 'Конфигурация модуля "Новости"');
 
 $conf_config_table = 'config';
 $conf_config_groups_table = 'config_groups';
@@ -23,9 +24,7 @@ include_once $config['inc_dir'].'forms.inc.php';
  * @return void
  */
 function AdminConfigurationEdit( $Exe, $Group = '', $ShowHiddenGroups = false, $ShowTitles = true, $ModuleName = '', $SavePageParam = 'a=configsave' ){
-
 	global $config, $db, $site, $conf_config_table, $conf_config_groups_table;
-
 	// Вытаскиваем настройки и отсортировываем по группам
 	$temp = $db->Select($conf_config_table, '');
 	$configs = array();
@@ -33,7 +32,6 @@ function AdminConfigurationEdit( $Exe, $Group = '', $ShowHiddenGroups = false, $
 		$configs[$temp[$i]['group_id']][] = $temp[$i];
 	}
 	unset($temp);
-
 	// Вытаскиваем группы настроек
 	if($Group == ''){
 		$q = '';
@@ -41,7 +39,6 @@ function AdminConfigurationEdit( $Exe, $Group = '', $ShowHiddenGroups = false, $
 		$q = "`name`='$Group'";
 	}
 	$cfg_grps = $db->Select($conf_config_groups_table, $q);
-
 	// Добавляем форму и начинаем генерировать текст
 	$text = '<form action="'.$config['admin_file'].'?exe='.$Exe.'&'.$SavePageParam.'" method="post">';
 	for($i = 0, $cnt = count($cfg_grps); $i < $cnt; $i++){
@@ -61,7 +58,6 @@ function AdminConfigurationEdit( $Exe, $Group = '', $ShowHiddenGroups = false, $
 		if($ShowTitles){
 			$text .= '<tr><th colspan="2" class="configtableth">'.SafeDB($cfg_grps[$i]['hname'], 255, str).'</th></tr>';
 		}
-
 		// Добавляем настройки группы
 		if($jcnt > 0){
 			for($j = 0; $j < $jcnt; $j++){
@@ -84,7 +80,7 @@ function AdminConfigurationEdit( $Exe, $Group = '', $ShowHiddenGroups = false, $
 			$text .= '<tr><td class="leftc" align="center"> В этой группе пока нет настроек. </td></tr>';
 		}
 		//Закрываем таблицу группы
-		$text .= '</table><br />';
+		$text .= '</table>';
 	}
 	$text .= '<table class="configsubmit"><tr><td>'.$site->Submit('Сохранить').'</td></tr></table>';
 	$text .= '</form>';
@@ -103,8 +99,7 @@ function AdminConfigurationEdit( $Exe, $Group = '', $ShowHiddenGroups = false, $
  * @param bool $ShowHidden
  * @return void
  */
-function AdminConfigurationSave( $Exe, $Group = '', $ShowHidden = false )
-{
+function AdminConfigurationSave( $Exe, $Group = '', $ShowHidden = false ){
 	global $config, $db, $conf_config_table, $conf_config_groups_table;
 	// Вытаскиваем настройки и отсортировываем по группам
 	$temp = $db->Select($conf_config_table, '');
@@ -198,6 +193,5 @@ function AdminConfigurationSave( $Exe, $Group = '', $ShowHidden = false )
 	// Очищаем кэш настроек
 	$cache = LmFileCache::Instance();
 	$cache->Clear('config');
-
 	GO(ADMIN_FILE.'?exe='.$Exe);
 }

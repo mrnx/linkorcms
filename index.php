@@ -17,7 +17,7 @@ if($config['general']['ufu'] && isset($_GET['ufu'])){
 
 // Закрыть сайт для пользователей
 if($config['general']['private_site'] && $user->AccessLevel() != 1){
-	include_once($config['inc_dir'].'template.login.php');
+	include_once $config['inc_dir'].'template.login.php';
 	AdminShowLogin('Сайт закрыт для пользователей');
 }
 

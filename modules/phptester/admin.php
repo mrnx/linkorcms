@@ -10,15 +10,16 @@ System::admin()->AddSubTitle('Тестирование PHP кода');
 if(isset($_GET['a'])){
 	$action = $_GET['a'];
 }else{
-	$action = 'main';
+	$action = 'mainphp';
 }
 
-System::admin()->SideBarAddMenuItem('Редактор', 'exe=phptester', 'main');
+System::admin()->SideBarAddMenuItem('PHP', 'exe=phptester&lang=php', 'mainphp');
+System::admin()->SideBarAddMenuItem('JavaScript', 'exe=phptester&lang=js', 'mainjs');
 System::admin()->SideBarAddMenuItem('Сниппеты', 'exe=phptester&a=snippets', 'snippets');
 System::admin()->SideBarAddMenuBlock('', $action);
 
 switch($action){
-	case 'main':
+	case 'mainphp':
 		AdminPhpTester();
 		break;
 	case 'perform':
