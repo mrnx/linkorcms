@@ -22,6 +22,13 @@ switch($action){
 function AdminFileManager(){
 	UseScript('elfinder');
 
+//	$().ready(function() {
+//		var elf = $('#elfinder').elfinder({
+//			// lang: 'ru',             // language (OPTIONAL)
+//			url : 'php/connector.php'  // connector URL (REQUIRED)
+//		}).elfinder('instance');
+//	});
+
 	$options = array(
 		'url' => 'scripts/elfinder/connector.php',
 		'lang' => 'ru',
