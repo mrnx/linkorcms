@@ -41,30 +41,14 @@ function ErrorsOff(){
  * @return void
  */
 function ErrorHandler( $No, $Error, $File, $Line = -1 ){
-	static $LogedErrors = array();
-	static $First = true;
 	global $SITE_ERRORS;
 	$errortype = array(
 		1 => 'Ошибка', 2 => 'Предупреждение!', 4 => 'Ошибка разборщика', 8 => 'Замечание', 16 => 'Ошибка ядра', 32 => 'Предупреждение ядра!', 64 => 'Ошибка компиляции',
 		128 => 'Предупреждение компиляции!', 256 => 'Пользовательская Ошибка', 512 => 'Пользовательскаое Предупреждение!', 1024 => 'Пользовательскаое Замечание', 2048 => 'Небольшое замечание',
 		8192 => 'Устаревший код'
 	);
-	$ErrorHtml = '<br /><b>'.$errortype[$No].'</b>: '.$Error.' в <b>'.$File.($Line > -1 ? '</b> на линии <b>'.$Line.'</b>' : '').'.<br />'."\n";
-	if(!defined('SETUP_SCRIPT') && System::config('debug/log_errors')){
-		$ErrorText = '"'.$errortype[$No].'" "'.$Error.'" "'.$File.'"'.($Line > -1 ? ' "'.$Line.'"' : '');
-		if(!in_array($ErrorText, $LogedErrors)){ // Отсеиваем одинаковые ошибки
-			$LogedErrors[] = $ErrorText;
-			if($First){
-				$First = false;
-				$ErrorText = '---- '.date("d.m.y G:i", time())."\n".$ErrorText;
-			}
-			System::log_errors($ErrorText);
-		}
-	}
-	if(PRINT_ERRORS){
-		print $ErrorHtml;
-	}
-	if(PRINT_ERRORS || ($SITE_ERRORS && System::config('debug/php_errors'))){
-		System::$Errors[] = $ErrorHtml."\n";
+	$ErrorHtml = '<b>'.$errortype[$No].'</b>: '.$Error.' в <b>'.$File.($Line > -1 ? '</b> на линии <b>'.$Line.'</b>' : '').'.';
+	if($SITE_ERRORS){
+		System::$Errors[] = $ErrorHtml;
 	}
 }

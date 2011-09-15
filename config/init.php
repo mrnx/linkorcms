@@ -1,7 +1,7 @@
 <?php
 
 // LinkorCMS
-// © 2006-2011 Галицкий Александр Николаевич (linkorcms@yandex.ru)
+// © 2006-2011 Александр Галицкий (linkorcms@yandex.ru)
 // Файл: init.php
 // Назначение: Файл инициализации
 
@@ -10,12 +10,21 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
+if($_SERVER['REQUEST_METHOD'] == "HEAD"){ // Отсеиваем HEAD запросы
+	header("X-Request: HEAD");
+	die();
+}
+
 define('INIT_CORE_START', microtime(true));
 
-@error_reporting(E_ALL);
-@ini_set('display_errors', true);
-@ini_set('html_errors', false);
-@ini_set('error_reporting', E_ALL);
+@ini_set('error_reporting', E_ALL | E_STRICT); // Всегда максимальный уровень
+@error_reporting(E_ALL | E_STRICT);
+
+@ini_set('html_errors', true);
+@ini_set('display_errors', true); // Включаем вывод ошибок
+
+@ini_set('log_errors', false); // Лог ошибок пока отключаем
+@ini_set('ignore_repeated_errors', true);
 
 umask(0); // По умолчанию файлы будут создаваться с правами 0666, папки с правами 0777
 
@@ -134,11 +143,14 @@ foreach($plugins as $plugin){
 }
 
 // Обработка ошибок
-set_error_handler('ErrorHandler');
+@ini_set('display_errors', System::config('debug/php_errors')); // Не влияет на error_handler, выводит фатальные ошибки, если включено
+@ini_set('error_log', dirname(__FILE__).'/'.$config['log_dir'].'errors.log'); // Записывает все ошибки включая фатальные
+@ini_set('log_errors', System::config('debug/log_errors'));
+set_error_handler('ErrorHandler'); // Обработчик ошибок, все ошибки кроме фатальных
 
 // Логи
-$SiteLog = new Logi($config['log_dir'].'site.log');
-$ErrorsLog = new Logi($config['log_dir'].'errors.log');
+$SiteLog = new Logi($config['log_dir'].'site.log'); // Лог для отладочных сообщений
+$ErrorsLog = new Logi($config['log_dir'].'errors.log'); // Лог для вывода ошибок
 
 // Сессии
 $user = new User();

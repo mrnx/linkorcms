@@ -83,11 +83,13 @@ class PageTemplate extends Starkyt{
 	 * @return void
 	 */
 	public function InitPageTemplate( $Disabled = false ){
-		Header('Expires: Mon, 1 Jan 2006 00:00:00 GMT');
-		Header('Last-Modified:'.gmdate('D, d M Y H:i:s').' GMT');
-		Header('Cache-Control: no-store, no-cache, must-revalidate');
-		Header('Pragma: no-cache');
-
+		header("Content-Type: text/html");
+		header('X-content-type-options: nosniff');
+		header("Cache-Control: no-cache");
+		header("Cache-Control: post-check=0, pre-check=0", false);
+		header('Pragma: no-cache');
+		header('Last-Modified: '.gmdate("D, d M Y H:i:s", time()-360).' GMT');
+		header('Expires: '.gmdate('D, d M Y H:i:s', time()-120).' GMT');
 		if(!$Disabled){
 			$this->InitStarkyt(System::config('inc_dir'), 'page.php');
 			$this->AddBlock('head');

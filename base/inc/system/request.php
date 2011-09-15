@@ -250,6 +250,15 @@ function CheckPost(){
 	return true;
 }
 
-function RequestMethod(){
-	return $_SERVER['REQUEST_METHOD'];
+/**
+ * Возвращает метод запроса
+ * @param null $Method С чем сравнить результат
+ * @return bool string|bool
+ */
+function RequestMethod( $Method = null ){
+	if(isset($Method)){
+		return $_SERVER['REQUEST_METHOD'] == $Method;
+	}else{
+		return $_SERVER['REQUEST_METHOD'];
+	}
 }
