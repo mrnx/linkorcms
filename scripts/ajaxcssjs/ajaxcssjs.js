@@ -21,9 +21,9 @@ ajaxcssjs = {
 	 * @author Alexander Galitsky
 	 */
 	parseCSS: function(cssdata){
-		var reg = new RegExp('([A-Za-z_\\-\\.#:\\*0-9\\[\\],= ]+[\\s]*){[\\s]*(([A-Za-z0-9-_]+)[\\s]*:[\\s]*([A-Za-z0-9#-_,\\\\/"\'\\.\\(\\)\\s]+);[\\s]*)*[\\s]*}', 'gm');
+		var reg = new RegExp('([A-Za-z_\\-\\.#:\\*0-9\\[\\],=\\(\\) ]+[\\s]*){([A-Za-z0-9#-_,\\\\/"\'\\.\\(\\)\\s:;]+)*}', 'gm');
 		var result = [];
-		while (true) {
+		while(true){
 			reg.lastIndex;
 			var arr = reg.exec(cssdata);
 			if (arr == null) {
@@ -81,7 +81,7 @@ ajaxcssjs = {
 			return;
 		}
 		var processed = 0;
-		for (var i = 0; i < fc; i++){
+		for(var i = 0; i < fc; i++){
 			var file = filenames[i];
 			if(!ajaxcssjs.cssLoaded(file)){ // Проверяем, не был ли загружен этот файл раньше
 				$.ajax({
@@ -93,11 +93,18 @@ ajaxcssjs = {
 							$('<style>').attr('type', 'text/css').appendTo('head');
 							var styleSheet = document.styleSheets[document.styleSheets.length - 1];
 							for (var i = 0; i < cssrules.length; i++){
-								var cssrule = cssrules[i][0];
-								if(cssrules[i][2] != undefined && cssrules[i][2].toLowerCase().indexOf('url') != -1){
-									cssrule = cssrule.replace(/([\("']+)((?!http)[^\("']+\.(gif|jpg|jpeg|png))([\)"']+)/g, "$1"+baseUrl+"$2$4");
+								var selector = cssrules[i][1];
+								var cssrule = cssrules[i][2];
+								if(cssrule != undefined){
+									if(cssrule.toLowerCase().indexOf('url') != -1){
+										cssrule = cssrule.replace(/([\("']+)((?!http)[^\("']+\.(gif|jpg|jpeg|png))([\)"']+)/g, "$1"+baseUrl+"$2$4");
+									}
+									if(styleSheet.insertRule){
+										styleSheet.insertRule(selector+'{'+ cssrule+'}', styleSheet.cssRules.length);
+									}else { /* IE */
+										styleSheet.addRule(selector, cssrule, -1);
+									}
 								}
-								styleSheet.insertRule(cssrule, 0);
 							}
 							processed++;
 							ajaxcssjs.loaded_files.push(file);
