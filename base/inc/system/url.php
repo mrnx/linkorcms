@@ -6,10 +6,7 @@
  * @return mixed
  */
 function Url( $url ){
-	$url = preg_replace('/^https:\/\//', '', $url);
-	$url = preg_replace('/^http:\/\//', '', $url);
-	$url = preg_replace('/^www\./', '', $url);
-	return $url;
+	return preg_replace(array('/^https:\/\//', '/^http:\/\//', '/^www\./'), '', $url);
 }
 
 //Код проверяет ссылку - если это ссылка на страницы своего же сайта
