@@ -30,7 +30,7 @@ function AdminFileManager(){
 //	});
 
 	$options = array(
-		'url' => 'scripts/elfinder/connector.php',
+		'url' => '/index.php?name=plugins&p=connectors&mod=elfinder',
 		'lang' => 'ru',
 		'docked' => true,
 		'height' => 490

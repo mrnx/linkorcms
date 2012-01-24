@@ -165,11 +165,11 @@ abstract class elFinderVolumeDriver {
 		// library to crypt/uncrypt files names (not implemented)
 		'cryptLib'        => '',
 		// how to detect files mimetypes. (auto/internal/finfo/mime_content_type)
-		'mimeDetect'      => 'auto',       
+		'mimeDetect'      => 'internal',
 		// mime.types file path (for mimeDetect==internal)
-		'mimefile'        => '',          
+		'mimefile'        => '',
 		// directory for thumbnails 
-		'tmbPath'         => '.tmb',       
+		'tmbPath'         => '.tmb',
 		// mode to create thumbnails dir
 		'tmbPathMode'     => 0777,   
 		// thumbnails dir URL. Set it if store thumbnails outside root directory      
@@ -191,11 +191,11 @@ abstract class elFinderVolumeDriver {
 		// on upload -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext   
 		'uploadOverwrite' => true, 
 		// mimetypes allowed to upload
-		'uploadAllow'     => array('all'),      
+		'uploadAllow'     => array('all'),
 		// mimetypes not allowed to upload
 		'uploadDeny'      => array(),      
 		// order to proccess uploadAllow and uploadAllow options
-		'uploadOrder'     => 'deny,allow', 
+		'uploadOrder'     => 'deny,allow',
 		// maximum upload file size. NOTE - this is size for every uploaded files
 		'uploadMaxSize'   => 0,
 		// files dates format
@@ -561,7 +561,6 @@ abstract class elFinderVolumeDriver {
 		);
 		// set files attributes
 		if (!empty($this->options['attributes']) && is_array($this->options['attributes'])) {
-			
 			foreach ($this->options['attributes'] as $a) {
 				// attributes must contain pattern and at least one rule
 				if (!empty($a['pattern']) || count($a) > 1) {
@@ -630,17 +629,14 @@ abstract class elFinderVolumeDriver {
 		$type = preg_match('/^(finfo|mime_content_type|internal|auto)$/i', $type) ? $type : 'auto';
 		$regexp = '/text\/x\-(php|c\+\+)/';
 		
-		if (($type == 'finfo' || $type == 'auto') 
-		&& class_exists('finfo')
-		&& preg_match($regexp, array_shift(explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__))))) {
-			$type = 'finfo';
-		} elseif (($type == 'mime_content_type' || $type == 'auto') 
-		&& function_exists('mime_content_type')
-		&& preg_match($regexp, array_shift(explode(';', mime_content_type(__FILE__))))) {
-			$type = 'mime_content_type';
-		} else {
-			$type = 'internal';
-		}
+//		if(($type == 'finfo' || $type == 'auto') && class_exists('finfo') && preg_match($regexp, array_shift(explode(';', @finfo_file(finfo_open(FILEINFO_MIME), __FILE__))))){
+//			$type = 'finfo';
+//		}elseif(($type == 'mime_content_type' || $type == 'auto') && function_exists('mime_content_type') && preg_match($regexp, array_shift(explode(';', mime_content_type(__FILE__))))) {
+//			$type = 'mime_content_type';
+//		} else {
+//			$type = 'internal';
+//		}
+		$type = 'internal';
 		$this->mimeDetect = $type;
 
 		// load mimes from external file for mimeDetect == 'internal'

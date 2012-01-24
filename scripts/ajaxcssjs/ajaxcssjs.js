@@ -80,21 +80,22 @@ ajaxcssjs = {
 			}
 			return;
 		}
-		var processed = 0;
-		for(var i = 0; i < fc; i++){
+		var i = 0;
+		var includecss = function(){
 			var file = filenames[i];
+			i++;
 			if(!ajaxcssjs.cssLoaded(file)){ // Проверяем, не был ли загружен этот файл раньше
 				$.ajax({
 					url: file,
-					success: (function(file){
+					success: (function(file, i){
 						return function(data){
 							var cssrules = ajaxcssjs.parseCSS(data);
 							var baseUrl = file.replace(/\\/g, '/').replace(/[^\/]*\/?$/, '');
 							$('<style>').attr('type', 'text/css').appendTo('head');
 							var styleSheet = document.styleSheets[document.styleSheets.length - 1];
-							for (var i = 0; i < cssrules.length; i++){
-								var selector = cssrules[i][1];
-								var cssrule = cssrules[i][2];
+							for (var j = 0; j < cssrules.length; j++){
+								var selector = cssrules[j][1];
+								var cssrule = cssrules[j][2];
 								if(cssrule != undefined){
 									if(cssrule.toLowerCase().indexOf('url') != -1){
 										cssrule = cssrule.replace(/([\("']+)((?!http)[^\("']+\.(gif|jpg|jpeg|png))([\)"']+)/g, "$1"+baseUrl+"$2$4");
@@ -106,25 +107,28 @@ ajaxcssjs = {
 									}
 								}
 							}
-							processed++;
 							ajaxcssjs.loaded_files.push(file);
-							if(processed == fc) {
+							if(i == fc) {
 								if (onsuccess != undefined){
 									onsuccess.call();
 								}
+							}else{
+								includecss();
 							}
 						}
-					})(file)
+					})(file, i)
 				});
 			}else{
-				processed++;
-				if(processed == fc){
-					if (onsuccess != undefined){
+				if(i == fc){
+					if(onsuccess != undefined){
 						onsuccess.call();
 					}
+				}else{
+					includecss();
 				}
 			}
 		}
+		includecss();
 	},
 
 	loadJS: function(filenames, onsuccess){
@@ -138,29 +142,33 @@ ajaxcssjs = {
 			}
 			return;
 		}
-		var processed = 0;
-		for(var i = 0; i < fc; i++){
+		var i = 0;
+		var includejs = function(){
 			var file = filenames[i];
+			i++;
 			if(!ajaxcssjs.jsLoaded(file)){ // Проверяем, не был ли загружен этот файл раньше
-				$.getScript(file, (function(file){
+				$.getScript(file, (function(file, i){
 					return function(){
-						processed++;
 						ajaxcssjs.loaded_files.push(file);
-						if(processed == fc){
+						if(i == fc){
 							if(onsuccess != undefined){
 								onsuccess.call();
 							}
+						}else{
+							includejs();
 						}
 					}
-				})(file));
+				})(file, i));
 			}else{
-				processed++;
-				if(processed == fc){
-					if (onsuccess != undefined){
+				if(i == fc){
+					if(onsuccess != undefined){
 						onsuccess.call();
 					}
+				}else{
+					includejs();
 				}
 			}
 		}
+		includejs();
 	}
 };

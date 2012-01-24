@@ -16,3 +16,5 @@
 
 	// elFinder translation
 	System::site()->JQueryPlugin('scripts/elfinder/js/i18n/elfinder.ru.js', true);
+
+

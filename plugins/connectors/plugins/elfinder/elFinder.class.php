@@ -191,8 +191,8 @@ class elFinder {
 	 **/
 	public function __construct($opts) {
 		$this->time  = $this->utime();
-		$this->debug = !empty($opts['debug']);
-		
+	    $this->debug = !empty($opts['debug']);
+
 		setlocale(LC_ALL, !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8');
 
 		// bind events listeners
@@ -204,19 +204,16 @@ class elFinder {
 
 		// "mount" volumes
 		if (isset($opts['roots']) && is_array($opts['roots'])) {
-			
-			foreach ($opts['roots'] as $i => $o) {
+			foreach($opts['roots'] as $i=>$o){
 				$class = 'elFinderVolume'.$o['driver'];
-
-				if (class_exists($class)) {
+				if(class_exists($class)){
 					$volume = new $class();
-					
-					if ($volume->mount($o)) {
+					if($volume->mount($o)){
 						// unique volume id (ends on "_") - used as prefix to files hash
 						$id = $volume->id();
 						$this->volumes[$id] = $volume;
-						if (!$this->default && $volume->isReadable()) {
-							$this->default = $this->volumes[$id]; 
+						if (!$this->default && $volume->isReadable()){
+							$this->default = $this->volumes[$id];
 						}
 					}
 				}
@@ -403,7 +400,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function open($args) {
-		$target = $args['target'];
+        $target = $args['target'];
 		$init   = !empty($args['init']);
 		$tree   = !empty($args['tree']);
 		$volume = $this->volume($target);

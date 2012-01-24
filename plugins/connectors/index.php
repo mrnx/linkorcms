@@ -9,7 +9,7 @@
 	$type = RealPath2($type);
 	$type = PLUG_DIR.'plugins/'.$type.'/connector.php';
 	if(!is_file($type) || !file_exists($type)){
-		echo 'Тип не зарегистрирован';
+		echo 'Тип не зарегистрирован ('.$type.')';
 		return;
 	}
 
