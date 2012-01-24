@@ -1,4 +1,4 @@
-﻿"use strict"
+"use strict"
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.ru = {
 		translator : 'Vasiliy Razumnih &lt;rvn@std42.ru&gt;',

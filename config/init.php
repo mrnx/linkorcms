@@ -12,7 +12,7 @@ if(!defined('VALID_RUN')){
 
 if($_SERVER['REQUEST_METHOD'] == "HEAD"){ // Отсеиваем HEAD запросы
 	header("X-Request: HEAD");
-	die();
+	exit();
 }
 
 define('INIT_CORE_START', microtime(true));
@@ -108,7 +108,6 @@ if(LOAD_SYSTEM_APART){ // Подключать каждый файл по отдельности
 	}
 }else{ // Сборка ядра
 	if(!is_file('config/system_build.php') || FORCE_BUILD_SYSTEM){
-		$system_modules = $GLOBALS['system_files'];
 		$inc_dir = $GLOBALS['config']['inc_dir'];
 		$core_dir = $inc_dir.'system/';
 		$core_build = '';

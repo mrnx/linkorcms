@@ -642,6 +642,7 @@ class AdminPage extends PageTemplate{
 				'js_inline'=>'',
 				'errors'=>'',
 				'info'=>'',
+				'title'=>''
 			);
 			$response['content'] = $this->AjaxContentTemplate->Compile();
 			if($this->tool_menu_block){
@@ -679,6 +680,7 @@ class AdminPage extends PageTemplate{
 			$response['js_inline'] = $JSInline;
 			$response['errors'] = implode(System::$Errors);
 			$response['info'] = $this->GetPageInfo($start);
+			$response['title'] = $this->GenerateTitle();
 			echo JsonEncode($response);
 		}else{
 			System::user()->OnlineProcess($this->Title);

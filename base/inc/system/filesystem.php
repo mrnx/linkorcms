@@ -59,9 +59,9 @@ function GetFiles( $folder, $use_subfolders = false, $use_mask = false, $mask = 
 	foreach($files as $file){
 		if(is_dir($folder.$file) && ($file != '.') && ($file != '..')){
 			if($use_subfolders){
-				GetFiles($folder.$file.'/', $use_subfolders, $use_mask, $mask, false, $parentf);
+				GetFiles($folder.$file, $use_subfolders, $use_mask, $mask, false, $parentf);
 			}
-		}elseif(is_file($folder.'/'.$file) && ($file != '.') && ($file != '..')){
+		}elseif(is_file($folder.$file) && ($file != '.') && ($file != '..')){
 			$ext = GetFileExt($file);
 			if(!$use_mask || stripos($mask, strtolower($ext)) !== false){
 				$rf = str_replace($parentf, '', $folder.$file);
@@ -128,6 +128,23 @@ function RmDirRecursive( $Path ){
 	}
 	@closedir($dir);
 	if(!rmdir($Path)) return false;
+	return true;
+}
+
+function ChmodRecursive( $Path, $FilesMode = 0666, $DirsMode = 0777 ){
+	if(is_file($Path)){
+		chmod($Path, $FilesMode);
+		return true;
+	}
+	$files = scandir($Path);
+	foreach($files as $file){
+		if(is_dir($Path.'/'.$file) && ($file != '.') && ($file != '..')){
+			chmod($Path.'/'.$file, $DirsMode);
+			ChmodRecursive($Path.'/'.$file, $FilesMode, $DirsMode);
+		}elseif(is_file($Path.'/'.$file) && ($file != '.') && ($file != '..')){
+			chmod($Path.'/'.$file, $FilesMode);
+		}
+	}
 	return true;
 }
 

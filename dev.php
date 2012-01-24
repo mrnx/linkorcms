@@ -52,6 +52,24 @@ function GetFiles($folder, $use_subfolders = false, $use_mask = false, $mask = '
 	return $sfiles;
 }
 
+function ChmodRecursive( $Path, $FilesMode = 0666, $DirsMode = 0777, &$temp = array() ){
+	if(is_file($Path)){
+		$temp[$Path] = chmod($Path, $FilesMode);
+		return $temp;
+	}
+	$files = scandir($Path);
+	foreach($files as $file){
+		$filename = $Path.'/'.$file;
+		if(is_dir($filename) && ($file != '.') && ($file != '..')){
+			$temp[$filename.'/'] = chmod($filename, $DirsMode);
+			ChmodRecursive($filename, $FilesMode, $DirsMode, $temp);
+		}elseif(is_file($filename) && ($file != '.') && ($file != '..')){
+			$temp[$filename] = chmod($filename, $FilesMode);
+		}
+	}
+	return $temp;
+}
+
 
 // Очищает и приводит в порядок файлы
 if(isset($_GET['clean'])){
@@ -62,12 +80,10 @@ if(isset($_GET['clean'])){
 		if(is_writable($href)){
 			$content = file_get_contents($href);
 			$content = trim($content);
-
 			$order   = array("\r\n", "\n", "\r");
 			$replace = '___***new'.'_'.'line***___';
 			$content = str_replace($order, $replace, $content);
 			$content = str_replace($replace, "\r\n", $content);
-
 			file_put_contents($href, $content);
 			chmod($href, 0666);
 			echo '<span style="color: green;">'.$i.': Обработан: '.$href.'</span><br />';
@@ -76,6 +92,17 @@ if(isset($_GET['clean'])){
 		}
 	}
 	exit;
+}
+
+if(isset($_GET['chmod'])){
+	$r = ChmodRecursive($_GET['chmod']);
+	foreach($r as $file=>$result){
+		if($result){
+			echo '<span style="color: green;">Изменение прав "'.$file.'": Удачно</span><br />';
+		}else{
+			echo '<span style="color: red;">Изменение прав "'.$file.'": Не удалось</span><br />';
+		}
+	}
 }
 
 function RmDirRecursive($Path){
@@ -122,16 +149,22 @@ if(isset($_GET['delete'])){
 }
 
 if(isset($_GET['permissions'])){
-	$allfiles = GetFiles('./', true, true, '.php,.html,.FRM,.MYD', true);
+	if($_GET['permissions'] == ''){
+		$path = './';
+	}else{
+		$path = $_GET['permissions'].'/';
+	}
+	$allfiles = GetFiles($path, true, false, '', true);
 	$text = 'Права на файлы и папки:<br />';
 	$text .= '<table>';
 	$text .= '<tr><th>Файл</th><th>Права на запись</th><th>Права</th><th>Группа</th><th>Владелец</th></tr>';
 	foreach($allfiles as $file){
+		$file = $path.$file;
 		$owner = posix_getpwuid(fileowner($file));
 		$group = posix_getgrgid(filegroup($file));
 		$text .= "<tr>
 		<td>$file</td>
-		<td>".(is_writable($file) ? 'Yes' : 'No')."</td>
+		<td>".(is_writable($file) ? 'Да' : 'Нет')."</td>
 		<td>".substr(sprintf('%o', fileperms($file)), -4)."</td>
 		<td>".$group['name']."</td>
 		<td>".$owner['name']."</td>

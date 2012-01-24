@@ -40,14 +40,13 @@ if(is_file('setup.php') && !is_file('dev.php')){
 }
 
 System::admin()->InitPage();
+define('INDEX_PHP', false);
 
 // Получаем имя модуля
 $ModuleName = '';
 if(!isset($_GET['exe'])){
-	define('INDEX_PHP', true); // модуль на главной странице
 	$ModuleName = 'adminpanel';
 }else{
-	define('INDEX_PHP', false);
 	$ModuleName = SafeEnv($_GET['exe'], 255, str);
 	if($ModuleName == 'exit'){ // Выход
 		System::user()->UnsetCookie('admin');

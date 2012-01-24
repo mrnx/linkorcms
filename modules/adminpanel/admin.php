@@ -10,5 +10,3 @@ TAddSubTitle('Главная');
 $text = '';
 IncludePluginsGroup('adminpanel');
 AddTextBox('Админ-панель', $text);
-
-?>

@@ -32,6 +32,19 @@
 		},
 
 		/**
+		 * Устанавливает URL в браузере
+		 * @param Url
+		 */
+		SetLoc: function( Url ){
+			try{
+				history.pushState({}, '', '/' + Url);
+				return;
+			}catch(e){}
+			var pc = Url.split('?', 2);
+			location.hash = '#' + pc[1];
+		},
+
+		/**
 		 * Загрузка страницы Админ-панели
 		 * @param Url
 		 * @param event
@@ -40,6 +53,7 @@
 			if(this.CheckButton(1, event)){ // Только левая кнопка мыши
 				if(this.Ajax){
 					self = this;
+					self.SetLoc(Url);
 					self.ShowSplashScreen();
 					$.ajax({
 						type: "GET",
@@ -58,6 +72,7 @@
 									}
 									$('#main-content').html(data.content);
 									eval(data.js_inline);
+									document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
 									self.HideSplashScreen();
 								});
 							});
