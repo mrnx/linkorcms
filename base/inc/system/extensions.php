@@ -43,8 +43,19 @@ function ExtLoadInfo( $ExtPath ){
 					'icon' => '',
 					'1.3' => true
 				);
-			}elseif(isset($groups)){
-				return false;
+			}elseif(isset($groups)){ // Группы 1.3
+				foreach($groups as $groups){}
+				return array(
+					'name' => $groups['name-ru'],
+					'description' => $groups['description-ru'],
+					'author' => '',
+					'site' => '',
+					'version' => '',
+					'icon' => '',
+					'1.3' => true,
+					'1.3_old_plugins_group' => true,
+					'1.3_old_plugins_group_type' => $groups['type']
+				);
 			}
 		}
 		return $result;
@@ -107,6 +118,9 @@ function ExtInstallPlugin( $Group, $Name, $Function, $Type, $Enabled = '1' ){
 	$Function = SafeEnv($Function, 255, str);
 	$Type = SafeEnv($Type, 1, int);
 	$Enabled = SafeEnv($Enabled, 1, int);
+	if($Type == PLUG_MANUAL_ONE && $Enabled == '1'){ // Отключаем все файлы с такой-же группой
+		System::database()->Update('plugins', "`enabled`='0'", "`group`='$Group'");
+	}
 	System::database()->Insert('plugins',"'','$Name','$Function','','$Type','$Group','0','$Enabled'");
 	PluginsClearCache();
 }
@@ -154,10 +168,11 @@ function ExtDeleteBlock( $Folder ){
  * @param string $Admin Шаблон для админ-панели
  * @return void
  */
-function ExtInstallTemplate( $Folder, $Admin = '0' ){
+function ExtInstallTemplate( $Name, $Folder, $Admin = '0' ){
+	$Name = SafeEnv($Name, 255, str);
 	$Folder = SafeEnv($Folder, 255, str);
 	$Admin = SafeEnv($Admin, 1, int);
-	System::database()->Insert('templates',"'','$Folder','$Admin'");
+	System::database()->Insert('templates',"'','$Name','$Folder','$Admin','0'");
 }
 
 /**

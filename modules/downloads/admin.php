@@ -26,8 +26,7 @@ $tree->id_par_name = 'id';
 
 include_once ($config['inc_dir'].'configuration/functions.php');
 
-function AdminDownloadsMain()
-{
+function AdminDownloadsMain(){
 	global $config, $db, $site, $tree, $user;
 	if(isset($_GET['cat']) && $_GET['cat'] > -1){
 		$cat = SafeEnv($_GET['cat'], 11, int);
@@ -108,8 +107,7 @@ function AdminDownloadsMain()
 	}
 }
 
-function AdminDownloadsFileEditor( $action )
-{
+function AdminDownloadsFileEditor( $action ){
 	global $config, $db, $site, $user, $tree;
 	if(!$user->CheckAccess2('downloads', 'edit_files')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -180,12 +178,13 @@ function AdminDownloadsFileEditor( $action )
 
 	FormRow('В категорию', $site->Select('category', $cats_data));
 	FormRow('Название', $site->Edit('title', $title, false, 'style="width:400px;"'));
-	FormRow('Путь к файлу', $site->Edit('url', $url, false, 'style="width:400px;"'));
-	$max_file_size = ini_get('upload_max_filesize');
-	FormRow(
-		'Загрузить файл<br />(<small>Максимальный размер файла: '.$max_file_size.'</small>)',
-		$site->FFile('upload_file').'<br /><div style="width: 400px; word-wrap:break-word;">Разрешенные форматы:<br />'.$config['downloads']['file_exts'].'</div>');
 
+	FormRow('Путь к файлу', $site->Edit('url', $url, false, 'style="width:400px;"'));
+	//FormRow('Путь к файлу', $site->FileManager( 'url', $url, 400));
+
+	$max_file_size = ini_get('upload_max_filesize');
+	FormRow('Загрузить файл<br />(<small>Максимальный размер файла: '.$max_file_size.'</small>)',
+		$site->FFile('upload_file').'<br /><div style="width: 400px; word-wrap:break-word;">Разрешенные форматы:<br />'.$config['downloads']['file_exts'].'</div>');
 	FormRow('Размер файла', $site->Edit('size', $file_size, false, 'style="width:200px;"').' '.$site->Select('filesize_type', $filesize_data));
 	AdminImageControl('Изображение', 'Загрузить изображение', $image, $config['downloads']['images_dir']);
 	FormTextRow('Краткое описание', $site->HtmlEditor('shortdesc', $shortdesc, 600, 200));
@@ -202,8 +201,7 @@ function AdminDownloadsFileEditor( $action )
 	AddForm('<form action="'.$config['admin_file'].'?exe=downloads&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data" name="edit_form">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
 }
 
-function AdminDownloadsSaveFile( $action )
-{
+function AdminDownloadsSaveFile( $action ){
 	global $config, $db, $tree, $user;
 
 	if($_POST == array()){
@@ -329,8 +327,7 @@ function AdminDownloadsSaveFile( $action )
 
 }
 
-function AdminDownloadsDeleteFile()
-{
+function AdminDownloadsDeleteFile(){
 	global $config, $db, $tree, $user;
 	if(!$user->CheckAccess2('downloads', 'edit_files')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -360,8 +357,7 @@ function AdminDownloadsDeleteFile()
 	}
 }
 
-function AdminDownloadsChangeStatus()
-{
+function AdminDownloadsChangeStatus(){
 	global $config, $db, $tree, $user;
 	if(!$user->CheckAccess2('downloads', 'edit_files')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -385,8 +381,7 @@ function AdminDownloadsChangeStatus()
 	GO($config['admin_file'].'?exe=downloads');
 }
 
-function AdminDownloadsResetRating()
-{
+function AdminDownloadsResetRating(){
 	global $config, $db, $user;
 	if(!$user->CheckAccess2('downloads', 'edit_files')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -403,8 +398,7 @@ function AdminDownloadsResetRating()
 	}
 }
 
-function AdminDownloadsResetCounter()
-{
+function AdminDownloadsResetCounter(){
 	global $config, $db, $user;
 	if(!$user->CheckAccess2('downloads', 'edit_files')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -414,8 +408,7 @@ function AdminDownloadsResetCounter()
 	GO($config['admin_file'].'?exe=downloads');
 }
 
-function AdminDownloads( $action )
-{
+function AdminDownloads( $action ){
 	global $config, $db, $user;
 	TAddToolLink('Файлы', 'main', 'downloads');
 	if($user->CheckAccess2('downloads', 'edit_cats')){
@@ -532,5 +525,3 @@ if(isset($_GET['a'])){
 	$action = 'main';
 	AdminDownloads($action);
 }
-
-?>

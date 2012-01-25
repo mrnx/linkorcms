@@ -16,6 +16,7 @@ $action = isset($_GET['a']) ? $_GET['a'] : 'main';
 
 System::admin()->SideBarAddMenuItem('Расширения', 'exe=modules&a=main', 'main');
 System::admin()->SideBarAddMenuItem('Установить', 'exe=modules&a=installlist', 'installlist');
+System::admin()->SideBarAddMenuItem('Добавить', 'exe=modules&a=add', 'add');
 System::admin()->SideBarAddMenuBlock('', $action);
 
 switch($action){
@@ -123,9 +124,10 @@ function AdminModules(){
 		$func = '';
 		$func .= System::admin()->SpeedStatus(
 			'Отключить', 'Подключить',
-			ADMIN_FILE.'?exe=modules&a=changestatus&id='.$mid,
+			ADMIN_FILE.'?exe=modules&a=changestatus&type='.EXT_MODULE.'&id='.$mid,
 			$mod['enabled'] == '1',
-			'images/bullet_green.png', 'images/bullet_red.png'
+			'images/bullet_green.png',
+			'images/bullet_red.png'
 		);
 		$func .= System::admin()->SpeedButton('Настройки', ADMIN_FILE.'?exe=modules&a=mod_config&name='.SafeDB($mod['folder'], 255, str), 'images/admin/config.png');
 
@@ -198,8 +200,7 @@ function AdminModules(){
 
 		$mid = SafeEnv($mod['id'], 11, int);
 		$func = '';
-		// Показываем кнопку удаления, только тогда, когда существует программа удаления
-		if(is_file($blocks_dir.$mod['folder'].'/uninstall.php')){
+		if(is_file($blocks_dir.$mod['folder'].'/uninstall.php')){ // Показываем кнопку удаления, только тогда, когда существует программа удаления
 			$func .= System::admin()->SpeedConfirm(
 				'Удалить',
 				ADMIN_FILE.'?exe=modules&a=uninstall&type='.EXT_BLOCK.'&name='.SafeDB($mod['folder'], 255, str),
@@ -276,8 +277,15 @@ function AdminModules(){
 		if(isset($configs_groups[($mod['group'] != '' ? $mod['group'].'.' : '').$mod['name']])){
 			$func .= System::admin()->SpeedButton('Настройки', ADMIN_FILE.'?exe=modules&a=plug_config&name='.SafeDB($mod['name'], 255, str).'&group='.SafeDB($mod['group'], 255, str), 'images/admin/config.png');
 		}
+		$func .= System::admin()->SpeedStatus(
+			'Отключить', 'Подключить',
+			ADMIN_FILE.'?exe=modules&a=changestatus&type='.EXT_PLUGIN.'&id='.$mid,
+			$mod['enabled'] == '1',
+			'images/bullet_green.png',
+			'images/bullet_red.png'
+		);
 		// Показываем кнопку удаления, только тогда, когда существует программа удаления
-		if(isset($info['1.3']) || is_file($plug_dir.$mod['name'].'/uninstall.php')){
+		if(isset($info['1.3']) || is_file($path.'/uninstall.php')){
 			$func .= System::admin()->SpeedConfirm(
 				'Удалить',
 				ADMIN_FILE.'?exe=modules&a=uninstall&type='.EXT_PLUGIN.'&name='.SafeDB($mod['name'], 255, str).($mod['group']!=''?'&group='.SafeDB($mod['group'], 255, str) : ''),
@@ -339,7 +347,7 @@ function AdminModules(){
 
 	// Шаблоны
 	$templates_html = '<div style="border-top: 1px #ccf solid; ">';
-	$mods = System::database()->Select('templates');
+	$mods = System::database()->Select('templates', "`default`='0'");
 	foreach($mods as $mod){
 		$info = ExtLoadInfo($tpl_dir.$mod['folder']);
 		if($info === false) continue;
@@ -347,7 +355,7 @@ function AdminModules(){
 		$mid = SafeEnv($mod['id'], 11, int);
 		$func = '';
 		$func .= System::admin()->SpeedConfirm(
-			'Удалить',
+			'Удалить шаблон',
 			ADMIN_FILE.'?exe=modules&a=uninstall&type='.EXT_TEMPLATE.'&name='.SafeDB($mod['folder'], 255, str),
 			'images/admin/delete.png',
 			'Удалить шаблон '.$info['name'].'?'
@@ -484,7 +492,11 @@ function AdminModulesInstallList(){
 	// Поиск плагинов
 	$plug_folders = GetFolders($plug_dir);
 	foreach($plug_folders as $folder){
-		if(!is_file($plug_dir.$folder.'/info.php')){ // Возможно группа
+		$info = false;
+		if(is_file($plug_dir.$folder.'/info.php')){ // Возможно группа
+			$info = ExtLoadInfo($plug_dir.$folder);
+		}
+		if(isset($info['1.3_old_plugins_group']) || $info === false){ // Группа
 			$plug_folders2 = GetFolders($plug_dir.$folder.'/');
 			foreach($plug_folders2 as $folder2){
 				if(!in_array($folder.'/'.$folder2, $installed_plugins)){
@@ -500,15 +512,15 @@ function AdminModulesInstallList(){
 					}
 				}
 			}
-		}
-		if(!in_array($folder, $installed_plugins)){
-			$info = ExtLoadInfo($plug_dir.$folder);
-			if($info !== false){
-				$info['type'] = EXT_PLUGIN;
-				$info['path'] = $plug_dir.$folder.'/';
-				$info['folder'] = $folder;
-				if(isset($info['1.3']) || (is_file($info['path'].'install.php') && is_file($info['path'].'uninstall.php'))){
-					$list[] = $info;
+		}else{
+			if(!in_array($folder, $installed_plugins)){
+				if($info !== false){
+					$info['type'] = EXT_PLUGIN;
+					$info['path'] = $plug_dir.$folder.'/';
+					$info['folder'] = $folder;
+					if(isset($info['1.3']) || (is_file($info['path'].'install.php') && is_file($info['path'].'uninstall.php'))){
+						$list[] = $info;
+					}
 				}
 			}
 		}
@@ -533,12 +545,14 @@ function AdminModulesInstallList(){
 	// Поиск шаблонов
 	$temp_folders = GetFolders($temp_dir);
 	foreach($temp_folders as $folder){
-		$info = ExtLoadInfo($temp_dir.$folder);
-		if($info !== false){
-			$info['type'] = EXT_TEMPLATE;
-			$info['path'] = $temp_dir.$folder.'/';
-			$info['folder'] = $folder;
-			$list[] = $info;
+		if(!in_array($folder, $installed_templates)){
+			$info = ExtLoadInfo($temp_dir.$folder);
+			if($info !== false){
+				$info['type'] = EXT_TEMPLATE;
+				$info['path'] = $temp_dir.$folder.'/';
+				$info['folder'] = $folder;
+				$list[] = $info;
+			}
 		}
 	}
 
@@ -608,11 +622,11 @@ function AdminModulesInstall(){
 						if(is_file($path.'/install.php')){
 							require $path.'/install.php';
 						}
-						$new_installed[] = $info; // здесь в любом случае
+						$new_installed[] = $info;
 					}else{
-						if(is_file($path.'/install.php')){
+						if(is_file($path.'/install.php')){  // Наличие install.php обязательно
 							require $path.'/install.php';
-							$new_installed[] = $info;  // Наличие install.php обязательно
+							$new_installed[] = $info;
 						}
 					}
 				break;
@@ -640,8 +654,8 @@ function AdminModulesInstall(){
 					// Установка тем оформления происходит автоматически
 					$path = RealPath2(System::config('tpl_dir').$folder);
 					$info = ExtLoadInfo($path);
-					$admin = is_file($path.'/theme_admin.html') ? '1' : '0';
-					ExtInstallTemplate($folder, $admin);
+					$admin = (isset($info['admin']) && $info['admin'] ? '1' : '0');
+					ExtInstallTemplate($info['name'], $folder, $admin);
 					$new_installed[] = $info;
 				break;
 			}
@@ -833,7 +847,7 @@ function AdminModulesUninstall(){
 					$folder = SafeEnv($folder, 255, str);
 					System::database()->Delete('plugins', "`name`='$folder' and `group`='$groupenv'");
 				}
-				// FIXME: delete plugins cache
+				PluginsClearCache();
 				GO(ADMIN_FILE.'?exe=modules#tabs-3');
 			}else{
 				$folder = SafeEnv($folder, 255, str);
@@ -884,15 +898,28 @@ function AdminModulesUninstall(){
  * Обработка Ajax изменения статуса модуля
  */
 function AdminModulesChangeStatus(){
-	$id = SafeEnv($_GET['id'], 11, int);
-	System::database()->Select('modules', "`id`='$id'");
-	$mod = System::database()->FetchRow();
-	if($mod['enabled'] == 1){
-		$en = '0';
-	}else{
-		$en = '1';
+	if($_GET['type'] == EXT_MODULE){
+		$id = SafeEnv($_GET['id'], 11, int);
+		System::database()->Select('modules', "`id`='$id'");
+		$mod = System::database()->FetchRow();
+		if($mod['enabled'] == 1){
+			$en = '0';
+		}else{
+			$en = '1';
+		}
+		System::database()->Update('modules', "enabled='$en'", "`id`='$id'");
+	}elseif($_GET['type'] == EXT_PLUGIN){
+		$id = SafeEnv($_GET['id'], 11, int);
+		System::database()->Select('plugins', "`id`='$id'");
+		$mod = System::database()->FetchRow();
+		if($mod['enabled'] == 1){
+			$en = '0';
+		}else{
+			$en = '1';
+		}
+		System::database()->Update('plugins', "enabled='$en'", "`id`='$id'");
 	}
-	System::database()->Update('modules', "enabled='$en'", "`id`='$id'");
+
 	echo 'OK';
 	exit();
 }

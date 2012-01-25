@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <info>
-	<name>Igrim Theme</name>
-	<description>Лёгкая тема, почти без графики.</description>
+	<name>Default</name>
+	<description>Шаблон по умолчанию</description>
 	<author>LinkorCMS Development Group</author>
 	<site>http://linkorcms.ru/</site>
 	<version>1.4</version>

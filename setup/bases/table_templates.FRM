@@ -1,0 +1,1 @@
+a:3:{i:0;a:5:{i:0;i:1;i:1;s:11:"Igrim Theme";i:2;s:10:"IgrimTheme";i:3;s:1:"0";i:4;s:1:"0";}i:1;a:5:{i:0;i:2;i:1;s:7:"Default";i:2;s:7:"default";i:3;s:1:"0";i:4;s:1:"1";}i:2;a:5:{i:0;i:3;i:1;s:13:"Default Admin";i:2;s:13:"default_admin";i:3;s:1:"1";i:4;s:1:"1";}}

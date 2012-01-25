@@ -1,4 +1,5 @@
 <?php
+
 return array(
 	'name'				=> 'TinyMCE - WYSIWYG HTML редактор',
 	'description' => 'TinyMCE (Tiny Moxiecode Content Editor) платформонезависимый Javascript HTML WYSIWYG редактор с открытым исходным кодом.',

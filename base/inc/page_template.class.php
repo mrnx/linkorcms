@@ -144,6 +144,16 @@ class PageTemplate extends Starkyt{
 		return $this->textarea_html;
 	}
 
+	public function FileManager( $Name, $Value, $Width = 400 ){
+		$this->editfilemanager_name = $Name;
+		$this->editfilemanager_html = $this->Edit($Name, $Value, false, 'id="filemanager_'.$Name.'" style="width:'.$Width.'px;"');
+		$this->editfilemanager_width = $Width;
+		if(defined('PLUGINS')){
+			IncludePluginsGroup('filemanagers');
+		}
+		return $this->editfilemanager_html;
+	}
+
 	/**
 	 * Подключает CSS файл к странице
 	 * @param  $filename
