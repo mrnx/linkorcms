@@ -29,9 +29,9 @@ $editcats = $user->CheckAccess2('articles', 'edit_cats');
 $editconf = $user->CheckAccess2('articles', 'config');
 
 // Главная - список статей
-function AdminArticlesMain()
-{
+function AdminArticlesMain(){
 	global $config, $db, $tree, $site, $user, $editarticles;
+
 	// Фильтр, дает возможность показывать статьи определенной категории.
 	if(isset($_GET['cat']) && $_GET['cat'] > -1){
 		$cat = SafeEnv($_GET['cat'], 11, int);
@@ -43,6 +43,7 @@ function AdminArticlesMain()
 	$data = array();
 	$data = $tree->GetCatsData($cat, true);
 	$site->DataAdd($data, -1, 'Все статьи', $cat == -1);
+
 	// Получаем номер страницы
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 10, int);
@@ -58,6 +59,7 @@ function AdminArticlesMain()
 	.'<tr><td align="center" class="contenttd">Выберите категорию: '.$site->Hidden('exe', 'articles').$site->Select('cat', $data).$site->Submit('Показать').'</td></tr>'
 	.'</table></form>';
 	AddText($text);
+
 	// Берем статьи из БД и включаем постраничную навигацию если нужно.
 	$r = $db->Select('articles', $where);
 	SortArray($r, 'public', true); // Сортируем по дате добавления
@@ -72,6 +74,8 @@ function AdminArticlesMain()
 	}
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 	$text .= '<tr><th>Название</th><th>Прочитано</th><th>Комментарии</th><th>Оценка</th><th>Просматривают</th><th>Статус</th><th>Функции</th></tr>';
+
+
 	foreach($r as $art){
 		switch($art['active']){
 			case '1':
@@ -90,7 +94,9 @@ function AdminArticlesMain()
 			$func = '-';
 		}
 		$vi = ViewLevelToStr(SafeDB($art['view'], 1, int));
+
 		$rating = '<img src="'.GetRatingImage(SafeDB($art['num_votes'], 11, int), SafeDB($art['all_votes'], 11, int)).'" border="0" />/ (всего '.SafeDB($art['num_votes'], 11, int).')'.($editarticles ? ' / <a href="'.$config['admin_file'].'?exe=articles&a=resetrating&id='.SafeDB($art['id'], 11, int).'" title="Обнулить счётчик оценок">Сброс</a>' : '');
+
 		$text .= '<tr>
 		<td><b><a href="'.$config['admin_file'].'?exe=articles&a=editor&id='.SafeDB($art['id'], 11, int).'">'.SafeDB($art['title'], 255, str).'</a></b></td>
 		<td>'.SafeDB($art['hits'], 11, int).($editarticles ? ' / <a href="'.$config['admin_file'].'?exe=articles&a=resethits&id='.SafeDB($art['id'], 11, int).'" title="Сбросить счётчик">Сброс</a>' : '').'</td>
@@ -102,6 +108,7 @@ function AdminArticlesMain()
 		</tr>';
 	}
 	$text .= '</table>';
+
 	AddText($text);
 	if($nav){
 		AddNavigation();
@@ -109,8 +116,7 @@ function AdminArticlesMain()
 }
 
 // Редактор статей - добавление, редактирование
-function AdminArticlesEditor()
-{
+function AdminArticlesEditor(){
 	global $tree, $site, $config, $db, $user, $editarticles;
 	if(!$editarticles){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -209,8 +215,7 @@ function AdminArticlesEditor()
 }
 
 // Сохранение статьи или изменений
-function AdminArticlesSaveArticle( $action )
-{
+function AdminArticlesSaveArticle( $action ){
 	global $config, $db, $tree, $user, $editarticles;
 	if(!$editarticles){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -273,8 +278,7 @@ function AdminArticlesSaveArticle( $action )
 }
 
 // Смена статуса статьи
-function AdminArticlesChangeStatus()
-{
+function AdminArticlesChangeStatus(){
 	global $config, $db, $tree, $user, $editarticles;
 	if(!$editarticles){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -299,8 +303,7 @@ function AdminArticlesChangeStatus()
 }
 
 // Удаление статьи
-function AdminArticlesDelete()
-{
+function AdminArticlesDelete(){
 	global $config, $db, $tree, $user, $editarticles;
 	if(!$editarticles){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -315,7 +318,6 @@ function AdminArticlesDelete()
 		$tree->CalcFileCounter($r[0]['cat_id'], false);
 		$db->Delete('articles', "`id`='$id'");
 		$db->Delete('articles_comments', "`object_id`='$id'");
-		//GO($config['admin_file'].'?exe=articles');
 		GoRefererUrl($_GET['back']);
 		AddTextBox('Сообщение', 'Статья удалена.'); // В случае, если не будет произведено перенаправление
 	}else{
@@ -326,8 +328,7 @@ function AdminArticlesDelete()
 }
 
 // Сброс счетчика просмотров статьи
-function AdminArticlesResetHits()
-{
+function AdminArticlesResetHits(){
 	global $config, $db, $user, $editarticles;
 	if(!$editarticles){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -340,8 +341,7 @@ function AdminArticlesResetHits()
 }
 
 // Сброс оценок статьи
-function AdminArticlesResetRating()
-{
+function AdminArticlesResetRating(){
 	global $config, $db, $user, $editarticles;
 	if(!$editarticles){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -359,8 +359,7 @@ function AdminArticlesResetRating()
 
 include_once ($config['inc_dir'].'configuration/functions.php');
 
-function AdminArticles( $action )
-{
+function AdminArticles( $action ){
 	global $user, $editarticles, $editcomments, $editcats, $editconf;
 	TAddToolLink('Статьи', 'main', 'articles');
 	if($editcats){

@@ -26,9 +26,9 @@ $system_modules = array(
 	'access.php','admin.php','ajax.php','array.php','autoload.php',
 	'bbcode.php','comments.php','config.php','database.php','datetime.php',
 	'email.php','errors.php','extensions.php','filesystem.php','forms.php',
-	'images.php','location.php','plugins.php','plugins_system.php','request.php',
-	'scripts.php','search.php','smilies.php','string.php','translit.php',
-	'ufu.php','url.php','user.php','utf8.php','version.php'
+	'images.php','location.php','plugins.php','plugins_system.php','rating.php',
+	'request.php','scripts.php','search.php','smilies.php','string.php',
+	'translit.php','ufu.php','url.php','user.php','utf8.php','version.php'
 );
 
 include 'config/autoload_user.php'; // Пользовательские классы
