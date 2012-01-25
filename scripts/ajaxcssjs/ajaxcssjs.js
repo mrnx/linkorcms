@@ -116,7 +116,19 @@ ajaxcssjs = {
 								includecss();
 							}
 						}
-					})(file, i)
+					})(file, i),
+					error: (function(i){
+						return function(){
+							// TODO: Вывод ошибки
+							if(i == fc) {
+								if(onsuccess != undefined){
+									onsuccess.call();
+								}
+							}else{
+								includecss();
+							}
+						}
+					})(i)
 				});
 			}else{
 				if(i == fc){
@@ -147,18 +159,34 @@ ajaxcssjs = {
 			var file = filenames[i];
 			i++;
 			if(!ajaxcssjs.jsLoaded(file)){ // Проверяем, не был ли загружен этот файл раньше
-				$.getScript(file, (function(file, i){
-					return function(){
-						ajaxcssjs.loaded_files.push(file);
-						if(i == fc){
-							if(onsuccess != undefined){
-								onsuccess.call();
+				$.ajax({
+					url: file,
+					dataType: "script",
+					success: (function(file, i){
+						return function(){
+							ajaxcssjs.loaded_files.push(file);
+							if(i == fc){
+								if(onsuccess != undefined){
+									onsuccess.call();
+								}
+							}else{
+								includejs();
 							}
-						}else{
-							includejs();
 						}
-					}
-				})(file, i));
+					})(file, i),
+					error: (function(i){
+						return function(){
+							// TODO: Вывод ошибки
+							if(i == fc) {
+								if(onsuccess != undefined){
+									onsuccess.call();
+								}
+							}else{
+								includejs();
+							}
+						}
+					})(i)
+				});
 			}else{
 				if(i == fc){
 					if(onsuccess != undefined){
