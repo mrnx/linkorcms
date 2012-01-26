@@ -100,7 +100,7 @@ function AdminModules(){
 	  }else{
 	    last_mod_id = "";
 	  }
-	}
+	};
 	window.last_block_id = "";
 	ShowBlockInfo = function(id){
 	  $(".mod_info").slideUp().parents(".ex-mod").css("cursor", "pointer");
@@ -110,7 +110,7 @@ function AdminModules(){
 	  }else{
 	    last_block_id = "";
 	  }
-	}
+	};
 	');
 
 	// Модули

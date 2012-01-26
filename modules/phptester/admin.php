@@ -91,7 +91,7 @@ PerformPhpCode = function(){
 			$("#perform_result").slideDown();
 		}
 	});
-}
+};
 SavePhpCode = function(met){
 	if($("#test_title").val() == ""){
 	  alert("Введите короткое описание сниппета.");
@@ -109,7 +109,7 @@ SavePhpCode = function(met){
 			$("#"+met).button("option", "label", label);
 		}
 	});
-}
+};
 ');
 
 	$html = <<<HTML
@@ -164,7 +164,7 @@ PerformJsCode = function(){
 	$("#perform").button("option", "label", "Выполнить код <img src=\"images/ajax-loader.gif\">");
 	eval($("#test_code").val());
 	$("#perform").button("option", "label", "Выполнить код");
-}
+};
 SaveJSCode = function(met){
 	if($("#test_title").val() == ""){
 	  alert("Введите короткое описание сниппета.");
@@ -182,7 +182,7 @@ SaveJSCode = function(met){
 			$("#"+met).button("option", "label", label);
 		}
 	});
-}
+};
 ');
 
 	$html = <<<HTML

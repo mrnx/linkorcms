@@ -89,11 +89,10 @@ ajaxcssjs = {
 					url: file,
 					success: (function(file, i){
 						return function(data){
+							ajaxcssjs.loaded_files.push(file);
 							var cssrules = ajaxcssjs.parseCSS(data);
 							var baseUrl = file.replace(/\\/g, '/').replace(/[^\/]*\/?$/, '');
-							$('<style>').attr('type', 'text/css').appendTo('head');
-							var styleSheet = document.styleSheets[document.styleSheets.length - 1];
-
+							var styleSheet = $('<style>').attr('type', 'text/css').appendTo('head').get(0).sheet;
 							for(var j = 0; j < cssrules.length; j++){
 								var selector = cssrules[j][1];
 								var cssrule = cssrules[j][2];
@@ -108,7 +107,6 @@ ajaxcssjs = {
 									}
 								}
 							}
-							ajaxcssjs.loaded_files.push(file);
 							if(i == fc) {
 								if (onsuccess != undefined){
 									onsuccess.call();
