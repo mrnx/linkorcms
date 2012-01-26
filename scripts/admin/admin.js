@@ -52,9 +52,9 @@
 		LoadPage: function( Url, event ){
 			if(this.CheckButton(1, event)){ // Только левая кнопка мыши
 				if(this.Ajax){
-					self = this;
-					self.SetLoc(Url);
-					self.ShowSplashScreen();
+					slf = this;
+					slf.SetLoc(Url);
+					slf.ShowSplashScreen();
 					$.ajax({
 						type: "GET",
 						url: Url,
@@ -66,14 +66,14 @@
 								ajaxcssjs.loadJS(data.js, function(){
 									if(data.show_sidebar){
 										$('#sidebar').html(data.sidebar);
-										self.SideBarShow();
+										slf.SideBarShow();
 									}else{
-										self.SideBarHide();
+										slf.SideBarHide();
 									}
 									$('#main-content').html(data.content);
 									eval(data.js_inline);
 									document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
-									self.HideSplashScreen();
+									slf.HideSplashScreen();
 								});
 							});
 						}

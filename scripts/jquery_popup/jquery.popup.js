@@ -15,15 +15,17 @@
 			popupObject: "span:last-child",
 			_classname: "lpopup-positionable",
 			popupStyle: "hover", // hover | click | down
-			delay: 0, // Автоматическая задержка перед показом всплывающего элемента
+			delay: 0, // Задержка перед показом всплывающего элемента
 			offset: "0 0"
-			//show: function(options){}, // Функция для показа элемента
-			//hide: function(options)(), // Функция для скрытия элемента
+			/*
+			show: function(options){}, // Функция для показа элемента
+			hide: function(options)(), // Функция для скрытия элемента
+			*/
 		};
 
 		options = $.extend({}, default_options, options);
 
-		function SetPopUpPosition(obj){
+		var SetPopUpPosition = function(obj){
 			$(obj)
 				.children(options.popupObject)
 				.position({
@@ -32,7 +34,7 @@
 					at: options.position,
 					offset: options.offset
 				});
-		}
+		};
 
 		return this.each(function(){
 			$(this).addClass(options._classname);

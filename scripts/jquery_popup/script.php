@@ -1,12 +1,10 @@
 <?php
 
-	if(!defined('VALID_RUN')){
-		header("HTTP/1.1 404 Not Found");
-		exit;
-	}
+if(!defined('VALID_RUN')){
+	header("HTTP/1.1 404 Not Found");
+	exit;
+}
 
-	UseScript('jquery');
+UseScript('jquery_ui');
 
-  System::site()->AddJSFile('scripts/jquery_popup/jquery.popup.js', true);
-
-?>
+System::site()->JQueryPlugin('scripts/jquery_popup/jquery.popup.js', true);
