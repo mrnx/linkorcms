@@ -1,13 +1,13 @@
 
 /*
  * LinkorCMS JQuery TreeView 1.0
- * Компонент древовидного представления данных с возможностью сортировки перетаскиванием
+ * РљРѕРјРїРѕРЅРµРЅС‚ РґСЂРµРІРѕРІРёРґРЅРѕРіРѕ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ РґР°РЅРЅС‹С… СЃ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊСЋ СЃРѕСЂС‚РёСЂРѕРІРєРё РїРµСЂРµС‚Р°СЃРєРёРІР°РЅРёРµРј
  *
- * Copyright 2011, Александр Галицкий
+ * Copyright 2011, РђР»РµРєСЃР°РЅРґСЂ Р“Р°Р»РёС†РєРёР№
  * Email: linkorcms@yandex.ru
  * Site: http://linkorcms.ru/
  *
- * Зависимости:
+ * Р—Р°РІРёСЃРёРјРѕСЃС‚Рё:
  *	 jquery.ui.nestedSortable.js
  *   jquery.ui.position.js
  *
@@ -17,8 +17,8 @@
 
 	$.widget( "ui.treeview", {
 		options: {
-			move: '',   // Адрес страницы обработчика перемещения элементов
-			del: '',  // Адрес страницы обработчика удаления элементов
+			move: '',   // РђРґСЂРµСЃ СЃС‚СЂР°РЅРёС†С‹ РѕР±СЂР°Р±РѕС‚С‡РёРєР° РїРµСЂРµРјРµС‰РµРЅРёСЏ СЌР»РµРјРµРЅС‚РѕРІ
+			del: '',  // РђРґСЂРµСЃ СЃС‚СЂР°РЅРёС†С‹ РѕР±СЂР°Р±РѕС‚С‡РёРєР° СѓРґР°Р»РµРЅРёСЏ СЌР»РµРјРµРЅС‚РѕРІ
 			nestedSortableOptions: {
 				forcePlaceholderSize: true,
 				handle: '.item_icon img',
@@ -35,20 +35,20 @@
 		},
 
 		default_item_options: {
-			id: '0', // Уникальный идентификатор
-			icon: 'scripts/jquery_treeview/theme/icon.png', // Имя файла иконки элемента
-			title: 'NodeTitle', // Секция с заголовком элемента
-			info: '', // Секция с информацией для всплывающей подсказки в формате HTML
-			func: '', // Секция с функциональными кнопками и ссылками
-			opened: false, // Развернуть
-			nonest: false, // Запретить ли в этот элемент кидать дочерние элементы
-			isnode: false, // Есть ли дочерние элемены - нужно когда они не загружены
-			loaded: false, // Были ли загружены дочерние элементы (в childs)
-			child_url: '', // Адрес для подгрузки узлов
-			childs: [] // Дочерние элементы в таком-же формате
+			id: '0', // РЈРЅРёРєР°Р»СЊРЅС‹Р№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
+			icon: 'scripts/jquery_treeview/theme/icon.png', // РРјСЏ С„Р°Р№Р»Р° РёРєРѕРЅРєРё СЌР»РµРјРµРЅС‚Р°
+			title: 'NodeTitle', // РЎРµРєС†РёСЏ СЃ Р·Р°РіРѕР»РѕРІРєРѕРј СЌР»РµРјРµРЅС‚Р°
+			info: '', // РЎРµРєС†РёСЏ СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ РґР»СЏ РІСЃРїР»С‹РІР°СЋС‰РµР№ РїРѕРґСЃРєР°Р·РєРё РІ С„РѕСЂРјР°С‚Рµ HTML
+			func: '', // РЎРµРєС†РёСЏ СЃ С„СѓРЅРєС†РёРѕРЅР°Р»СЊРЅС‹РјРё РєРЅРѕРїРєР°РјРё Рё СЃСЃС‹Р»РєР°РјРё
+			opened: false, // Р Р°Р·РІРµСЂРЅСѓС‚СЊ
+			nonest: false, // Р—Р°РїСЂРµС‚РёС‚СЊ Р»Рё РІ СЌС‚РѕС‚ СЌР»РµРјРµРЅС‚ РєРёРґР°С‚СЊ РґРѕС‡РµСЂРЅРёРµ СЌР»РµРјРµРЅС‚С‹
+			isnode: false, // Р•СЃС‚СЊ Р»Рё РґРѕС‡РµСЂРЅРёРµ СЌР»РµРјРµРЅС‹ - РЅСѓР¶РЅРѕ РєРѕРіРґР° РѕРЅРё РЅРµ Р·Р°РіСЂСѓР¶РµРЅС‹
+			loaded: false, // Р‘С‹Р»Рё Р»Рё Р·Р°РіСЂСѓР¶РµРЅС‹ РґРѕС‡РµСЂРЅРёРµ СЌР»РµРјРµРЅС‚С‹ (РІ childs)
+			child_url: '', // РђРґСЂРµСЃ РґР»СЏ РїРѕРґРіСЂСѓР·РєРё СѓР·Р»РѕРІ
+			childs: [] // Р”РѕС‡РµСЂРЅРёРµ СЌР»РµРјРµРЅС‚С‹ РІ С‚Р°РєРѕРј-Р¶Рµ С„РѕСЂРјР°С‚Рµ
 		},
 
-		tree: null, // Ссылка на список верхнего уровня
+		tree: null, // РЎСЃС‹Р»РєР° РЅР° СЃРїРёСЃРѕРє РІРµСЂС…РЅРµРіРѕ СѓСЂРѕРІРЅСЏ
 
 	/* PRIVATE */
 
@@ -60,8 +60,8 @@
 				ns._update = ns.update;
 			}
 			ns.update = function(event, ui){
-				var $item = $(ui.item); // Перемещаемый элемент
-				var $target = $(ui.item).parents('li:first'); // Куда переместили
+				var $item = $(ui.item); // РџРµСЂРµРјРµС‰Р°РµРјС‹Р№ СЌР»РµРјРµРЅС‚
+				var $target = $(ui.item).parents('li:first'); // РљСѓРґР° РїРµСЂРµРјРµСЃС‚РёР»Рё
 				var item_opt = $item.data('options');
 				var target_opt = $target.data('options');
 				if(!target_opt){
@@ -69,7 +69,7 @@
 				}else{
 					var target_id = target_opt.id;
 				}
-				// Посылаем POST запрос перемещения элементов
+				// РџРѕСЃС‹Р»Р°РµРј POST Р·Р°РїСЂРѕСЃ РїРµСЂРµРјРµС‰РµРЅРёСЏ СЌР»РµРјРµРЅС‚РѕРІ
 				if(target_opt && target_opt.isnode && !target_opt.loaded){
 					var index = '-1';
 					$item.remove();
@@ -87,15 +87,15 @@
 						if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();
 					}
 				});
-				// FIXME: При неудачном перемещении должно выводиться сообщение об ошибке
+				// FIXME: РџСЂРё РЅРµСѓРґР°С‡РЅРѕРј РїРµСЂРµРјРµС‰РµРЅРёРё РґРѕР»Р¶РЅРѕ РІС‹РІРѕРґРёС‚СЊСЃСЏ СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ
 				self._updateBullets();
 				if(ns._update){
 					ns._update(event, ui);
 				}
 			}
-			this.tree = this._generateList(this.element, o.tree, true);// Генерируем список
+			this.tree = this._generateList(this.element, o.tree, true);// Р“РµРЅРµСЂРёСЂСѓРµРј СЃРїРёСЃРѕРє
 			if(o.move != ''){
-				$(this.tree).nestedSortable(ns);// Делаем дерево сортируемым
+				$(this.tree).nestedSortable(ns);// Р”РµР»Р°РµРј РґРµСЂРµРІРѕ СЃРѕСЂС‚РёСЂСѓРµРјС‹Рј
 			}
 		},
 
@@ -104,7 +104,7 @@
 		},
 
 		/**
-		 * Показать кнопку информации
+		 * РџРѕРєР°Р·Р°С‚СЊ РєРЅРѕРїРєСѓ РёРЅС„РѕСЂРјР°С†РёРё
 		 * @param item_id
 		 */
 		_showInfoButton: function(item_id){
@@ -112,7 +112,7 @@
 		},
 
 		/**
-		 * Скрыть кнопку информации
+		 * РЎРєСЂС‹С‚СЊ РєРЅРѕРїРєСѓ РёРЅС„РѕСЂРјР°С†РёРё
 		 * @param item_id
 		 */
 		_hideInfoButton: function(item_id){
@@ -120,9 +120,9 @@
 		},
 
 		/**
-		 * Открытие - закрытие элемента содержащего дочерние элементы
-		 * @param item_id Объект элемента списка или его атрибут id
-		 * @param end_toggle Обработчик события при показе элемента (окончанию загрузки)
+		 * РћС‚РєСЂС‹С‚РёРµ - Р·Р°РєСЂС‹С‚РёРµ СЌР»РµРјРµРЅС‚Р° СЃРѕРґРµСЂР¶Р°С‰РµРіРѕ РґРѕС‡РµСЂРЅРёРµ СЌР»РµРјРµРЅС‚С‹
+		 * @param item_id РћР±СЉРµРєС‚ СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР° РёР»Рё РµРіРѕ Р°С‚СЂРёР±СѓС‚ id
+		 * @param end_toggle РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёСЏ РїСЂРё РїРѕРєР°Р·Рµ СЌР»РµРјРµРЅС‚Р° (РѕРєРѕРЅС‡Р°РЅРёСЋ Р·Р°РіСЂСѓР·РєРё)
 		 */
 		_toggleNode: function(item_id, end_toggle){
 			if(typeof item_id != 'object'){
@@ -133,15 +133,15 @@
 			var opt = $element.data('options');
 			var $node = $element.find("ol:first");
 			var $bullet = $('#item_bullet_'+item_id);
-			if('opened' in opt && opt.opened){ // скрыть
+			if('opened' in opt && opt.opened){ // СЃРєСЂС‹С‚СЊ
 				$node.hide();
 				opt.opened = false;
-				// Меняем значёк на кнопке
+				// РњРµРЅСЏРµРј Р·РЅР°С‡С‘Рє РЅР° РєРЅРѕРїРєРµ
 				$bullet.removeClass('node_open');
 				if(!$bullet.hasClass('node_close')){
 					$bullet.addClass('node_close');
 				}
-			} else{ // показать
+			} else{ // РїРѕРєР°Р·Р°С‚СЊ
 				if(!$node.length){
 					if('childs' in opt && opt.childs.length > 0){
 						this.GenerateList($element, opt.childs);
@@ -160,7 +160,7 @@
 					}
 				}
 				opt.opened = true;
-				// Меняем значёк на кнопке
+				// РњРµРЅСЏРµРј Р·РЅР°С‡С‘Рє РЅР° РєРЅРѕРїРєРµ
 				$bullet.removeClass('node_close');
 				if(!$bullet.hasClass('node_open')){
 					$bullet.addClass('node_open');
@@ -169,7 +169,7 @@
 		},
 
 		/**
-		 * Обновление статусов кнопок и опций
+		 * РћР±РЅРѕРІР»РµРЅРёРµ СЃС‚Р°С‚СѓСЃРѕРІ РєРЅРѕРїРѕРє Рё РѕРїС†РёР№
 		 */
 		_updateBullets: function(){
 			var self = this;
@@ -184,7 +184,7 @@
 					opt.isnode = true;
 					opt.loaded = true;
 					opt.opened = !!$OL.is(':visible');
-					// обновляем стили
+					// РѕР±РЅРѕРІР»СЏРµРј СЃС‚РёР»Рё
 					if(opt.opened){
 						$bullet.removeClass('node_close');
 						if(!$bullet.hasClass('node_open')){
@@ -196,7 +196,7 @@
 							$bullet.addClass('node_close');
 						}
 					}
-					// Обновляем событие
+					// РћР±РЅРѕРІР»СЏРµРј СЃРѕР±С‹С‚РёРµ
 					$bullet.unbind();
 					$bullet.bind('click', function(){
 						self._toggleNode(opt.id);
@@ -208,7 +208,7 @@
 						}else{
 							opt.opened = false;
 							opt,isnode = false;
-							// скрываем буллет и удаляем обработчики событий
+							// СЃРєСЂС‹РІР°РµРј Р±СѓР»Р»РµС‚ Рё СѓРґР°Р»СЏРµРј РѕР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№
 							$bullet.removeClass('node_close node_open').addClass('node_none');
 							$bullet.unbind();
 						}
@@ -218,7 +218,7 @@
 		},
 
 		/**
-		 * Обработчик события начала загрузки дочерних элементов
+		 * РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёСЏ РЅР°С‡Р°Р»Р° Р·Р°РіСЂСѓР·РєРё РґРѕС‡РµСЂРЅРёС… СЌР»РµРјРµРЅС‚РѕРІ
 		 * @param $element
 		 */
 		_loadingStart: function($element){
@@ -229,7 +229,7 @@
 		},
 
 		/**
-		 * Обработчик события окончания загрузки дочерних элементов
+		 * РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёСЏ РѕРєРѕРЅС‡Р°РЅРёСЏ Р·Р°РіСЂСѓР·РєРё РґРѕС‡РµСЂРЅРёС… СЌР»РµРјРµРЅС‚РѕРІ
 		 * @param $element
 		 * @param $list
 		 * @param $placeholder
@@ -240,22 +240,22 @@
 		},
 
 		/**
-		 * Создание нового элемента списка с использованием пользовательских параметров
+		 * РЎРѕР·РґР°РЅРёРµ РЅРѕРІРѕРіРѕ СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР° СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёС… РїР°СЂР°РјРµС‚СЂРѕРІ
 		 * @param opt
 		 */
 		_generateElement: function(opt){
 			opt = $.extend({}, this.default_item_options, opt);
 			var self = this;
 
-			// Элемент списка с вложенным дивом
+			// Р­Р»РµРјРµРЅС‚ СЃРїРёСЃРєР° СЃ РІР»РѕР¶РµРЅРЅС‹Рј РґРёРІРѕРј
 			var element_options = {id: "item_"+opt.id};
 			if(opt.nonest){
 				element_options['class'] = "no-nest";
 			}
 			var $element = $('<li>', element_options);
-			var $div_helper = $('<div>').appendTo($element); // Вспомогательный див в который отдельно будут помещены и элементы и кнопка узла
+			var $div_helper = $('<div>').appendTo($element); // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Р№ РґРёРІ РІ РєРѕС‚РѕСЂС‹Р№ РѕС‚РґРµР»СЊРЅРѕ Р±СѓРґСѓС‚ РїРѕРјРµС‰РµРЅС‹ Рё СЌР»РµРјРµРЅС‚С‹ Рё РєРЅРѕРїРєР° СѓР·Р»Р°
 
-			// Контейнер div.item
+			// РљРѕРЅС‚РµР№РЅРµСЂ div.item
 			var $div = $('<div>', {
 				id: "item_div_"+opt.id,
 				"class": "item",
@@ -267,7 +267,7 @@
 				}
 			}).appendTo($div_helper);
 
-			// Кнопка закрытия и открытия элементов
+			// РљРЅРѕРїРєР° Р·Р°РєСЂС‹С‚РёСЏ Рё РѕС‚РєСЂС‹С‚РёСЏ СЌР»РµРјРµРЅС‚РѕРІ
 			var bullet_options = {
 				id: "item_bullet_"+opt.id
 			};
@@ -290,18 +290,18 @@
 			}
 			$('<div>', bullet_options).prependTo($div_helper);
 
-			// Иконка div.item_icon img
+			// РРєРѕРЅРєР° div.item_icon img
 			if('icon' in opt && opt.icon != ''){
-				var $icon = $('<div class="item_icon" id="item_icon_'+opt.id+'"><img src="'+opt.icon+'" title="Переместить" /></div>').appendTo($div);
+				var $icon = $('<div class="item_icon" id="item_icon_'+opt.id+'"><img src="'+opt.icon+'" title="РџРµСЂРµРјРµСЃС‚РёС‚СЊ" /></div>').appendTo($div);
 			}
 			if(this.options.move != ''){
 				$icon.css("cursor", "move");
 			}
 
-			//Заголовок div.item_title
+			//Р—Р°РіРѕР»РѕРІРѕРє div.item_title
 			$('<div class="item_title" id="item_title_'+opt.id+'">'+opt.title+'<a name="item_'+opt.id+'" /></div>').appendTo($div);
 
-			// Всплывающая информация об элементе div.item_info
+			// Р’СЃРїР»С‹РІР°СЋС‰Р°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ РѕР± СЌР»РµРјРµРЅС‚Рµ div.item_info
 			if('info' in opt && opt.info != ''){
 				var $info = $('<div id="item_info_'+opt.id+'" class="item_info"><span class="tooltip">'+opt.info+'</span></div>').appendTo($div);
 				$info.lPopUp({
@@ -311,12 +311,12 @@
 				});
 			}
 
-			// Функциональные ссылки div.item_func_bar
+			// Р¤СѓРЅРєС†РёРѕРЅР°Р»СЊРЅС‹Рµ СЃСЃС‹Р»РєРё div.item_func_bar
 			if('func' in opt && opt.func != ''){
 				$('<div class="item_func_bar" id="item_func_'+opt.id+'">'+opt.func+'</div>').appendTo($div);
 			}
 
-			// Дочерние элементы
+			// Р”РѕС‡РµСЂРЅРёРµ СЌР»РµРјРµРЅС‚С‹
 			if('opened' in opt && opt.opened){
 				if('childs' in opt && opt.childs.length > 0){
 					this._generateList($element, opt.childs);
@@ -338,10 +338,10 @@
 		},
 
 		/**
-		 * Загрузка и добавление удаленного списка узлов
-		 * @param $parentElement Родительский элемент
-		 * @param loadUrl Адрес, откуда загружать элементы (данные в формате json)
-		 * @param endLoad Обработчик окончания загрузки
+		 * Р—Р°РіСЂСѓР·РєР° Рё РґРѕР±Р°РІР»РµРЅРёРµ СѓРґР°Р»РµРЅРЅРѕРіРѕ СЃРїРёСЃРєР° СѓР·Р»РѕРІ
+		 * @param $parentElement Р РѕРґРёС‚РµР»СЊСЃРєРёР№ СЌР»РµРјРµРЅС‚
+		 * @param loadUrl РђРґСЂРµСЃ, РѕС‚РєСѓРґР° Р·Р°РіСЂСѓР¶Р°С‚СЊ СЌР»РµРјРµРЅС‚С‹ (РґР°РЅРЅС‹Рµ РІ С„РѕСЂРјР°С‚Рµ json)
+		 * @param endLoad РћР±СЂР°Р±РѕС‚С‡РёРє РѕРєРѕРЅС‡Р°РЅРёСЏ Р·Р°РіСЂСѓР·РєРё
 		 */
 		_loadList: function($parentElement, loadUrl, endLoad){
 			var $placeholder = this._loadingStart($parentElement);
@@ -360,11 +360,11 @@
 		},
 
 		/**
-		 * Генерация списка (OL)
-		 * @param $parentElement Родительский элемент (контейнер)
-		 * @param elements Данные для создания списка
-		 * @param _toplevel Список верхнего уровня
-		 * @param hidden Скрыть список после создания (например если элемент свернут)
+		 * Р“РµРЅРµСЂР°С†РёСЏ СЃРїРёСЃРєР° (OL)
+		 * @param $parentElement Р РѕРґРёС‚РµР»СЊСЃРєРёР№ СЌР»РµРјРµРЅС‚ (РєРѕРЅС‚РµР№РЅРµСЂ)
+		 * @param elements Р”Р°РЅРЅС‹Рµ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ СЃРїРёСЃРєР°
+		 * @param _toplevel РЎРїРёСЃРѕРє РІРµСЂС…РЅРµРіРѕ СѓСЂРѕРІРЅСЏ
+		 * @param hidden РЎРєСЂС‹С‚СЊ СЃРїРёСЃРѕРє РїРѕСЃР»Рµ СЃРѕР·РґР°РЅРёСЏ (РЅР°РїСЂРёРјРµСЂ РµСЃР»Рё СЌР»РµРјРµРЅС‚ СЃРІРµСЂРЅСѓС‚)
 		 */
 		_generateList: function($parentElement, elements, _toplevel, hidden){
 			if(arguments.length > 2 && _toplevel == true){
@@ -388,7 +388,7 @@
 				id: 'node_'+id
 			}).appendTo($parentElement);
 
-			// Добавляем элементы списка
+			// Р”РѕР±Р°РІР»СЏРµРј СЌР»РµРјРµРЅС‚С‹ СЃРїРёСЃРєР°
 			for(var i = 0; i < elements.length; i++){
 				$ol.append(this._generateElement(elements[i]));
 			}

@@ -10,23 +10,34 @@ System::admin()->AddSubTitle('Тестирование PHP кода');
 if(isset($_GET['a'])){
 	$action = $_GET['a'];
 }else{
-	$action = 'mainphp';
+	if(!isset($_GET['lang']) || $_GET['lang'] == 'php'){
+		$action = 'mainphp';
+	}else{
+		$action = 'mainjs';
+	}
 }
 
 System::admin()->SideBarAddMenuItem('PHP', 'exe=phptester&lang=php', 'mainphp');
+System::admin()->SideBarAddMenuItem('Сниппеты PHP', 'exe=phptester&a=phpsnippets', 'phpsnippets');
 System::admin()->SideBarAddMenuItem('JavaScript', 'exe=phptester&lang=js', 'mainjs');
-System::admin()->SideBarAddMenuItem('Сниппеты', 'exe=phptester&a=snippets', 'snippets');
+System::admin()->SideBarAddMenuItem('Сниппеты JS', 'exe=phptester&a=jssnippets', 'jssnippets');
 System::admin()->SideBarAddMenuBlock('', $action);
 
 switch($action){
 	case 'mainphp':
 		AdminPhpTester();
 		break;
+	case 'mainjs':
+		AdminJsTester();
+		break;
 	case 'perform':
 		AdminPhpTesterPerform();
 		break;
-	case 'snippets':
-		AdminPhpTesterSnippets();
+	case 'phpsnippets':
+		AdminPhpTesterSnippets("php");
+		break;
+	case 'jssnippets':
+		AdminPhpTesterSnippets("js");
 		break;
 	case 'add':
 	case 'save':
@@ -54,7 +65,7 @@ function AdminPhpTester(){
 
 	System::admin()->AddJS('
 window.snippet_id = "'.$snippet_id.'";
-function PerformPhpCode(){
+PerformPhpCode = function(){
 	$("#perform").button("option", "label", "Выполнить код <img src=\"images/ajax-loader.gif\">");
 	$("#result_container").hide();
 	$("#perform_result").html("");
@@ -71,7 +82,7 @@ function PerformPhpCode(){
 		}
 	});
 }
-function SavePhpCode(met){
+SavePhpCode = function(met){
 	if($("#test_title").val() == ""){
 	  alert("Введите короткое описание сниппета.");
 	  return;
@@ -82,7 +93,7 @@ function SavePhpCode(met){
 		type: "POST",
 		url: "'.ADMIN_FILE.'?exe=phptester&a="+met,
 		dataType: "json",
-		data: {code: $("#test_code").val(), title: $("#test_title").val(), id: window.snippet_id},
+		data: {code: $("#test_code").val(), title: $("#test_title").val(), id: window.snippet_id, type: "php"},
 		success: function(data){
 			window.snippet_id = data.id;
 			$("#"+met).button("option", "label", label);
@@ -109,7 +120,67 @@ function SavePhpCode(met){
 </div>
 HTML;
 
-	System::admin()->AddTextBox('Тестирование PHP кода', $html);
+	System::admin()->AddTextBox('Тестирование PHP', $html);
+}
+
+function AdminJsTester(){
+	UseScript('jquery');
+
+	$code = '';
+	$title = '';
+	if(isset($_GET['id'])){
+		$snippet_id = SafeDB($_GET['id'], 11, int);
+		System::database()->Select('snippets', "`id`='$snippet_id'");
+		$s = System::database()->FetchRow();
+		$code = SafeDB($s['code'], 0, str);
+		$title = SafeDB($s['title'], 255, str);
+	}else{
+		$snippet_id = '0';
+	}
+
+	System::admin()->AddJS('
+window.snippet_id = "'.$snippet_id.'";
+PerformJsCode = function(){
+	$("#perform").button("option", "label", "Выполнить код <img src=\"images/ajax-loader.gif\">");
+	eval($("#test_code").val());
+	$("#perform").button("option", "label", "Выполнить код");
+}
+SaveJSCode = function(met){
+	if($("#test_title").val() == ""){
+	  alert("Введите короткое описание сниппета.");
+	  return;
+	}
+	var label = $("#"+met).button("option", "label");
+	$("#"+met).button("option", "label", label+" <img src=\"images/ajax-loader.gif\">");
+	$.ajax({
+		type: "POST",
+		url: "'.ADMIN_FILE.'?exe=phptester&a="+met,
+		dataType: "json",
+		data: {code: $("#test_code").val(), title: $("#test_title").val(), id: window.snippet_id, type: "js"},
+		success: function(data){
+			window.snippet_id = data.id;
+			$("#"+met).button("option", "label", label);
+		}
+	});
+}
+');
+
+	$html = <<<HTML
+<div>
+	<div style="width: 800px;">
+		<textarea id="test_code" style="width: 791px; height: 200px;">$code</textarea>
+		<div style="width: 72px; float: left; line-height: 25px; padding-left: 2px;"><strong>Описание</strong></div>
+		<input type="text" id="test_title" style="width: 717px;" value="$title">
+	</div>
+	<div style="width: 800px; text-align: right;">
+		<a href="#" id="add" class="button" onclick="SaveJSCode('add'); return false;" title="Добавить сниппет как новый">Добавить</a>
+		<a href="#" id="save" class="button" onclick="SaveJSCode('save'); return false;" title="Добавить новый снипет или сохранить редактируемый">Сохранить</a>
+		<a href="#" id="perform" class="button" onclick="PerformJsCode(); return false;" title="Выполнить код">Выполнить код</a>
+	</div>
+</div>
+HTML;
+
+	System::admin()->AddTextBox('Тестирование JS', $html);
 }
 
 function AdminPhpTesterPerform(){
@@ -125,7 +196,7 @@ function AdminPhpTesterPerform(){
 	exit();
 }
 
-function AdminPhpTesterSnippets(){
+function AdminPhpTesterSnippets( $type ){
 	System::admin()->AddSubTitle('Сниппеты');
 	UseScript('jquery_ui_table');
 
@@ -140,7 +211,7 @@ function AdminPhpTesterSnippets(){
 		$page = 1;
 	}
 
-	$snippets_db = System::database()->Select('snippets');
+	$snippets_db = System::database()->Select('snippets', "`type`='$type'");
 	$columns = array('title');
 	$sortby = '';
 	$sortbyid = -1;
@@ -155,7 +226,7 @@ function AdminPhpTesterSnippets(){
 	}
 
 	$table = new jQueryUiTable();
-	$table->listing = ADMIN_FILE.'?exe=phptester&a=snippets&ajax';
+	$table->listing = ADMIN_FILE.'?exe=phptester&a='.$type.'snippets&ajax';
 	$table->del = ADMIN_FILE.'?exe=phptester&a=delete';
 	$table->total = count($snippets_db);
 	$table->onpage = $num;
@@ -169,7 +240,7 @@ function AdminPhpTesterSnippets(){
 	$snippets_db = ArrayPage($snippets_db, $num, $page); // Берем только новости с текущей страницы
 	foreach($snippets_db as $snip){
 		$id = SafeDB($snip['id'], 11, int);
-		$editlink = ADMIN_FILE.'?exe=phptester&id='.$id;
+		$editlink = ADMIN_FILE.'?exe=phptester&id='.$id.'&lang='.$type;
 
 		$func = '';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
@@ -195,13 +266,13 @@ function AdminPhpTesterSnippets(){
 }
 
 function AdminPhpTesterSave($action){
-	$snippet = SafeR('title', 255, str) + SafeR('code', 0, str);
+	$snippet = SafeR('title,type', 255, str) + SafeR('code', 0, str);
 	ObjectUtf8ToCp1251($snippet);
 	if($action == 'save'){ // Редактирование
 		$id = SafeEnv($_POST['id'], 11, int);
 		System::database()->Update('snippets', MakeSet($snippet), "`id`='$id'");
 	}else{
-		System::database()->Insert('snippets', MakeValues("'','title','code'", $snippet));
+		System::database()->Insert('snippets', MakeValues("'','title','code','type'", $snippet));
 	}
 	echo JsonEncode(array('id'=>System::database()->GetLastId()));
 	exit();

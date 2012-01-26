@@ -653,7 +653,7 @@ class AdminPage extends PageTemplate{
 			$response['show_sidebar'] = $this->tool_menu_block;
 
 			foreach($this->css as $file){
-				$response['css'][] = $file;
+				$response['css'][] = $file[0];
 			}
 			foreach($this->css_inc as $file){
 				$response['css'][] = $file;
@@ -661,23 +661,16 @@ class AdminPage extends PageTemplate{
 			if($this->JQueryFile != ''){
 				$response['js'][] = $this->JQueryFile;
 				foreach($this->JQueryPlugins as $filename){
-					$response['js'][] = $filename;
+					$response['js'][] = $filename[0];
 				}
 			}
 			foreach($this->js as $filename){
-				$response['js'][] = $filename;
+				$response['js'][] = $filename[0];
 			}
 			foreach($this->js_inc as $filename){
 				$response['js'][] = $filename;
 			}
-			$JSInline = '';
-			if($this->JQueryFile != ''){
-				$JSInline .= "jQuery(function(){".$this->OnLoadJavaScript."});\n";
-			}else{
-				$JSInline .= "window.onload = function(){".$this->OnLoadJavaScript."};\n";
-			}
-			$JSInline .= $this->TextJavaScript;
-			$response['js_inline'] = $JSInline;
+			$response['js_inline'] = $this->TextJavaScript."\n".$this->OnLoadJavaScript;
 			$response['errors'] = implode(System::$Errors);
 			$response['info'] = $this->GetPageInfo($start);
 			$response['title'] = $this->GenerateTitle();

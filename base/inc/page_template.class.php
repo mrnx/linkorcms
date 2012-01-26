@@ -61,9 +61,9 @@ class PageTemplate extends Starkyt{
 
 // Модуль CSS и JavaScript
 	protected $css = array(); // Имена файлов css которые следует подключить
-	protected $css_inc = array();
+	protected $css_inc = array(); // Файлы css встраиваемые в страницу
 	protected $js = array(); // Имена файлов JavaScript которые следует подключить
-	protected $js_inc = array();
+	protected $js_inc = array(); // Файлы js встраиваемые в страницу
 	protected $TextJavaScript = ''; // Сюда записывается javaScript который потом вставится в шапку страницы
 	protected $JQueryFile = ''; // Имя файла библиотеки JQuery
 	protected $JQueryPlugins = array(); // Имена файлов плагинов JQuery и других библиотек
@@ -126,24 +126,31 @@ class PageTemplate extends Starkyt{
 
 	/**
 	 * Вставляет редактор HTML-контента на страницу, поддерживает плагины
-	 * @param  $textarea_name
-	 * @param  $value
-	 * @param int $width
-	 * @param int $height
-	 * @return
+	 * @param string $Name
+	 * @param string $Value
+	 * @param int $Width
+	 * @param int $Height
+	 * @return string
 	 */
-	public function HtmlEditor( $textarea_name, $value, $width = 600, $height = 400 ){
-		$this->textarea_name = $textarea_name;
-		$this->textarea_html = $this->TextArea($textarea_name, $value, 'id="'.$textarea_name.'"  rows="15" cols="80" style="width:'.$width.'px;height:'.$height.'px;"');
-		$this->textarea_width = $width;
-		$this->textarea_height = $height;
-		$this->textarea_value = & $value;
+	public function HtmlEditor( $Name, $Value, $Width = 600, $Height = 400 ){
+		$this->textarea_name = $Name;
+		$this->textarea_html = $this->TextArea($Name, $Value, 'id="'.$Name.'"  rows="15" cols="80" style="width:'.$Width.'px;height:'.$Height.'px;"');
+		$this->textarea_width = $Width;
+		$this->textarea_height = $Height;
+		$this->textarea_value = & $Value;
 		if(defined('PLUGINS')){
 			IncludePluginsGroup('editors');
 		}
 		return $this->textarea_html;
 	}
 
+	/**
+	 * Добавляет поле ввода с возможностью выбрать файл с помощью файлового менеджера
+	 * @param string $Name
+	 * @param string $Value
+	 * @param int $Width
+	 * @return string
+	 */
 	public function FileManager( $Name, $Value, $Width = 400 ){
 		$this->editfilemanager_name = $Name;
 		$this->editfilemanager_html = $this->Edit($Name, $Value, false, 'id="filemanager_'.$Name.'" style="width:'.$Width.'px;"');
@@ -161,7 +168,7 @@ class PageTemplate extends Starkyt{
 	 * @param bool $inc
 	 * @return void
 	 */
-	public function AddCSSFile( $filename, $local = false, $inc = false ){
+	public function AddCSSFile( $filename, $local = false, $inc = false, $params='' ){
 		if(!$local){
 			$filename = $this->Root.'style/'.$filename;
 		}
@@ -171,7 +178,7 @@ class PageTemplate extends Starkyt{
 			}
 		}else{
 			if(!in_array($filename, $this->css)){
-				$this->css[] = $filename;
+				$this->css[] = array($filename, $params);
 			}
 		}
 	}
@@ -183,7 +190,7 @@ class PageTemplate extends Starkyt{
 	 * @param bool $inc
 	 * @return void
 	 */
-	public function AddJSFile( $filename, $local = false, $inc = false ){
+	public function AddJSFile( $filename, $local = false, $inc = false, $params='charset="utf-8"' ){
 		if(!$local){
 			$filename = $this->Root.'java/'.$filename;
 		}
@@ -193,7 +200,7 @@ class PageTemplate extends Starkyt{
 			}
 		}else{
 			if(!in_array($filename, $this->js)){
-				$this->js[] = $filename;
+				$this->js[] = array($filename, $params);
 			}
 		}
 	}
@@ -226,12 +233,12 @@ class PageTemplate extends Starkyt{
 	 * @param string $FileName
 	 * @param <type> $local
 	 */
-	public function JQueryPlugin( $FileName, $local = true ){
+	public function JQueryPlugin( $FileName, $local = true, $params='charset="utf-8"' ){
 		if(!$local){
 			$FileName = $this->Root.'java/'.$FileName;
 		}
 		if(!in_array($FileName, $this->JQueryPlugins)){
-			$this->JQueryPlugins[] = $FileName;
+			$this->JQueryPlugins[] = array($FileName, $params);
 		}
 	}
 
@@ -315,8 +322,8 @@ class PageTemplate extends Starkyt{
 		$Head = '';
 		$Head .= '<base href="'.GetSiteUrl().'" />'."\n";
 		//Подключаем таблицы стилей
-		foreach($this->css as $filename){
-			$Head .= '<link rel="StyleSheet" href="'.$filename.'" type="text/css" />'."\n";
+		foreach($this->css as $css){
+			$Head .= '<link rel="StyleSheet" href="'.$css[0].'" type="text/css" '.$css[1].' />'."\n";
 		}
 		foreach($this->css_inc as $filename){
 			if(file_exists($filename)){
@@ -326,13 +333,13 @@ class PageTemplate extends Starkyt{
 		// Подключаем JQuery и плагины
 		if($this->JQueryFile != ''){
 			$Head .= '<script src="'.$this->JQueryFile.'" type="text/javascript"></script>'."\n";
-			foreach($this->JQueryPlugins as $filename){
-				$Head .= '<script src="'.$filename.'" type="text/javascript"></script>'."\n";
+			foreach($this->JQueryPlugins as $js){
+				$Head .= '<script src="'.$js[0].'" type="text/javascript" '.$js[1].'></script>'."\n";
 			}
 		}
 		//Подключаем JavaScript
-		foreach($this->js as $filename){
-			$Head .= '<script src="'.$filename.'" type="text/javascript"></script>'."\n";
+		foreach($this->js as $js){
+			$Head .= '<script src="'.$js[0].'" type="text/javascript" '.$js[1].'></script>'."\n";
 		}
 		foreach($this->js_inc as $filename){
 			if(file_exists($filename)){

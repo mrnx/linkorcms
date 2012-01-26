@@ -92,7 +92,7 @@ function AdminModules(){
 	// JS
 	System::site()->AddJS('
 	window.last_mod_id = "";
-	function ShowModInfo(id){
+	ShowModInfo = function(id){
 	  $(".mod_info").slideUp().parents(".ex-mod").css("cursor", "pointer");
 	  if(last_mod_id != id){
 	  	$("#mod_info_"+id).slideDown().parents(".ex-mod").css("cursor", "default");
@@ -102,7 +102,7 @@ function AdminModules(){
 	  }
 	}
 	window.last_block_id = "";
-	function ShowBlockInfo(id){
+	ShowBlockInfo = function(id){
 	  $(".mod_info").slideUp().parents(".ex-mod").css("cursor", "pointer");
 	  if(last_block_id != id){
 	  	$("#mod_info_"+id).slideDown().parents(".ex-mod").css("cursor", "default");

@@ -23,7 +23,7 @@ function AdminFileManager(){
 	UseScript('elfinder');
 
 	$options = array(
-		'url' => '/index.php?name=plugins&p=connectors&mod=elfinder',
+		'url' => 'index.php?name=plugins&p=connectors&mod=elfinder',
 		'lang' => 'ru',
 		'docked' => true,
 		'height' => 490
