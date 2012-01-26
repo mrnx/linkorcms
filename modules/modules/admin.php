@@ -16,7 +16,6 @@ $action = isset($_GET['a']) ? $_GET['a'] : 'main';
 
 System::admin()->SideBarAddMenuItem('Расширения', 'exe=modules&a=main', 'main');
 System::admin()->SideBarAddMenuItem('Установить', 'exe=modules&a=installlist', 'installlist');
-System::admin()->SideBarAddMenuItem('Добавить', 'exe=modules&a=add', 'add');
 System::admin()->SideBarAddMenuBlock('', $action);
 
 switch($action){
@@ -561,35 +560,40 @@ function AdminModulesInstallList(){
 	$text .= '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 	$text .= '<tr><th>Установка</th><th>Тип</th><th>Имя</th><th>Описание</th><th>Автор</th><th>Сайт</th></tr>';
 
-	foreach($list as $i=>$ext){
-		switch($ext['type']){
-			case 1: $type = '<img src="images/widgets.png" title="Модуль">';
+	if(count($list) > 0){
+		foreach($list as $i=>$ext){
+			switch($ext['type']){
+				case 1: $type = '<img src="images/widgets.png" title="Модуль">';
 				break;
-			case 2: $type = '<img src="images/plugin.png" title="Плагин">';
+				case 2: $type = '<img src="images/plugin.png" title="Плагин">';
 				break;
-			case 3: $type = '<img src="images/block.png" title="Блок">';
+				case 3: $type = '<img src="images/block.png" title="Блок">';
 				break;
-			case 4: $type = '<img src="images/skins.png" title="Шаблон">';
+				case 4: $type = '<img src="images/skins.png" title="Шаблон">';
 				break;
-		}
-		$text .= '<tr>
+			}
+			$text .= '<tr>
 		<td>'
-			.$site->Check('install_'.$i, $list[$i])
-			.$site->Hidden('folder_'.$i, $ext['folder'])
-			.$site->Hidden('type_'.$i, $ext['type'])
-			.($ext['type'] == EXT_PLUGIN ? $site->Hidden('group_'.$i, $ext['group']) : '')
-		.'</td>
+				.$site->Check('install_'.$i, $list[$i])
+				.$site->Hidden('folder_'.$i, $ext['folder'])
+				.$site->Hidden('type_'.$i, $ext['type'])
+				.($ext['type'] == EXT_PLUGIN ? $site->Hidden('group_'.$i, $ext['group']) : '')
+				.'</td>
 		<td>'.$type.'</td>
 		<td>'.SafeDB($ext['name'], 255, str).'</td>
 		<td>'.(isset($ext['description']) && $ext['description'] != '' && $ext['description'] != ' - ' ? SafeDB($ext['description'], 255, str) : 'Нет описания').'</td>
 		<td>'.(isset($ext['author']) && $ext['author'] != '' ? SafeDB($ext['author'], 255, str) : '&nbsp;').'</td>
 		<td>'.(isset($ext['site']) && $ext['site'] != '' ? '<a href="'.$ext['site'].'" target="_blank">Перейти</a>' : 'Нет').'</td>
 		</tr>';
+		}
+		$text .= '</table>';
+		$text .= '<div style="margin-bottom: 25px;">'.$site->Hidden('count', $count).$site->Submit('Установить выделенные').'</div>';
+		$text .= '</form>';
+	}else{
+		$text .= '<tr><td colspan="6" style="text-align: left;">Нет не установленных модулей.</td></tr>';
+		$text .= '</table>';
+		$text .= '</form>';
 	}
-
-	$text .= '</table>';
-	$text .= '<div style="margin-bottom: 25px;">'.$site->Hidden('count', $count).$site->Submit('Установить выделенные').'</div>';
-	$text .= '</form>';
 
 	System::admin()->AddCenterBox($title.' ('.$count.' готово к установке)');
 	System::admin()->AddText($text);
