@@ -49,7 +49,7 @@ switch($action){
 }
 
 function AdminPhpTester(){
-	UseScript('jquery');
+	UseScript('jquery', 'codemirror');
 
 	$code = '';
 	$title = '';
@@ -63,6 +63,16 @@ function AdminPhpTester(){
 		$snippet_id = '0';
 	}
 
+	System::admin()->AddOnLoadJS('myCodeMirror = CodeMirror.fromTextArea(document.getElementById("test_code"),{
+		lineNumbers: true,
+		matchBrackets: true,
+		mode: "text/x-php",
+		indentUnit: 4,
+		indentWithTabs: true,
+		onChange: function(){
+			document.getElementById("test_code").value = myCodeMirror.getValue();
+		}
+	});');
 	System::admin()->AddJS('
 window.snippet_id = "'.$snippet_id.'";
 PerformPhpCode = function(){
@@ -124,7 +134,7 @@ HTML;
 }
 
 function AdminJsTester(){
-	UseScript('jquery');
+	UseScript('jquery', 'codemirror');
 
 	$code = '';
 	$title = '';
@@ -138,6 +148,16 @@ function AdminJsTester(){
 		$snippet_id = '0';
 	}
 
+	System::admin()->AddOnLoadJS('myCodeMirror = CodeMirror.fromTextArea(document.getElementById("test_code"),{
+		lineNumbers: true,
+		matchBrackets: true,
+		mode: "javascript",
+		indentUnit: 4,
+		indentWithTabs: true,
+		onChange: function(){
+			document.getElementById("test_code").value = myCodeMirror.getValue();
+		}
+	});');
 	System::admin()->AddJS('
 window.snippet_id = "'.$snippet_id.'";
 PerformJsCode = function(){

@@ -21,12 +21,12 @@ ajaxcssjs = {
 	 * @author Alexander Galitsky
 	 */
 	parseCSS: function(cssdata){
-		var reg = new RegExp('([A-Za-z_\\-\\.#:\\*0-9\\[\\],=\\(\\) ]+[\\s]*){([A-Za-z0-9#-_,\\\\/"\'\\.\\(\\)\\s:;]+)*}', 'gm');
+		var reg = new RegExp('([A-Za-z_\\-\\.#:\\*0-9\\[\\],=\\(\\) ]+[\\s]*){([A-Za-z0-9#-_,\\\\/"\'\\.\\(\\)\\s:;\\!]+)*}', 'gm');
 		var result = [];
 		while(true){
 			reg.lastIndex;
 			var arr = reg.exec(cssdata);
-			if (arr == null) {
+			if(arr == null){
 				break;
 			}
 			result.push(arr);
@@ -93,7 +93,8 @@ ajaxcssjs = {
 							var baseUrl = file.replace(/\\/g, '/').replace(/[^\/]*\/?$/, '');
 							$('<style>').attr('type', 'text/css').appendTo('head');
 							var styleSheet = document.styleSheets[document.styleSheets.length - 1];
-							for (var j = 0; j < cssrules.length; j++){
+
+							for(var j = 0; j < cssrules.length; j++){
 								var selector = cssrules[j][1];
 								var cssrule = cssrules[j][2];
 								if(cssrule != undefined){
@@ -112,6 +113,7 @@ ajaxcssjs = {
 								if (onsuccess != undefined){
 									onsuccess.call();
 								}
+								return;
 							}else{
 								includecss();
 							}
@@ -124,6 +126,7 @@ ajaxcssjs = {
 								if(onsuccess != undefined){
 									onsuccess.call();
 								}
+								return;
 							}else{
 								includecss();
 							}
@@ -135,6 +138,7 @@ ajaxcssjs = {
 					if(onsuccess != undefined){
 						onsuccess.call();
 					}
+					return;
 				}else{
 					includecss();
 				}
@@ -169,6 +173,7 @@ ajaxcssjs = {
 								if(onsuccess != undefined){
 									onsuccess.call();
 								}
+								return;
 							}else{
 								includejs();
 							}
@@ -181,6 +186,7 @@ ajaxcssjs = {
 								if(onsuccess != undefined){
 									onsuccess.call();
 								}
+								return;
 							}else{
 								includejs();
 							}
@@ -192,6 +198,7 @@ ajaxcssjs = {
 					if(onsuccess != undefined){
 						onsuccess.call();
 					}
+					return;
 				}else{
 					includejs();
 				}
