@@ -452,8 +452,7 @@ a.nav_item:hover {
 .cfgtable th{ /* Ячейки заголовков таблиц */
 	padding: 5px;
 	color: #000;
-	background-color: #E7E7E7;
-	background-image: url(../img/table_th.png);
+	background: #DCDCDC url(../img/table_th.png) repeat-x;
 	border: 1px #CCCCCC solid;
 	text-shadow: 0px 1px 0px #fff;
 	text-align: center;

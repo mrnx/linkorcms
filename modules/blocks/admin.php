@@ -79,8 +79,7 @@ if(isset($_GET['a'])){
 	AdminBlocks('main');
 }
 
-function GetPlace( $pos, $id )
-{
+function GetPlace( $pos, $id ){
 	global $config, $db;
 	$db->Select('blocks', "`position`='".$pos."'");
 	while($row = $db->FetchRow()){
@@ -91,8 +90,7 @@ function GetPlace( $pos, $id )
 	return $db->NumRows();
 }
 
-function AdminBlocksMain()
-{
+function AdminBlocksMain(){
 	global $config, $db, $site;
 	$db->Select('block_types', '');
 	while($type = $db->FetchRow()){
@@ -172,19 +170,20 @@ function AdminBlocksMain()
 		}
 	}
 	$text .= '</table><br />';
+	AddCenterBox('Блоки');
+	AddText($text);
+
+	// Форма добавления блока
+	System::admin()->FormTitleRow('Добавить блок');
 	$db->Select('block_types', '');
 	while($row = $db->FetchRow()){
 		$site->DataAdd($btd, SafeDB($row['folder'], 255, str), SafeDB($row['name'], 255, str));
 	}
 	FormRow('Тип', $site->Select('type', $btd, false, 'style="width:200px;"'), 60);
-	$text .= '.:Добавить блок:.';
-	AddCenterBox('Блоки');
-	AddText($text);
 	AddForm('<form action="'.$config['admin_file'].'?exe=blocks&a=add" method="post">', $site->Submit('Далее'));
 }
 
-function AdminBlocksEdit( $a )
-{
+function AdminBlocksEdit( $a ){
 	global $config, $db, $site;
 	$text = '';
 	$title = '';
@@ -289,8 +288,7 @@ function AdminBlocksEdit( $a )
 	}
 }
 
-function AdminBlocksSave( $a )
-{
+function AdminBlocksSave( $a ){
 	global $config, $db;
 	$block_config = '';
 	$editsave = $config['blocks_dir'].SafeEnv($_POST['type'], 255, str).'/editsave.php';
@@ -340,8 +338,7 @@ function AdminBlocksSave( $a )
 	GO($config['admin_file'].'?exe=blocks');
 }
 
-function AdminBlockDelete()
-{
+function AdminBlockDelete(){
 	global $config, $db;
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$db->Delete('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
@@ -354,8 +351,7 @@ function AdminBlockDelete()
 	}
 }
 
-function AdminBlocksChangeStatus()
-{
+function AdminBlocksChangeStatus(){
 	global $config, $db;
 	$db->Select('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	if($db->NumRows() > 0){
@@ -370,15 +366,13 @@ function AdminBlocksChangeStatus()
 	GO($config['admin_file'].'?exe=blocks');
 }
 
-function AdminBlocksSort( $a, $b )
-{
+function AdminBlocksSort( $a, $b ){
 	if($a['place'] == $b['place'])
 		return 0;
 	return ($a['place'] < $b['place']) ? -1 : 1;
 }
 
-function AdminBlocksMove()
-{
+function AdminBlocksMove(){
 	global $config, $db;
 	$move = SafeEnv($_GET['to'], 4, str);
 	$id = SafeEnv($_GET['id'], 11, int);
@@ -419,4 +413,4 @@ function AdminBlocksMove()
 	GO($config['admin_file'].'?exe=blocks');
 }
 
-?>
+

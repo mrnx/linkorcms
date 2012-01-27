@@ -17,14 +17,12 @@ $rankedit = $user->CheckAccess2('user', 'ranks');
 $galeryedit = $user->CheckAccess2('user', 'avatars_gallery');
 $confedit = $user->CheckAccess2('user', 'config');
 
-function AdminUserGetUsers( $where = '`type`=\'2\'' )
-{
+function AdminUserGetUsers( $where = '`type`=\'2\'' ){
 	global $config, $db;
 	return $db->Select('users', $where);
 }
 
-function AdminUserQueryStristrFilter( $str, $inez )
-{
+function AdminUserQueryStristrFilter( $str, $inez ){
 	global $db;
 	if($str == ''){
 		return;
@@ -38,8 +36,7 @@ function AdminUserQueryStristrFilter( $str, $inez )
 	$db->QueryResult = $newResult;
 }
 
-function AdminUserMain()
-{
+function AdminUserMain(){
 	global $db, $config, $site, $user, $editing;
 	$db->FreeResult();
 	if(isset($_GET['page'])){
@@ -220,8 +217,7 @@ function AdminUserMain()
 	}
 }
 
-function AdminUserDelUser()
-{
+function AdminUserDelUser(){
 	global $config, $db, $site;
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -249,8 +245,7 @@ function AdminUserDelUser()
 	}
 }
 
-function AdminUserRanks()
-{
+function AdminUserRanks(){
 	global $config, $db, $site, $rankedit;
 	TAddSubTitle('Ранги пользователей');
 
@@ -294,16 +289,15 @@ function AdminUserRanks()
 	AddCenterBox('Ранги пользователей');
 	AddText($text);
 	if($rankedit){
+		System::admin()->FormTitleRow('Добавить ранг');
 		FormRow('Название ранга', $site->Edit('rankname', '', false, 'style="width:140px;"'));
 		FormRow('Изображение', $site->Edit('rankimage', '', false, 'style="width:180px;"'));
 		FormRow('Минимальное количество пунктов<br />для вступления', $site->Edit('minpoints', '0', false, 'style="width:60px;"'));
-		AddText('<br /><center>.: Добавить ранг :.</center>');
 		AddForm('<form name="addrang" method="post" action="'.$config['admin_file'].'?exe=user&a=addrank">', $site->Submit('Добавить')).'<br />';
 	}
 }
 
-function AdminUserEditRank()
-{
+function AdminUserEditRank(){
 	global $db, $config, $site;
 	$id = SafeEnv($_GET['id'], 11, int);
 	$db->Select('userranks', "`id`='$id'");
@@ -315,8 +309,7 @@ function AdminUserEditRank()
 	AddForm('<form name="addrang" method="post" action="'.$config['admin_file'].'?exe=user&a=saverank&id='.$id.'">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit('Сохранить изменения'));
 }
 
-function AdminUserRankSave( $action )
-{
+function AdminUserRankSave( $action ){
 	global $config, $db;
 	$rankname = SafeEnv($_POST['rankname'], 250, str);
 	$rankimage = SafeEnv($_POST['rankimage'], 250, str);
@@ -334,8 +327,7 @@ function AdminUserRankSave( $action )
 	GO($config['admin_file'].'?exe=user&a=ranks');
 }
 
-function AdminUserDeleteRank()
-{
+function AdminUserDeleteRank(){
 	global $config, $db;
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$db->Delete('userranks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
@@ -355,8 +347,7 @@ function AdminUserDeleteRank()
 	}
 }
 
-function AdminUserAvatarsGallery()
-{
+function AdminUserAvatarsGallery(){
 	global $config, $site, $galeryedit, $db;
 	TAddSubTitle('Галерея аватар');
 	if(isset($_GET['user']) && $_GET['user'] == '1'){
@@ -436,16 +427,16 @@ function AdminUserAvatarsGallery()
 	$text = $info.$text;
 	AddCenterBox('Галерея аватар', $text);
 	AddText($text);
+
 	if(!$personal && $galeryedit){
-		$text .= '<br />.: Загрузить аватар :.';
+		System::admin()->FormTitleRow('Загрузить аватар');
 		FormRow('Выберите файл', $site->FFile('avatar'));
 		AddForm($site->FormOpen($config['admin_file'].'?exe=user&a=saveavatar', 'post', true), $site->Submit('Загрузить'));
 	}
 	AddText('<br />');
 }
 
-function AdminUserSaveAvatar()
-{
+function AdminUserSaveAvatar(){
 	global $config;
 	$alloy_mime = array('image/gif'=>'.gif', 'image/jpeg'=>'.jpg', 'image/pjpeg'=>'.jpg', 'image/png'=>'.png', 'image/x-png'=>'.png');
 	if(isset($_FILES['avatar'])){
@@ -462,8 +453,7 @@ function AdminUserSaveAvatar()
 	GO($config['admin_file'].'?exe=user&a=avatars');
 }
 
-function AdminUserDeleteAvatar()
-{
+function AdminUserDeleteAvatar(){
 	global $config, $db;
 	if(isset($_GET['personal'])){
 		$dir = $config['general']['personal_avatars_dir'];
@@ -495,8 +485,7 @@ function AdminUserDeleteAvatar()
 }
 include_once ($config['inc_dir'].'configuration/functions.php');
 
-function AdminUser( $action )
-{
+function AdminUser( $action ){
 	global $config, $editing, $rankedit, $galeryedit, $confedit;
 	TAddToolLink('Главная', 'main', 'user');
 	if($editing){

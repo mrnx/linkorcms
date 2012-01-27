@@ -688,9 +688,20 @@ class AdminPage extends PageTemplate{
 }
 
 // Старые функции для добавления левого меню очень удобны
+/**
+ * Добавляет новый элемент левого меню
+ * @param $Title Заголовок
+ * @param $Action Значение параметра при котором этот пункт будет выделен
+ * @param $Exe Ссылка на модуль без начального параметра "exe="
+ */
 function TAddToolLink( $Title, $Action, $Exe ){
 	System::admin()->SideBarAddMenuItem($Title, 'exe='.$Exe, $Action);
 }
+/**
+ * Добавляет блок левого меню
+ * @param $CurrentAction Текущее значение параметра
+ * @param string $Title Заголовок блока меню
+ */
 function TAddToolBox( $CurrentAction, $Title = '' ){
 	System::admin()->SideBarAddMenuBlock($Title, $CurrentAction);
 }

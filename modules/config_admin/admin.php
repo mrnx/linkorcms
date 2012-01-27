@@ -472,7 +472,8 @@ function AdminConfigViewGroups(){
 	}
 	AddText($text);
 
-	AddText('.:Добавить группу:.');
+	//AddText('.:Добавить группу:.');
+	System::admin()->FormTitleRow('Добавить группу');
 	FormRow('Имя', $site->Edit('name', '', false, 'style="width:400px;"'));
 	FormRow('Заголовок', $site->Edit('hname', '', false, 'style="width:400px;"'));
 	FormRow('Описание', $site->TextArea('description', '', 'style="width:400px;height:100px;"'));
