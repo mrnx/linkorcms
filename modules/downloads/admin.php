@@ -26,6 +26,117 @@ $tree->id_par_name = 'id';
 
 include_once ($config['inc_dir'].'configuration/functions.php');
 
+if(isset($_GET['a'])){
+	$action = SafeEnv($_GET['a'], 255, str);
+}else{
+	$action = 'main';
+}
+
+TAddToolLink('Файлы', 'main', 'downloads');
+if($user->CheckAccess2('downloads', 'edit_files')) TAddToolLink('Добавить файл', 'editor', 'downloads&a=editor');
+TAddToolBox($action);
+if($user->CheckAccess2('downloads', 'edit_cats')){
+	TAddToolLink('Категории', 'cats', 'downloads&a=cats');
+	TAddToolLink('Добавить категорию', 'cateditor', 'downloads&a=cateditor');
+	TAddToolBox($action);
+}
+if($user->CheckAccess2('downloads', 'config')){
+	TAddToolLink('Настройки модуля', 'config', 'downloads&a=config');
+	TAddToolBox($action);
+}
+
+switch($action){
+	case 'main':
+		AdminDownloadsMain();
+		break;
+	case 'editor':
+		AdminDownloadsFileEditor($action);
+		break;
+	case 'addfilesave':
+	case 'editfilesave':
+		AdminDownloadsSaveFile($action);
+		break;
+	case 'deletefile':
+		AdminDownloadsDeleteFile();
+		break;
+	case 'cats':
+		if(!$user->CheckAccess2('downloads', 'edit_cats')){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+			return;
+		}
+		global $tree;
+		$result = $tree->ShowCats();
+		if($result == false){
+			$result = 'Нет категорий для отображения.';
+		}
+		AddTextBox('Категории', $result);
+		break;
+		if(!$user->CheckAccess2('downloads', 'edit_cats')){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+			return;
+		}
+	case 'cateditor':
+		if(!$user->CheckAccess2('downloads', 'edit_cats')){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+			return;
+		}
+		global $tree;
+		if(isset($_GET['id'])){
+			$id = SafeEnv($_GET['id'], 11, str);
+		}else{
+			$id = null;
+		}
+		if(isset($_GET['to'])){
+			$to = SafeEnv($_GET['to'], 11, str);
+		}else{
+			$to = null;
+		}
+		$text = $tree->CatEditor($id, $to);
+		break;
+	case 'catsave':
+		if(!$user->CheckAccess2('downloads', 'edit_cats')){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+			return;
+		}
+		global $tree, $config;
+		$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
+		GO($config['admin_file'].'?exe=downloads&a=cats');
+		break;
+	case 'delcat':
+		if(!$user->CheckAccess2('downloads', 'edit_cats')){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+			return;
+		}
+		global $tree, $config;
+		if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
+			GO($config['admin_file'].'?exe=downloads&a=cats');
+		}
+		break;
+	case 'changestatus':
+		AdminDownloadsChangeStatus();
+		break;
+	case 'config':
+		if(!$user->CheckAccess2('downloads', 'config')){
+			AddTextBox('Ошибка', 'Доступ запрещён!');
+			return;
+		}
+		AdminConfigurationEdit('downloads', 'downloads', false, false, 'Конфигурация модуля "Архив файлов"');
+		break;
+	case 'configsave':
+		if(!$user->CheckAccess2('downloads', 'config')){
+			AddTextBox('Ошибка', 'Доступ запрещён!');
+			return;
+		}
+		AdminConfigurationSave('downloads&a=config', 'downloads', false);
+		break;
+	case 'resetrating':
+		AdminDownloadsResetRating();
+		break;
+	case 'resetcounter':
+		AdminDownloadsResetCounter();
+		break;
+}
+
 function AdminDownloadsMain(){
 	global $config, $db, $site, $tree, $user;
 	if(isset($_GET['cat']) && $_GET['cat'] > -1){
@@ -408,120 +519,3 @@ function AdminDownloadsResetCounter(){
 	GO($config['admin_file'].'?exe=downloads');
 }
 
-function AdminDownloads( $action ){
-	global $config, $db, $user;
-	TAddToolLink('Файлы', 'main', 'downloads');
-	if($user->CheckAccess2('downloads', 'edit_cats')){
-		TAddToolLink('Категории', 'cats', 'downloads&a=cats');
-	}
-	if($user->CheckAccess2('downloads', 'config')){
-		TAddToolLink('Настройки', 'config', 'downloads&a=config');
-	}
-	TAddToolBox($action);
-	if($user->CheckAccess2('downloads', 'edit_files')){
-		TAddToolLink('Добавить файл', 'editor', 'downloads&a=editor');
-	}
-	if($user->CheckAccess2('downloads', 'edit_cats')){
-		TAddToolLink('Добавить категорию', 'cateditor', 'downloads&a=cateditor');
-	}
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminDownloadsMain();
-			break;
-		case 'editor':
-			AdminDownloadsFileEditor($action);
-			break;
-		case 'addfilesave':
-		case 'editfilesave':
-			AdminDownloadsSaveFile($action);
-			break;
-		case 'deletefile':
-			AdminDownloadsDeleteFile();
-			break;
-		case 'cats':
-			if(!$user->CheckAccess2('downloads', 'edit_cats')){
-				AddTextBox('Ошибка', $config['general']['admin_accd']);
-				return;
-			}
-			global $tree;
-			$result = $tree->ShowCats();
-			if($result == false){
-				$result = 'Нет категорий для отображения.';
-			}
-			AddTextBox('Категории', $result);
-			break;
-			if(!$user->CheckAccess2('downloads', 'edit_cats')){
-				AddTextBox('Ошибка', $config['general']['admin_accd']);
-				return;
-			}
-		case 'cateditor':
-			if(!$user->CheckAccess2('downloads', 'edit_cats')){
-				AddTextBox('Ошибка', $config['general']['admin_accd']);
-				return;
-			}
-			global $tree;
-			if(isset($_GET['id'])){
-				$id = SafeEnv($_GET['id'], 11, str);
-			}else{
-				$id = null;
-			}
-			if(isset($_GET['to'])){
-				$to = SafeEnv($_GET['to'], 11, str);
-			}else{
-				$to = null;
-			}
-			$text = $tree->CatEditor($id, $to);
-			break;
-		case 'catsave':
-			if(!$user->CheckAccess2('downloads', 'edit_cats')){
-				AddTextBox('Ошибка', $config['general']['admin_accd']);
-				return;
-			}
-			global $tree, $config;
-			$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
-			GO($config['admin_file'].'?exe=downloads&a=cats');
-			break;
-		case 'delcat':
-			if(!$user->CheckAccess2('downloads', 'edit_cats')){
-				AddTextBox('Ошибка', $config['general']['admin_accd']);
-				return;
-			}
-			global $tree, $config;
-			if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
-				GO($config['admin_file'].'?exe=downloads&a=cats');
-			}
-			break;
-		case 'changestatus':
-			AdminDownloadsChangeStatus();
-			break;
-		case 'config':
-			if(!$user->CheckAccess2('downloads', 'config')){
-				AddTextBox('Ошибка', 'Доступ запрещён!');
-				return;
-			}
-			AdminConfigurationEdit('downloads', 'downloads', false, false, 'Конфигурация модуля "Архив файлов"');
-			break;
-		case 'configsave':
-			if(!$user->CheckAccess2('downloads', 'config')){
-				AddTextBox('Ошибка', 'Доступ запрещён!');
-				return;
-			}
-			AdminConfigurationSave('downloads&a=config', 'downloads', false);
-			break;
-		case 'resetrating':
-			AdminDownloadsResetRating();
-			break;
-		case 'resetcounter':
-			AdminDownloadsResetCounter();
-			break;
-	}
-}
-
-if(isset($_GET['a'])){
-	$action = SafeEnv($_GET['a'], 255, str);
-	AdminDownloads($action);
-}else{
-	$action = 'main';
-	AdminDownloads($action);
-}

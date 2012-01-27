@@ -77,7 +77,6 @@ class Tree{
 		if(!is_array($Table)){  // Если передано имя таблицы
 			$this->Table = $Table;
 			$cache = LmFileCache::Instance();
-
 			if($cache->HasCache('tree', $Table)){
 				$cats_cache = $cache->Get('tree', $Table);
 				$cats = &$cats_cache[0];
@@ -173,9 +172,7 @@ class Tree{
 	 */
 	public function ListingTree( $pid, $callbackFunc ){
 		$tree = $this->GetChildTree($pid);
-		if((!is_array($callbackFunc) && !@function_exists($callbackFunc))
-			|| (is_array($callbackFunc) && !@method_exists($callbackFunc[0], $callbackFunc[1])))
-		{
+		if((!is_array($callbackFunc) && !@function_exists($callbackFunc)) || (is_array($callbackFunc) && !@method_exists($callbackFunc[0], $callbackFunc[1]))){
 			ErrorHandler(NOTICE, 'CallBack функция не предопределена.', 'Tree->ListingTree()');
 			return false;
 		}else{

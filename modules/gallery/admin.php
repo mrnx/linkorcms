@@ -5,12 +5,12 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Фотогалерея');
-
 if(!$user->CheckAccess2('gallery', 'gallery')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);
 	return;
 }
+
+TAddSubTitle('Фотогалерея');
 
 include_once ($config['inc_dir'].'tree_a.class.php');
 $tree = new AdminTree('gallery_cats');
@@ -29,8 +29,120 @@ $editconf = $user->CheckAccess2('gallery', 'config');
 $GalleryDir = $config['gallery']['gallery_dir'];
 $ThumbsDir = $config['gallery']['thumbs_dir'];
 
-function AdminGalleryMainFunc()
-{
+include_once ($config['inc_dir'].'configuration/functions.php');
+
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+
+TAddToolLink('Изображения', 'main', 'gallery');
+if($editimages){
+	TAddToolLink('Добавить изображения', 'editor', 'gallery&a=editor');
+}
+TAddToolBox($action);
+
+if($editcats){
+	TAddToolLink('Категории', 'cats', 'gallery&a=cats');
+	TAddToolLink('Добавить категорию', 'cateditor', 'gallery&a=cateditor');
+}
+TAddToolBox($action);
+
+if($editconf){
+	TAddToolLink('Настройки', 'config', 'gallery&a=config');
+}
+TAddToolBox($action);
+
+switch($action){
+	case 'main':
+		AdminGalleryMainFunc();
+		break;
+	case 'editor':
+		AdminGalleryEditor();
+		break;
+	case 'add':
+	case 'save':
+		AdminGallerySaveImage($action);
+		break;
+	case 'changestatus':
+		AdminGalleryChangeStatus();
+		break;
+	case 'delete':
+		AdminGalleryDeleteImage();
+		break;
+	case 'resethits':
+		AdminGalleryResetHits();
+		break;
+	case 'resetrating':
+		AdminArticlesResetRating();
+		break;
+	////////////////// Категории
+	case 'cats':
+		if(!$editcats){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}
+		global $tree;
+		$result = $tree->ShowCats();
+		if($result == false){
+			$result = 'Нет категорий для отображения.';
+		}
+		AddTextBox('Категории', $result);
+		break;
+	case 'cateditor':
+		if(!$editcats){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}
+		global $tree;
+		if(isset($_GET['id'])){
+			$id = SafeEnv($_GET['id'], 11, str);
+		}else{
+			$id = null;
+		}
+		if(isset($_GET['to'])){
+			$to = SafeEnv($_GET['to'], 11, str);
+		}else{
+			$to = null;
+		}
+		$text = $tree->CatEditor($id, $to);
+		break;
+	case 'catsave':
+		if(!$editcats){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}
+		global $tree, $config;
+		$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
+		GO($config['admin_file'].'?exe=gallery&a=cats');
+		break;
+	case 'delcat':
+		if(!$editcats){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}
+		global $tree, $config;
+		if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
+			GO($config['admin_file'].'?exe=gallery&a=cats');
+		}
+		break;
+	////////////////// Настройки
+	case 'config':
+		if(!$editconf){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}
+		AdminConfigurationEdit('gallery', 'gallery', false, false, 'Конфигурация модуля "Галерея"');
+		break;
+	case 'configsave':
+		if(!$editconf){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}
+		AdminConfigurationSave('gallery&a=config', 'gallery', false);
+		break;
+	////////
+	case 'refreshthumb':
+		AdminGalleryThumbRefresh();
+		break;
+}
+
+function AdminGalleryMainFunc(){
 	global $config, $db, $tree, $site, $user, $editimages, $GalleryDir, $ThumbsDir;
 	$vrating = false;
 	if(isset($_GET['cat']) && $_GET['cat'] > -1){
@@ -53,7 +165,6 @@ function AdminGalleryMainFunc()
 	$text = '<form name="categories" method="get">'.'<table cellspacing="0" cellpadding="0" border="0" width="100%" align="center"><tr><td align="center" class="contenttd">'.'Выберите категорию: '.$site->Hidden('exe', 'gallery').$site->Select('cat', $data).$site->Submit('Показать').'</td></tr></table></form><br />';
 	AddText($text);
 	$r = $db->Select('gallery', $where);
-	//SortArray($r, 'public', true);
 
 	if(count($r) > $config['gallery']['images_on_page']){
 		$navigator = new Navigation($page);
@@ -111,8 +222,7 @@ function AdminGalleryMainFunc()
 	}
 }
 
-function AdminGalleryEditor()
-{
+function AdminGalleryEditor(){
 	global $tree, $site, $config, $db, $user, $editimages;
 	if(!$editimages){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -180,8 +290,7 @@ function AdminGalleryEditor()
 	AddForm('<form action="'.$config['admin_file'].'?exe=gallery&a='.$action.'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
 }
 
-function AdminGallerySaveImage()
-{
+function AdminGallerySaveImage(){
 	global $db, $config, $tree, $GalleryDir, $ThumbsDir;
 	$alloy_mime = array('image/gif'=>'.gif', 'image/jpeg'=>'.jpg', 'image/pjpeg'=>'.jpg', 'image/png'=>'.png', 'image/x-png'=>'.png');
 	$ThumbsDir = $config['gallery']['thumbs_dir'];
@@ -239,8 +348,7 @@ function AdminGallerySaveImage()
 	GO($config['admin_file'].'?exe=gallery');
 }
 
-function AdminGalleryDeleteImage()
-{
+function AdminGalleryDeleteImage(){
 	global $config, $db, $tree, $user, $editimages, $GalleryDir, $ThumbsDir;
 	if(!$editimages){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -278,8 +386,7 @@ function AdminGalleryDeleteImage()
 	}
 }
 
-function AdminGalleryChangeStatus()
-{
+function AdminGalleryChangeStatus(){
 	global $config, $db, $tree, $user, $editimages;
 	if(!$editimages){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -303,8 +410,7 @@ function AdminGalleryChangeStatus()
 	GO($config['admin_file'].'?exe=gallery');
 }
 
-function AdminGalleryResetHits()
-{
+function AdminGalleryResetHits(){
 	global $config, $db, $user, $editimages;
 	if(!$editimages){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -316,8 +422,7 @@ function AdminGalleryResetHits()
 	GO($config['admin_file'].'?exe=gallery');
 }
 
-function AdminGalleryThumbRefresh()
-{
+function AdminGalleryThumbRefresh(){
 	global $config, $db, $GalleryDir, $ThumbsDir;
 	if(!isset($_GET['id'])){
 		GoBack();
@@ -333,134 +438,3 @@ function AdminGalleryThumbRefresh()
 	}
 	GoBack();
 }
-include_once ($config['inc_dir'].'configuration/functions.php');
-
-function AdminGallery( $action )
-{
-	global $editimages, $editcats, $editconf;
-	TAddToolLink('Изображения', 'main', 'gallery');
-	if($editcats){
-		TAddToolLink('Категории', 'cats', 'gallery&a=cats');
-	}
-	if($editconf){
-		TAddToolLink('Настройки', 'config', 'gallery&a=config');
-	}
-	TAddToolBox($action);
-	if($editimages){
-		TAddToolLink('Добавить изображения', 'editor', 'gallery&a=editor');
-	}
-	if($editcats){
-		TAddToolLink('Добавить категорию', 'cateditor', 'gallery&a=cateditor');
-	}
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminGalleryMainFunc();
-			return true;
-			break;
-		case 'editor':
-			AdminGalleryEditor();
-			return true;
-			break;
-		case 'add':
-		case 'save':
-			AdminGallerySaveImage($action);
-			return true;
-			break;
-		case 'changestatus':
-			AdminGalleryChangeStatus();
-			return true;
-			break;
-		case 'delete':
-			AdminGalleryDeleteImage();
-			return true;
-			break;
-		case 'resethits':
-			AdminGalleryResetHits();
-			return true;
-			break;
-		case 'resetrating':
-			AdminArticlesResetRating();
-			return true;
-			break;
-		////////////////// Категории
-		case 'cats':
-			if(!$editcats){
-				return false;
-			}
-			global $tree;
-			$result = $tree->ShowCats();
-			if($result == false){
-				$result = 'Нет категорий для отображения.';
-			}
-			AddTextBox('Категории', $result);
-			return true;
-			break;
-		case 'cateditor':
-			if(!$editcats){
-				return false;
-			}
-			global $tree;
-			if(isset($_GET['id'])){
-				$id = SafeEnv($_GET['id'], 11, str);
-			}else{
-				$id = null;
-			}
-			if(isset($_GET['to'])){
-				$to = SafeEnv($_GET['to'], 11, str);
-			}else{
-				$to = null;
-			}
-			$text = $tree->CatEditor($id, $to);
-			return true;
-			break;
-		case 'catsave':
-			if(!$editcats){
-				return false;
-			}
-			global $tree, $config;
-			$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
-			GO($config['admin_file'].'?exe=gallery&a=cats');
-			break;
-		case 'delcat':
-			if(!$editcats){
-				return false;
-			}
-			global $tree, $config;
-			if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
-				GO($config['admin_file'].'?exe=gallery&a=cats');
-			}
-			return true;
-			break;
-		////////////////// Настройки
-		case 'config':
-			if(!$editconf){
-				return false;
-			}
-			AdminConfigurationEdit('gallery', 'gallery', false, false, 'Конфигурация модуля "Галерея"');
-			return true;
-			break;
-		case 'configsave':
-			if(!$editconf){
-				return false;
-			}
-			AdminConfigurationSave('gallery&a=config', 'gallery', false);
-			return true;
-			break;
-		////////
-		case 'refreshthumb':
-			AdminGalleryThumbRefresh();
-			break;
-	}
-	return false;
-}
-
-if(isset($_GET['a'])){
-	$a = $_GET['a'];
-}else{
-	$a = 'main';
-}
-
-AdminGallery($a)
-
-?>

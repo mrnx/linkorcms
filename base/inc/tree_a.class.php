@@ -10,10 +10,11 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-$AdminTreeText = '';
+/**
+ * Высокоуровневый класс для работы с деревьями
+ */
+class AdminTree extends Tree{
 
-class AdminTree extends Tree
-{
 	public $obj_table = 'cats';
 	public $module = '';
 	public $edit_met = 'editcat';
@@ -24,48 +25,64 @@ class AdminTree extends Tree
 	public $obj_cat_coll = 'cat';
 	public $id_par_name = 'id';
 
-	// Функция для обхода дерева категорий, обрабатывает каждый элемент дерева и генерирует html
-	public function HtmlTreeItem( $tree, $level )
-	{
-		global $config, $AdminTreeText;
-
-		$id = SafeDB($tree['id'], 11, int);
-		$counters = $this->GetCountersRecursive($id);
-
-		$levs = str_repeat('<td class="treelevel">&nbsp; - &nbsp;</td>', $level);
-		if(isset($tree[TREE_CHILD_ID]) && count($tree[TREE_CHILD_ID]) > 0){
-			$img = 'images/admin/cat_open.gif';
-		}else{
-			$img = 'images/admin/cat_close.gif';
+	/**
+	 * Выводит дерево в html-коде для отображения в админ-панели
+	 * @param int $pid
+	 * @return bool|string
+	 */
+	public function ShowCats( $pid = 0 ){
+		UseScript('jquery_ui_treeview');
+		if($pid == 0 && isset($_GET['_cat_parent'])){
+			$pid = SafeEnv($_GET['_cat_parent'], 11, int);
 		}
+		$elements = array();
+		foreach($this->Cats[$pid] as $cat){
+			$id = SafeDB($cat['id'], 11, int);
+			if(trim($cat['icon']) != ''){
+				$info = '<img src="'.SafeDB($cat['icon'], 255, str).'">';
+			}else{
+				$info = '';
+			}
+			$icon = 'images/folder.png';
 
-		$func = '';
-		$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->edit_met.'&'.$this->id_par_name.'='.$id, 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', $config['admin_file'].'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->del_met.'&'.$this->id_par_name.'='.$id.'&ok=0', 'images/admin/delete.png');
+			$add_cat_link = ADMIN_FILE.'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->edit_met.'&_cat_adto='.$id;
+			$edit_cat_link = ADMIN_FILE.'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->edit_met.'&'.$this->id_par_name.'='.$id;
 
-		$AdminTreeText .= "\n".'<tr><td align="left"><table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>'."\n";
-		$AdminTreeText .= $levs.'<td class="treetd"><img src="'.$img.'" width="24" height="24" />&nbsp;'.SafeDB($tree['title'], 250, str).' ('.$counters['files'].')&nbsp;&nbsp;&nbsp;'.$func.'</td>';
-		$AdminTreeText .= "\n".'</tr></table></td></tr>'."\n";
+			$func = '';
+			$func .= System::admin()->SpeedButton('Добавить дочернюю категорию', $add_cat_link, 'images/admin/folder_add.png');
+			$func .= System::admin()->SpeedButton('Редактировать', $edit_cat_link, 'images/admin/edit.png');
+			$func .= System::admin()->SpeedConfirmJs(
+				'Удалить категорию',
+				'$(\'#cats_tree_container\').treeview(\'deleteNode\', '.$id.');',
+				'images/admin/delete.png',
+				'Уверены что хотите удалить? Все дочерние объекты так-же будут удалены.'
+			);
+
+			$obj_counts = $this->GetCountersRecursive($id);
+			$elements[] = array(
+				'id'=>$id,
+				'icon'=>$icon,
+				'title'=>'<b><a href="'.$edit_cat_link.'">'.SafeDB($cat['title'], 255, str).' ('.$obj_counts['files'].')</a></b>',
+				'info'=>$info,
+				'func'=>$func,
+				'isnode'=>isset($this->Cats[$id]),
+				'child_url'=>ADMIN_FILE.'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->showcats_met.'&_cat_parent='.$id
+			);
+		}
+		if($pid == 0){
+			return '<div id="cats_tree_container"></div><script>$("#cats_tree_container").treeview({del: \''.ADMIN_FILE.'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->del_met.'&ok=1\', delRequestType: \'GET\', tree: '.JsonEncode($elements).'});</script>';
+		}else{
+			echo JsonEncode($elements);
+			exit;
+		}
 	}
 
-	// Выводит дерево в html-коде для отображения в админ-панели
-	public function ShowCats( $pid = 0 )
-	{
-		global $site, $AdminTreeText;
-		$site->AddCSSFile('tree.css');
-		$AdminTreeText = "\n\n".'<table cellspacing="0" cellpadding="0" class="treetable">';
-		$result = $this->ListingTree($pid, array($this, 'HtmlTreeItem'));
-		$AdminTreeText .= '</table>'."\n\n";
-		if($result == false){
-			return false;
-		}else{
-			return $AdminTreeText;
-		}
-	}
-
-	// Редактор категорий
-	public function CatEditor( $cat_id = null, $to_id = null )
-	{
+	/**
+	 * Редактор категорий
+	 * @param null $cat_id
+	 * @param null $to_id
+	 */
+	public function CatEditor( $cat_id = null, $to_id = null ){
 		global $db, $config, $site;
 		$title = '';
 		$desc = '';
@@ -76,20 +93,22 @@ class AdminTree extends Tree
 		if($cat_id != null){
 			$db->Select($this->Table, "`id`='$cat_id'");
 			$cat = $db->FetchRow();
-			$title = $cat['title'];
-			$desc = $cat['description'];
-			$icon = $cat['icon'];
-			$parent = $cat['parent'];
+			$title = SafeDB($cat['title'], 255, str);
+			$desc = SafeDB($cat['description'], 255, str);
+			$icon = SafeDB($cat['icon'], 255, str);
+			$parent = SafeDB($cat['parent'], 11, int);
 			$boxtitle = 'Редактирование категории';
 			$save_met = $this->save_met.'&'.$this->id_par_name.'='.$cat_id;
 			$cmd = 'Сохранить изменения';
-		}elseif($to_id != null){
-			$parent = $to_id;
-			$cmd = 'Создать';
 		}else{
 			$parent = -1;
 			$id = -1;
 			$cmd = 'Создать';
+			if($to_id != null){
+				$parent = $to_id;
+			}elseif(isset($_GET['_cat_adto'])){
+				$parent = SafeEnv($_GET['_cat_adto'], 11, int);
+			}
 		}
 		$cats_data = array();
 		$cats_data = $this->GetCatsData($parent, false, true, $cat_id, true);
@@ -101,9 +120,11 @@ class AdminTree extends Tree
 		AddForm('<form action="'.$config['admin_file'].'?exe='.$this->module.'&'.$this->action_par_name.'='.$save_met.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit($cmd));
 	}
 
-	// Сохранение категории
-	public function EditorSave( $id = null )
-	{
+	/**
+	 * Сохранение категории
+	 * @param null $id
+	 */
+	public function EditorSave( $id = null ){
 		global $db, $config;
 		$title = SafeEnv($_POST['title'], 250, str);
 		$desc = SafeEnv($_POST['desc'], 255, str);
@@ -123,9 +144,12 @@ class AdminTree extends Tree
 		$cache->Delete('tree', $this->Table);
 	}
 
-	// Удаление категории
-	public function DeleteCat( $id )
-	{
+	/**
+	 * Удаление категории
+	 * @param $id
+	 * @return bool
+	 */
+	public function DeleteCat( $id ){
 		global $config, $db;
 		if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 			$r = $db->Select($this->Table, "`id`='$id'");
@@ -148,6 +172,5 @@ class AdminTree extends Tree
 			return false;
 		}
 	}
-}
 
-?>
+} // End Class;

@@ -20,6 +20,7 @@ function IsMainHost( $url ){
  *
  */
 function GO( $address, $exit = true, $response_code = 303 ){
+	if(IsAjax()) exit;
 	if($address == '') return;
 	if(!defined('ERROR_HANDLER') || count(System::$Errors) == 0){ // todo Учитывать значение настройки вывода ошибок в браузер
 		if($response_code == 302){

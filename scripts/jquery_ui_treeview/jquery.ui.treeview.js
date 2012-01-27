@@ -19,6 +19,8 @@
 		options: {
 			move: '',   // Адрес страницы обработчика перемещения элементов
 			del: '',  // Адрес страницы обработчика удаления элементов
+			delParName: 'id',
+			delRequestType: 'POST',
 			nestedSortableOptions: {
 				forcePlaceholderSize: true,
 				handle: '.item_icon img',
@@ -406,9 +408,9 @@
 			var item_opt = $item.data('options');
 			if(window.Admin.ShowSplashScreen) window.Admin.ShowSplashScreen();
 			$.ajax({
-				type: "POST",
+				type: self.options.delRequestType,
 				url: self.options.del,
-				data: 'id='+item_opt.id,
+				data: self.options.delParName+'='+item_opt.id,
 				cache: false,
 				success: function(){
 					if(window.Admin.HideSplashScreen) window.Admin.HideSplashScreen();

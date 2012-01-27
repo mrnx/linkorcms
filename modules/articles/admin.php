@@ -5,12 +5,12 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Архив статей');
-
 if(!$user->CheckAccess2('articles', 'articles')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);
 	return;
 }
+
+TAddSubTitle('Архив статей');
 
 include_once ($config['inc_dir'].'tree_a.class.php');
 $tree = new AdminTree('articles_cats');
@@ -27,6 +27,113 @@ $tree->id_par_name = 'id';
 $editarticles = $user->CheckAccess2('articles', 'edit_articles');
 $editcats = $user->CheckAccess2('articles', 'edit_cats');
 $editconf = $user->CheckAccess2('articles', 'config');
+
+include_once ($config['inc_dir'].'configuration/functions.php');
+
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+
+TAddToolLink('Статьи', 'main', 'articles');
+if($editarticles) TAddToolLink('Добавить статью', 'editor', 'articles&a=editor');
+TAddToolBox($action);
+if($editcats) TAddToolLink('Категории', 'cats', 'articles&a=cats');
+if($editcats) TAddToolLink('Добавить категорию', 'cateditor', 'articles&a=cateditor');
+TAddToolBox($action);
+if($editconf) TAddToolLink('Настройки модуля', 'config', 'articles&a=config');
+TAddToolBox($action);
+
+switch($action){
+	case 'main':
+		AdminArticlesMain();
+		break;
+	case 'editor':
+		AdminArticlesEditor();
+		break;
+	case 'add':
+	case 'save':
+		AdminArticlesSaveArticle($action);
+		break;
+	case 'changestatus':
+		AdminArticlesChangeStatus();
+		break;
+	case 'delete':
+		AdminArticlesDelete();
+		break;
+	case 'resethits':
+		AdminArticlesResetHits();
+		break;
+	case 'resetrating':
+		AdminArticlesResetRating();
+		break;
+	// Категории
+	case 'cats':
+		if(!$editcats){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}else{
+			global $tree;
+			$result = $tree->ShowCats();
+			if($result == false){
+				$result = 'Нет категорий для отображения.';
+			}
+			AddTextBox('Категории', $result);
+		}
+		break;
+	case 'cateditor':
+		if(!$editcats){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}else{
+			global $tree;
+			if(isset($_GET['id'])){
+				$id = SafeEnv($_GET['id'], 11, str);
+			}else{
+				$id = null;
+			}
+			if(isset($_GET['to'])){
+				$to = SafeEnv($_GET['to'], 11, str);
+			}else{
+				$to = null;
+			}
+			$text = $tree->CatEditor($id, $to);
+		}
+		break;
+	case 'catsave':
+		if(!$editcats){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}else{
+			global $tree, $config;
+			$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
+			GO($config['admin_file'].'?exe=articles&a=cats');
+		}
+		break;
+	case 'delcat':
+		if(!$editcats){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}else{
+			global $tree, $config;
+			if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
+				GO($config['admin_file'].'?exe=articles&a=cats');
+			}
+		}
+		break;
+	// Настройки
+	case 'config':
+		if(!$editconf){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}else{
+			AdminConfigurationEdit('articles', 'articles', false, false, 'Конфигурация модуля "Архив статей"');
+		}
+		break;
+	case 'configsave':
+		if(!$editconf){
+			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		}else{
+			AdminConfigurationSave('articles&a=config', 'articles', false, false);
+		}
+		break;
+}
 
 // Главная - список статей
 function AdminArticlesMain(){
@@ -357,132 +464,3 @@ function AdminArticlesResetRating(){
 	}
 }
 
-include_once ($config['inc_dir'].'configuration/functions.php');
-
-function AdminArticles( $action ){
-	global $user, $editarticles, $editcomments, $editcats, $editconf;
-	TAddToolLink('Статьи', 'main', 'articles');
-	if($editcats){
-		TAddToolLink('Категории', 'cats', 'articles&a=cats');
-	}
-	if($editconf){
-		TAddToolLink('Настройки', 'config', 'articles&a=config');
-	}
-	TAddToolBox($action);
-	if($editarticles){
-		TAddToolLink('Добавить статью', 'editor', 'articles&a=editor');
-	}
-	if($editcats){
-		TAddToolLink('Добавить категорию', 'cateditor', 'articles&a=cateditor');
-	}
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminArticlesMain();
-			return true;
-			break;
-		case 'editor':
-			AdminArticlesEditor();
-			return true;
-			break;
-		case 'add':
-		case 'save':
-			AdminArticlesSaveArticle($action);
-			return true;
-			break;
-		case 'changestatus':
-			AdminArticlesChangeStatus();
-			return true;
-			break;
-		case 'delete':
-			AdminArticlesDelete();
-			return true;
-			break;
-		case 'resethits':
-			AdminArticlesResetHits();
-			return true;
-			break;
-		case 'resetrating':
-			AdminArticlesResetRating();
-			return true;
-			break;
-		////////////////// Категории
-		case 'cats':
-			if(!$editcats){
-				return false;
-			}
-			global $tree;
-			$result = $tree->ShowCats();
-			if($result == false){
-				$result = 'Нет категорий для отображения.';
-			}
-			AddTextBox('Категории', $result);
-			return true;
-			break;
-		case 'cateditor':
-			if(!$editcats){
-				return false;
-			}
-			global $tree;
-			if(isset($_GET['id'])){
-				$id = SafeEnv($_GET['id'], 11, str);
-			}else{
-				$id = null;
-			}
-			if(isset($_GET['to'])){
-				$to = SafeEnv($_GET['to'], 11, str);
-			}else{
-				$to = null;
-			}
-			$text = $tree->CatEditor($id, $to);
-			return true;
-			break;
-		case 'catsave':
-			if(!$editcats){
-				return false;
-			}
-			global $tree, $config;
-			$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
-			GO($config['admin_file'].'?exe=articles&a=cats');
-			break;
-		case 'delcat':
-			if(!$editcats){
-				return false;
-			}
-			global $tree, $config;
-			if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
-				GO($config['admin_file'].'?exe=articles&a=cats');
-			}
-			return true;
-			break;
-		////////////////// Настройки
-		case 'config':
-			if(!$editconf){
-				return false;
-			}
-			AdminConfigurationEdit('articles', 'articles', false, false, 'Конфигурация модуля "Архив статей"');
-			return true;
-			break;
-		case 'configsave':
-			if(!$editconf){
-				return false;
-			}
-			AdminConfigurationSave('articles&a=config', 'articles', false, false);
-			return true;
-			break;
-	}
-	return false;
-}
-
-if(isset($_GET['a'])){
-	$a = $_GET['a'];
-}else{
-	$a = 'main';
-}
-
-if(!AdminArticles($a)){
-	AddTextBox('Ошибка', $config['general']['admin_accd']);
-	return;
-}
-
-?>
