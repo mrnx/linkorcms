@@ -53,11 +53,11 @@ foreach($info as $col){
 }
 
 $text .= '</table><br />';
-$text .= '.:Вставить колонку:.';
-FormRow('После (индекс поля)', $site->Edit('toindex', '', false, 'style="width: 100px;"'), 160);
+
 AddCenterBox('Структура таблицы "'.$name.'"');
 AddText($text);
+
+System::admin()->FormTitleRow('Вставить колонку');
+FormRow('После (индекс поля)', $site->Edit('toindex', '', false, 'style="width: 100px;"'), 160);
 AddForm('<form action="'.$config['admin_file'].'?exe=fdbadmin&a=newcoll&name='.$name.'" method="post">', $site->Submit('Далее', 'title="Перейти к след. шагу добавления колонки."'));
 AdminFdbAdminGenTableMenu($name);
-
-?>

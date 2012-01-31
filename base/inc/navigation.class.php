@@ -2,10 +2,14 @@
 
 class Navigation{
 
+	static public $StarkytDefault = null; // Шаблонизатор, если используется отличный от стандартного
+	static public $AdminAjaxLinks = false; // Генерировать Ajax ссылки для админ-панели
+
 	public $page = 0;
 	public $param_name;
 	public $template_block;
 	public $FrendlyUrl = false;
+	public $Starkyt = null;
 
 	/**
 	 * Конструктор
@@ -15,10 +19,14 @@ class Navigation{
 	 * @param <type> $ParamName
 	 */
 	public function  __construct( $Page, $BlockName = 'navigation', $ParamName = 'page' ){
-		global $site;
 		$this->page = $Page;
 		$this->param_name = $ParamName;
 		$this->template_block = $BlockName;
+		if(self::$StarkytDefault == null){
+			$this->Starkyt = System::site();
+		}else{
+			$this->Starkyt = self::$StarkytDefault;
+		}
 	}
 
 	private function GetUrl( $Link, $Page ){
@@ -30,22 +38,29 @@ class Navigation{
 	}
 
 	private function SetItem( $Pos, $Enabled ){
-		global $site;
-		$site->Blocks[$this->template_block]['sub'][0]['child'][$Pos]['sub'][0]['enabled'] = $Enabled;
+		$this->Starkyt->Blocks[$this->template_block]['sub'][0]['child'][$Pos]['sub'][0]['enabled'] = $Enabled;
 	}
 
 	private function AddItem( $Pos, $Link, $Page, $Text, $isText = false){
-		global $site;
 		$url = $this->GetUrl($Link, $Page);
+		if(!$isText){
+			if(self::$AdminAjaxLinks){
+				$link_a = System::admin()->Link($Text, $url);
+			}else{
+				$link_a = '<a href="'.$url.'">'.$Text.'</a>';
+			}
+		}else{
+			$link_a = $Text;
+		}
 		$vars = array(
-			'link' => ( !$isText ? '<a href="'.$url.'">'.$Text.'</a>' : $Text),
+			'link' => $link_a,
 			'link_url' => $url,
 			'text' => $Text,
 			'is_text' => $isText,
 			'is_link' => !$isText,
 			'pos' => $Pos
 		);
-		$site->Blocks[$this->template_block]['sub'][0]['child'][$Pos]['sub'][] = $site->CreateSubBlock(true, $vars);
+		$this->Starkyt->Blocks[$this->template_block]['sub'][0]['child'][$Pos]['sub'][] = $this->Starkyt->CreateSubBlock(true, $vars);
 	}
 
 	/**
@@ -53,8 +68,7 @@ class Navigation{
 	 * @global <type> $site
 	 */
 	public function DisableNavigation(){
-		global $site;
-		$site->AddBlock($this->template_block, true, false);
+		$this->Starkyt->AddBlock($this->template_block, true, false);
 	}
 
 	/**
@@ -66,7 +80,6 @@ class Navigation{
 	 * @param <type> $Page
 	 */
 	public function GenNavigationMenu2( $ItemsCount, $ItemsOnPage, $Link, $Page = null ){
-		global $site;
 		if($Page == null){
 			$Page = $this->page;
 		}
@@ -75,15 +88,15 @@ class Navigation{
 			return;
 		}else{
 			$items_block_vars = array();
-			$items_block_vars['back'] = $site->CreateBlock(true, true, 'item', 'navigation_item.html');
-			$items_block_vars['begin'] = $site->CreateBlock(true, true, 'item', 'navigation_item.html');
-			$items_block_vars['left'] = $site->CreateBlock(true, true, 'item', 'navigation_item.html');
-			$items_block_vars['right'] = $site->CreateBlock(true, true, 'item', 'navigation_item.html');
-			$items_block_vars['end'] = $site->CreateBlock(true, true, 'item', 'navigation_item.html');
-			$items_block_vars['next'] = $site->CreateBlock(true, true, 'item', 'navigation_item.html');
-			$items_block_vars['is_next'] = $site->CreateBlock();
-			$items_block_vars['is_back'] = $site->CreateBlock();
-			$site->AddBlock($this->template_block, true, false, 'nav', 'navigation.html', '', $items_block_vars);
+			$items_block_vars['back'] = $this->Starkyt->CreateBlock(true, true, 'item', 'navigation_item.html');
+			$items_block_vars['begin'] = $this->Starkyt->CreateBlock(true, true, 'item', 'navigation_item.html');
+			$items_block_vars['left'] = $this->Starkyt->CreateBlock(true, true, 'item', 'navigation_item.html');
+			$items_block_vars['right'] = $this->Starkyt->CreateBlock(true, true, 'item', 'navigation_item.html');
+			$items_block_vars['end'] = $this->Starkyt->CreateBlock(true, true, 'item', 'navigation_item.html');
+			$items_block_vars['next'] = $this->Starkyt->CreateBlock(true, true, 'item', 'navigation_item.html');
+			$items_block_vars['is_next'] = $this->Starkyt->CreateBlock();
+			$items_block_vars['is_back'] = $this->Starkyt->CreateBlock();
+			$this->Starkyt->AddBlock($this->template_block, true, false, 'nav', 'navigation.html', '', $items_block_vars);
 		}
 
 		$PagesCount = ceil($ItemsCount / $ItemsOnPage);
@@ -140,7 +153,7 @@ class Navigation{
 			$next = $this->AddItem('next', $Link, $Page + 1, '&gt;&gt;&gt;', true);
 			$this->SetItem('is_next', false);
 		}
-		$site->Blocks[$this->template_block]['sub'][0]['vars']['active'] = $Active;
+		$this->Starkyt->Blocks[$this->template_block]['sub'][0]['vars']['active'] = $Active;
 	}
 
 	/**
@@ -151,7 +164,6 @@ class Navigation{
 	 * @param String $link Формат ссылок. В конец ссылки будет добавляться параметр page.
 	 */
 	public function GenNavigationMenu( &$Items, $ItemsOnPage, $Link, $Page = null ){
-		global $site;
 		if($Page == null){
 			$Page = $this->page;
 		}
@@ -166,4 +178,3 @@ class Navigation{
 	}
 }
 
-?>

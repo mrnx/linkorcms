@@ -17,7 +17,7 @@ if(isset($_GET['page'])){
 }else{
 	$page = 1;
 }
-$rows_on_page = 25;
+$rows_on_page = 20;
 if(count($rows) > $rows_on_page){
 	$navigator = new Navigation($page);
 	$navigator->GenNavigationMenu($rows, $rows_on_page, $config['admin_file'].'?exe=fdbadmin&a=review&name='.$name);
@@ -65,5 +65,3 @@ if($nav){
 }
 
 AdminFdbAdminGenTableMenu($name);
-
-?>

@@ -74,6 +74,8 @@ class AdminPage extends PageTemplate{
 			$this->AjaxSidebarTemplate->InitStarkyt($TemplateDir, 'sidebar_ajax.html');
 			$this->AjaxContentTemplate = new Starkyt();
 			$this->AjaxContentTemplate->InitStarkyt($TemplateDir, 'content_box_ajax.html');
+			Navigation::$StarkytDefault = $this->AjaxContentTemplate;
+			Navigation::$AdminAjaxLinks = true;
 		}else{
 			$this->SetTempVar('head', 'body', $PageTemplate);
 		}

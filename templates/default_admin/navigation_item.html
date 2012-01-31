@@ -1,2 +1,2 @@
-{item:is_link}<a href="{item.link_url}" class="nav_item">{item.text}</a>{/item:is_link}
+{item:is_link}<a href="{item.link_url}" onclick="event.cancelBubble = true; event.stopPropagation(); return !Admin.LoadPage('{item.link_url}', event);" onmousedown="event.cancelBubble = true; event.stopPropagation();" class="nav_item">{item.text}</a>{/item:is_link}
 {item:is_text}<span class="nav_item_text">{item.text}</span>{/item:is_text}

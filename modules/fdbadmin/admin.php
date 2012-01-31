@@ -14,6 +14,8 @@ TAddSubTitle('Управление БД');
 
 $action = isset($_GET['a']) ? $_GET['a'] : 'main';
 
+AdminFdbAdminGenMenu();
+
 switch($action){
 	case 'main': include(MOD_DIR.'table_list.inc.php');
 		break;
@@ -53,7 +55,6 @@ switch($action){
 		break;
 }
 
-AdminFdbAdminGenMenu();
 if($action == 'main') System::admin()->SideBarAddTextBlock('', $top_text);
 
 function AdminFdbAdminGenMenu(){
@@ -62,7 +63,7 @@ function AdminFdbAdminGenMenu(){
 	System::admin()->SideBarAddMenuItem('Создать таблицу', 'exe=fdbadmin&a=createtable', 'createtable');
 	System::admin()->SideBarAddMenuItem('Бекап', 'exe=fdbadmin&a=backup', 'backup');
 	System::admin()->SideBarAddMenuItem('Выполнить SQL', 'exe=fdbadmin&a=query', 'query');
-	System::admin()->SideBarAddMenuBlock('База данных', $action);
+	System::admin()->SideBarAddMenuBlock('База данных "'.System::database()->SelectDbName.'"', $action);
 }
 
 function AdminFdbAdminGenTableMenu( $name ){
@@ -72,7 +73,7 @@ function AdminFdbAdminGenTableMenu( $name ){
 	System::admin()->SideBarAddMenuItem('Добавить запись', 'exe=fdbadmin&a=insert&name='.$name, 'insert');
 	System::admin()->SideBarAddMenuItem('Редактировать', 'exe=fdbadmin&a=edittable&name='.$name, 'edittable');
 	System::admin()->SideBarAddMenuItem('Удалить таблицу', 'exe=fdbadmin&a=droptable&name='.$name, 'droptable');
-	System::admin()->SideBarAddMenuBlock('Таблица', $action);
+	System::admin()->SideBarAddMenuBlock('Таблица "'.$_GET['name'].'"', $action);
 }
 
 function AdminFdbAdminInitCollForm( &$text, $saveparam ){
