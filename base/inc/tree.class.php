@@ -286,10 +286,12 @@ class Tree{
 		$db->Select($this->Table, "`".$this->IdKey."`='$id'");
 		if($db->NumRows() > 0){
 			$cat = $db->FetchRow();
-			if($inc == true){
+			if($inc === true){
 				$counter_val = $cat[$this->FileCounterKey] + 1;
-			}else{
+			}elseif($inc === false){
 				$counter_val = $cat[$this->FileCounterKey] - 1;
+			}else{
+				$counter_val = $cat[$this->FileCounterKey] + intval($inc);
 			}
 			$db->Update($this->Table, $this->FileCounterKey."='$counter_val'", "`".$this->IdKey."`='$id'");
 
@@ -329,10 +331,12 @@ class Tree{
 		$db->Select($this->Table, "`".$this->IdKey."`='$id'");
 		if($db->NumRows() > 0){
 			$cat = $db->FetchRow();
-			if($inc == true){
+			if($inc === true){
 				$counter_val = $cat[$this->CatCounterKey] + 1;
-			}else{
+			}elseif($inc === false){
 				$counter_val = $cat[$this->CatCounterKey] - 1;
+			}else{
+				$counter_val = $cat[$this->CatCounterKey] + intval($inc);
 			}
 			$db->Update($this->Table, $this->CatCounterKey."='$counter_val'", "`".$this->IdKey."`='$id'");
 
@@ -387,5 +391,3 @@ class Tree{
 		return $FCatsData;
 	}
 }
-
-?>

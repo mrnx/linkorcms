@@ -27,18 +27,25 @@ class User{
 	public $access2 = array();
 	public $SuperAccess2 = false;
 
+	public $AuthCookieName = 'c_auth';
+	public $AdminCookieName = 'c_admin';
+
 	/**
 	 * Конструктор
 	 */
 	public function __construct(){
 		if($this->Started == false){
+			if(isset($_GET['PHPSESSID'])){ // Установка ИД сессии
+				session_id($_GET['PHPSESSID']);
+			}elseif(isset($_POST['PHPSESSID'])){
+				session_id($_POST['PHPSESSID']);
+			}elseif(isset($_COOKIE['PHPSESSID'])){
+				session_id($_COOKIE['PHPSESSID']);
+			}
 			if(!session_start()){
 				echo $this->errors[] = '<b>Внимание!</b>: User->User(): Ошибка при запуске сессии.<br />';
 			}else{
 				$this->Started = true;
-			}
-			if(isset($_REQUEST['PHPSESSID'])){ // Установка ИД сессии через GET и POST
-				session_id($_REQUEST['PHPSESSID']);
 			}
 		}
 		// Пишем свой http_referer. Брать реферер из $_SERVER['HTTP_REFERER'].
@@ -357,13 +364,13 @@ class User{
 		}else{
 			$expiry = null;
 		}
-		$this->SetCookie('auth', $auth, $expiry);
+		$this->SetCookie($this->AuthCookieName, $auth, $expiry);
 	}
 
 	public function SetAdminCookie( $login, $password ){
 		global $config;
 		$auth = base64_encode($login.':'.md5(md5($password).$config['salt'].EXTRA_ADMIN_COOKIE));
-		$this->SetCookie('admin', $auth);
+		$this->SetCookie($this->AdminCookieName, $auth);
 	}
 
 	// Выполняет аутентификацию пользователя по логину и паролю
@@ -400,9 +407,9 @@ class User{
 	}
 
 	public function CheckCookies(){
-		if(!$this->AllowCookie('auth')){
-			if(isset($_COOKIE['auth'])){
-				$this->UnsetCookie('auth');
+		if(!$this->AllowCookie($this->AuthCookieName)){
+			if(isset($_COOKIE[$this->AuthCookieName])){
+				$this->UnsetCookie($this->AuthCookieName);
 			}
 			$this->RegisterGuestData();
 		}
@@ -412,13 +419,15 @@ class User{
 	// от пользователя и выполняет его вход если они верны.
 	public function AllowCookie( $CookieName, $AdminCookie = false ){
 		global $config, $db;
-
 		if(defined('SETUP_SCRIPT')) return false;
 
-		if(isset($_COOKIE[$CookieName])){
+		// Можно передавать в POST и GET
+		if(isset($_GET[$CookieName])){
+			$cookie = $_GET[$CookieName];
+		}elseif(isset($_POST[$CookieName])){
+			$cookie = $_POST[$CookieName];
+		}elseif(isset($_COOKIE[$CookieName])){
 			$cookie = $_COOKIE[$CookieName];
-		}elseif(isset($_REQUEST[$CookieName])){ // Можно передавать в POST и GET
-			$cookie = $_REQUEST[$CookieName];
 		}else{
 			return false;
 		}
@@ -518,8 +527,8 @@ class User{
 			$this->session = array();
 			session_destroy();
 		}
-		$this->UnsetCookie('auth');
-		$this->UnsetCookie('admin');
+		$this->UnsetCookie($this->AuthCookieName);
+		$this->UnsetCookie($this->AdminCookieName);
 		$this->RegisterGuestData();
 		$ip = getip();
 		$where = "`u_ip`='$ip'";
@@ -527,4 +536,3 @@ class User{
 	}
 }
 
-?>

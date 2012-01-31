@@ -12,7 +12,7 @@ require 'config/init.php'; // Конфигурация и инициализация
 define('ADMIN_FILE', System::config('admin_file')); // Ссылка на админ-панель
 
 // Проверка пользователя
-if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie('admin', true))){
+if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie(System::user()->AdminCookieName, true))){
 	if(isset($_POST['admin_login'])){ // Проверка логина-пароля
 		$admin_name = $_POST['admin_name'];
 		$admin_password = $_POST['admin_password'];
@@ -20,7 +20,7 @@ if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie('admin'
 		if($a === true && System::user()->SecondLoginAdmin){
 			System::user()->SetAdminCookie($admin_name, $admin_password);
 		}else{
-			System::user()->UnsetCookie('admin');
+			System::user()->UnsetCookie(System::user()->AdminCookieName);
 			System::admin()->Login('Неверный логин или пароль'); // exit
 		}
 	}else{ // Форма авторизации
@@ -49,7 +49,7 @@ if(!isset($_GET['exe'])){
 }else{
 	$ModuleName = SafeEnv($_GET['exe'], 255, str);
 	if($ModuleName == 'exit'){ // Выход
-		System::user()->UnsetCookie('admin');
+		System::user()->UnsetCookie(System::user()->AdminCookieName);
 		GO(Ufu('index.php')); // exit
 	}
 }

@@ -34,6 +34,10 @@ body {
 	-moz-box-shadow: 2px 2px 2px #DDD;
 }
 
+#ajaxsplashscreen_message {
+	margin-bottom: 10px;
+}
+
 #wrapper {
 	text-align: left;
 	max-width: 1200px;
@@ -511,7 +515,7 @@ a.nav_item:hover {
 }
 
 .fsubmit{
-	background-color: #535353;
+	background-color: #EEE;
 	padding: 4px 14px 4px 0;
 	height: 32px;
 	vertical-align: middle;
@@ -559,4 +563,23 @@ a.nav_item:hover {
 	text-align: right;
 	width: 100%;
 	height: 30px;
+}
+
+/* Встраиваемые боксы */
+
+.cfgbox {
+	margin: 10px 27px 10px 27px;
+	padding: 16px;
+	border: 1px #838383 solid;
+	border-left-color: #A3A3A3;
+	border-top-color: #A3A3A3;
+	background-color: #FFF;
+}
+
+.cfgboxsubmit{
+	margin: 10px 27px 10px 27px;
+	padding: 10px;
+	border: 1px #CCCCCC solid;
+	background-color: #FFF;
+	text-align: right;
 }

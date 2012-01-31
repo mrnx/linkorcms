@@ -270,8 +270,8 @@ class AdminPage extends PageTemplate{
 	public function SpeedAjax($Title, $AjaxUrl, $ImgSrc = '', $ConfirmMsg = '', $OnStart = '', $OnSuccess = '', $Method = 'post', $Params = ''){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
-		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMsg',  this); event.cancelBubble = true; event.stopPropagation(); return false;";
-		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
+		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMsg',  this); event.cancelBubble = true; event.stopPropagation();";
+		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.' return false;" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
 	}
 

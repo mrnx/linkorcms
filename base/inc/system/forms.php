@@ -124,7 +124,7 @@ function LoadImage($PostName, $Dir, $ThumbsDir, $MaxWidth, $MaxHeight, $Default,
 		$Default = '';
 	}
 
-	$alloy_mime = array('image/gif', 'image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png');
+	$alloy_mime = array('image/gif', 'image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'application/octet-stream');
 	$alloy_exts = array('.gif', '.jpg', '.jpeg', '.png');
 	if(isset($_FILES[$PostName]) && file_exists($_FILES[$PostName]['tmp_name'])){
 		if(in_array($_FILES[$PostName]['type'], $alloy_mime) && in_array(strtolower(GetFileExt($_FILES[$PostName]['name'])), $alloy_exts)) {

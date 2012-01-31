@@ -117,14 +117,14 @@
 		/**
 		 * Показать Splash Screen при Ajax запросе
 		 */
-		ShowSplashScreen: function(){
+		ShowSplashScreen: function( Message ){
 			if(this.splashShows == 0){
 				$('div#wrapper').fadeTo(0, 0.5);
 				$('div#ajaxsplashscreen').show();
 			}
 			this.splashShows++;
 			this.splashShowsMax++;
-			$("#ajaxsplashscreen_progress").text((this.splashShowsMax - this.splashShows + 1)+'/'+this.splashShowsMax);
+			this.SetSplashScreenMessage(Message);
 		},
 
 		/**
@@ -136,10 +136,20 @@
 				$('div#ajaxsplashscreen').hide();
 			}
 			this.splashShows--;
-			$("#ajaxsplashscreen_progress").text((this.splashShowsMax - this.splashShows + 1)+'/'+this.splashShowsMax);
 			if(this.splashShows <= 0){
 				this.splashShows = 0;
 				this.splashShowsMax = 0;
+			}
+		},
+
+		/**
+		 * Обновить сообщение на SplashScreen
+		 */
+		SetSplashScreenMessage: function( NewMessage ){
+			if(NewMessage == undefined || NewMessage == ''){
+				$("#ajaxsplashscreen_message").hide();
+			}else{
+				$("#ajaxsplashscreen_message").show().text(NewMessage);
 			}
 		},
 
@@ -246,7 +256,7 @@
 			},
 
 			Ajax: function( AjaxUrl, Start, Success, Method, Params, Confirm, link ){
-				if(Confirm != '' && confirm(Confirm)){
+				if(Confirm == '' || confirm(Confirm)){
 					Admin.ShowSplashScreen();
 					Start(link);
 					$.ajax({

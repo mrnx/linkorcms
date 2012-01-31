@@ -198,9 +198,10 @@ if(is_file('config/db_config.php')){ // Система установлена
 			}
 		}
 
-		// Устанавливаем временную зону сайта по умолчанию
 		$user->CheckCookies();
 		$user->AccessInit($user->AccessGroup());
+
+		// Устанавливаем временную зону сайта по умолчанию
 		if($user->Auth && $user->Get('u_timezone')){
 			@date_default_timezone_set($user->Get('u_timezone'));
 		}else{

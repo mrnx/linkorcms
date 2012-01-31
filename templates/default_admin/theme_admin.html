@@ -1,27 +1,18 @@
 <?php
 	UseScript('admin'); // Обязательно
 	UseScript('jquery_topmenu');
-
 	System::admin()->AddCSSFile('style.css');
-
-	System::admin()->AddOnLoadJS(<<<JS
-			(function($){
-				// Обработка элементов с интервалом
-			  Admin.Live(".cfgtable tr:nth-child(even)", function(){ $(this).addClass('cfgtable_even').hover(
-					function(){ $(this).addClass('cfgtable_hover'); },
-					function(){ $(this).removeClass('cfgtable_hover'); }
-				)});
-			  Admin.Live(".cfgtable tr:nth-child(odd)", function(){ $(this).addClass('cfgtable_odd').hover(
-					function(){ $(this).addClass('cfgtable_hover'); },
-					function(){ $(this).removeClass('cfgtable_hover'); }
-				);});
-			  Admin.Live("#sidebar .sideNav li a", function(){
-				$(this).mousedown(function(e){if(e.which == 1)$(this).addClass('activate'); });
-			  });
-				Admin.Live(".button, input[type=button], input[type=submit]", function(){ $(this).button(); });
-			})(jQuery);
-JS
-);
+	System::admin()->AddOnLoadJS('
+	(function($){
+		// Обработка элементов с интервалом
+		Admin.Live(".cfgtable tr:nth-child(even)", function(){ $(this).addClass("cfgtable_even"); });
+		Admin.Live(".cfgtable tr:nth-child(odd)", function(){ $(this).addClass("cfgtable_odd"); });
+		Admin.Live("#sidebar .sideNav li a", function(){
+			$(this).mousedown(function(e){if(e.which == 1)$(this).addClass("activate"); });
+		});
+		Admin.Live(".button, input[type=button], input[type=submit]", function(){ $(this).button(); });
+	})(jQuery);
+');
 ?>
 {template}
 <body>
@@ -67,6 +58,7 @@ JS
 	</div>
 </div>
 <div id="ajaxsplashscreen">
+	<div id="ajaxsplashscreen_message"></div>
 	<div><img src="images/loadbar.gif" style="vertical-align: middle;"></div>
 </div>
 <script type="text/javascript">

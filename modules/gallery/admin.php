@@ -40,6 +40,7 @@ if(isset($_GET['a'])){
 TAddToolLink('Изображения', 'main', 'gallery');
 if($editimages){
 	TAddToolLink('Добавить изображения', 'editor', 'gallery&a=editor');
+	TAddToolLink('Мультизагрузка', 'upload', 'gallery&a=upload');
 }
 TAddToolBox($action);
 
@@ -60,6 +61,15 @@ switch($action){
 		break;
 	case 'editor':
 		AdminGalleryEditor();
+		break;
+	case 'upload':
+		AdminGalleryUpload(); // Загрузка фотографий и прием формы
+		break;
+	case 'deleteuploaded':
+		AdminGalleryDeleteUploaded();
+		break;
+	case 'saveuploaded':
+		AdminGallerySaveUploaded();
 		break;
 	case 'add':
 	case 'save':
@@ -287,13 +297,231 @@ function AdminGalleryEditor(){
 	$enData = GetEnData($show, 'Да', 'Нет');
 	FormRow('Показать', $site->Select('show', $enData));
 	AddCenterBox($top);
-	AddForm('<form action="'.$config['admin_file'].'?exe=gallery&a='.$action.'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=gallery&a='.$action.'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
+}
+
+function AdminGalleryUploadForm(){
+	global $tree, $site, $config, $db, $user, $editimages;
+	if(!$editimages){
+		AddTextBox('Ошибка', $config['general']['admin_accd']);
+		return;
+	}
+	UseScript('swfupload');
+	$formid = uniqid(); // Уникальный ID формы
+	$_SESSION['uploadforms'][$formid] = array(
+		'photos'=>array(),
+		'category' => '0',
+		'allow_comments' => '1',
+		'allow_votes' => '1',
+		'view' => '4',
+		'show' => '1'
+	);
+
+	System::admin()->AddOnLoadJS('
+	window.photo_id = 1;
+	window.allUploadComplete = false;
+	window.photosCountFiles = 0;
+	window.photosUploaded = 0;
+
+	window.SubmitFormGuard = function(){
+		if(window.photosCountFiles == 0){
+			alert("Выберите фотографии для загрузки");
+			return false;
+		}
+		if(!window.allUploadComplete){
+			window.swfu.startUpload();
+			Admin.ShowSplashScreen("Загрузка фотографий на хостинг");
+			return false;
+		}
+		return true;
+	}
+
+	// SWFUpload
+	window.swfu = new SWFUpload({
+		flash_url: "scripts/swfupload/swfupload.swf",
+		upload_url: "'.ADMIN_FILE.'?exe=gallery&a=upload&formid='.$formid.'",
+		file_post_name : "up_image",
+		post_params: {
+			"action": "upload"
+		},
+		file_size_limit: "100 MB",
+		file_types: "*.jpg; *.png; *.jpeg; *.gif",
+		file_types_description: "Все файлы",
+		file_upload_limit: 0,
+		file_queue_limit: 0,
+		debug: false,
+
+		button_placeholder_id: "uploadbutton",
+		button_width: "54",
+		button_height: "18",
+		button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT,
+		button_text: "<span class=\"btnCap\">Обзор<span>",
+		button_text_style: ".btnCap{ align: center; color: #4F4F4F; font-family: Verdana, Tahoma, sans-serif; font-weight: bold; }",
+		button_text_left_padding: 4,
+		button_text_top_padding: 1,
+
+		file_dialog_complete_handler: function(numFilesSelected, numFilesQueued, total){
+			$("#uploadFilesCount").html("Выбрано " + total + " файл(ов)");
+			window.photosCountFiles = total;
+		},
+		upload_progress_handler: function(file, bytesLoaded, bytesTotal){
+			var current = window.photosUploaded + 1;
+			Admin.SetSplashScreenMessage("Загрузка фотографий на хостинг: " + current + "/" + window.photosCountFiles + " (" + Math.round(bytesLoaded/bytesTotal*100) + "%)");
+		},
+		upload_complete_handler: function(file){
+			window.photosUploaded++;
+			if(window.photosUploaded == window.photosCountFiles){
+				window.allUploadComplete = true;
+				$("#galleryForm").submit();
+			}
+		},
+		minimum_flash_version: "9.0.28"
+	});');
+
+	if(!$editimages){
+		AddTextBox('Ошибка', $config['general']['admin_accd']);
+		return;
+	}
+	$visdata = GetUserTypesFormData(4);
+	$cats_data = array();
+	$cats_data = $tree->GetCatsData(0);
+	if(count($cats_data) == 0){
+		AddTextBox($top, 'Нет категорий для добавления! Создайте категорию.');
+		return;
+	}
+	FormRow('В категорию', $site->Select('category', $cats_data));
+
+	FormRow('Выберите файлы', '<div style="float: left;" id="uploadFilesCount">Выбрано 0 файл(ов)</div>&nbsp;&nbsp;&nbsp;&nbsp;<div class="button" style="float: right; border: 1px #ccc solid;"><span  id="uploadbutton"></span></div>');
+
+	$enData = GetEnData(true, 'Разрешить', 'Запретить');
+	FormRow('Комментарии', $site->Select('allow_comments', $enData));
+	$enData = GetEnData(true, 'Разрешить', 'Запретить');
+	FormRow('Оценки', $site->Select('allow_votes', $enData));
+	FormRow('Кто видит', $site->Select('view', $visdata));
+	$enData = GetEnData(true, 'Да', 'Нет');
+	FormRow('Показать', $site->Select('show', $enData));
+	AddCenterBox("Мультизагрузка");
+	AddForm('<form action="'.ADMIN_FILE.'?exe=gallery&a=upload&formid='.$formid.'" method="post" onsubmit="return SubmitFormGuard();" id="galleryForm">',
+		System::admin()->Hidden('action', 'preview').System::admin()->Submit('Загрузить'));
+}
+
+function AdminGalleryUpload(){
+	if(!isset($_POST['action']) || !isset($_GET['formid']) || !isset($_SESSION['uploadforms'][$_GET['formid']])){
+		AdminGalleryUploadForm();
+		return;
+	}
+	global $GalleryDir, $ThumbsDir;
+	$formid = $_GET['formid'];
+
+	// Загрузка фотографий
+	if($_POST['action'] == 'upload'){
+		$Error = false;
+		$_SESSION['uploadforms'][$formid]['photos'][] = LoadImage(
+			'up_image',
+			$GalleryDir,
+			$ThumbsDir,
+			System::config('gallery/thumb_max_width'),
+			System::config('gallery/thumb_max_height'),
+			'',
+			$Error
+		);
+		if($Error){
+			exit('ERROR 2');
+		}
+		exit('OK');
+	}
+
+	// Предпросмотр добавляемых фотографий
+	$_SESSION['uploadforms'][$formid]['category'] = $_POST['category'];
+	$_SESSION['uploadforms'][$formid]['allow_comments'] = EnToInt($_POST['allow_comments']);
+	$_SESSION['uploadforms'][$formid]['allow_votes'] = EnToInt($_POST['allow_votes']);
+	$_SESSION['uploadforms'][$formid]['show'] = EnToInt($_POST['show']);
+	$_SESSION['uploadforms'][$formid]['view'] = ViewLevelToInt($_POST['view']);
+
+	AddCenterBox('Мультизагрузка - предпросмотр');
+	$count_photos = count($_SESSION['uploadforms'][$formid]['photos']);
+	$text = '<form action="'.ADMIN_FILE.'?exe=gallery&a=saveuploaded&formid='.$formid.'" method="post">';
+	$submits = System::admin()->Submit('Отмена', 'name="submit_cancel" value="cancel"').System::admin()->Submit('Сохранить', 'name="submit_save" value="save"');
+	$text .= '<div class="cfgboxsubmit"><div style="float: left;">Загружено '.$count_photos.' изображений.</div>'.$submits.'</div>';
+	foreach($_SESSION['uploadforms'][$formid]['photos'] as $id=>$photo){
+		$func = System::admin()->SpeedAjax('Удалить', ADMIN_FILE.'?exe=gallery&a=deleteuploaded&id='.$id.'&formid='.$formid, 'images/admin/delete.png', '', '', "jQuery('#photo_box_$id').fadeOut();");
+		$text .= '<div class="cfgbox" id="photo_box_'.$id.'">';
+		$text .= '<table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">';
+		$text .= '<tr><td style="vertical-align: top; width: 160px;"><a href="'.$GalleryDir.$photo.'" target="_blank"><img src="'.$ThumbsDir.$photo.'" /></a></td>';
+		$text .= '<td style="vertical-align: top;">';
+		$text .= '<table cellspacing="2" cellpadding="4" style="width: 100%;" class="cfgtable">
+		<tr><td>Заголовок</td><td colspan="3" style="text-align: left;">'.System::admin()->Edit('title_'.$id, '', false, 'maxlength="250" style="width:400px;"').'</td></tr>
+		<tr><td>Описание (HTML)</td>
+		<td colspan="3" style="text-align: left;">'.System::admin()->TextArea('description_'.$id, '', 'style="width: 400px; height: 120px;"').'</td></tr>
+		<tr><td>Автор</td><td style="text-align: left;">'.System::admin()->Edit('author_'.$id, '', false, 'maxlength="250" style="width:200px;"').'</td>
+			<td>Email автора</td><td style="text-align: left;">'.System::admin()->Edit('email_'.$id, '', false, 'maxlength="250" style="width:200px;"').'</td></tr>
+		<tr><td>Сайт автора</td><td colspan="3" style="text-align: left;">'.System::admin()->Edit('www_'.$id, '', false, 'maxlength="250" style="width:200px;"').'</td></tr>
+		</table>';
+		$text .= '</td>';
+		$text .= '<td style="vertical-align: top; text-align: right; width: 50px;">'.$func.'</td></tr>';
+		$text .= '</table>';
+		$text .= '</div>';
+	}
+	$text .= '<div class="cfgboxsubmit">'.$submits.'</div>';
+	$text .= '</form>';
+	AddText($text);
+}
+
+function AdminGalleryDeleteUploaded(){
+	global $GalleryDir, $ThumbsDir;
+	if(!isset($_GET['id']) || !isset($_GET['formid']) || !isset($_SESSION['uploadforms'][$_GET['formid']]) || !isset($_SESSION['uploadforms'][$_GET['formid']]['photos'][$_GET['id']])){
+		exit("ERROR");
+	}
+	$photo = $_SESSION['uploadforms'][$_GET['formid']]['photos'][$_GET['id']];
+	unlink($GalleryDir.$photo);
+	unlink($ThumbsDir.$photo);
+	unset($_SESSION['uploadforms'][$_GET['formid']]['photos'][$_GET['id']]);
+	exit("OK");
+}
+
+function AdminGallerySaveUploaded(){
+	global $GalleryDir, $ThumbsDir, $tree;
+	if(!isset($_GET['formid']) || !isset($_SESSION['uploadforms'][$_GET['formid']])){
+		System::admin()->HighlightError('Ошибка');
+		return;
+	}
+	$formid = $_GET['formid'];
+	$form = $_SESSION['uploadforms'][$formid];
+	$count_photo = count($form['photos']);
+
+	$cat_id = SafeEnv($form['category'], 11, int);
+	$allow_comments = $form['allow_comments'];
+	$allow_votes = $form['allow_votes'];
+	$view = $form['view'];
+	$show = $form['show'];
+
+	if(isset($_POST['submit_cancel'])){ // Отмена удаляем форму и все фотографии
+		foreach($form['photos'] as $id=>$photo){
+			unlink($GalleryDir.$photo);
+			unlink($ThumbsDir.$photo);
+		}
+		unset($_SESSION['uploadforms'][$formid]);
+		GO(ADMIN_FILE.'?exe=gallery&a=upload');
+	}else{ // Сохраняем фотографии в базе данных
+		foreach($form['photos'] as $id=>$photo){
+			$photo = SafeEnv($photo, 255, str);
+			$title = SafeEnv($_POST['title_'.$id], 255, str);
+			$desc = SafeEnv($_POST['description_'.$id], 0, str);
+			$author = SafeEnv($_POST['author_'.$id], 50, str);
+			$email = SafeEnv($_POST['email_'.$id], 50, str);
+			$site = SafeEnv(url($_POST['www_'.$id]), 250, str);
+			System::database()->Insert('gallery', "'','$cat_id','".time()."','$title','$desc','$photo','0','$author','$email','$site','$allow_comments','0','$allow_votes','0','0','$view','$show'");
+		}
+		if($show){
+			$tree->CalcFileCounter($cat_id, $count_photo);
+		}
+		unset($_SESSION['uploadforms'][$formid]);
+		GO(ADMIN_FILE.'?exe=gallery');
+	}
 }
 
 function AdminGallerySaveImage(){
 	global $db, $config, $tree, $GalleryDir, $ThumbsDir;
-	$alloy_mime = array('image/gif'=>'.gif', 'image/jpeg'=>'.jpg', 'image/pjpeg'=>'.jpg', 'image/png'=>'.png', 'image/x-png'=>'.png');
-	$ThumbsDir = $config['gallery']['thumbs_dir'];
 	$cat_id = SafeEnv($_POST['category'], 11, int);
 	$title = SafeEnv($_POST['title'], 255, str);
 	$file = SafeEnv($_POST['image'], 255, str);
@@ -320,8 +548,7 @@ function AdminGallerySaveImage(){
 			$tree->CalcFileCounter($cat_id, true);
 		}
 	}else{
-		// TODO: Исправить ошибку, на MySQL не работает сохранение изменений. Проблема возможно решается добавлением обр. кавычек, проверить это решение на файловой БД.
-		$set = "cat_id='$cat_id',title='$title',description='$desc',file='$file',author='$author',email='$email',site='',allow_comments='$allow_comments',allow_votes='$allow_votes',view='$view',show='$show'";
+		$set = "`cat_id`='$cat_id',`title`='$title',`description`='$desc',`file`='$file',`author`='$author',`email`='$email',`site`='',`allow_comments`='$allow_comments',`allow_votes`='$allow_votes',`view`='$view',`show`='$show'";
 		$id = SafeEnv($_GET['id'], 11, int);
 		$r = $db->Select('gallery', "`id`='$id'");
 		if($r[0]['cat_id'] != $cat_id && $r[0]['show'] == '1'){ //Если переместили в другой раздел

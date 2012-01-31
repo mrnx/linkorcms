@@ -11,4 +11,3 @@
 	System::site()->AddJSFile('scripts/swfupload/plugins/swfupload.cookies.js', true);
 	System::site()->AddJSFile('scripts/swfupload/plugins/swfupload.speed.js', true);
 
-?>
