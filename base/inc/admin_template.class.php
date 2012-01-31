@@ -199,6 +199,17 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
+	 * Предупреждение с двумя кнопками "Да" и "Отмена"
+	 * @param $Text
+	 * @param $YesUrl
+	 * @param string $CancelUrl
+	 */
+	public function HighlightConfirm( $Text, $YesUrl, $CancelUrl = 'javascript:history.go(-1)' ){
+		$Text .= '<br /><br />'.$this->SpeedButton('Отмена', $CancelUrl, 'images/admin/delete.png', false, true).'&nbsp;&nbsp;'.$this->SpeedButton('Да', $YesUrl, 'images/admin/accept.png', true, true);
+		$this->Highlight($Text);
+	}
+
+	/**
 	 * Генерирует код красивой ссылки в виде кнопки
 	 *
 	 * @param string $Title
@@ -206,9 +217,19 @@ class AdminPage extends PageTemplate{
 	 * @param string $ImgSrc
 	 * @return string <type>
 	 */
-	public function SpeedButton( $Title, $Url, $ImgSrc = '' ){
+	public function SpeedButton( $Title, $Url, $ImgSrc = '', $Ajax = true, $ShowText = false ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
-		return $this->Link(($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title), $Url, $Title, true, 'class="button"');
+		$text = '';
+		if($ImgSrc != ''){
+			$text = '<img src="'.$ImgSrc.'" alt="'.$Title.'" />';
+			if($ShowText){
+				$text .= $Title;
+				$Title = '';
+			}
+		}else{
+			$text = $Title;
+		}
+		return $this->Link($text, $Url, $Title, $Ajax, 'class="button"');
 	}
 
 	/**
@@ -220,11 +241,24 @@ class AdminPage extends PageTemplate{
 	 * @param string $ConfirmMsg
 	 * @return string
 	 */
-	public function SpeedConfirm( $Title, $Url, $ImgSrc = '', $ConfirmMsg = 'Уверены?' ){
+	public function SpeedConfirm( $Title, $Url, $ImgSrc = '', $ConfirmMsg = 'Уверены?', $Ajax = true, $ShowText = false ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
-		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="return Admin.Buttons.Confirm(\''.$ConfirmMsg.'\', \''.$Url.'\',this, event);" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
+		if($ImgSrc != ''){
+			$text = '<img src="'.$ImgSrc.'" alt="'.$Title.'" />';
+			if($ShowText){
+				$text .= $Title;
+				$Title = '';
+			}
+		}else{
+			$text = $Title;
+		}
+		if($Ajax){
+			$ajax = 'true';
+		}else{
+			$ajax = 'false';
+		}
+		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="return Admin.Buttons.Confirm(\''.$ConfirmMsg.'\', \''.$Url.'\',this, event, '.$ajax.');" onmousedown="event.cancelBubble = true; event.stopPropagation();">'.$text.'</a>';
 	}
 
 	/**

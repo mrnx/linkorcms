@@ -73,6 +73,7 @@
 									eval(data.js_inline);
 									document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
 									slf.SetLoc(data.uri);
+									slf.LiveUpdate();
 									slf.HideSplashScreen();
 								});
 							});
@@ -174,12 +175,10 @@
 		},
 
 		LiveUpdate: function(){
-			var length = this.liveWatch.length,
-					w;
+			var length = this.liveWatch.length, w;
 			while( length-- ){
 				w = this.liveWatch[length];
-				var objs = $(w.selector),
-						nobjs = objs.not(w.elms);
+				var objs = $(w.selector), nobjs = objs.not(w.elms);
 				nobjs.each(function(){
 					w.fn.apply(this);
 				});
@@ -213,9 +212,13 @@
 			 * @param ConfirmMsg
 			 * @param Object
 			 */
-			Confirm: function( ConfirmMsg, Url, Object, event ){
+			Confirm: function( ConfirmMsg, Url, Object, event, ajax ){
 				if(confirm(ConfirmMsg)){
-					Admin.LoadPage(Url, event);
+					if(ajax){
+						Admin.LoadPage(Url, event);
+					}else{
+						return true;
+					}
 				}
 				return false;
 			},

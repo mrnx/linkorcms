@@ -38,7 +38,7 @@ foreach($info as $col){
 
 	$func = '';
 	$func .= SpeedButton('Просмотреть информацию для установки', $config['admin_file'].'?exe=fdbadmin&a=viewcollinfo&name='.$name.'&collid='.$i, 'images/admin/info.png');
-	$func .= SpeedButton('Удалить колонку', $config['admin_file'].'?exe=fdbadmin&a=deletecoll&name='.$name.'&collid='.$i, 'images/admin/delete.png');
+	$func .= System::admin()->SpeedConfirm('Удалить колонку', ADMIN_FILE.'?exe=fdbadmin&a=deletecoll&name='.$name.'&collid='.$i, 'images/admin/delete.png', 'Удалить колонку?');
 
 	$text .= '<tr>
 	<td>'.$i.'</td>

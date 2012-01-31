@@ -26,5 +26,3 @@ $db->Delete($table, $sql);
 
 //GO($config['admin_file'].'?exe=fdbadmin&a=review&name='.$table);
 GoBack();
-
-?>

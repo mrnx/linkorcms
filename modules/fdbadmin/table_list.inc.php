@@ -28,9 +28,9 @@ $text = '';
 $text .= '<table cellspacing="0" cellpadding="0" class="cfgtable">'
 .'<tr>
 	<th>#</th>
-	<th><a href="'.$config['admin_file'].'?exe=fdbadmin&sort=name'.($sort == 'name' && !$sort_dec ? '&dec=1' : '').'">Таблица</a></th>
-	<th><a href="'.$config['admin_file'].'?exe=fdbadmin&sort=num_rows'.($sort == 'num_rows' && !$sort_dec ? '&dec=1' : '').'">Записей</a></th>
-	<th><a href="'.$config['admin_file'].'?exe=fdbadmin&sort=size'.($sort == 'size' && !$sort_dec ? '&dec=1' : '').'">Размер</a></th>
+	<th>'.System::admin()->Link('Таблица', ADMIN_FILE.'?exe=fdbadmin&sort=name'.($sort == 'name' && !$sort_dec ? '&dec=1' : ''), 'Сортировать').'</th>
+	<th>'.System::admin()->Link('Записей', ADMIN_FILE.'?exe=fdbadmin&sort=num_rows'.($sort == 'num_rows' && !$sort_dec ? '&dec=1' : ''), 'Сортировать').'</th>
+	<th>'.System::admin()->Link('Размер', ADMIN_FILE.'?exe=fdbadmin&sort=size'.($sort == 'size' && !$sort_dec ? '&dec=1' : ''), 'Сортировать').'</th>
 	<th>Тип</th>
 	<th>Действия</th>
 </tr>';
@@ -50,12 +50,12 @@ foreach($tables as $r){
 	}
 
 	$func = '';
-	$func .= SpeedButton('Переименовать', $config['admin_file'].'?exe=fdbadmin&a=renametable&name='.$r['name'], 'images/admin/rename.png');
-	$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=fdbadmin&a=droptable&name='.$r['name'].'&ok=0', 'images/admin/delete.png');
+	$func .= SpeedButton('Переименовать', ADMIN_FILE.'?exe=fdbadmin&a=renametable&name='.$r['name'], 'images/admin/rename.png');
+	$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=fdbadmin&a=droptable&name='.$r['name'].'&ok=0', 'images/admin/delete.png', 'Удалить таблицу?');
 
 	$text .= '<tr>'
 	.'<td style="text-align:left; padding-left:10px;">'.$i.$a.'</td>'
-	.'<td align="left" style="text-align:left; padding-left:10px;"><b><a href="'.$config['admin_file'].'?exe=fdbadmin&a=structure&name='.$r['name'].'">'.$r['name'].'</a></b></td>'
+	.'<td align="left" style="text-align:left; padding-left:10px;"><b>'.System::admin()->Link($r['name'], ADMIN_FILE.'?exe=fdbadmin&a=structure&name='.$r['name']).'</b></td>'
 	.'<td>'.$r['num_rows'].'</td>'
 	.'<td>'.FormatFileSize($r['size']).'</td>'
 	.'<td>'.(isset($r['type'])?$r['type']:'По умолчанию').'</td>'
@@ -70,5 +70,3 @@ $top_text .= '<strong>Всего записей</strong>: '.$totalrows.'<br>';
 $top_text .= '<strong>Общий размер</strong>: '.FormatFileSize($totalsize).'<br>';
 
 AddText($text);
-
-?>

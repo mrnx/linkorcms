@@ -158,5 +158,3 @@ function AdminFdbAdminAddTableForm( &$text, $tablename, $SetComment = '', $SetTa
 		.$site->Select('tabletype', $tabletype).'</font>'
 		.$site->Hidden('tablename', $tablename);
 }
-
-?>
