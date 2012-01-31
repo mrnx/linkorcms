@@ -20,7 +20,6 @@ function IsMainHost( $url ){
  *
  */
 function GO( $address, $exit = true, $response_code = 303 ){
-	if(IsAjax()) exit;
 	if($address == '') return;
 	if(!defined('ERROR_HANDLER') || count(System::$Errors) == 0){ // todo Учитывать значение настройки вывода ошибок в браузер
 		if($response_code == 302){
@@ -161,4 +160,14 @@ function GetSiteHost(){
  */
 function GetSiteUrl( $EndSlash = true ){
 	return GetSiteHost().GetSiteDir($EndSlash);
+}
+
+function GetPageUri( $FirstSlash = false ){
+	$uri = $_SERVER['REQUEST_URI'];
+	if(substr($uri, 0, 1) != '/' && $FirstSlash){
+		$uri = '/'.$uri;
+	}elseif(substr($uri, 0, 1) == '/' && !$FirstSlash){
+		$uri = substr($uri, 1);
+	}
+	return $uri;
 }

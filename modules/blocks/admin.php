@@ -134,10 +134,10 @@ function AdminBlocksMain(){
 			$block_id = SafeDB($block['id'], 11, int);
 			switch($block['enabled']){
 				case "1":
-					$st = '<a href="'.$config['admin_file'].'?exe=blocks&a=changestatus&id='.$block_id.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
+					$st = '<a href="'.ADMIN_FILE.'?exe=blocks&a=changestatus&id='.$block_id.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
 					break;
 				case "0":
-					$st = '<a href="'.$config['admin_file'].'?exe=blocks&a=changestatus&id='.$block_id.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
+					$st = '<a href="'.ADMIN_FILE.'?exe=blocks&a=changestatus&id='.$block_id.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
 					break;
 			}
 			$vi = ViewLevelToStr(SafeDB($block['view'], 1, int));
@@ -147,16 +147,16 @@ function AdminBlocksMain(){
 				$move_menu .= ' - ';
 			}else{
 				if($block['place'] >= 0 && $block['place'] < $maxplace){ // Первый элемент
-					$move_menu .= SpeedButton('Вниз', $config['admin_file'].'?exe=blocks&a=move&to=down&id='.$block_id, 'images/admin/down.png');
+					$move_menu .= SpeedButton('Вниз', ADMIN_FILE.'?exe=blocks&a=move&to=down&id='.$block_id, 'images/admin/down.png');
 				}
 				if($block['place'] <= $maxplace && $block['place'] > 0){
-					$move_menu .= SpeedButton('Вверх', $config['admin_file'].'?exe=blocks&a=move&to=up&id='.$block_id, 'images/admin/up.png');
+					$move_menu .= SpeedButton('Вверх', ADMIN_FILE.'?exe=blocks&a=move&to=up&id='.$block_id, 'images/admin/up.png');
 				}
 			}
 
 			$func = '';
-			$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=blocks&a=edit&id='.$block_id, 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=blocks&a=del&id='.$block_id.'&ok=0', 'images/admin/delete.png');
+			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=blocks&a=edit&id='.$block_id, 'images/admin/edit.png');
+			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=blocks&a=del&id='.$block_id.'&ok=0', 'images/admin/delete.png', 'Удалить блок?');
 
 			$text .= '
 			<tr>
@@ -340,10 +340,9 @@ function AdminBlocksSave( $a ){
 
 function AdminBlockDelete(){
 	global $config, $db;
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
+	if(isset($_GET['ok']) && $_GET['ok'] == '1' || IsAjax()){
 		$db->Delete('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		GO($config['admin_file'].'?exe=blocks');
-		exit();
 	}else{
 		$r = $db->Select('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$text = 'Вы действительно хотите удалить блок "'.$r[0]['title'].'"<br />'.'<a href="'.$config['admin_file'].'?exe=blocks&a=del&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';

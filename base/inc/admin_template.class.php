@@ -206,8 +206,7 @@ class AdminPage extends PageTemplate{
 	 */
 	public function SpeedButton( $Title, $Url, $ImgSrc = '' ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
-		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
+		return $this->Link(($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title), $Url, $Title, true, 'class="button"');
 	}
 
 	/**
@@ -222,8 +221,7 @@ class AdminPage extends PageTemplate{
 	public function SpeedConfirm( $Title, $Url, $ImgSrc = '', $ConfirmMsg = 'Уверены?' ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
 		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
-		$OnClick = "event.cancelBubble = true; event.stopPropagation(); return Admin.Buttons.Confirm('$ConfirmMsg', this);";
-		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
+		return '<a title="'.$Title.'" href="'.$Url.'" class="button" onclick="return Admin.Buttons.Confirm(\''.$ConfirmMsg.'\', \''.$Url.'\',this, event);" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
 	}
 
@@ -273,6 +271,23 @@ class AdminPage extends PageTemplate{
 		$OnClick = "Admin.Buttons.Ajax('$AjaxUrl', function(link){ $OnStart }, function(data, textStatus, jqXHR){ $OnSuccess }, '$Method', '$Params', '$ConfirmMsg',  this); event.cancelBubble = true; event.stopPropagation();";
 		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.' return false;" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
 			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
+	}
+
+	/**
+	 * Генерирует ссылку которая загружается с помощью Ajax если он включен с поддержкой открытия страницы в новой вкладке средней кнопкой мыши
+	 * @param $Text
+	 * @param $Address
+	 * @param bool $Ajax
+	 * @param string $Other
+	 * @return string
+	 */
+	public function Link( $Text, $Address, $Title = '', $Ajax = true, $Other = '' ){
+		$Address = htmlspecialchars($Address, ENT_QUOTES);
+		if($Ajax){
+			return '<a href="'.$Address.'" title="'.$Title.'" onclick="event.cancelBubble = true; event.stopPropagation(); return !Admin.LoadPage(\''.$Address.'\', event);" onmousedown="event.cancelBubble = true; event.stopPropagation();" '.$Other.'>'.$Text.'</a>';
+		}else{
+			return '<a href="'.$Address.'" title="'.$Title.'" '.$Other.'>'.$Text.'</a>';
+		}
 	}
 
 	/**
@@ -642,7 +657,8 @@ class AdminPage extends PageTemplate{
 				'js_inline'=>'',
 				'errors'=>'',
 				'info'=>'',
-				'title'=>''
+				'title'=>'',
+				'uri' => '' // Адрес страницы (после перенаправления адрес может измениться, поэтому передаем его в скрипт)
 			);
 			$response['content'] = $this->AjaxContentTemplate->Compile();
 			if($this->tool_menu_block){
@@ -674,6 +690,7 @@ class AdminPage extends PageTemplate{
 			$response['errors'] = implode(System::$Errors);
 			$response['info'] = $this->GetPageInfo($start);
 			$response['title'] = $this->GenerateTitle();
+			$response['uri'] = GetPageUri();
 			echo JsonEncode($response);
 		}else{
 			System::user()->OnlineProcess($this->Title);

@@ -53,7 +53,6 @@
 			if(this.CheckButton(1, event)){ // Только левая кнопка мыши
 				if(this.Ajax){
 					slf = this;
-					slf.SetLoc(Url);
 					slf.ShowSplashScreen();
 					$.ajax({
 						type: "GET",
@@ -73,6 +72,7 @@
 									$('#main-content').html(data.content);
 									eval(data.js_inline);
 									document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
+									slf.SetLoc(data.uri);
 									slf.HideSplashScreen();
 								});
 							});
@@ -81,6 +81,8 @@
 				}else{
 					document.location = Url;
 				}
+				event.cancelBubble = true;
+				event.stopPropagation();
 				return true;
 			}else{
 				return false;
@@ -208,11 +210,14 @@
 
 			/**
 			 * Кнопка с подтверждением действия
-			 * @param Confirm
+			 * @param ConfirmMsg
 			 * @param Object
 			 */
-			Confirm: function( Confirm, Object ){
-				return confirm(Confirm);
+			Confirm: function( ConfirmMsg, Url, Object, event ){
+				if(confirm(ConfirmMsg)){
+					Admin.LoadPage(Url, event);
+				}
+				return false;
 			},
 
 			/**

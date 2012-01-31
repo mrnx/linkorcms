@@ -192,7 +192,7 @@ function AdminPagesAjaxTree(){
 		$elements[] = array(
 			'id'=>$id,
 			'icon'=>$icon,
-			'title'=>'<b><a href="'.$editlink.'" onclick="return Admin.CheckButton(2, event);" onmousedown="return Admin.LoadPage(\''.$editlink.'\', event);">'.SafeDB($page['title'], 255, str).'</a></b>',
+			'title'=>'<b>'.System::admin()->Link(SafeDB($page['title'], 255, str), $editlink).'</a></b>',
 			'info'=>$info,
 			'func'=>$func,
 			'isnode'=>isset($pages_tree->Cats[$id]),
