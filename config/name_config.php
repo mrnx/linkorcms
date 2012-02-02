@@ -14,3 +14,4 @@ $config['sys_plug_dir'] = $config['inc_dir'].'plugins/';
 
 $config['log_dir'] = 'log/';
 $config['cache_dir'] = 'cache/';
+$config['backup_dir'] = 'backup/';

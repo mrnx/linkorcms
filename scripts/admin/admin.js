@@ -50,44 +50,45 @@
 		 * @param event
 		 */
 		LoadPage: function( Url, event ){
-			if(this.CheckButton(1, event)){ // Только левая кнопка мыши
-				if(this.Ajax){
-					slf = this;
-					slf.ShowSplashScreen();
-					$.ajax({
-						type: "GET",
-						url: Url,
-						dataType: "json",
-						success: function(data){
-							// Загружаем СSS
-							ajaxcssjs.loadCSS(data.css, function(){
-								// Загружаем JS
-								ajaxcssjs.loadJS(data.js, function(){
-									if(data.show_sidebar){
-										$('#sidebar').html(data.sidebar);
-										slf.SideBarShow();
-									}else{
-										slf.SideBarHide();
-									}
-									$('#main-content').html(data.content);
-									eval(data.js_inline);
-									document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
-									slf.SetLoc(data.uri);
-									slf.LiveUpdate();
-									slf.HideSplashScreen();
-								});
-							});
-						}
-					});
-				}else{
-					document.location = Url;
-				}
-				event.cancelBubble = true;
-				event.stopPropagation();
-				return true;
-			}else{
+			if(event != undefined && !this.CheckButton(1, event)){ // Только левая кнопка мыши
 				return false;
 			}
+			if(this.Ajax){
+				slf = this;
+				slf.ShowSplashScreen();
+				$.ajax({
+					type: "GET",
+					url: Url,
+					dataType: "json",
+					success: function(data){
+						// Загружаем СSS
+						ajaxcssjs.loadCSS(data.css, function(){
+							// Загружаем JS
+							ajaxcssjs.loadJS(data.js, function(){
+								if(data.show_sidebar){
+									$('#sidebar').html(data.sidebar);
+									slf.SideBarShow();
+								}else{
+									slf.SideBarHide();
+								}
+								$('#main-content').html(data.content);
+								eval(data.js_inline);
+								document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
+								slf.SetLoc(data.uri);
+								slf.LiveUpdate();
+								slf.HideSplashScreen();
+							});
+						});
+					}
+				});
+			}else{
+				document.location = Url;
+			}
+			if(event != undefined){
+				event.cancelBubble = true;
+				event.stopPropagation();
+			}
+			return true;
 		},
 
 		/**

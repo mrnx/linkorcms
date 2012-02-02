@@ -73,7 +73,7 @@ function AdminCacheMain(){
 	}
 
 	$text .= '</table><br />';
-	$text .= 'Итого <b>'.count($groups).'</b> групп(ы), <b>'.$num_rows.'</b> записей и <b>'.FormatFileSize($total_size).'</b> занято ( <a href="'.$config['admin_file'].'?exe=cache&a=cleanup">Очистить все группы</a> )';
+	$text .= 'Итого <b>'.count($groups).'</b> групп(ы), <b>'.$num_rows.'</b> записей и <b>'.FormatFileSize($total_size).'</b> занято. <a href="'.ADMIN_FILE.'?exe=cache&a=cleanup" class="button">Очистить все группы</a>';
 	$text .= '<br /><br />';
 	AddText($text);
 }

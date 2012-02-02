@@ -7,7 +7,7 @@ if(!defined('VALID_RUN')){
 
 AddCenterBox('Обзор таблиц');
 
-$tables = $db->GetTableInfo();
+$tables = System::database()->GetTableInfo();
 
 $sort = 'name';
 $sort_dec = false;
@@ -65,7 +65,7 @@ foreach($tables as $r){
 	$totalrows += $r['num_rows'];
 }
 $text .= '</table><br><br>';
-$top_text .= '<strong>Таблиц</strong>: '.$db->NumRows().'<br>';
+$top_text .= '<strong>Таблиц</strong>: '.System::database()->NumRows().'<br>';
 $top_text .= '<strong>Всего записей</strong>: '.$totalrows.'<br>';
 $top_text .= '<strong>Общий размер</strong>: '.FormatFileSize($totalsize).'<br>';
 

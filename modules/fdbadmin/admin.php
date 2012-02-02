@@ -53,6 +53,14 @@ switch($action){
 		break;
 	case 'viewcollinfo': include(MOD_DIR.'code_coll.inc.php');
 		break;
+	case 'backups': include(MOD_DIR.'backups.inc.php');
+		break;
+	case 'backup_create': include(MOD_DIR.'backup_create.inc.php');
+		break;
+	case 'backup_delete': include(MOD_DIR.'backup_delete.inc.php');
+		break;
+	case 'backup_restore': include(MOD_DIR.'backup_restore.inc.php');
+	break;
 }
 
 if($action == 'main') System::admin()->SideBarAddTextBlock('', $top_text);
@@ -61,7 +69,7 @@ function AdminFdbAdminGenMenu(){
 	global $action;
 	System::admin()->SideBarAddMenuItem('Список таблиц', 'exe=fdbadmin', 'main');
 	System::admin()->SideBarAddMenuItem('Создать таблицу', 'exe=fdbadmin&a=createtable', 'createtable');
-	System::admin()->SideBarAddMenuItem('Бекап', 'exe=fdbadmin&a=backup', 'backup');
+	System::admin()->SideBarAddMenuItem('Резервные копии', 'exe=fdbadmin&a=backups', 'backup');
 	System::admin()->SideBarAddMenuItem('Выполнить SQL', 'exe=fdbadmin&a=query', 'query');
 	System::admin()->SideBarAddMenuBlock('База данных "'.System::database()->SelectDbName.'"', $action);
 }

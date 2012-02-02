@@ -46,7 +46,7 @@ class LcDatabaseMySQL
 	//  Системные //
 	public $QueryLayer = 0; // Показывает уровень вложенности операции. Системная.
 	public $Method = ''; // Показывает какой метод был вызван последним. Низкоуровневая, системная.
-	public $Name = 'MySQl'; // Имя базы данных
+	public $Name = 'MySQL'; // Имя базы данных
 	public $Version = ''; // Версия базы данных
 
 	function __construct()
@@ -101,6 +101,15 @@ class LcDatabaseMySQL
 		if($query != '' && $this->Connected){
 			return $this->QueryResult = $this->MySQLQueryResult = @mysql_query($query, $this->DbAccess);
 		}
+	}
+
+	/**
+	 * Выполняет MySQL запрос и возвращает результат
+	 * @param $query
+	 * @return array
+	 */
+	public function MySQLQueryResult( $query ){
+		return $this->SetResult($this->MySQLQuery($query));
 	}
 
 	private function MySQLQuery2( $query, $error_msg )
