@@ -4,6 +4,7 @@
 
 System::admin()->AddCenterBox('Восстановление базы данных');
 $name = RealPath2(System::config('backup_dir').$_GET['name']);
+$iferrors = false;
 
 // Функция получает тип БД из имени файла
 // Бекап из файловой БД нельзя применить к MySQL
@@ -25,7 +26,7 @@ function BackupGetDbType( $Name ){
 }
 
 $zip = new ZipArchive();
-if(BackupGetDbType($name) && $zip->open($name) === true){ // Восстанавливаем
+if(BackupGetDbType($name) && $zip->open($name) === true){
 	if(System::database()->Name == 'FilesDB'){ // Файловая БД
 		$dbhost = System::database()->DbAccess;
 		$to_unpack = array();
@@ -36,14 +37,26 @@ if(BackupGetDbType($name) && $zip->open($name) === true){ // Восстанавливаем
 		foreach($to_unpack as $file){
 			copy($file[0], $file[1]);
 		}
-	}elseif(System::database()->Name == 'MySQL'){
-		// Восстановление БД из резервной копии
-
-
-
+	}elseif(System::database()->Name == 'MySQL'){ // БД MySQL
+		for($i = 0; $i < $zip->numFiles; $i++){
+			$filename = $zip->getNameIndex($i);
+			$sql = $zip->getFromIndex($i);
+			$sql = explode(";\n", $sql);
+			foreach($sql as $query){
+				if(trim($query) == '') continue;
+				if(System::database()->MySQLQuery($query) === false){
+					System::admin()->HighlightError(System::database()->MySQLGetErrMsg().' ('.$filename.')');
+					$iferrors = true;
+				}
+			}
+		}
 	}
 	$zip->close();
-	System::admin()->Highlight('База данных успешно восстановлена из резервной копии.');
+	if($iferrors){
+		System::admin()->Highlight('Произошли ошибки при восстановлении некоторых таблиц.');
+	}else{
+		System::admin()->Highlight('База данных успешно восстановлена из резервной копии.');
+	}
 }else{
 	// Выводим сообщение об ошибке
 	System::admin()->HighlightError('Ошибка. Неверный формат файла, либо это бекап другого типа Базы данных.');

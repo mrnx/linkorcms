@@ -49,13 +49,13 @@
 		 * @param Url
 		 * @param event
 		 */
-		LoadPage: function( Url, event ){
+		LoadPage: function( Url, event, Message ){
 			if(event != undefined && !this.CheckButton(1, event)){ // Только левая кнопка мыши
 				return false;
 			}
 			if(this.Ajax){
 				slf = this;
-				slf.ShowSplashScreen();
+				slf.ShowSplashScreen(Message);
 				$.ajax({
 					type: "GET",
 					url: Url,

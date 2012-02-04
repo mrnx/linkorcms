@@ -85,21 +85,22 @@ class LcDatabaseMySQL
 		}
 	}
 
-	private function MySQLGetErrNo()
+	public function MySQLGetErrNo()
 	{
 		return mysql_errno($this->DbAccess);
 	}
 
-	private function MySQLGetErrMsg()
+	public function MySQLGetErrMsg()
 	{
 		return mysql_error($this->DbAccess);
 	}
 
 	// private
-	public function MySQLQuery( $query )
-	{
+	public function MySQLQuery( $query ){
 		if($query != '' && $this->Connected){
 			return $this->QueryResult = $this->MySQLQueryResult = @mysql_query($query, $this->DbAccess);
+		}else{
+			return false;
 		}
 	}
 

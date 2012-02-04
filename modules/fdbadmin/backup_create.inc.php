@@ -22,11 +22,12 @@ if(System::database()->Name == 'FilesDB'){
 	}
 	$zip->close();
 }elseif(System::database()->Name == 'MySQL'){
-	$backup_file_sql = $filename.'.sql';
-	$sqlfile = fopen($backup_file_sql, 'a');
-	fwrite($sqlfile, "\n".'/* Backup database "'.System::database()->SelectDbName.'". Created in '.CMS_VERSION_STR.'. */'."\n\n\n");
+	$zip = new ZipArchive();
+	$zip->open($backup_file, ZipArchive::CREATE);
 	$tables = System::database()->GetTableInfo();
 	foreach($tables as $table){
+		$rdata = '';
+		$rows = array();
 		$rows = System::database()->Select($table['name']);
 		$table = System::database()->Prefix().$table['name'];
 		$rdata = "DROP TABLE IF EXISTS `$table`;\n";
@@ -42,18 +43,10 @@ if(System::database()->Name == 'FilesDB'){
 			$rdata = substr($rdata, 0, strlen($rdata)-1);
 			$rdata .= ");\n";
 		}
-		$rdata .= "\n";
-		fwrite($sqlfile, $rdata);
-		$rdata = '';
-		$rows = array();
+		$rdata = substr($rdata, 0, strlen($rdata)-1);
+		$zip->addFromString($table.'.sql', $rdata);
 	}
-	fclose($sqlfile);
-	// Архивируем sql файл
-	$zip = new ZipArchive();
-	$zip->open($backup_file, ZipArchive::CREATE);
-	$zip->addFile($backup_file_sql, 'backup.sql');
 	$zip->close();
-	unlink($backup_file_sql);
 }else{
 	// Выводим ошибку
 }

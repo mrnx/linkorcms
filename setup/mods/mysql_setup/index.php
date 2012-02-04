@@ -172,7 +172,7 @@ switch($p){
 				foreach($data as $row){
 					$values = sqlValues($row);
 					$sql = "INSERT INTO `{$config['db_pref']}_{$table}` VALUES $values";
-					if(!System::database()->MySQLQuery($sql)){
+					if(!System::database()->MySQLQuery($sql) === false){
 						echo System::database()->ErrorMsg;
 					}
 				}
