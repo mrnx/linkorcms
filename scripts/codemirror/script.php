@@ -27,3 +27,4 @@ System::site()->AddJSFile('scripts/codemirror/mode/javascript/javascript.js', tr
 System::site()->AddJSFile('scripts/codemirror/mode/css/css.js', true); // text/css
 System::site()->AddJSFile('scripts/codemirror/mode/clike/clike.js', true); // text/x-csrc, text/x-c++src, text/x-java, text/x-groovy (требуется для text/x-php)
 System::site()->AddJSFile('scripts/codemirror/mode/php/php.js', true); // text/x-php
+System::site()->AddJSFile('scripts/codemirror/mode/plsql/plsql.js', true); // text/x-plsql

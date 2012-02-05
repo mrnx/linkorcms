@@ -46,7 +46,7 @@ switch($action){
 	case 'newcoll': include(MOD_DIR.'coll_edit.inc.php');
 		break;
 	case 'addcoll': include(MOD_DIR.'coll_save.inc.php');
-	break;
+		break;
 	case 'deletecoll': include(MOD_DIR.'coll_delete.inc.php');
 		break;
 	case 'viewcode': include(MOD_DIR.'code_row.inc.php');
@@ -60,7 +60,11 @@ switch($action){
 	case 'backup_delete': include(MOD_DIR.'backup_delete.inc.php');
 		break;
 	case 'backup_restore': include(MOD_DIR.'backup_restore.inc.php');
-	break;
+		break;
+	case 'query': include(MOD_DIR.'db_query.inc.php');
+		break;
+	case 'performsql': include(MOD_DIR.'db_performsql.inc.php');
+		break;
 }
 
 if($action == 'main') System::admin()->SideBarAddTextBlock('', $top_text);
@@ -70,7 +74,9 @@ function AdminFdbAdminGenMenu(){
 	System::admin()->SideBarAddMenuItem('Список таблиц', 'exe=fdbadmin', 'main');
 	System::admin()->SideBarAddMenuItem('Создать таблицу', 'exe=fdbadmin&a=createtable', 'createtable');
 	System::admin()->SideBarAddMenuItem('Резервные копии', 'exe=fdbadmin&a=backups', 'backup');
-	System::admin()->SideBarAddMenuItem('Выполнить SQL', 'exe=fdbadmin&a=query', 'query');
+	if(System::database()->Name == 'MySQL'){
+		System::admin()->SideBarAddMenuItem('Выполнить SQL', 'exe=fdbadmin&a=query', 'query');
+	}
 	System::admin()->SideBarAddMenuBlock('База данных "'.System::database()->SelectDbName.'"', $action);
 }
 

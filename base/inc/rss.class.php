@@ -126,4 +126,3 @@ class RssChannel
 		return $rss;
 	}
 }
-?>

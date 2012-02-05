@@ -76,6 +76,7 @@ function AdminPhpTester(){
 	System::admin()->AddJS('
 window.snippet_id = "'.$snippet_id.'";
 PerformPhpCode = function(){
+	var label = $("#perform").button("option", "label");
 	$("#perform").button("option", "label", "Выполнить код <img src=\"images/ajax-loader.gif\">");
 	$("#result_container").hide();
 	$("#perform_result").html("");
@@ -85,7 +86,7 @@ PerformPhpCode = function(){
 		url: "'.ADMIN_FILE.'?exe=phptester&a=perform",
 		data: {code: $("#test_code").val(), id: window.snippet_id},
 		success: function(data){
-			$("#perform").button("option", "label", "Выполнить код");
+			$("#perform").button("option", "label", label);
 			$("#perform_result").html("<pre>"+data+"</pre>");
 			$("#result_container").show();
 			$("#perform_result").slideDown();
@@ -119,12 +120,12 @@ SavePhpCode = function(met){
 		<div style="width: 72px; float: left; line-height: 25px; padding-left: 2px;"><strong>Описание</strong></div>
 		<input type="text" id="test_title" style="width: 717px;" value="$title">
 	</div>
-	<div style="width: 800px; text-align: right;">
-		<a href="#" id="add" class="button" onclick="SavePhpCode('add'); return false;" title="Добавить сниппет как новый">Добавить</a>
-		<a href="#" id="save" class="button" onclick="SavePhpCode('save'); return false;" title="Добавить новый снипет или сохранить редактируемый">Сохранить</a>
-		<a href="#" id="perform" class="button" onclick="PerformPhpCode(); return false;" title="Отправить код на выполнение и вывести результат">Выполнить код</a>
+	<div style="margin: 2px 0; width: 800px; text-align: right;">
+		<a href="#" id="add" class="button" onclick="SavePhpCode('add'); return false;" title="Добавить сниппет как новый"><img src="images/admin/plus.png" />&nbsp;Добавить</a>
+		<a href="#" id="save" class="button" onclick="SavePhpCode('save'); return false;" title="Добавить новый снипет или сохранить редактируемый"><img src="images/admin/save.png" />&nbsp;Сохранить</a>
+		<a href="#" id="perform" class="button" onclick="PerformPhpCode(); return false;" title="Отправить код на выполнение и вывести результат">Выполнить код<img src="images/arrow_blue_right.png" /></a>
 	</div>
-	<div id="result_container" style="margin: 10px 0; width: 794px; background-color: #EEE; display: none; text-align: left; border: 3px #DDD solid; border-radius: 3px;-moz-border-radius: 3px;">
+	<div id="result_container" style="margin: 8px 0; width: 794px; background-color: #EEE; display: none; text-align: left; border: 3px #DDD solid; border-radius: 3px;-moz-border-radius: 3px;">
 		<div id="perform_result" style="display: none; padding: 5px; overflow-x: auto;"></div>
 	</div>
 </div>
@@ -161,9 +162,10 @@ function AdminJsTester(){
 	System::admin()->AddJS('
 window.snippet_id = "'.$snippet_id.'";
 PerformJsCode = function(){
+	var label = $("#perform").button("option", "label");
 	$("#perform").button("option", "label", "Выполнить код <img src=\"images/ajax-loader.gif\">");
 	eval($("#test_code").val());
-	$("#perform").button("option", "label", "Выполнить код");
+	$("#perform").button("option", "label", label);
 };
 SaveJSCode = function(met){
 	if($("#test_title").val() == ""){
@@ -193,9 +195,9 @@ SaveJSCode = function(met){
 		<input type="text" id="test_title" style="width: 717px;" value="$title">
 	</div>
 	<div style="width: 800px; text-align: right;">
-		<a href="#" id="add" class="button" onclick="SaveJSCode('add'); return false;" title="Добавить сниппет как новый">Добавить</a>
-		<a href="#" id="save" class="button" onclick="SaveJSCode('save'); return false;" title="Добавить новый снипет или сохранить редактируемый">Сохранить</a>
-		<a href="#" id="perform" class="button" onclick="PerformJsCode(); return false;" title="Выполнить код">Выполнить код</a>
+		<a href="#" id="add" class="button" onclick="SaveJSCode('add'); return false;" title="Добавить сниппет как новый"><img src="images/admin/plus.png" />&nbsp;Добавить</a>
+		<a href="#" id="save" class="button" onclick="SaveJSCode('save'); return false;" title="Добавить новый снипет или сохранить редактируемый"><img src="images/admin/save.png" />&nbsp;Сохранить</a>
+		<a href="#" id="perform" class="button" onclick="PerformJsCode(); return false;" title="Выполнить код">Выполнить код<img src="images/arrow_blue_right.png" /></a>
 	</div>
 </div>
 HTML;

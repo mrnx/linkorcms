@@ -153,5 +153,3 @@ class LmDebug{
 		LmDebug::Write($Msg, LmDebug::LEVEL_CORE_ERROR, $Label);
 	}
 }
-
-?>

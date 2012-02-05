@@ -12,7 +12,6 @@ if(!defined("USER")){
 	return;
 }
 
-
 class User{
 
 	public $Auth = false;

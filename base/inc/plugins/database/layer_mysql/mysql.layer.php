@@ -157,6 +157,9 @@ class LcDatabaseMySQL
 	// Устанавливает результат запроса
 	protected function SetResult( $result )
 	{
+		if($result === false){
+			return false;
+		}
 		$result_array = array();
 		$nr = mysql_num_rows($result);
 		if($nr > 0){

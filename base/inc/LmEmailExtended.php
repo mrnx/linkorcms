@@ -385,5 +385,3 @@ class LmEmailExtended{
 		return self::$_instance;
 	}
 }
-
-?>
