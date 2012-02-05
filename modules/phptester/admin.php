@@ -116,7 +116,7 @@ SavePhpCode = function(met){
 	$html = <<<HTML
 <div>
 	<div style="width: 800px;">
-		<textarea id="test_code" style="width: 791px; height: 200px;">$code</textarea>
+		<textarea id="test_code" style="margin: 2px 0; width: 791px; height: 200px;">$code</textarea>
 		<div style="width: 72px; float: left; line-height: 25px; padding-left: 2px;"><strong>Описание</strong></div>
 		<input type="text" id="test_title" style="width: 717px;" value="$title">
 	</div>
@@ -190,11 +190,11 @@ SaveJSCode = function(met){
 	$html = <<<HTML
 <div>
 	<div style="width: 800px;">
-		<textarea id="test_code" style="width: 791px; height: 200px;">$code</textarea>
+		<textarea id="test_code" style="margin: 2px 0; width: 791px; height: 200px;">$code</textarea>
 		<div style="width: 72px; float: left; line-height: 25px; padding-left: 2px;"><strong>Описание</strong></div>
 		<input type="text" id="test_title" style="width: 717px;" value="$title">
 	</div>
-	<div style="width: 800px; text-align: right;">
+	<div style="margin: 2px 0; width: 800px; text-align: right;">
 		<a href="#" id="add" class="button" onclick="SaveJSCode('add'); return false;" title="Добавить сниппет как новый"><img src="images/admin/plus.png" />&nbsp;Добавить</a>
 		<a href="#" id="save" class="button" onclick="SaveJSCode('save'); return false;" title="Добавить новый снипет или сохранить редактируемый"><img src="images/admin/save.png" />&nbsp;Сохранить</a>
 		<a href="#" id="perform" class="button" onclick="PerformJsCode(); return false;" title="Выполнить код">Выполнить код<img src="images/arrow_blue_right.png" /></a>

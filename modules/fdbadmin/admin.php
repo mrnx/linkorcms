@@ -73,7 +73,7 @@ function AdminFdbAdminGenMenu(){
 	global $action;
 	System::admin()->SideBarAddMenuItem('Список таблиц', 'exe=fdbadmin', 'main');
 	System::admin()->SideBarAddMenuItem('Создать таблицу', 'exe=fdbadmin&a=createtable', 'createtable');
-	System::admin()->SideBarAddMenuItem('Резервные копии', 'exe=fdbadmin&a=backups', 'backup');
+	System::admin()->SideBarAddMenuItem('Резервные копии', 'exe=fdbadmin&a=backups', 'backups');
 	if(System::database()->Name == 'MySQL'){
 		System::admin()->SideBarAddMenuItem('Выполнить SQL', 'exe=fdbadmin&a=query', 'query');
 	}
@@ -171,4 +171,23 @@ function AdminFdbAdminAddTableForm( &$text, $tablename, $SetComment = '', $SetTa
 		.$site->Edit('comment', $SetComment, false, 'style="width: 300px;"').'&nbsp;&nbsp;&nbsp;&nbsp;Тип '
 		.$site->Select('tabletype', $tabletype).'</font>'
 		.$site->Hidden('tablename', $tablename);
+}
+
+// Функция получает тип БД из имени файла
+// Бекап из файловой БД нельзя применить к MySQL
+function BackupCheckDbType( $Name ){
+	$pos = strrpos($Name, '.');
+	if($pos === false){
+		return false;
+	}
+	$ext = substr($Name, $pos+1); // zip
+	$pos2 = strrpos($Name, '.', -strlen($ext)-2);
+	if($pos2 === false){
+		return false;
+	}
+	$ext2 = substr($Name, $pos2+1, $pos-$pos2-1); // MySQL
+	if($ext != 'zip' || $ext2 != System::database()->Name){
+		return false;
+	}
+	return true;
 }

@@ -9,6 +9,22 @@ AddCenterBox('Обзор таблиц');
 
 $tables = System::database()->GetTableInfo();
 
+// Получаем имеющиеся бекапы
+$backup_files = GetFiles(System::config('backup_dir'), false, true, '.zip');
+rsort($backup_files, SORT_STRING);
+$backup_files2 = array();
+foreach($backup_files as $file){
+	if(BackupCheckDbType($file)){
+		$backup_files2[] = $file;
+	}
+}
+if(count($backup_files2) > 0){
+	$last_backup_name = SafeDB($backup_files2[0], 255, str);
+}else{
+	$last_backup_name = '';
+}
+
+
 $sort = 'name';
 $sort_dec = false;
 if(isset($_GET['sort'])) $sort = $_GET['sort'];
@@ -51,6 +67,9 @@ foreach($tables as $r){
 
 	$func = '';
 	$func .= SpeedButton('Переименовать', ADMIN_FILE.'?exe=fdbadmin&a=renametable&name='.$r['name'], 'images/admin/rename.png');
+	if($last_backup_name != ''){
+		$func .= System::admin()->SpeedConfirm('Восстановить из последней резервной копии', ADMIN_FILE.'?exe=fdbadmin&a=backup_restore&name='.$last_backup_name.'&table='.$r['name'], 'images/admin/restore.png', 'Все текущие данные будут затёрты. Восстановить таблицу из последней резервной копии БД?');
+	}
 	$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=fdbadmin&a=droptable&name='.$r['name'].'&ok=0', 'images/admin/delete.png', 'Удалить таблицу?');
 
 	$text .= '<tr>'

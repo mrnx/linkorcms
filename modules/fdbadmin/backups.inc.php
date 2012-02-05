@@ -7,23 +7,6 @@ if(!is_writable($backup_dir)){
 	System::admin()->HighlightError('<strong style="color: #FF0000;">Внимание!</strong> Нет прав на запись в папку '.$backup_dir.'. Создание резервных копий не возможно.');
 }
 
-function BackupCheckDbType( $Name ){
-	$pos = strrpos($Name, '.');
-	if($pos === false){
-		return false;
-	}
-	$ext = substr($Name, $pos+1); // zip
-	$pos2 = strrpos($Name, '.', -strlen($ext)-2);
-	if($pos2 === false){
-		return false;
-	}
-	$ext2 = substr($Name, $pos2+1, $pos-$pos2-1); // MySQL
-	if($ext != 'zip' || $ext2 != System::database()->Name){
-		return false;
-	}
-	return true;
-}
-
 System::admin()->AddJS('
 CreateBackup = function(){
 	Admin.ShowSplashScreen("Создание резервной копии");
