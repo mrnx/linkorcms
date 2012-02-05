@@ -65,6 +65,8 @@ switch($action){
 		break;
 	case 'performsql': include(MOD_DIR.'db_performsql.inc.php');
 		break;
+	case 'optimize': include(MOD_DIR.'db_optimize.inc.php');
+		break;
 }
 
 if($action == 'main') System::admin()->SideBarAddTextBlock('', $top_text);
@@ -76,6 +78,7 @@ function AdminFdbAdminGenMenu(){
 	System::admin()->SideBarAddMenuItem('Резервные копии', 'exe=fdbadmin&a=backups', 'backups');
 	if(System::database()->Name == 'MySQL'){
 		System::admin()->SideBarAddMenuItem('Выполнить SQL', 'exe=fdbadmin&a=query', 'query');
+		System::admin()->SideBarAddMenuItem('Оптимизировать', 'exe=fdbadmin&a=optimize', 'optimize');
 	}
 	System::admin()->SideBarAddMenuBlock('База данных "'.System::database()->SelectDbName.'"', $action);
 }
