@@ -2,18 +2,15 @@
 
 // Добавление сообщения
 function IndexForumAddPost(){
-	global $db, $config, $user, $site, $lang, $UFU;
+	global $db, $config, $user, $site, $lang;
 
 	$topic_id = SafeEnv($_GET['topic'], 11, int);
 	$forum_id = SafeEnv($_GET['forum'], 11, int);
 
 	$db->Select('forums', "`id`='$forum_id'");
 	$forum = $db->FetchRow();
-	if($user->AccessIsResolved($forum['view'])
-			&& $user->AccessIsResolved(2)
-			&& $forum['parent_id'] != '0'
-	){
-		# Доступ по рангу
+	if($user->AccessIsResolved($forum['view']) && $user->AccessIsResolved(2) && $forum['parent_id'] != '0'){
+		// Доступ по рангу
 		$rang = Rang_UserStatus($forum);
 		if($rang['rang_access']){
 			$result = Forum_Add_AddPost2();
@@ -41,11 +38,7 @@ function IndexForumAddPost(){
 						Forum_Cache_ClearAllCacheForum();
 					}
 				}
-				if(!$UFU){
-					GO('index.php?name=forum&op=showtopic&topic='.$topic_id.'&view=lastpost#last');
-				}else{
-					GO($config['general']['site_url'].'forum/topic'.$topic_id.'-new.html#last');
-				}
+				GO(Ufu('index.php?name=forum&op=showtopic&topic='.$topic_id.'&view=lastpost#last', GetSiteUrl().'forum/topic{topic}-new.html#last'));
 			}
 		}else{
 			$site->AddTextBox($lang['error'], $lang['error_access_category']);

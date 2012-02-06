@@ -3,17 +3,10 @@
 ForumLoadFunction('main');
 
 function IndexForumShowForum(){
-	global $db, $config, $site, $user, $lang, $UFU, $forum_lib_dir, $read_data, $forums2,  $topics, $statistics;
+	global $db, $config, $site, $user, $lang, $forum_lib_dir, $read_data, $forums2,  $topics, $statistics;
 	$forums2 = array();
 	$topics = array();
 	$read_data = array();
-
-	if($UFU){
-		$forum_nav_url = 'forum/';
-	}else{
-		$forum_nav_url = 'index.php?name=forum&amp;op=showforum&amp;forum=';
-	}
-
 	$where_forum_id = '';
 
 	if(isset($_GET['page'])) {
@@ -22,7 +15,6 @@ function IndexForumShowForum(){
 		$page = 1;
 	}
 	$topics_on_page = $config['forum']['topics_on_page'];
-
 
 	$statistics = ForumStatistics::Instance();
 	$statistics->Initialize($lang['statistics_cat']);
@@ -70,12 +62,10 @@ function IndexForumShowForum(){
 						$forum_parent['id'] = $mforum;
 					}
 					$mforums[$mforum['id']] = $mforum;
-
 					if($mforum['parent_id'] > 0 )
 					$forums2[$mforum['parent_id']][] = IndexForumDataFilter($mforum);
 					if($mforum['parent_id'] == SafeEnv($_GET['forum'], 11, int))
 					$where_forum_id .= "`forum_id`= '".$mforum['id']."' or";
-
 				}
 
 				if(count($forum) > 0){
@@ -94,7 +84,6 @@ function IndexForumShowForum(){
 			IndexForumMain();
 			return;
 		}
-
 
 		if(count($forum) > 0){
 			include_once($forum_lib_dir.'forum_render_topics.php');
@@ -124,9 +113,6 @@ function IndexForumShowForum(){
 							if(!$is_theme_add || !$user->Get('u_add_forum')){
 								$is_forum_member = false;
 							}
-
-
-
 							if(isset($forums2[$forum['id']])) {
 								$site->AddBlock('is_no_sub_forum', false, false);
 							} else {
@@ -139,13 +125,12 @@ function IndexForumShowForum(){
 								$site->AddBlock('forums', true, true, 'forum');
 								$site->AddBlock('forum_statistics', false, false);
 								$site->AddBlock('forum_online', false, false);
-								$f =array();
+								$f = array();
 								$f = $forum;
 								$f['parent_id'] = 0;
 								$f['title'] = 'Подфорумы категории - '.$f['title'];
 								IndexForumCatOpen($f);
 								IndexForumRender($f);
-
 								foreach($forums2[$forum['id']] as $forum2) {
 									if(isset($forums2[$forum2['id']]))
 									foreach($forums2[$forum2['id']] as $forum3){
@@ -157,24 +142,22 @@ function IndexForumShowForum(){
 									$where_forum_id = "(".substr($where_forum_id, 0, strlen($where_forum_id)-3).")";
 								}
 								$sub_topics = array();
-								if($where_forum_id <>''){
-									//$sub_topics1 = $db->SelectFields('forum_topics',$where_forum_id , " id, last_post");
-									$sub_topics1 = $db->Select('forum_topics',$where_forum_id );
+								if($where_forum_id <> ''){
+									$sub_topics1 = $db->Select('forum_topics',$where_forum_id);
 									foreach($sub_topics1 as $sub_topics2){
-										$sub_topics[$sub_topics2['forum_id']][] =  $sub_topics2;
+										$sub_topics[$sub_topics2['forum_id']][] = $sub_topics2;
 										$statistics->hits += $sub_topics2['hits'];
 										$statistics->AddTopicAuthor($sub_topics2['starter_id'], $sub_topics2['starter_name']);
-										$forum['topics'] ++;
-
+										$forum['topics']++;
 									}
 									$topics = $sub_topics;
 								}
 								foreach($forums2[$forum['id']] as $forum2){
 									if(isset($forums2[$forum2['id']])) {
 										$result2 = IndexForumStats($forum2['id']);
-										$forum2['topics'] =	 $forum2['topics'] +$result2['topics'];
-										$forum2['posts'] =	$forum2['posts'] +$result2['posts'];
-										$forum['posts'] =	$forum['posts'] +$result2['posts'];
+										$forum2['topics'] = $forum2['topics'] +$result2['topics'];
+										$forum2['posts'] = $forum2['posts'] +$result2['posts'];
+										$forum['posts'] = $forum['posts'] +$result2['posts'];
 										if($forum2['topics'] < 0 ) $forum2['topics'] = 0;
 										if($forum2['posts'] < 0 ) $forum2['posts'] = 0;
 										if($forum['posts'] < 0 ) $forum['posts'] = 0;
@@ -224,15 +207,11 @@ function IndexForumShowForum(){
 							$statistics->topics_count +=  $forum['topics'] ;
 							$site->AddBlock('is_forum_member', $is_forum_member, false, 'mark');
 							$site->AddBlock('old', true, false, 'mark');
-							if(!$UFU){
-								$vars_is_forum_member['url'] = '<a href="index.php?name=forum&amp;op=markread&amp;forum='.$forum['id'].'">'.$lang['mark_all_read'].'</a>';
-								$vars_is_forum_member['viewnoreadurl'] = '<a href="index.php?name=forum&amp;op=viewnoread&amp;forum='.$forum['id'].'">'.$lang['viewnoread'].'</a>';
-								$vars_old['lasttopics'] = '<a href="index.php?name=forum&amp;op=lasttopics&amp;forum='.$forum['id'].'">'.$lang['lasttopics'].'</a>';
-							}else{
-								$vars_is_forum_member['url'] = '<a href="forum/markread/'.$forum['id'].'">'.$lang['mark_all_read'].'</a>';
-								$vars_is_forum_member['viewnoreadurl'] = '<a href="forum/viewnoread/'.$forum['id'].'">'.$lang['viewnoread'].'</a>';
-								$vars_old['lasttopics'] = '<a href="forum/lasttopics/'.$forum['id'].'">'.$lang['lasttopics'].'</a>';
-							}
+
+							$vars_is_forum_member['url'] = '<a href="'.Ufu('index.php?name=forum&op=markread&forum='.$forum['id'], 'forum/markread/{forum}/').'">'.$lang['mark_all_read'].'</a>';
+							$vars_is_forum_member['viewnoreadurl'] = '<a href="'.Ufu('index.php?name=forum&op=viewnoread&forum='.$forum['id'], 'forum/viewnoread/{forum}/').'">'.$lang['viewnoread'].'</a>';
+							$vars_old['lasttopics'] = '<a href="'.Ufu('index.php?name=forum&op=lasttopics&forum='.$forum['id'], 'forum/lasttopics/{forum}/').'">'.$lang['lasttopics'].'</a>';
+
 							$site->Blocks['is_forum_member']['vars'] = $vars_is_forum_member;
 							$site->Blocks['old']['vars'] = $vars_old;
 							$site->SetVar('is_forum_member', 'forum_id', $forum['id']);
@@ -252,13 +231,9 @@ function IndexForumShowForum(){
 									Forum_Render_FilterTopics($mforums, $topics, $statistics, $topics);
 								}
 
-								if($UFU){
-									$forum_nav_url .= $forum['id'].'-{page}';
-								}else{
-									$forum_nav_url .= $forum_id;
-								}
+								$forum_nav_url = Ufu('index.php?name=forum&op=showforum&forum='.$forum_id, 'forum/{forum}-{page}/', true);
 								$navigation = new Navigation($page);
-								$navigation->FrendlyUrl = $UFU;
+								$navigation->FrendlyUrl = $config['general']['ufu'];
 								$navigation->GenNavigationMenu($topics, $topics_on_page, $forum_nav_url);
 
 								if(is_array($topics) && count($topics) > 0){
@@ -269,11 +244,7 @@ function IndexForumShowForum(){
 								$site->AddBlock('topic_form', $is_forum_member, false, 'form');
 
 								if($is_forum_member){
-									if(!$UFU) {
-										$site->SetVar('topic_form', 'url', 'index.php?name=forum&amp;op=addtopic&amp;forum=' . $forum_id);
-									}else{
-										$site->SetVar('topic_form', 'url', 'forum/addtopic/'.$forum_id);
-									}
+									$site->SetVar('topic_form', 'url', Ufu('index.php?name=forum&op=addtopic&forum='.$forum_id, 'forum/addtopic/{forum}/'));
 									ForumSmile();
 								}
 							}else{
@@ -306,7 +277,7 @@ function IndexForumShowForum(){
 
 	// Пользователи онлайн
 	if(isset($online_user)){
-		if(isset($online_user['reg'])){		
+		if(isset($online_user['reg'])){
 			Forum_Online_Render_Online($online_user, $lang['current_category'], 'forum_topics_online');
 		}
 	}

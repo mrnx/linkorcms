@@ -1,4 +1,4 @@
-
+п»ї
 function BBCodeButton(title, image, event){
 	return '<div class="bbcode_button"><img src="'+ image +'" onClick="'+ event +'" title="'+ title +'" alt="'+ title +'" /></div>';
 }
@@ -6,18 +6,18 @@ function BBCodeButton(title, image, event){
 function BBCodeToolBar(id_name){
 	document.write("<div class=\"bbcode_toolbar\">");
 
-	document.write(BBCodeButton('Жирный', 'scripts/bbcode_editor/images/bold.png', "BBCodeAddTag('[b]','[/b]','" + id_name + "')"));
-	document.write(BBCodeButton('Курсив', 'scripts/bbcode_editor/images/italic.png', "BBCodeAddTag('[i]','[/i]','" + id_name + "')"));
-	document.write(BBCodeButton('Подчеркнутый', 'scripts/bbcode_editor/images/underline.png', "BBCodeAddTag('[u]','[/u]','" + id_name + "')"));
-	document.write(BBCodeButton('Зачеркнутый', 'scripts/bbcode_editor/images/strike.png', "BBCodeAddTag('[s]','[/s]','" + id_name + "')"));
+	document.write(BBCodeButton('Р–РёСЂРЅС‹Р№', 'scripts/bbcode_editor/images/bold.png', "BBCodeAddTag('[b]','[/b]','" + id_name + "')"));
+	document.write(BBCodeButton('РљСѓСЂСЃРёРІ', 'scripts/bbcode_editor/images/italic.png', "BBCodeAddTag('[i]','[/i]','" + id_name + "')"));
+	document.write(BBCodeButton('РџРѕРґС‡РµСЂРєРЅСѓС‚С‹Р№', 'scripts/bbcode_editor/images/underline.png', "BBCodeAddTag('[u]','[/u]','" + id_name + "')"));
+	document.write(BBCodeButton('Р—Р°С‡РµСЂРєРЅСѓС‚С‹Р№', 'scripts/bbcode_editor/images/strike.png', "BBCodeAddTag('[s]','[/s]','" + id_name + "')"));
 
-	document.write(BBCodeButton('По левому краю', 'scripts/bbcode_editor/images/left.png', "BBCodeAddTag('[left]','[/left]','" + id_name + "')"));
-	document.write(BBCodeButton('По центру', 'scripts/bbcode_editor/images/center.png', "BBCodeAddTag('[center]','[/center]','" + id_name + "')"));
-	document.write(BBCodeButton('По правому краю', 'scripts/bbcode_editor/images/right.png', "BBCodeAddTag('[right]','[/right]','" + id_name + "')"));
-	document.write(BBCodeButton('По ширине', 'scripts/bbcode_editor/images/justify.png', "BBCodeAddTag('[justify]','[/justify]','" + id_name + "')"));
+	document.write(BBCodeButton('РџРѕ Р»РµРІРѕРјСѓ РєСЂР°СЋ', 'scripts/bbcode_editor/images/left.png', "BBCodeAddTag('[left]','[/left]','" + id_name + "')"));
+	document.write(BBCodeButton('РџРѕ С†РµРЅС‚СЂСѓ', 'scripts/bbcode_editor/images/center.png', "BBCodeAddTag('[center]','[/center]','" + id_name + "')"));
+	document.write(BBCodeButton('РџРѕ РїСЂР°РІРѕРјСѓ РєСЂР°СЋ', 'scripts/bbcode_editor/images/right.png', "BBCodeAddTag('[right]','[/right]','" + id_name + "')"));
+	document.write(BBCodeButton('РџРѕ С€РёСЂРёРЅРµ', 'scripts/bbcode_editor/images/justify.png', "BBCodeAddTag('[justify]','[/justify]','" + id_name + "')"));
 
-	document.write("<select class=\"bbcode_select\" id=\"boxh\" name=\"boxh\" onchange=\"BBCodeAddTagSelect('boxh','" + id_name + "');\" title=\"Заголовки\" tabIndex=\"100\">");
-	document.write("<option value=\"\" >Заголовок</option>\n\
+	document.write("<select class=\"bbcode_select\" id=\"boxh\" name=\"boxh\" onchange=\"BBCodeAddTagSelect('boxh','" + id_name + "');\" title=\"Р—Р°РіРѕР»РѕРІРєРё\" tabIndex=\"100\">");
+	document.write("<option value=\"\" >Р—Р°РіРѕР»РѕРІРѕРє</option>\n\
 			<option value=\"h1\">H1</option>\n\
 			<option value=\"h2\">H2</option>\n\
 			<option value=\"h3\">H3</option>\n\
@@ -26,27 +26,27 @@ function BBCodeToolBar(id_name){
 			<option value=\"h6\">H6</option>");
 	document.write("</select>");
 
-	document.write("<select class=\"bbcode_select\" id=\"boxfz\" name=\"boxfz\" onchange=\"BBCodeAddTagSelectFontSize('boxfz','" + id_name + "');\" title=\"Размер шрифта\"  tabIndex=\"101\"><option value=\"\" >Размер шрифта</option><option value=\"8\" >8</option><option value=\"10\">10</option><option value=\"12\">12</option><option value=\"14\">14</option><option value=\"16\">16</option><option value=\"18\">18</option><option value=\"20\">20</option><option value=\"22\">22</option><option value=\"24\">24</option></select>");
+	document.write("<select class=\"bbcode_select\" id=\"boxfz\" name=\"boxfz\" onchange=\"BBCodeAddTagSelectFontSize('boxfz','" + id_name + "');\" title=\"Р Р°Р·РјРµСЂ С€СЂРёС„С‚Р°\"  tabIndex=\"101\"><option value=\"\" >Р Р°Р·РјРµСЂ С€СЂРёС„С‚Р°</option><option value=\"8\" >8</option><option value=\"10\">10</option><option value=\"12\">12</option><option value=\"14\">14</option><option value=\"16\">16</option><option value=\"18\">18</option><option value=\"20\">20</option><option value=\"22\">22</option><option value=\"24\">24</option></select>");
 
 	document.write("</div>");
 	document.write("<div class=\"bbcode_toolbar\">");
 
-	document.write(BBCodeButton('Цитата', 'scripts/bbcode_editor/images/quote.png', "BBCodeAddTag('[quote]','[/quote]','" + id_name + "')"));
-	document.write(BBCodeButton('Код', 'scripts/bbcode_editor/images/code.png', "BBCodeAddTag('[code]','[/code]','" + id_name + "')"));
-	document.write(BBCodeButton('PHP код', 'scripts/bbcode_editor/images/php.png', "BBCodeAddTag('[php]','[/php]','" + id_name + "')"));
-	document.write(BBCodeButton('Изображение', 'scripts/bbcode_editor/images/image.png', "BBCodeAddTagImage('" + id_name + "')"));
+	document.write(BBCodeButton('Р¦РёС‚Р°С‚Р°', 'scripts/bbcode_editor/images/quote.png', "BBCodeAddTag('[quote]','[/quote]','" + id_name + "')"));
+	document.write(BBCodeButton('РљРѕРґ', 'scripts/bbcode_editor/images/code.png', "BBCodeAddTag('[code]','[/code]','" + id_name + "')"));
+	document.write(BBCodeButton('PHP РєРѕРґ', 'scripts/bbcode_editor/images/php.png', "BBCodeAddTag('[php]','[/php]','" + id_name + "')"));
+	document.write(BBCodeButton('Р?Р·РѕР±СЂР°Р¶РµРЅРёРµ', 'scripts/bbcode_editor/images/image.png', "BBCodeAddTagImage('" + id_name + "')"));
 
-	document.write(BBCodeButton('Код видео (Youtube/Rutube)', 'scripts/bbcode_editor/images/video.png', "BBCodeAddTagVideo('" + id_name + "')"));
-	document.write(BBCodeButton('Ссылка', 'scripts/bbcode_editor/images/link.png', "BBCodeAddTagUrl('" + id_name + "')"));
-	document.write(BBCodeButton('E-Mail адрес', 'scripts/bbcode_editor/images/email.png', "BBCodeAddTagEmail('" + id_name + "')"));
-	document.write(BBCodeButton('Скрытый текст', 'scripts/bbcode_editor/images/hide.png', "BBCodeAddTag('[hide]','[/hide]','" + id_name + "')"));
-	document.write(BBCodeButton('Горизонтальная линия', 'scripts/bbcode_editor/images/hr.png', "BBCodeAddTag('[hr]','','" + id_name + "')"));
-	document.write(BBCodeButton('Маркированный список', 'scripts/bbcode_editor/images/li.png', "BBCodeAddTag('[*]','','" + id_name + "')"));
+	document.write(BBCodeButton('РљРѕРґ РІРёРґРµРѕ (Youtube/Rutube)', 'scripts/bbcode_editor/images/video.png', "BBCodeAddTagVideo('" + id_name + "')"));
+	document.write(BBCodeButton('РЎСЃС‹Р»РєР°', 'scripts/bbcode_editor/images/link.png', "BBCodeAddTagUrl('" + id_name + "')"));
+	document.write(BBCodeButton('E-Mail Р°РґСЂРµСЃ', 'scripts/bbcode_editor/images/email.png', "BBCodeAddTagEmail('" + id_name + "')"));
+	document.write(BBCodeButton('РЎРєСЂС‹С‚С‹Р№ С‚РµРєСЃС‚', 'scripts/bbcode_editor/images/hide.png', "BBCodeAddTag('[hide]','[/hide]','" + id_name + "')"));
+	document.write(BBCodeButton('Р“РѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅР°СЏ Р»РёРЅРёСЏ', 'scripts/bbcode_editor/images/hr.png', "BBCodeAddTag('[hr]','','" + id_name + "')"));
+	document.write(BBCodeButton('РњР°СЂРєРёСЂРѕРІР°РЅРЅС‹Р№ СЃРїРёСЃРѕРє', 'scripts/bbcode_editor/images/li.png', "BBCodeAddTag('[*]','','" + id_name + "')"));
 
-	document.write(BBCodeButton('Цвет выделеного текста', 'scripts/bbcode_editor/images/color.png', "ShowHide('fontcolor')"));
+	document.write(BBCodeButton('Р¦РІРµС‚ РІС‹РґРµР»РµРЅРѕРіРѕ С‚РµРєСЃС‚Р°', 'scripts/bbcode_editor/images/color.png', "ShowHide('fontcolor')"));
 
-	document.write(BBCodeButton('Увеличить размер поля', 'scripts/bbcode_editor/images/down.png', "Resize('" + id_name + "', true)"));
-	document.write(BBCodeButton('Уменьшить размер поля', 'scripts/bbcode_editor/images/up.png', "Resize('" + id_name + "', false)"));
+	document.write(BBCodeButton('РЈРІРµР»РёС‡РёС‚СЊ СЂР°Р·РјРµСЂ РїРѕР»СЏ', 'scripts/bbcode_editor/images/down.png', "Resize('" + id_name + "', true)"));
+	document.write(BBCodeButton('РЈРјРµРЅСЊС€РёС‚СЊ СЂР°Р·РјРµСЂ РїРѕР»СЏ', 'scripts/bbcode_editor/images/up.png', "Resize('" + id_name + "', false)"));
 
 	document.write("</div>");
 
@@ -70,9 +70,9 @@ function BBCodeToolBar(id_name){
 }
 
 function BBCodeAddTagUrl(id_name){
-	var url_link = prompt('Адрес ссылки (URL):','http://');
+	var url_link = prompt('РђРґСЂРµСЃ СЃСЃС‹Р»РєРё (URL):','http://');
 	if(url_link.length > 0){
-		var link_name = prompt('Название ссылки (можно не указывать):');
+		var link_name = prompt('РќР°Р·РІР°РЅРёРµ СЃСЃС‹Р»РєРё (РјРѕР¶РЅРѕ РЅРµ СѓРєР°Р·С‹РІР°С‚СЊ):');
 		if(link_name.length > 0){
 			var tag1 = '[url='+url_link+']';
 			var tag2 = '[/url]';
@@ -111,21 +111,21 @@ function BBCodeAddTagSelect(box, id_name){
 
 
 function BBCodeAddTagVideo(id_name){
-	var url = prompt('Вставте код видео (Youtube/Rutube):');
+	var url = prompt('Р’СЃС‚Р°РІС‚Рµ РєРѕРґ РІРёРґРµРѕ (Youtube/Rutube):');
 	if (url.length > 0){
 		BBCodeAddTag('[video]', '[/video]', id_name, url );
 	}
 }
 
 function BBCodeAddTagEmail(id_name){
-	var url = prompt('Адрес электронной почты:');
+	var url = prompt('РђРґСЂРµСЃ СЌР»РµРєС‚СЂРѕРЅРЅРѕР№ РїРѕС‡С‚С‹:');
 	if (url.length > 0){
 		BBCodeAddTag('[email]' , '[/email]', id_name, url);
 	}
 }
 
 function BBCodeAddTagImage(id_name){
-	var url_image = prompt('Вставте полный URL изображения:','http://');
+	var url_image = prompt('Р’СЃС‚Р°РІС‚Рµ РїРѕР»РЅС‹Р№ URL РёР·РѕР±СЂР°Р¶РµРЅРёСЏ:','http://');
 	if (url_image.length > 0){
 		BBCodeAddTag('[img]', '[/img]', id_name, url_image);
 	}

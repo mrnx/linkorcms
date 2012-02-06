@@ -12,7 +12,7 @@
 
 function Online_Forum(&$u) {
 	global $UFU;
-	if($UFU) {
+	if($UFU){
 		$pos = strpos($u['p_url'] , 'forum');
 		if($pos<>false) {
 			$pos = strpos($u['p_url'] , '/topic');
@@ -38,11 +38,9 @@ function Online_Forum(&$u) {
 			}
 		}
 	}
-
-	if(strpos($u['p_url'],'name=forum') == true) {
+	if(strpos($u['p_url'], 'name=forum') == true){
 		return true;
-	}
-	else {
+	}else{
 		return false;
 	}
 }
@@ -242,8 +240,6 @@ function Online_GetCountUser($id, $root = true, $only_topic = false, $only_int_a
 		$yes = true;
 	}
 
-
-
 	$results = array();
 	$results['users'] = '';
 	$count = 0;
@@ -269,14 +265,14 @@ function Online_GetCountUser($id, $root = true, $only_topic = false, $only_int_a
 
 	if($count > 0 and $id > -1){
 		$results['users']['count'] = $count;
-		$results['count'] ='<FONT SIZE="1"> ('.$lang['online'].': '.$count.')</FONT>';
+		$results['count'] ='<font size="1"> ('.$lang['online'].': '.$count.')</font>';
 		return  $results;
 	}else{
 		if($id == -1){
 			if($all == 0) $all = 1;
 			$results['users']['reg'] = Forum_Online_Get_User($all_forum);
 			$results['users']['count'] = $all;
-			$results['count'] = '<FONT SIZE="1"> ('.$lang['online'].': '.$all.')</FONT>';
+			$results['count'] = '<font size="1"> ('.$lang['online'].': '.$all.')</font>';
 			return  $results;
 		}
 	}
@@ -310,37 +306,34 @@ function Forum_Online_Get_User_Info( $user_id ) {
 }
 
 
-function Forum_Online_Get_User(&$users , $full = true) {
-	global $db, $use, $users_reg2, $UFU;
-
+function Forum_Online_Get_User( &$users, $full = true ){
+	global $db, $use, $users_reg2;
 	$sus_user_info = false;
-	if(isset($_GET['op']) and $_GET['op'] == 'showtopic')
+	if(isset($_GET['op']) and $_GET['op'] == 'showtopic'){
 		$sus_user_info = true;
+	}
 	$users_str = '';
 	$users_reg = array();
 	$u_id=-1;
 	if($users > 0){
 		foreach($users as $m_user){
 			$usr =	$m_user;
-			if( $usr>0 ){
+			if($usr>0){
 				if($full){
 					if($sus_user_info){
-						$usr = $m_user['u_name'];	
-
+						$usr = $m_user['u_name'];
 					}else{
 						$usr =  $m_user['u_name'];
 					}
-					$user_online = (!$UFU?'<a href="index.php?name=user&amp;op=userinfo&amp;user=' .$m_user. '">' . $usr . '</a>': '<a href="user/'.$m_user. '">'.$usr.'</a>');
-
+					$user_online = '<a href="'.Ufu('index.php?name=user&op=userinfo&user='.SafeDB($m_user['u_id'], 11, int), 'user/{user}/info/').'">'.SafeDB($usr, 255, str).'</a>';
 					$users_reg[] = $user_online.'&nbsp;';
-				}
-				else {
+				}else{
 					$users_reg[] = $m_user;
 				}
 			}
 		}
 	}
-	return $users_reg ;
+	return $users_reg;
 }
 
 function  Forum_Online_Render_Online($users = array(), $title='', $block='forum_online') {
@@ -353,21 +346,21 @@ function  Forum_Online_Render_Online($users = array(), $title='', $block='forum_
 		$vars_online['online_img'] = true;
 		$vars_online['title'] = $title;
 		$vars_online['reg'] = count($users['reg']);
-		$vars_online['guest'] = ($users['count'] - count($users['reg'])>0?$users['count'] - count($users['reg']):0);
+		$vars_online['guest'] = ($users['count'] - count($users['reg'])>0 ? $users['count'] - count($users['reg']) : 0);
 		$site->Blocks['gen_online']['vars'] = $vars_online;
 		$site->AddBlock('onlines', true,true, 'user');
 		$i = 0;
 		$vars_online= array();
-		foreach($users['reg'] as $reg_user) {
+		foreach($users['reg'] as $reg_user){
 			$i++;
 			$vars_online['url'] = $reg_user;
-			$site->AddSubBlock('onlines',true,$vars_online);
+			$site->AddSubBlock('onlines', true, $vars_online);
 			if($i>250) break;
 		}
-		if($title<>$lang['all_online']) {
-			$c_u = Online_GetCountUser(-1,true,false, true);
+		if($title<>$lang['all_online']){
+			$c_u = Online_GetCountUser(-1, true, false, true);
 			$vars_online['url'] = '<BR>всего на форуме: '.$c_u['users']['count'] ;
-			$site->AddSubBlock('onlines',true,$vars_online);
+			$site->AddSubBlock('onlines', true, $vars_online);
 
 		}
 	}

@@ -42,8 +42,7 @@ switch($op){
 		HackOff();
 }
 
-function AcceptPost(&$login,&$email,&$hideemail,&$nikname,&$realname,&$age,&$homepage,&$icq,&$city,&$avatar,&$apersonal,&$gmt,&$about,&$snews)
-{
+function AcceptPost(&$login,&$email,&$hideemail,&$nikname,&$realname,&$age,&$homepage,&$icq,&$city,&$avatar,&$apersonal,&$gmt,&$about,&$snews){
 	global $config;
 	if(isset($_POST['login'])){
 		$login = substr($_POST['login'],0,30);
@@ -113,8 +112,7 @@ function AcceptPost(&$login,&$email,&$hideemail,&$nikname,&$realname,&$age,&$hom
 }
 
 #Загрузка данных пользователя из базы данных для редактирования
-function GetEditUserData( &$login, &$email, &$hideemail, &$nikname, &$realname, &$age, &$homepage, &$icq, &$city, &$avatar, &$apersonal, &$gmt, &$about, &$snews)
-{
+function GetEditUserData( &$login, &$email, &$hideemail, &$nikname, &$realname, &$age, &$homepage, &$icq, &$city, &$avatar, &$apersonal, &$gmt, &$about, &$snews){
 	global $config, $db, $user;
 	$db->Select('users', "`id`='".$user->Get('u_id')."'");
 	$u = $db->FetchRow();
@@ -134,8 +132,7 @@ function GetEditUserData( &$login, &$email, &$hideemail, &$nikname, &$realname, 
 	$snews = SafeDB($u['servernews'], 1, int);
 }
 
-function IndexUserConditions()
-{
+function IndexUserConditions(){
 	global $config, $site, $site;
 	if($config['user']['registration']=='off'){
 		$site->AddTextBox('','<center>Извините, регистрация приостановлена.</center>');
@@ -153,8 +150,7 @@ function IndexUserConditions()
 }
 
 // Форма регистрации / редактирования пользователя
-function IndexUserRegistration($acceptPost=false, $edit=false)
-{
+function IndexUserRegistration($acceptPost=false, $edit=false){
 	global $config, $site, $site, $user;
 	if(!$edit){
 		$user->UnLogin(false);
@@ -331,8 +327,7 @@ function IndexUserRegistration($acceptPost=false, $edit=false)
 	$site->Blocks['user_form']['vars'] = $vars;
 }
 
-function IndexUserRegistrationOk()
-{
+function IndexUserRegistrationOk(){
 	global $db, $config, $site, $user;
 	$site->SetTitle('Регистрация на сайте');
 
@@ -579,8 +574,7 @@ function IndexUserRegistrationOk()
 	}
 }
 
-function IndexUserInfo()
-{
+function IndexUserInfo(){
 	global $config, $db, $user, $site;
 
 	if(isset($_GET['user'])){
@@ -632,8 +626,7 @@ function IndexUserInfo()
 	}
 }
 
-function IndexUserlist()
-{
+function IndexUserlist(){
 	global $config, $db, $site;
 	$site->SetTitle('Список пользователей');
 
@@ -678,8 +671,7 @@ function IndexUserlist()
 	}
 }
 
-function IndexUserForgotPassword()
-{
+function IndexUserForgotPassword(){
 	global $site;
 	$site->SetTitle('Восстановление пароля/логина');
 	$site->AddTemplatedBox('Восстановление пароля/логина','module/user_forgotpassword.html');
@@ -692,8 +684,7 @@ function IndexUserForgotPassword()
 	$site->Blocks['forgot_form']['vars'] = $vars;
 }
 
-function IndexUserSendPassword()
-{
+function IndexUserSendPassword(){
 	global $site, $db, $config;
 	$title = 'Восстановление пароля/логина';
 	$site->SetTitle($title);
@@ -718,5 +709,3 @@ function IndexUserSendPassword()
 		$site->AddTextBox($title, "Ошибка, данные не инициализированы.");
 	}
 }
-
-?>

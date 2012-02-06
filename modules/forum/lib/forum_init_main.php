@@ -38,13 +38,6 @@ $user->Def('u_read_forum',true);
 
 Index_Forum_Add_Java();
 
-if(isset($config['forum']['ufu'])) {
-	$UFU = $config['forum']['ufu'];
-}else{
-	$config['forum']['ufu'] = false;
-	$UFU = false;
-}
-
 if(!isset($config['forum']['cache'])) {
 	$config['forum']['cache'] = false;
 	$config['forum']['maxi_cache_duration'] = 600;

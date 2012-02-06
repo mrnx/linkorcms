@@ -10,37 +10,26 @@ include ($config['inc_dir'].'tree.class.php');
 class ForumTree extends Tree
 {
 	public $moduleName = 'forum';
-	public $id_par_name = 'op=showforum&forum';
+	public $id_par_name = '';
 	public $TopCatName = 'Форум';
 	public $Slach = '/';
 
-	public function ShowPath( $id, $UFU = false, $view_end_url = false )
-	{
+	public function ShowPath( $id, $view_end_url = false ){
 		global $site;
 		$parents = array();
 		$parents = $this->GetAllParent($id);
 		$parent = $this->GetParentId($id);
-		if($parent == 0){
-			$burl = 'index.php?name='.$this->moduleName;
-		}elseif($parent != 0){
-			$burl = 'index.php?name='.$this->moduleName.'&'.$this->id_par_name.'='.$parent;
-		}
 		$path = '';
-		$path .= '<b><a href="index.php?name='.$this->moduleName.'">'.$this->TopCatName.'</a></b>';
+		$path .= '<b><a href="'.Ufu('index.php?name='.$this->moduleName, $this->moduleName.'/').'">'.$this->TopCatName.'</a></b>';
 		$c = count($parents) - 1;
 		for($i = 0; $i < $c; $i++){
-			if( !$UFU){
-			$path .=  $this->Slach.' <a href="index.php?name='.$this->moduleName.'&'.$this->id_par_name.'='.$parents[$i]['id'].'">'.$parents[$i]['title'].'</a>';
-			} else {
-			$path .= $this->Slach.' <a href="'.$this->moduleName.'/'.$parents[$i]['id'].'">'.$parents[$i]['title'].'</a>';
-			}
+			$path .= $this->Slach.' <a href="'.Ufu('index.php?name='.$this->moduleName.'&op=showforum&forum='.$parents[$i]['id'], $this->moduleName.'/{forum}/').'">'.SafeDB($parents[$i]['title'], 255, str).'</a>';
 		}
-			if(!$view_end_url){
-				$path .=$this->Slach.$parents[$c]['title'];
-			} else {
-				$path .= $this->Slach.' <a href="'.$this->moduleName.'/'.$parents[$i]['id'].'">'.$parents[$c]['title'].'</a>';
-			}
-
+		if(!$view_end_url){
+			$path .= $this->Slach.$parents[$c]['title'];
+		} else {
+			$path .= $this->Slach.' <a href="'.$this->moduleName.'/'.$parents[$i]['id'].'">'.$parents[$c]['title'].'</a>';
+		}
 		$site->AddTextBox('', $path);
 	}
 

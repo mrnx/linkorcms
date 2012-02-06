@@ -153,9 +153,9 @@ function IndexNewsMain()
 	$site->AddBlock('news',true,true);
 
 	if(isset($_GET['page'])){
-		$page=SafeEnv($_GET['page'],10,int);
+		$page = SafeEnv($_GET['page'],10,int);
 	}else{
-		$page=1;
+		$page = 1;
 	}
 
 	$topics = GetTopics();

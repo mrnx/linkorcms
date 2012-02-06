@@ -2,7 +2,7 @@
 
 // ƒобавление новой темы пользователем
 function IndexForumAddTopic(){
-	global $user, $db, $site, $config, $lang, $UFU;
+	global $user, $db, $site, $config, $lang;
 
 	if(isset($_GET['forum']) && isset($_POST['topic_title']) && isset($_POST['text'])) {
 
@@ -54,11 +54,7 @@ function IndexForumAddTopic(){
 					if($config['forum']['update_cache_in_add']){
 						Forum_Cache_ClearAllCacheForum();
 					}
-					if(!$UFU){
-						GO('index.php?name=forum&op=showforum&forum='.$forum_id);
-					}else{
-						GO($config['general']['site_url'].'forum/'.$forum_id);
-					}
+					GO(Ufu('index.php?name=forum&op=showforum&forum='.$forum_id, GetSiteUrl().'forum/{forum}/'));
 				}
 			}else{
 				$site->AddTextBox($lang['error'], $lang['error_access_category']);

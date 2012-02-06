@@ -1,8 +1,7 @@
 <?php
 
 function IndexForumUserTopics(){
-	global $db, $config, $site, $user, $lang, $UFU, $forum_lib_dir;
-
+	global $db, $config, $site, $user, $lang, $forum_lib_dir;
 	if(isset($_GET['user'])){
 		include_once($forum_lib_dir.'forum_render_topics.php');
 		$user_id = SafeEnv($_GET['user'], 11, int);
@@ -14,13 +13,9 @@ function IndexForumUserTopics(){
 			$page = 1;
 		}
 		$topics_on_page = $config['forum']['topics_on_page'];
-		if($UFU){
-			$forum_nav_url = 'forum/usertopics/'.$user_id.'-{page}';
-		}else{
-			$forum_nav_url = 'index.php?name=forum&amp;op=usertopics&amp;user='.$user_id;
-		}
-		$navigation = new Navigation($page, 'navigation');
-		$navigation->FrendlyUrl = $UFU;
+		$forum_nav_url = Ufu('index.php?name=forum&op=usertopics&user='.$user_id, 'forum/usertopics/{user}-{page}/', true);
+		$navigation = new Navigation($page);
+		$navigation->FrendlyUrl = $config['general']['ufu'];
 		//
 
 		if($config['forum']['cache']){
@@ -82,16 +77,12 @@ function IndexForumUserTopics(){
 				}
 			}
 
-			if($UFU){
-				Navigation_AppLink($lang['forum'], 'forum');
-				Navigation_AppLink($lang['usertopics']. $starter_name. '&nbsp;['.$count_topics.']', 'forum/usertopics/'.SafeEnv($_GET['user'], 11, int));
-			}else{
-				Navigation_AppLink($lang['forum'], 'index.php?name=forum');
-				Navigation_AppLink($lang['usertopics']. $starter_name. '&nbsp;['.$count_topics.']' ,  $forum_nav_url.SafeEnv($_GET['user'], 11, int));
-			}
-
+			Navigation_AppLink($lang['forum'], Ufu('index.php?name=forum', 'forum/'));
+			Navigation_AppLink($lang['usertopics']. $starter_name. '&nbsp;['.$count_topics.']', Ufu('index.php?name=forum&op=usertopics&user='.$user_id, 'forum/usertopics/{user}/'));
 			Navigation_ShowNavMenu();
+
 			$navigation->GenNavigationMenu($topics, $topics_on_page, $forum_nav_url);
+
 			$read_data = Forum_Marker_GetReadData();
 			Forum_Render_Topics($forum, $topics, $read_data, false, $page);
 			$site->AddBlock('topic_form', false, false, 'form');

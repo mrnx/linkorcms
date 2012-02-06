@@ -1,16 +1,11 @@
 <?php
 
 function IndexForumViewNoRead(){
-	global $db, $config, $site, $user, $lang, $UFU, $forum_lib_dir;
+	global $db, $config, $site, $user, $lang, $forum_lib_dir;
 	if(isset($_GET['page'])) {
 		$page = SafeEnv($_GET['page'], 11, int);
 	}else {
 		$page = 1;
-	}
-	if(!$UFU){
-		$forum_nav_url = 'index.php?name=forum&op=viewnoread';
-	}else{
-		$forum_nav_url = 'forum/viewnoread-{page}';
 	}
 
 	if($user->Auth){
@@ -23,15 +18,10 @@ function IndexForumViewNoRead(){
 
 		if(isset($_GET['forum'])){
 			$gforum = SafeEnv($_GET['forum'], 11, int);
-			if($gforum>0)
-				if(!$UFU) {
-					$forum_nav_url .= '&forum='.$gforum;
-				}else{
-					$forum_nav_url .= '/'.$gforum;
-				}
 		}else{
 			$gforum = -1;
 		}
+		$forum_nav_url = Ufu('index.php?name=forum&op=viewnoread'.($gforum>0 ? '&forum='.$gforum : ''), 'forum/viewnoread-{page}/'.($gforum>0 ? '{forum}/' : ''), true);
 
 		$your_where = "`delete`='0'";
 		if($user->isAdmin() ||  $config['forum']['basket'] == false){
@@ -67,7 +57,7 @@ function IndexForumViewNoRead(){
 
 		if(count($forum) > 0 ){
 			if($gforum>0 && $mtitle['id']<>''){
-				if($forum[$mtitle['id']]['parent_id'] >0){
+				if($forum[$mtitle['id']]['parent_id'] > 0){
 					$mtitle0['id'] =  $forum[$mtitle['id']]['parent_id'];
 					$mtitle0['title'] = $forums[$mtitle0['id']]['title'];
 				}
@@ -86,35 +76,28 @@ function IndexForumViewNoRead(){
 					}
 				}
 				// Выводим темы
-				Forum_Render_FilterTopics($forum, $allnoreadtopics, $statistics, $topics );
-			}
-			if(is_array($topics)){
-				$count_topics = count($topics);
-				if($UFU){
-					Navigation_AppLink($lang['forum'], 'forum');
-					if($mtitle0['id']<>''){
-						Navigation_AppLink($mtitle0['title'], 'forum/'.$mtitle0['id']);
-					}
-					if($mtitle['id']<>''){
-						Navigation_AppLink($mtitle['title'], 'forum/'.$mtitle['id']);
-					}
-					Navigation_AppLink($lang['viewnoreadtitle'].'&nbsp;['.$count_topics.']', $forum_nav_url);
-				}else{
-					Navigation_AppLink($lang['forum'], 'index.php?name=forum');
-					Navigation_AppLink($lang['viewnoreadtitle'].'&nbsp;['.$count_topics.']' , $forum_nav_url);
-				}
-				Navigation_ShowNavMenu();
+				Forum_Render_FilterTopics($forum, $allnoreadtopics, $statistics, $topics);
 			}
 
-			if(count($topics) > $topics_on_page){
-				$navigation = new Navigation($page);
-				$navigation->FrendlyUrl = true;
-				$navigation->GenNavigationMenu($topics, $topics_on_page, $forum_nav_url);
-				$mtopics['navigation'] = $site->Blocks['navigation'];
+			// Добавляем хлебные крошки
+			$mtitle['id'] = SafeDB($mtitle['id'], 11, int);
+			$mtitle['title'] = SafeDB($mtitle['title'], 255, str);
+			$mtitle0['id'] = SafeDB($mtitle0['id'], 11, int);
+			$mtitle0['title'] = SafeDB($mtitle0['title'], 255, str);
+			Navigation_AppLink($lang['forum'], Ufu('index.php?name=forum', 'forum/'));
+			if($mtitle0['id']>0){
+				Navigation_AppLink($mtitle0['title'], Ufu('index.php?name=forum&op=showforum&forum='.$mtitle0['id'], 'forum/{forum}/'));
 			}
-			else {
-				$site->AddBlock('navigation',false, false);
+			if($mtitle['id']>0){
+				Navigation_AppLink($mtitle['title'], Ufu('index.php?name=forum&op=showforum&forum='.$mtitle['id'], 'forum/{forum}/'));
 			}
+			Navigation_AppLink($lang['viewnoreadtitle'].'&nbsp;['.count($topics).']', Ufu('index.php?name=forum&op=viewnoread'.($mtitle['id']>0 ? '&forum='.$mtitle['id'] : ''), 'forum/viewnoread/'.($mtitle['id']>0 ? $mtitle['id'].'/' : '')));
+			Navigation_ShowNavMenu();
+
+			// Постраничная навигация
+			$navigation = new Navigation($page);
+			$navigation->FrendlyUrl = $config['general']['ufu'];
+			$navigation->GenNavigationMenu($topics, $topics_on_page, $forum_nav_url);
 
 			Forum_Render_Topics($forum, $topics, $read_data, false, $page );
 			$site->AddBlock('topic_form', false, false, 'form');
@@ -123,18 +106,12 @@ function IndexForumViewNoRead(){
 		}else {
 			$site->AddTextBox($lang['error'], $lang['error_no_forum'] );
 		}
-
-		$cat = 0;
-
 		$statistics->Render('forum_topics_statistics');
-
 		$c_u = Online_GetCountUser(-1);
 		$online_user = $c_u['users'];
 		Forum_Online_Render_Online($online_user, $lang['all_online'], 'forum_topics_online');
-
-		$site->AddTextBox('', '<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox($cat).'</span>');
+		$site->AddTextBox('', '<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox(0).'</span>');
 		$site->AddBlock('old', false, false, 'mark');
-
 	}else{ // Пользователь не авторизован
 		$site->AddTextBox($lang['error'], $lang['error_auth']);
 	}

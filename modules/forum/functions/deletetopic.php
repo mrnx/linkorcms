@@ -44,7 +44,7 @@ function IndexForumDeleteTopic(){
 			}
 		}
 		Forum_Cache_ClearAllCacheForum();
-		GO('index.php?name=forum&op=showforum&forum='.$forum_id);
+		GO(Ufu('index.php?name=forum&op=showforum&forum='.$forum_id, 'forum/{forum}/'));
 	}else{
 		$db->Select('forum_topics', "`id`='".SafeEnv($_GET['topic'], 11, int)."'");
 		$topic = $db->FetchRow();
@@ -54,7 +54,7 @@ function IndexForumDeleteTopic(){
 		$site->AddBlock('delete_form', true, false, 'form');
 		$vars = array();
 		$vars['basket'] = $config['forum']['basket'] == true;
-		$vars['url'] = 'index.php?name=forum&amp;op=deletetopic&amp;topic=' . SafeEnv($_GET['topic'], 11, int) . '&amp;ok=1';
+		$vars['url'] = 'index.php?name=forum&op=deletetopic&topic='.SafeEnv($_GET['topic'], 11, int).'&ok=1'; // Без UFU
 		$site->Blocks['delete_form']['vars'] = $vars;
 	}
 }

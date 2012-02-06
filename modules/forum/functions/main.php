@@ -1,20 +1,28 @@
 <?php
-global  $forums2, $topics, $statistics;
+
+global $forums2, $topics, $statistics;
 $statistics = ForumStatistics::Instance();
 $forums2 = array();
 $topics = array();
 $read_data = array();
 
-
 // Статистика и пометки о прочтёном/не прочтёном для подфорумов
 function IndexForumStats($id){
-	global $topics,$read_data, $statistics, $forums2;
-	$result = array('topics'=>0, 'posts'=>0, 'last'=> array( 'last_post_date'=>0,  'last_id'=>0, 'last_poster_id'=>0, 'last_poster_name'=>'','last_title'=>'') );
+	global $topics, $read_data, $statistics, $forums2;
+	$result = array(
+		'topics'=>0,
+		'posts'=>0,
+		'last'=> array(
+			'last_post_date'=>0,
+			'last_id'=>0,
+			'last_poster_id'=>0,
+			'last_poster_name'=>'',
+			'last_title'=>''
+		)
+	);
 	foreach($forums2[$id] as $key=>$sub_forum){
-
-		$result['topics'] +=	$sub_forum['topics'];
-		$result['posts'] +=	$sub_forum['posts'];
-
+		$result['topics'] += $sub_forum['topics'];
+		$result['posts'] += $sub_forum['posts'];
 		if($sub_forum['last_post_date'] > $result['last']['last_post_date']){
 			$result['last']['last_post_date'] = $sub_forum['last_post_date'];
 			$result['last']['last_id'] = $sub_forum['last_id'];
@@ -39,16 +47,14 @@ function IndexForumStats($id){
 				}
 				if(!$statistics->stop){
 					$statistics->hits += $topic2['hits'];
-					$statistics->AddTopicAuthor($topic2['starter_id'], SafeDB($topic2['starter_name'], 250, str) );
+					$statistics->AddTopicAuthor($topic2['starter_id'], SafeDB($topic2['starter_name'], 250, str));
 				}
 			}
 		}
-
 		if(isset($forums2[$sub_forum['id']])){
 			$result2 = IndexForumStats($sub_forum['id']);
-			// if(
-			$result['topics'] +=	$result2['topics'];
-			$result['posts'] +=	$result2['posts'];
+			$result['topics'] += $result2['topics'];
+			$result['posts'] += $result2['posts'];
 			if($result2['last']['last_post_date'] > $result2['last']['last_post_date']){
 				$result['last']['last_post_date'] = $result2['last']['last_post_date'];
 				$result['last']['last_id'] = $result2['last']['last_id'];
@@ -58,43 +64,32 @@ function IndexForumStats($id){
 			}
 		}
 	}
-
 	return $result;
 }
 
 
 // Главная страница форума, список форумов в категории
 function IndexForumMain(){
-
-	global $site, $user, $lang, $config, $db, $UFU, $forums2, $topics, $read_data,$statistics;
+	global $site, $user, $lang, $config, $db, $forums2, $topics, $read_data, $statistics;
 	$forums2 = array();
 	$topics = array();
 	$read_data = array();
-
 	if(isset($_GET['cat'])){
 		$cat = true;
 		$_GET['cat'] = str_replace('/', '', $_GET['cat']);
 		$pid = SafeEnv($_GET['cat'], 11, int);
 		$e_where = " and (`id`='$pid' or `parent_id`='$pid')";
-		if($UFU){
-			Navigation_AppLink($lang['forum'], 'forum');
-		}else{
-			Navigation_AppLink($lang['forum'], 'index.php?name=forum');
-		}
 	}else{
 		$cat = false;
 		$e_where = '';
 	}
-
 	$s_title = (!$cat ? $lang['statistics'] : $lang['statistics_cat']);
 	$statistics->Initialize($s_title);
-
 	if($cat){
 		$statistics->_current = $pid;
 	}else {
 		$statistics->stop = true;
 	}
-
 	if($config['forum']['cache'] && !$user->Auth){
 		$cache_name = 'IndexForumMain_'.$user->AccessLevel()."_cat$pid";
 		$cache = LmFileCache::Instance();
@@ -103,7 +98,6 @@ function IndexForumMain(){
 			return true;
 		}
 	}
-
 	$result =  Forum_Cache_AllDataTableForum();
 	$forums = array();
 	foreach($result as $f) {
@@ -114,10 +108,8 @@ function IndexForumMain(){
 		}
 	}
 	// $forums - форумы по родительским категориям
-
 	$result = Forum_Cache_AllDataTableForumTopics();
 	$statistics->topics_count =  count($result) ;
-
 	foreach($result as $topic) {
 		$topics[$topic['forum_id']][] = $topic;
 		if(!$cat){
@@ -125,9 +117,7 @@ function IndexForumMain(){
 			$statistics->AddTopicAuthor($topic['starter_id'], $topic['starter_name']);
 		}
 	}
-
 	// $topics - темы по родительским форумам
-
 	if(isset($forums['0'])){ // есть категории
 		$cat_id = -1;
 		if(isset($_GET['cat'])){
@@ -142,19 +132,13 @@ function IndexForumMain(){
 		$site->AddBlock('is_forum_member', $is_forum_member, false, 'mark');
 		$site->AddBlock('old', true, false, 'mark');
 
-		if(!$UFU) {
-			$vars_is_forum_member['url'] = '<a href="index.php?name=forum&amp;op=markread">'.$lang['mark_all_read'].'</a>';
-			$vars_is_forum_member['viewnoreadurl'] = '<a href="index.php?name=forum&amp;op=viewnoread">'.$lang['viewnoread'].'</a>';
-			$vars_old['lasttopics'] = '<a href="index.php?name=forum&amp;op=lasttopics">'.$lang['lasttopics'].'</a>';
-		}else{
-			$vars_is_forum_member['url'] = '<a href="forum/markread">'.$lang['mark_all_read'].'</a>';
-			$vars_is_forum_member['viewnoreadurl'] = '<a href="forum/viewnoread">'.$lang['viewnoread'].'</a>';
-			$vars_old['lasttopics'] = '<a href="forum/lasttopics">'.$lang['lasttopics'].'</a>';
-		}
+		$vars_is_forum_member['url'] = '<a href="'.Ufu('index.php?name=forum&op=markread', 'forum/markread/').'">'.$lang['mark_all_read'].'</a>';
+		$vars_is_forum_member['viewnoreadurl'] = '<a href="'.Ufu('index.php?name=forum&op=viewnoread', 'forum/viewnoread/').'">'.$lang['viewnoread'].'</a>';
+		$vars_old['lasttopics'] = '<a href="'.Ufu('index.php?name=forum&op=lasttopics', 'forum/lasttopics/').'">'.$lang['lasttopics'].'</a>';
+
 		$site->Blocks['is_forum_member']['vars'] = $vars_is_forum_member;
 		$site->Blocks['old']['vars'] = $vars_old;
 
-		//	$site->AddTemplatedBox($lang['forum'].$c_u['count'], 'module/forums.html');
 		$site->AddTemplatedBox('', 'module/forums.html');
 		$site->AddBlock('forums', true, true, 'forum');
 		$site->AddBlock('is_no_sub_forum', true, false);

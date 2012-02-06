@@ -9,8 +9,7 @@ $forum_navigation = '';
 
 function Navigation_AppLink($title, $url) {
 	global $forum_navigation, $lang;
-	$forum_navigation .= ( $forum_navigation != '' ? $lang['site_slas'] : '')
-	.'<b><a href="'.$url.'">'.$title.'</a></b>';
+	$forum_navigation .= ($forum_navigation != '' ? $lang['site_slas'] : '').'<b><a href="'.$url.'">'.$title.'</a></b>';
 }
 
 function Navigation_ShowNavMenu() {
@@ -18,7 +17,7 @@ function Navigation_ShowNavMenu() {
 	$site->AddTextBox('', $forum_navigation);
 }
 
-# Комбобокс  "Разделы форума"
+// Комбобокс  "Разделы форума"
 function Navigation_GetForumCategoryComboBox( $cat, $form =true, $count = true, $start = true){
 	global  $site, $config;
 	//$ex_where = "'status`='1'";
@@ -42,12 +41,12 @@ function Navigation_GetForumCategoryComboBox( $cat, $form =true, $count = true, 
 '.$site->Select('forum', $data, false, 'onchange="this.form.submit();"').'
 </form>';
 	}else{
-		return  $site->Select('forum',$data,false);
+		return $site->Select('forum',$data,false);
 	}
 }
 
 function Navigation_Patch( $cat, $view_end_url = false){
-	global  $site, $UFU, $config, $forum_lib_dir, $lang;
+	global  $site, $config, $forum_lib_dir, $lang;
 	$all_table = Forum_Cache_AllDataTableForum();
 	$table = ForumGetViewAccessTable($all_table);
 	include_once($forum_lib_dir.'tree_f.class.php');
@@ -56,5 +55,5 @@ function Navigation_Patch( $cat, $view_end_url = false){
 	$tree->TopCatName = 'Форум';
 	$tree->Slach = $lang['site_slas'];
 	$nav_url = 'index.php?name=forum';
-	$tree->ShowPath($cat, $UFU, $view_end_url);
+	$tree->ShowPath($cat, $view_end_url);
 }

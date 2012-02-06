@@ -100,10 +100,7 @@ function IndexForumShowTopic( $one_post = false ){
 			}
 
 			// Доступ по уровню видимости
-			if(
-			($user->AccessIsResolved($forum['view']) && $forum['parent_id'] != '0')
-			&& ($user->AccessIsResolved($parent['view']))
-			){
+			if(($user->AccessIsResolved($forum['view']) && $forum['parent_id'] != '0') && ($user->AccessIsResolved($parent['view']))){
 				// Доступ по рангу
 				$rang = Rang_UserStatus($forum);
 				if($rang['rang_access']){
@@ -113,7 +110,7 @@ function IndexForumShowTopic( $one_post = false ){
 					$site->Title .= $lang['site_slas'].$parent['title'].$lang['site_slas']. $forum['title'] .$lang['site_slas'].$topic['title'];
 
 					// Бокс с названием темы и количеством просматривающих пользователей
-					$site->AddTextBox('','<b>'.SafeDB($topic['title'], 255, str).'</b>'.$topic2['read']);
+					$site->AddTextBox('', '<b>'.SafeDB($topic['title'], 255, str).'</b>'.$topic2['read']);
 
 					// Увеличиваем счетчик просмотров
 					$db->Update('forum_topics', "hits='".(SafeDB($topic['hits'], 11, int) + 1)."'", "`id`='".$topic_id."'");
@@ -126,18 +123,18 @@ function IndexForumShowTopic( $one_post = false ){
 						$one_post = '';
 					}
 					Posts_RenderPosts(
-					$topic_id,
-					'forum_posts',
-					$lastpost,
-					$page,
-					true,
-					$posts_on_page,
-					'index.php?name=forum&amp;op=showtopic&amp;topic='.$topic_id,$rang['no_link_guest'],
-					'', // your_where
-					$forum['id'],
-					$parent['id'],
-					($topic['close_topics']==1?true:false),
-					$one_post
+						$topic_id,
+						'forum_posts',
+						$lastpost,
+						$page,
+						true,
+						$posts_on_page,
+						'index.php?name=forum&op=showtopic&topic='.$topic_id,$rang['no_link_guest'],
+						'', // your_where
+						$forum['id'],
+						$parent['id'],
+						($topic['close_topics']==1?true:false),
+						$one_post
 					);
 
 					// Форма добавления комментарий
@@ -148,13 +145,13 @@ function IndexForumShowTopic( $one_post = false ){
 						$rang= Rang_RangUserTopic($rang,$topic);
 						$is_message_add = $rang['rang_message'];
 						Posts_RenderPostForm(
-						false,
-						$forum['id'],
-						$topic['id'],
-						0,
-						'',
-						'',
-						$is_forum_member
+							false,
+							$forum['id'],
+							$topic['id'],
+							0,
+							'',
+							'',
+							$is_forum_member
 						);
 					}else{
 						$is_forum_member = false;
@@ -192,7 +189,7 @@ function IndexForumShowTopic( $one_post = false ){
 				$site->AddTextBox($lang['error'], $lang['error_access_category']);
 			}
 		}else {
-			$site->AddTextBox($lang['topic_basket'], $lang['topic_basket_current'].'</BR><input type="button" value="'.$lang['back'].'"onclick="history.back();"></center>');
+			$site->AddTextBox($lang['topic_basket'], $lang['topic_basket_current'].'<br><input type="button" value="'.$lang['back'].'"onclick="history.back();"></center>');
 		}
 	}else{
 		$site->AddTextBox($lang['error'], '<center><input type="button" value="'.$lang['back'].'"onclick="history.back();"></center>');
@@ -206,7 +203,9 @@ function IndexForumShowTopic( $one_post = false ){
 		$site->AddSubBlock('topic_right', true, $vars);
 	}
 
-	if(!isset($forum_id)) $forum_id = 0;
+	if(!isset($forum_id)){
+		$forum_id = 0;
+	}
 	// Быстрый переход по форумам
 	$site->AddTextBox('', '<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox($forum_id).'</span>');
 

@@ -62,7 +62,7 @@ function Forum_Render_Topics(&$forum, &$topics, &$read_data,
 		$rang='' , &$online_user=null)
 {
 
-	global $db, $config, $site, $user, $lang, $UFU;
+	global $db, $config, $site, $user, $lang;
 	$basket = Forum_Basket_RenderBasket($topics, 'forum_basket_topics');
 
 	$site->AddBlock('no_topics', count($topics) == 0);

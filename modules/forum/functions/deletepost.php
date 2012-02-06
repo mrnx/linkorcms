@@ -3,15 +3,12 @@
 // Удаление сообщения
 function IndexForumDeletePost(){
 	global $db, $site, $user, $config, $lang;
-
 	if(isset($_GET['ok'])){
-
 		if(isset($_GET['page'])){
 			$page = SafeEnv($_GET['page'], 11, int);
 		}else{
 			$page = 1;
 		}
-
 		$post_id = SafeEnv($_GET['post'], 11, int);
 		$db->Select('forum_posts',"`id`='$post_id'");
 		$post = $db->FetchRow();
@@ -66,7 +63,7 @@ function IndexForumDeletePost(){
 		}
 
 		Forum_Cache_ClearAllCacheForum();
-		GO('index.php?name=forum&op=showtopic&topic='.$topic_id.'&page='.$page);
+		GO(Ufu('index.php?name=forum&op=showtopic&topic='.$topic_id.'&page='.$page, 'forum/topic{topic}-{page}.html'));
 	}else {
 		$text = '<br />'.$lang['delete_post'].'?<br /><br />'
 				.' <a href="javascript:history.go(-1)">Нет</a>';
@@ -75,7 +72,7 @@ function IndexForumDeletePost(){
 		$site->AddBlock('delete_form', true, false, 'form');
 		$vars = array();
 		$vars['basket'] = $config['forum']['basket'] == true;
-		$vars['url'] ='index.php?name=forum&amp;op=deletepost&amp;topic='.SafeEnv($_GET['topic'], 11, int).'&amp;post='.SafeEnv($_GET['post'], 11, int).'&amp;ok=1';
+		$vars['url'] = 'index.php?name=forum&op=deletepost&topic='.SafeEnv($_GET['topic'], 11, int).'&post='.SafeEnv($_GET['post'], 11, int).'&ok=1'; // Без UFU
 		$site->Blocks['delete_form']['vars'] = $vars;
 	}
 }

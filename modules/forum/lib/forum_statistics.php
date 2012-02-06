@@ -49,23 +49,15 @@ class ForumStatistics{
 	}
 
 	public function ActiveTopicAuthors(){
-		global $UFU;
-
 		$this->topic_authors_count = count(array_unique($this->_author_count));
 		$this->active_topic_authors = ' ';
-
 		if(count($this->_author_name) > 0){
 			SortArray($this->_author_name, 'count', true);
 			$i = 0;
 			foreach($this->_author_name as $author){
 				$i++;
-				if($UFU){
-					$author_link = 'user/'.$author['id'];
-					$usertopics_link = 'forum/usertopics'.$this->_current.'/'.$author['id'];
-				}else{
-					$author_link = 'index.php?name=user&amp;op=userinfo&amp;user='.$author['id'];
-					$usertopics_link = 'index.php?name=forum&amp;op=usertopics&amp;user='.$author['id'];
-				}
+				$author_link = Ufu('index.php?name=user&op=userinfo&user='.$author['id'], 'user/{user}/info/');
+				$usertopics_link = Ufu('index.php?name=forum&op=usertopics&user='.$author['id'], 'forum/usertopics/{user}/');
 				$this->active_topic_authors .= '<a href="'.$author_link.'">'.$author['name'].'</a> <font size="1">[<a href="'.$usertopics_link.'">'.$author['count'].'</a>]</font>';
 				if($i == 20 || count($this->_author_name) == $i){
 					$this->active_topic_authors .= '.';

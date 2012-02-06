@@ -15,13 +15,13 @@ if(!defined('VALID_RUN')){
 include_once('forum_init.php');
 include_once($forum_lib_dir.'forum_init_main.php');
 
-if(isset($_GET['op'])) {
+if(isset($_GET['op'])){
 	$op = $_GET['op'];
 }else {
 	$op = 'main';
 }
 
-switch($op) {
+switch($op){
 	case 'login':
 		ForumLoadFunction('login');
 		IndexForumLogin();
@@ -159,8 +159,8 @@ switch($op) {
 		HackOff();
 }
 
-function IndexForumDataFilter( &$forum, $root= true , $get_online = true) {
-	global  $lang, $UFU, $config;
+function IndexForumDataFilter( &$forum, $root= true , $get_online = true ){
+	global  $lang, $config;
 	$forum2 = array();
 	$forum2['id'] = SafeDB($forum['id'], 11, int);
 	$forum2['parent_id'] = SafeDB($forum['parent_id'], 11, int);
@@ -172,14 +172,13 @@ function IndexForumDataFilter( &$forum, $root= true , $get_online = true) {
 	$forum2['last_post_date'] = SafeDB($forum['last_post'], 11, int);
 	$forum2['last_post'] = TimeRender(SafeDB($forum['last_post'], 11, int), true, true);
 	if($forum2['last_post_date']> (time()-86400)){
-		$forum2['last_post'] = '<FONT COLOR="#FF0000">'.$forum2['last_post'].'</FONT>';
+		$forum2['last_post'] = '<font color="#FF0000">'.$forum2['last_post'].'</font>';
 	}
 	$forum2['last_poster_id'] = SafeDB($forum['last_poster_id'], 11, int);
-	$forum2['last_poster_url'] = (!$UFU?'index.php?name=user&op=userinfo&user='.$forum2['last_poster_id']:
-			'user/'.$forum2['last_poster_id']);
+	$forum2['last_poster_url'] = Ufu('index.php?name=user&op=userinfo&user='.$forum2['last_poster_id'], 'user/{user}/info/');
 
 	$forum2['last_poster_name'] = SafeDB($forum['last_poster_name'], 255, str);
-	$forum2['last_title'] = 	DivideWord(SafeDB($forum['last_title'], 255, str));
+	$forum2['last_title'] = DivideWord(SafeDB($forum['last_title'], 255, str));
 	$forum2['last_id'] = SafeDB($forum['last_id'], 11, int);
 	$forum2['order'] = SafeDB($forum['order'], 11, int);
 	$forum2['status'] = SafeDB($forum['status'], 1, int);
@@ -203,15 +202,14 @@ function IndexForumDataFilter( &$forum, $root= true , $get_online = true) {
 
 	if($forum2['topics'] > $config['forum']['topics_on_page']){
 		$forum2['pages'] = true;
-		$forum2['pages'] =$lang['pages'];
-		$forum_nav_url = (!$UFU ? 'index.php?name=forum&amp;op=showforum&amp;forum=' : 'forum/');
+		$forum2['pages'] = $lang['pages'];
 		$page = ceil($forum2['topics']/ $config['forum']['topics_on_page']);
 		$str ='';
-		for ($i = 0, $page ;$i< $page	 ; $i++) {
-			$str .= '<a href="'.$forum_nav_url.$forum2['id'].(!$UFU?'&page=':'-').($i+1).'">'.($i+1).' </a>';
-			if($i>5 and $page>14) {
-				$str .= '<a href="'.$forum_nav_url.$forum2['id'].(!$UFU?'&page=':'-').($page-1).'">'.($page-1).' </a>';
-				$str .= '......<a href="'.$forum_nav_url.$forum2['id'].(!$UFU?'&page=':'-').$page.'">'.$page.' </a>';
+		for ($i = 0; $i<$page; $i++){
+			$str .= '<a href="'.Ufu('index.php?name=forum&op=showforum&forum='.$forum2['id'].'&page='.($i+1), 'forum/{forum}-{page}/').'">'.' </a>';
+			if($i>5 && $page>14){
+				$str .= '<a href="'.Ufu('index.php?name=forum&op=showforum&forum='.$forum2['id'].'&page='.($page-1), 'forum/{forum}-{page}/').'">'.($page-1).' </a>';
+				$str .= '......<a href="'.Ufu('index.php?name=forum&op=showforum&forum='.$forum2['id'].'&page='.$page, 'forum/{forum}-{page}/').'">'.$page.' </a>';
 				break;
 			}
 		}
@@ -219,12 +217,11 @@ function IndexForumDataFilter( &$forum, $root= true , $get_online = true) {
 	}
 
 	if($forum2['close_topic']==1) {
-		$forum2['description'].=''.$lang['close_for_discussion'];
+		$forum2['description'] .= ''.$lang['close_for_discussion'];
 	}
 
-	$forum2['url'] = (!$UFU?'index.php?name=forum&op=showforum&forum='.$forum2['id']:'forum/'.$forum2['id']);
-	$forum2['last_url_topic'] = (!$UFU?'index.php?name=forum&amp;op=showtopic&amp;topic='.$forum2['last_id'].'&amp;view=lastpost':'forum/topic'.$forum2['last_id'].'-new.html');
-
+	$forum2['url'] = Ufu('index.php?name=forum&op=showforum&forum='.$forum2['id'], 'forum/{forum}/');
+	$forum2['last_url_topic'] = Ufu('index.php?name=forum&op=showtopic&topic='.$forum2['last_id'].'&view=lastpost', 'forum/topic{topic}-new.html');
 	return $forum2;
 }
 
@@ -240,7 +237,7 @@ function IndexForumCatOpen( &$category ) {
 	$site->AddSubBlock('forums', true, $category);
 }
 
-function IndexForumCatClose( &$category ) {
+function IndexForumCatClose( &$category ){
 	global $site, $lang;
 	$category['is_cat_close'] = true;
 	$category['is_cat'] = false;
@@ -258,7 +255,7 @@ function IndexForumCatClose( &$category ) {
 
 function IndexForumRender( &$forum, $read = false, $pod_forums=array() ){
 	global $site, $lang;
-	if($forum['parent_id'] == '0') {
+	if($forum['parent_id'] == '0'){
 		$forum['is_cat'] = true;
 		$forum['is_forum'] = false;
 	}else {
@@ -278,20 +275,25 @@ function IndexForumRender( &$forum, $read = false, $pod_forums=array() ){
 	if(!isset($forum['users'])){
 		$forum['users'] = ' ';
 	}
-
     $forum['subforums'] = false;
 	if(count($pod_forums)>0){
-    $forum['subforums'] = true;
-		  $forum['subforums'] = '<table border="0" cellpadding="0" cellspacing="0" width="100%" align="center" valign="top"><tr valign="top">'; 
-		  $i = 0;
-		foreach($pod_forums as $pod_forum){		
+		$forum['subforums'] = true;
+		$forum['subforums'] = '<table border="0" cellpadding="0" cellspacing="0" width="100%" align="center" valign="top"><tr valign="top">';
+		$i = 0;
+		foreach($pod_forums as $pod_forum){
 			$i++;
-		  $img = (!$pod_forum['read']?'subforum.gif':'subforum_old.gif');
-		  $alt = (!$pod_forum['read']?'Есть новые сообщения':'Все прочитаны.');
-		  $forum['subforums'] .= '<td style="text-transform:none;font-size:11px;  padding-left:10px;" ><img src="images/'.$img.'" title="'.$alt.'" alt="'.$alt.'" border="0" />&nbsp;<a href="forum/'.$pod_forum['id'].'" title="'.substr(strip_tags($pod_forum['description']),0,250).'... тем  '.$pod_forum['topics'].'">'.$pod_forum['title'].' ('.$pod_forum['topics'].')</a> &nbsp;&nbsp;</td>	'.($i==3?'</tr><tr valign="top">':'') ;
-		  if($i==3) $i = 0;
+			$forum_link = Ufu('index.php?name=forum&op=showforum&forum='.$pod_forum['id'], 'forum/{forum}/');
+			$img = (!$pod_forum['read'] ? 'subforum.gif' : 'subforum_old.gif');
+			$alt = (!$pod_forum['read'] ? 'Есть новые сообщения' : 'Все прочитаны.');
+			$forum['subforums'] .= '
+			<td style="text-transform:none; font-size:11px; padding-left:10px;>
+			<img src="images/'.$img.'" title="'.$alt.'" alt="'.$alt.'" border="0" />
+			&nbsp;<a href="'.$forum_link.'" title="'.substr(strip_tags($pod_forum['description']),0,250).'... тем '.$pod_forum['topics'].'">'.$pod_forum['title'].' ('.$pod_forum['topics'].')</a>
+			&nbsp;&nbsp;
+			</td>'.($i==3?'</tr><tr valign="top">':'');
+			if($i==3) $i = 0;
 		}
-		 $forum['subforums'] .=($i<2?'<td></td>':'').'</tr></table><BR>';
+		$forum['subforums'] .=($i<2?'<td></td>':'').'</tr></table><BR>';
 	}
 	$site->AddSubBlock('forums', true, $forum);
 }

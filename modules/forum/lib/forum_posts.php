@@ -21,10 +21,8 @@ function word_wrapped_string($text, $limit = 75, $wraptext = '<br />'){
 function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 		$page = 0, $EnNav = false, $com_on_page = 10, $nav_url = '',
 		$no_link_guest = false, $your_where = '', $parent_forum_id = '',
-		$parent_parent_forum_id = '' , $topic_close = false , $one_post='')
-{
-	global $site, $db, $config, $user, $lang, $UFU;
-	$post_nav_url = $nav_url.($page > 0 ? '&page='.$page : '');
+		$parent_parent_forum_id = '' , $topic_close = false , $one_post=''){
+	global $site, $db, $config, $user, $lang;
 
 	$cache_name = 'IndexForumRenderPosts_page'.$page.'_';
 	$site->AddBlock($blockname, true, true, 'post');
@@ -38,7 +36,7 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 	if($user->isAdmin()){
 		$cache_name .='a_page'.$page;
 	}
-	$where = "`object`='" . $topic_id . "'".$your_where;
+	$where = "`object`='".$topic_id."'".$your_where;
 	if($lastpost){
 		$cache_name .= 'lastpost';
 	}
@@ -46,30 +44,21 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 	if(!$cache->HasCache('forum', $cache_name)){
 		$coms = $db->Select('forum_posts', $where.(($where <> '' && $one_post <> '')?' and ':'').$one_post);
 		SortArray($coms, 'public', false); //Сортируем по дате
+		$navigation = new Navigation($page);
 		if(count($coms) > $com_on_page && $EnNav){
 			if($lastpost){
 				$page = ceil(count($coms) / $com_on_page);
 			}
-			$comm_nav_obj = new Navigation($page);
-			$comm_nav_obj->FrendlyUrl = $UFU;
-			if($UFU){
-				$post_nav_url = 'forum/topic'.$topic_id.'-{page}.html';
-			}else{
-				$post_nav_url = $nav_url;
-			}
-			$comm_nav_obj->GenNavigationMenu($coms, $com_on_page, $post_nav_url);
-		}
-		else {
-			$site->AddBlock('navigation',false, false);
+			$navigation->FrendlyUrl = $config['general']['ufu'];
+			$post_nav_url = Ufu($nav_url, 'forum/topic'.$topic_id.'-{page}.html', true);
+			$navigation->GenNavigationMenu($coms, $com_on_page, $post_nav_url);
+		}else{
+			$navigation->DisableNavigation();
 		}
 
 		$basket = Forum_Basket_RenderBasket($coms);
 		$i = 1;
 		$i2 = 1;
-		$usertopics_url = '<a href="index.php?name=forum&amp;op=usertopics&amp;user=';
-		if($UFU){
-			$usertopics_url = '<a href="forum/usertopics/';
-		}
 		$num = 0;
 		if($page > 1){
 			$num = ($page * $com_on_page) - $com_on_page;
@@ -98,12 +87,11 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 			}
 			if($uid != 0){
 				$userinfo = GetUserInfo($uid);
-				$vars['usertopics'] = $usertopics_url.$uid.'">'.$lang['allusertopics'].'</a>' ;
+				$vars['usertopics'] = '<a href="'.Ufu('index.php?name=forum&op=usertopics&user='.$uid, 'forum/usertopics/{user}/').'">'.$lang['allusertopics'].'</a>' ;
 				$vars['public'] = $comment['public'];
 				if($userinfo['rank_name']<>'') {
-					$vars['author_name']	 = $userinfo['name'];
-					$vars['author'] = (!$UFU?'<a href="index.php?name=user&amp;op=userinfo&amp;user=' . $uid . '">' . $userinfo['name'] . '</a>':
-							'<a href="user/'.$uid. '">'.$userinfo['name'].'</a>');
+					$vars['author_name'] = $userinfo['name'];
+					$vars['author'] = '<a href="'.Ufu('index.php?name=user&op=userinfo&user='.$uid, 'user/{user}/info/').'">'.$userinfo['name'].'</a>';
 				}else{
 					$vars['author'] = $comment['name'];
 					$vars['author_name'] = $comment['name'];
@@ -153,15 +141,15 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 				$ruser = false;
 			}
 			if($vars['homepage'] != ''){
-				$vars['homepage'] = '<a href="http://' . $vars['homepage'] . '" target="_blank">' . $vars['homepage'] . '</a>';
+				$vars['homepage'] = '<a href="http://'.$vars['homepage'].'" target="_blank">'.$vars['homepage'].'</a>';
 			}else {
 				$vars['homepage'] = '&nbsp;';
 			}
-			$vars['public'] = $lang['added'] . TimeRender($vars['public']);
-			$vars['ip'] = SafeDB($comment['user_ip'],19,str);
+			$vars['public'] = $lang['added'].TimeRender($vars['public']);
+			$vars['ip'] = SafeDB($comment['user_ip'], 19, str);
 			$vars['topic_id'] = $topic_id;
-			$vars['id'] = SafeDB($comment['id'],11,int);
-			$vars['nodelete'] = (SafeDB($comment['delete'], 1, int)?false:true);
+			$vars['id'] = SafeDB($comment['id'], 11, int);
+			$vars['nodelete'] = (SafeDB($comment['delete'], 1, int) ? false : true);
 			$vars['page'] = $page;
 			$vars['last'] = false;
 			$vars['start'] = false;
@@ -183,12 +171,7 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 			}
 			if($one_post ==''){
 				$vars['num'] = $num;
-				if($UFU) {
-					$vars['url'] ="javascript:link_post('".$config['general']['site_url']."forum/t".$topic_id."/post".$comment['id'].".html')";
-				}
-				else {
-					$vars['url'] ="javascript:link_post('".$config['general']['site_url']."index.php?name=forum&op=post&topic=".$topic_id."&post=".$comment['id']."')";
-				}
+				$vars['url'] = "javascript:link_post('".GetSiteUrl().Ufu("index.php?name=forum&op=post&topic=".$topic_id."&post=".$comment['id'], 'forum/t{topic}/post{post}.html')."')";
 			}else{
 				$vars['url'] = 'javascript:history.go(-1)';
 				$vars['num'] = '';
@@ -215,7 +198,7 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 function Posts_RenderPostForm($edit = false, $forum = 0, $topic = 0, $id = 0,
 		$value = '', $text_title='', $loadform = true, $close = false)
 {
-	global $site, $db, $config, $user, $lang, $UFU;
+	global $site, $db, $config, $user, $lang;
 	if($edit){
 		$site->AddTemplatedBox('', 'module/forum_edit_post.html');
 	}else{
@@ -237,11 +220,7 @@ function Posts_RenderPostForm($edit = false, $forum = 0, $topic = 0, $id = 0,
 			$vars['edit_title'] = $text_title<>'';
 			$vars['topic'] = $topic;
 			$vars['title'] = $lang['edit_post'];
-			if(!$UFU){
-				$vars['url'] = "index.php?name=forum&amp;op=savepost&amp;topic={$topic}&amp;post={$id}&amp;page={$page}";
-			}else{
-				$vars['url'] = $config['general']['site_url']."forum/savepost/topic{$topic}/post{$id}-{$page}";
-			}
+			$vars['url'] = Ufu("index.php?name=forum&op=savepost&topic=$topic&post=$id&page=$page", 'forum/savepost/topic{topic}/post{post}-{page}/');
 			$vars['edit'] = true;
 			$vars['lsubmit'] = $lang['save'];
 			$vars['lsubmit_title'] = $lang['save_edit'];
@@ -253,11 +232,7 @@ function Posts_RenderPostForm($edit = false, $forum = 0, $topic = 0, $id = 0,
 			$vars['edit_title'] = $text_title<>'';
 			$vars['text_value'] = '';
 			$vars['title'] = $lang['add_post'];
-			if(!$UFU){
-				$vars['url'] = $vars['url'] = "index.php?name=forum&amp;op=addpost&amp;topic=$topic&amp;forum=$forum";
-			}else{
-				$vars['url'] = $config['general']['site_url']."forum/addpost/{$forum}/topic{$topic}";
-			}
+			$vars['url'] = Ufu("index.php?name=forum&op=addpost&topic=$topic&forum=$forum", 'forum/addpost/{forum}/topic{topic}/');
 			$vars['edit'] = false;
 			$vars['lsubmit'] = $lang['add'];
 			$vars['lsubmit_title'] = $lang['add_post'];

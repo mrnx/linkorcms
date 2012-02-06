@@ -6,7 +6,7 @@
 # Темы форума
 
 function Forum_Topic_DataFilter( &$topic, $root = true ){
-	global  $lang, $UFU, $config;
+	global  $lang, $config;
 
 	$topic2 = array();
 	$topic2['id'] = SafeDB($topic['id'], 11, int);
@@ -18,8 +18,7 @@ function Forum_Topic_DataFilter( &$topic, $root = true ){
 	$topic2['start_date'] = TimeRender(SafeDB($topic['start_date'], 11, int), true, true);
 	$topic2['starter_id'] = SafeDB($topic['starter_id'], 11, int);
 	$topic2['starter_name'] = SafeDB($topic['starter_name'], 255, str);
-	$topic2['starter_url'] = (!$UFU?'index.php?name=user&op=userinfo&user='.$topic2['starter_id']:
-	'user/'.$topic2['starter_id']);
+	$topic2['starter_url'] = Ufu('index.php?name=user&op=userinfo&user='.$topic2['starter_id'], 'user/{user}/info/');
 
 	$topic2['last_post_date'] = SafeDB($topic['last_post'], 11, int);
 	$topic2['last_post'] = TimeRender(SafeDB($topic['last_post'], 11, int), true, true);
@@ -29,8 +28,7 @@ function Forum_Topic_DataFilter( &$topic, $root = true ){
 
 	$topic2['last_poster_id'] = SafeDB($topic['last_poster_id'], 11, int);
 	$topic2['last_poster_name'] = SafeDB($topic['last_poster_name'], 255, str);
-	$topic2['last_poster_url'] = (!$UFU ? 'index.php?name=user&op=userinfo&user='.$topic2['last_poster_id']:
-	'user/'.$topic2['last_poster_id']);
+	$topic2['last_poster_url'] = Ufu('index.php?name=user&op=userinfo&user='.$topic2['last_poster_id'], 'user/{user}/info/');
 
 	$c = Online_GetCountUser($topic2['id'], $root, true);
 	$topic2['read'] = $c['count'];
@@ -43,28 +41,21 @@ function Forum_Topic_DataFilter( &$topic, $root = true ){
 	$topic2['nodelete'] = (SafeDB($topic['delete'], 1, int)?false:true);
 	$topic2['category'] = $topic['forum_id'];
 
-	if($UFU){
-		$topic2['url'] = 'forum/topic'.$topic2['id'].'.html';
-		$topic2['last_url'] = 'forum/topic'.$topic2['id'].'-new.html';
-	}else{
-		$topic2['url'] = 'index.php?name=forum&amp;op=showtopic&amp;topic='.$topic2['id'];
-		$topic2['last_url'] = 'index.php?name=forum&amp;op=showtopic&amp;topic='.$topic2['id'].'&amp;view=lastpost';
-	}
+	$topic2['url'] = Ufu('index.php?name=forum&op=showtopic&topic='.$topic2['id'], 'forum/topic{topic}.html');
+	$topic2['last_url'] = Ufu('index.php?name=forum&op=showtopic&topic='.$topic2['id'].'&view=lastpost', 'forum/topic{topic}-new.html');
 
 	$topic2['pages'] = '';
 	if($topic2['posts'] + 1 > $config['forum']['posts_on_page']){
-		$forum_nav_url ='index.php?name=forum&amp;op=showtopic&amp;topic=';
-		if($UFU){
-			$forum_nav_url ='forum/'.$topic2['category'].'/'.$topic2['forum_id'].'/topic';
-		}
-		$page = ceil(($topic2['posts']+1)/$config['forum']['posts_on_page']);
+		$forum_nav_url = 'index.php?name=forum&op=showtopic&topic='.$topic2['id'];
+		$forum_nav_url_u ='forum/topic{topic}-';
 
+		$page = ceil(($topic2['posts']+1)/$config['forum']['posts_on_page']);
 		$str = $lang['pages'];
 		for($i=0, $page; $i<$page; $i++){
-			$str .= '<a href="'.$forum_nav_url.$topic2['id'].($UFU?'-'.($i+1).'.html':'&page='.($i+1)).'"><FONT SIZE="1">'.($i+1).' </FONT></a>';
-			if($i > 5 && $page > 10) {
-				$str .= '....<a href="'.$forum_nav_url.$topic2['id'].($UFU?'-'.($page-1).'.html':'&page='.($page-1)).'"><FONT SIZE="1">'.($page-1).' </FONT></a>';
-				$str .= '<a href="'.$forum_nav_url.$topic2['id'].($UFU?'-'.($page).'.html':'&page='.$page).'"><FONT SIZE="1">'.$page.' </FONT></a>';
+			$str .= '<a href="'.Ufu($forum_nav_url.'&page='.($i+1), $forum_nav_url_u.($i+1).'.html').'"><font size="1">'.($i+1).' </font></a>';
+			if($i > 5 && $page > 10){
+				$str .= '....<a href="'.Ufu($forum_nav_url.'&page='.($page-1), $forum_nav_url_u.($page-1).'.html').'"><font size="1">'.($page-1).' </font></a>';
+				$str .= '<a href="'.Ufu($forum_nav_url.'&page='.$page, $forum_nav_url_u.$page).'"><font size="1">'.$page.' </font></a>';
 				break;
 			}
 		}
