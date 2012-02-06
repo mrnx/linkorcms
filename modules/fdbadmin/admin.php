@@ -95,7 +95,7 @@ function AdminFdbAdminGenTableMenu( $name ){
 
 function AdminFdbAdminInitCollForm( &$text, $saveparam ){
 	global $config;
-	$text .= '<form action="'.$config['admin_file'].'?exe=fdbadmin&a='.$saveparam.'" method="post"><table cellspacing="0" cellspacing="0" class="cfgtable">'
+	$text .= '<form action="'.ADMIN_FILE.'?exe=fdbadmin&a='.$saveparam.'" method="post"><table cellspacing="0" cellspacing="0" class="cfgtable">'
 	.'<tr><th>Поле</th><th>Тип</th><th>Длина/значения</th><th>Атрибуты</th><th>Ноль</th><th>По умолчанию</th><th>Авто приращение</th><th>Первичный</th><th>Индекс</th><th>Уникальное</th><th> - </th><th>Полный текст</th></tr>';
 }
 

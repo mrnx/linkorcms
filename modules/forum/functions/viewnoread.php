@@ -2,7 +2,7 @@
 
 function IndexForumViewNoRead(){
 	global $db, $config, $site, $user, $lang, $UFU, $forum_lib_dir;
-if(isset($_GET['page'])) {
+	if(isset($_GET['page'])) {
 		$page = SafeEnv($_GET['page'], 11, int);
 	}else {
 		$page = 1;
@@ -139,5 +139,3 @@ if(isset($_GET['page'])) {
 		$site->AddTextBox($lang['error'], $lang['error_auth']);
 	}
 }
-
-?>

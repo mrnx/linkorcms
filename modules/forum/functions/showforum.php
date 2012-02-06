@@ -331,7 +331,4 @@ function IndexForumShowForum(){
 			$cache->Write('forum', $cache_name, $site);
 		}
 	}
-
 }
-
-?>

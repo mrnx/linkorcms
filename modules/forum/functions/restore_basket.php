@@ -75,5 +75,3 @@ function IndexForumRestoreBasketTopic( $id = 0, $go_back = true ){
 		GoBack();
 	}
 }
-
-?>

@@ -56,5 +56,3 @@ function IndexForumMarkRead(){
 		}
 	}
 }
-
-?>

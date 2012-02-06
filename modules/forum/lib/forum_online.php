@@ -376,4 +376,3 @@ function  Forum_Online_Render_Online($users = array(), $title='', $block='forum_
 	}
 
 }
-?>

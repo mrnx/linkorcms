@@ -29,4 +29,3 @@ $db->Delete('config',"`group_id`='9' and `name`='forum_post'");
 $db->Delete('access',"`group`='forum'");
 $db->Delete('modules', "`folder`='forum'");
 
-?>

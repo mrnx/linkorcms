@@ -79,5 +79,3 @@ function IndexForumDeletePost(){
 		$site->Blocks['delete_form']['vars'] = $vars;
 	}
 }
-
-?>

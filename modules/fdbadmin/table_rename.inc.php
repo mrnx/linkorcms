@@ -14,10 +14,10 @@ if(isset($_POST['newname'])){
 if($s == false){
 	FormRow('Новое имя', $site->Edit('newname', SafeEnv($_GET['name'], 255, str)));
 	AddCenterBox('Переименование таблицы "'.SafeEnv($_GET['name'], 255, str).'"');
-	AddForm('<form action="'.$config['admin_file'].'?exe=fdbadmin&a=renametable&name='.SafeEnv($_GET['name'], 255, str).'" method="post">', $site->Submit('Переименовать'));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=fdbadmin&a=renametable&name='.SafeEnv($_GET['name'], 255, str).'" method="post">', $site->Submit('Переименовать'));
 }else{
 	$db->RenameTable(SafeEnv($_GET['name'], 255, str), SafeEnv($_POST['newname'], 255, str));
-	GO($config['admin_file'].'?exe=fdbadmin');
+	GO(ADMIN_FILE.'?exe=fdbadmin');
 }
 
 AdminFdbAdminGenTableMenu(SafeEnv($_GET['name'], 255, str));

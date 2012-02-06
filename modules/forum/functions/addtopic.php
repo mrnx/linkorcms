@@ -70,5 +70,3 @@ function IndexForumAddTopic(){
 		$site->AddTextBox($lang['error'], $lang['error_data']);
 	}
 }
-
-?>

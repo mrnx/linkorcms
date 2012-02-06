@@ -17,12 +17,11 @@ if(!$user->CheckAccess2('forum', 'forum')){
 	return;
 }
 global $admin_forum_url,$config;
-$admin_forum_url = $config['admin_file'].'?exe=forum';
+$admin_forum_url = ADMIN_FILE.'?exe=forum';
 
 
 include_once('forum_init.php');
 include_once($forum_lib_dir.'forum_init_admin.php');
-
 include_once($config['inc_dir'].'configuration/functions.php');
 
 function AdminForum( $action ){
@@ -131,7 +130,6 @@ if(isset($_GET['a'])) {
 
 
 
-
 function AdminForumGetOrder( $parent_id ) {
 	global $db;
 	$db->Select('forums', "`parent_id`='$parent_id'");
@@ -153,10 +151,10 @@ function AdminForumRender2( $forum, $all_forums, $forums_all_id = array() ) {
 	}else{
 		$order = SafeDB($forum['order'], 11, int);
 		if($order >= 0 && $order < $max_place){ // Первый элемент
-			$move_menu .= SpeedButton('Вниз', $config['admin_file'].'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
+			$move_menu .= SpeedButton('Вниз', ADMIN_FILE.'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
 		}
 		if($order <= $max_place && $order > 0){
-			$move_menu .= SpeedButton('Вверх', $config['admin_file'].'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
+			$move_menu .= SpeedButton('Вверх', ADMIN_FILE.'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
 		}
 	}
 	// Кто видит
@@ -164,10 +162,10 @@ function AdminForumRender2( $forum, $all_forums, $forums_all_id = array() ) {
 	// Статус
 	switch($forum['status']) {
 		case '1':
-			$st = '<a href="'.$config['admin_file'].'?exe=forum&a=changestatus&id='.SafeDB($forum['id'], 11, int).'" title="Выключить"><font color="#008000">Вкл.</font></a>';
+			$st = '<a href="'.ADMIN_FILE.'?exe=forum&a=changestatus&id='.SafeDB($forum['id'], 11, int).'" title="Выключить"><font color="#008000">Вкл.</font></a>';
 			break;
 		case '0':
-			$st = '<a href="'.$config['admin_file'].'?exe=forum&a=changestatus&id='.SafeDB($forum['id'], 11, int).'" title="Включить"><font color="#FF0000">Выкл.</font></a>';
+			$st = '<a href="'.ADMIN_FILE.'?exe=forum&a=changestatus&id='.SafeDB($forum['id'], 11, int).'" title="Включить"><font color="#FF0000">Выкл.</font></a>';
 			break;
 	}
 	$font_start = '';
@@ -175,11 +173,11 @@ function AdminForumRender2( $forum, $all_forums, $forums_all_id = array() ) {
 
 	// Func меню
 	if($forum['parent_id'] == '0') {
-		$editlink = $config['admin_file'].'?exe=forum&a=cat_editor&id='.SafeDB($forum['id'], 11, int);
+		$editlink = ADMIN_FILE.'?exe=forum&a=cat_editor&id='.SafeDB($forum['id'], 11, int);
 		$font_start = '<FONT SIZE="2" COLOR="#3300FF">';
 		$font_end = '</FONT>';
 	}else {
-		$editlink = $config['admin_file'].'?exe=forum&a=forum_editor&id='.SafeDB($forum['id'], 11, int);
+		$editlink = ADMIN_FILE.'?exe=forum&a=forum_editor&id='.SafeDB($forum['id'], 11, int);
 	}
 	$discussion = $forum['close_topic'] == 1?$lang['close_for_discussion_admin']:$lang['on_for_discussion'];
 	if(isset($forums_all_id[$forum['parent_id']])) {
@@ -188,7 +186,7 @@ function AdminForumRender2( $forum, $all_forums, $forums_all_id = array() ) {
 	}
 	$func = '';
 	$func .= SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-	$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=forum&a=delete&id='.SafeDB($forum['id'], 11, int).'&ok=0', 'images/admin/delete.png');
+	$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=forum&a=delete&id='.SafeDB($forum['id'], 11, int).'&ok=0', 'images/admin/delete.png');
 
 	$levs = '<table cellspacing="0" cellpadding="0" border="0" align="left"><tr>';
 	$levs .= str_repeat('<td style="border:none;">&nbsp;-&nbsp;</td>', ($forum['parent_id'] == '0' ? 0 : 1));
@@ -199,8 +197,7 @@ function AdminForumRender2( $forum, $all_forums, $forums_all_id = array() ) {
 }
 
 
-function AdminForumRender( $forum, $all_forums, $forums_all_id = array(), $is_sub_parent=false, $levs_sub=1)
-{
+function AdminForumRender( $forum, $all_forums, $forums_all_id = array(), $is_sub_parent=false, $levs_sub=1){
 	global $admin_forum_url,$config, $lang;
 	$text = '';
 	//генерируем move menu
@@ -213,12 +210,12 @@ function AdminForumRender( $forum, $all_forums, $forums_all_id = array(), $is_su
 	if($max_place > 0){
 		$order = SafeDB($forum['order'], 11, int);
 		if($order > 0 && $order < $max_place){
-			$move_menu .= SpeedButton('Вверх', $config['admin_file'].'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
-			$move_menu .= SpeedButton('Вниз', $config['admin_file'].'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
+			$move_menu .= SpeedButton('Вверх', ADMIN_FILE.'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
+			$move_menu .= SpeedButton('Вниз', ADMIN_FILE.'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
 		}elseif($order == 0){
-			$move_menu .= SpeedButton('Вниз', $config['admin_file'].'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
+			$move_menu .= SpeedButton('Вниз', ADMIN_FILE.'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
 		}elseif($order >= $max_place){
-			$move_menu .= SpeedButton('Вверх', $config['admin_file'].'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
+			$move_menu .= SpeedButton('Вверх', ADMIN_FILE.'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
 		}
 	}else{
 		$move_menu = '&nbsp;-&nbsp;';
@@ -259,7 +256,7 @@ function AdminForumRender( $forum, $all_forums, $forums_all_id = array(), $is_su
 
 	$func = '';
 	$func .= SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-	$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=forum&a=delete&id='.SafeDB($forum['id'], 11, int).'&ok=0', 'images/admin/delete.png');
+	$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=forum&a=delete&id='.SafeDB($forum['id'], 11, int).'&ok=0', 'images/admin/delete.png');
 
 	$levs = '<table cellspacing="0" cellpadding="0" border="0" align="left"><tr>';
 	$levs .= str_repeat('<td style="border:none;">&nbsp;-&nbsp;</td>', ($forum['parent_id'] == '0' ? 0 : $levs_sub));
@@ -270,8 +267,7 @@ function AdminForumRender( $forum, $all_forums, $forums_all_id = array(), $is_su
 	return $text;
 }
 
-function AdminSubForums($forums,$forums_all_id, $sub_forum, $id, $text='',$levels)
-{
+function AdminSubForums($forums,$forums_all_id, $sub_forum, $id, $text='',$levels){
 	foreach($sub_forum[$id] as $forum1){
 		$text .= AdminForumRender($forum1, $forums, $forums_all_id, false, $levels);
 		if(isset($sub_forum[$forum1['id']])) {
@@ -287,8 +283,7 @@ function AdminSubForums($forums,$forums_all_id, $sub_forum, $id, $text='',$level
 }
 
 
-function AdminForumMain()
-{
+function AdminForumMain(){
 	global $admin_forum_url,$db, $config;
 	/* @var $db Database_FilesDB */
 	$result = $db->Select('forums');
@@ -575,18 +570,18 @@ function AdminForumMove() {
 		}
 	}
 	Forum_Cache_ClearAllCacheForum();
-	GO($config['admin_file'].'?exe=forum');
+	GO(ADMIN_FILE.'?exe=forum');
 }
 
 function AdminForumDelete() {
 	global $config, $db;
 	if(!isset($_GET['id'])) {
-		GO($config['admin_file'].'?exe=forum');
+		GO(ADMIN_FILE.'?exe=forum');
 	}
 	if(isset($_GET['ok']) && $_GET['ok'] == '1') {
 		ForumAdminDeleteForum(SafeEnv($_GET['id'], 11, int));
 		Forum_Cache_ClearAllCacheForum();
-		GO($config['admin_file'].'?exe=forum');
+		GO(ADMIN_FILE.'?exe=forum');
 	}else {
 		/* @var $db Database_FilesDB */
 		$db->Select('forums', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
@@ -596,7 +591,7 @@ function AdminForumDelete() {
 		}else {
 			$f = 'форум';
 		}
-		$text = 'Вы действительно хотите удалить '.$f.' "'.SafeDB($r['title'], 255, str).'"? Все дочерние форумы и темы будут удалены.<br />'.'<a href="'.$config['admin_file'].'?exe=forum&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите удалить '.$f.' "'.SafeDB($r['title'], 255, str).'"? Все дочерние форумы и темы будут удалены.<br />'.'<a href="'.ADMIN_FILE.'?exe=forum&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание!", $text);
 	}
 }
@@ -612,7 +607,7 @@ function AdminForumChangeStatus() {
 	}
 	$db->Update('forums', "status='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	Forum_Cache_ClearAllCacheForum();
-	GO($config['admin_file'].'?exe=forum');
+	GO(ADMIN_FILE.'?exe=forum');
 }
 
 /******************Корзина*****************/
@@ -637,7 +632,7 @@ function AdminForumBasket( $table = 'forum_basket_post' ){
 
 	if(count($result)>20){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($result, 20, $config['admin_file'].'?exe=forum&a='.$table);
+		$navigator->GenNavigationMenu($result, 20, ADMIN_FILE.'?exe=forum&a='.$table);
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -704,7 +699,7 @@ function AdminForumBasket( $table = 'forum_basket_post' ){
 	$text .= '<tr><th>Кто удалил</th><th>Дата удаления</th><th>Дата окончательного удаления</th><th>Комментарий</th><th>Содержимое удаляемого <BR>'. $table_caption.'</th><th>Функции</th></tr>';
 	foreach($result as $basket){
 		$mop = 'showtopic&topic='.($table == 'forum_basket_post' ? $basket['obj_id2'] : $basket['obj_id']);
-		$restore_link = $config['admin_file'].'?exe=forum&a=basket_restore&'.$table.'='.$basket['obj_id'];
+		$restore_link = ADMIN_FILE.'?exe=forum&a=basket_restore&'.$table.'='.$basket['obj_id'];
 		$ainfo = GetUserInfo($basket['user']);
 		$text .= '<tr>
 		<td>'.$ainfo['name'].'</td>
@@ -731,5 +726,3 @@ function AdminForumBasketRestore(){
 		IndexForumRestoreBasketTopic(SafeEnv($_GET['forum_basket_topics'], 11, int));
 	}
 }
-
-?>

@@ -54,5 +54,3 @@ function IndexForumAddPost(){
 		$site->AddTextBox($lang['error'], $lang['error_access_category']);
 	}
 }
-
-?>

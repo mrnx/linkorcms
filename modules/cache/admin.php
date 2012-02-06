@@ -59,7 +59,7 @@ function AdminCacheMain(){
 				$num_files++;
 			}
 		}
-		$func = SpeedButton('Очистить', $config['admin_file'].'?exe=cache&a=clear&group='.SafeDB($g, 255, str), 'images/admin/cleanup.png');
+		$func = SpeedButton('Очистить', ADMIN_FILE.'?exe=cache&a=clear&group='.SafeDB($g, 255, str), 'images/admin/cleanup.png');
 		$rows = floor($num_files / 2);
 		$text .= '<tr>'
 			.'<td>'.SafeDB($g, 255, str).'</td>'

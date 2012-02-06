@@ -93,5 +93,3 @@ $db->Insert('config', "'','{$group['id']}','max_word_length','80','1','Максималь
 $db->Insert('config',"'','9','forum_post','5','1','Сообщение на форуме','','edit:w50','','','10,int,false','1'");
 $db->Insert('access',"'','forum','forum','Форум'");
 $db->Insert('modules',"'','Форум','forum','0','1','LinkorCMS Development Group','','4','1','15','1',''");
-
-?>

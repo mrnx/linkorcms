@@ -11,5 +11,3 @@ function IndexForumCloseTopic(){
 	$db->Update('forum_topics', "`close_topics`='1'", "`id`='$topic_id'");
 	GO('index.php?name=forum&op=showforum&forum='.$forum_id);
 }
-
-?>

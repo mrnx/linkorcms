@@ -45,7 +45,7 @@ function AdminCommentsMain()
 	// Добавляем постраничную навигацию
 	if(count($posts) > $commentsOnPage){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($posts, $commentsOnPage, $config['admin_file'].'?exe=comments');
+		$navigator->GenNavigationMenu($posts, $commentsOnPage, ADMIN_FILE.'?exe=comments');
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -57,7 +57,7 @@ function AdminCommentsMain()
 	if(count($posts) == 0){
 		$text = '<center>- На сайте нет комментариев -</center><br />';
 	}else{
-		$text = '<form action="'.$config['admin_file'].'?exe=comments&a=delete&page='.$page.'" method="post">';
+		$text = '<form action="'.ADMIN_FILE.'?exe=comments&a=delete&page='.$page.'" method="post">';
 	}
 
 
@@ -75,7 +75,7 @@ function AdminCommentsMain()
 		$post_date = TimeRender($post['post_date']);
 		$post_message = SafeDB($post['post_message'], 0, str);
 
-		$edit = $config['admin_file'].'?exe=comments&a=edit&id='.$post_id.'&table='.$post['_table'].'&page='.$page;
+		$edit = ADMIN_FILE.'?exe=comments&a=edit&id='.$post_id.'&table='.$post['_table'].'&page='.$page;
 
 		if($user_id != 0){
 			$userinfo = GetUserInfo($user_id);
@@ -192,7 +192,7 @@ function AdminCommentsEdit()
 		FormRow('Сайт', $site->Edit('user_homepage', $user_homepage, false, 'style="width:400px;"'));
 	}
 	FormRow('Текст', $site->TextArea('post_message', $post_message, 'style="width:400px;height:200px;"'));
-	$action = $config['admin_file'].'?exe=comments&a=save&id='.$id.'&table='.$table.'&page='.$page;
+	$action = ADMIN_FILE.'?exe=comments&a=save&id='.$id.'&table='.$table.'&page='.$page;
 	AddCenterBox('Редактирование комментария');
 	AddForm(
 		'<form action="'.$action.'" method="post">',
@@ -230,14 +230,14 @@ function AdminCommentsSave()
 		$set .= ",`user_name`='$user_name',`user_email`='$user_email',`user_hideemail`='$user_hideemail',`user_homepage`='$user_homepage'";
 	}
 	$db->Update($table, $set, "`id`='$id'");
-	GO($config['admin_file'].'?exe=comments&page='.$page);
+	GO(ADMIN_FILE.'?exe=comments&page='.$page);
 }
 
 function AdminDownloadsDeleteComment()
 {
 	global $config, $db, $site, $user;
 	if(!isset($_POST['delcomments'])){
-		GO($config['admin_file'].'?exe=comments');
+		GO(ADMIN_FILE.'?exe=comments');
 	}
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 10, int);
@@ -277,12 +277,12 @@ function AdminDownloadsDeleteComment()
 			$where = substr($where, 0, strlen($where) - 4);
 			$db->Delete($post_table, $where);
  		}
-		GO($config['admin_file'].'?exe=comments&page='.$page);
+		GO(ADMIN_FILE.'?exe=comments&page='.$page);
 	}else{
 		$cmcnt = count($_POST['delcomments']);
 		$hid = implode(',', $_POST['delcomments']);
 		$text = 'Вы действительно хотите удалить выделенные ('.$cmcnt.') комментарии?<br />'
-		.$site->FormOpen($config['admin_file'].'?exe=comments&a=delete&page='.$page.'&ok=1', 'post')
+		.$site->FormOpen(ADMIN_FILE.'?exe=comments&a=delete&page='.$page.'&ok=1', 'post')
 			.$site->Hidden('delcomments', $hid)
 			.$site->Submit('Да').'&nbsp;&nbsp;&nbsp;'
 			.$site->Button('Нет', 'onclick="history.go(-1)"')

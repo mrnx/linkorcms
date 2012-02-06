@@ -359,5 +359,3 @@ $table_forum_topics_read = Array
 		"name" => 'forum_topics_read'
 );
 
-
-?>

@@ -45,5 +45,3 @@ function IndexForumSavePost() {
 		$site->AddTextBox($lang['post_basket'], '<center>'.$lang['post_basket_no_edit'].'.</BR><input type="button" value="'.$lang['back'].'"onclick="history.back();"></center>');
 	}
 }
-
-?>

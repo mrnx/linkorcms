@@ -128,9 +128,9 @@ function AdminViewRetrofittingList(){
 	while($conf = $db->FetchRow()){
 		$id++;
 		$func = '';
-		$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=config_admin&a=edit&id='.SafeDB($conf['id'], 11, int)
+		$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=config_admin&a=edit&id='.SafeDB($conf['id'], 11, int)
 		.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=config_admin&a=delete&id='.SafeDB($conf['id'], 11, int).'&ok=0'
+		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=config_admin&a=delete&id='.SafeDB($conf['id'], 11, int).'&ok=0'
 		.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/delete.png');
 
 		$access = $access_config."<span style=\"color: #008200\">'".$groups[$conf['group_id']]['name'].'/'."".$conf['name']."'</span>)";
@@ -293,7 +293,7 @@ function AdminConfigAdd(){
 	FormRow('Видимая', $site->Check('visible', '1', $visible));
 	FormRow('Автозагрузка', $site->Check('autoload', '1', $autoload));
 	AddForm(
-		$site->FormOpen($config['admin_file'].'?exe=config_admin&a=save'.(AdminConfigPlugins() ? '&plugins=1' : '').(isset($_GET['id']) ? '&id='.$id : '')),
+		$site->FormOpen(ADMIN_FILE.'?exe=config_admin&a=save'.(AdminConfigPlugins() ? '&plugins=1' : '').(isset($_GET['id']) ? '&id='.$id : '')),
 		$site->Submit((isset($_GET['id']) ? 'Сохранить' : 'Добавить'))
 	);
 }
@@ -306,10 +306,10 @@ function AcAddRetrofitting(){
 	$back_url = '';
 	if(!AdminConfigPlugins()){
 		$access_config = 'System::config(';
-		$back_url = $config['admin_file'].'?exe=config_admin&a=view_all&saveok';
+		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_all&saveok';
 	}else{
 		$access_config = 'System::plug_config(';
-		$back_url = $config['admin_file'].'?exe=config_admin&a=view_all_plugins&plugins=1&saveok';
+		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_all_plugins&plugins=1&saveok';
 	}
 
 	$db->Select(AdminConfigGroupTable(), '');
@@ -394,9 +394,9 @@ function AdminConfigDeleteRetrofitting(){
 	global $config, $db;
 	$back_url = '';
 	if(!AdminConfigPlugins()){
-		$back_url = $config['admin_file'].'?exe=config_admin&a=view_all&delok';
+		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_all&delok';
 	}else{
-		$back_url = $config['admin_file'].'?exe=config_admin&a=view_all_plugins&plugins=1&delok';
+		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_all_plugins&plugins=1&delok';
 	}
 
 	if(!isset($_GET['id'])){
@@ -412,7 +412,7 @@ function AdminConfigDeleteRetrofitting(){
 		$r = $db->Select(AdminConfigConfigTable(), "`id`='$id'");
 		$text = 'Вы действительно хотите удалить настройку "'.SafeDB($r[0]['hname'], 255, str)
 		.'"<br />'
-		.'<a href="'.$config['admin_file'].'?exe=config_admin&a=delete&id='.$id.'&ok=1'
+		.'<a href="'.ADMIN_FILE.'?exe=config_admin&a=delete&id='.$id.'&ok=1'
 		.(AdminConfigPlugins() ? '&plugins=1' : '').'">Да</a>'
 		.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание!", $text);
@@ -437,9 +437,9 @@ function AdminConfigViewGroups(){
 
 	while($group = $db->FetchRow()){
 		$func = '';
-		$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=config_admin&a=editgroup&id='.SafeDB($group['id'], 11, int)
+		$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=config_admin&a=editgroup&id='.SafeDB($group['id'], 11, int)
 		.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=config_admin&a=deletegroup&id='.SafeDB($group['id'], 11, int).'&ok=0'
+		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=config_admin&a=deletegroup&id='.SafeDB($group['id'], 11, int).'&ok=0'
 		.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/delete.png');
 
 		if($group['visible'] == '1'){
@@ -478,7 +478,7 @@ function AdminConfigViewGroups(){
 	FormRow('Заголовок', $site->Edit('hname', '', false, 'style="width:400px;"'));
 	FormRow('Описание', $site->TextArea('description', '', 'style="width:400px;height:100px;"'));
 	FormRow('Видимая', $site->Check('visible', '1', false));
-	AddForm('<form action="'.$config['admin_file'].'?exe=config_admin&a=savegroup'.(AdminConfigPlugins() ? '&plugins=1' : '').'" method="post">',$site->Submit('Добавить'));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=config_admin&a=savegroup'.(AdminConfigPlugins() ? '&plugins=1' : '').'" method="post">',$site->Submit('Добавить'));
 }
 
 // Редактирование группы
@@ -495,7 +495,7 @@ function AdminConfigGroupEdit(){
 	FormRow('Видимая', $site->Check('visible', '1', $group['visible']=='1'));
 
 	AddCenterBox('Редактирование группы');
-	AddForm('<form action="'.$config['admin_file'].'?exe=config_admin&a=savegroup&id='.$id.(AdminConfigPlugins() ? '&plugins=1' : '').'" method="post">',
+	AddForm('<form action="'.ADMIN_FILE.'?exe=config_admin&a=savegroup&id='.$id.(AdminConfigPlugins() ? '&plugins=1' : '').'" method="post">',
 		$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit('Сохранить')
 	);
 }
@@ -530,9 +530,9 @@ function AdminConfigGroupDelete(){
 	$back_url = '';
 
 	if(!AdminConfigPlugins()){
-		$back_url = $config['admin_file'].'?exe=config_admin&a=view_groups&delok';
+		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_groups&delok';
 	}else{
-		$back_url = $config['admin_file'].'?exe=config_admin&a=view_groups_plugins&plugins=1&delok';
+		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_groups_plugins&plugins=1&delok';
 	}
 
 	if(!isset($_GET['id'])){
@@ -549,7 +549,7 @@ function AdminConfigGroupDelete(){
 		$r = $db->Select(AdminConfigGroupTable(), "`id`='$id'");
 		$text = 'Вы действительно хотите удалить группу "'.SafeDB($r[0]['hname'], 255, str)
 		.'"?<br />Все настройки группы будут удалены.<br />'
-		.'<a href="'.$config['admin_file'].'?exe=config_admin&a=deletegroup&id='.$id.'&ok=1'
+		.'<a href="'.ADMIN_FILE.'?exe=config_admin&a=deletegroup&id='.$id.'&ok=1'
 		.(AdminConfigPlugins() ? '&plugins=1' : '').'">Да</a>'
 		.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание!", $text);

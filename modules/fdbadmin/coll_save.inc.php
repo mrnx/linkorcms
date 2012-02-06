@@ -45,6 +45,6 @@ if(isset($_POST['fulltext0'])){
 }
 
 $db->InsertColl($name, $col, $after);
-GO($config['admin_file'].'?exe=fdbadmin&a=structure&name='.$name);
+GO(ADMIN_FILE.'?exe=fdbadmin&a=structure&name='.$name);
 
 ?>

@@ -17,8 +17,8 @@ if($_SERVER['REQUEST_METHOD'] == "HEAD"){ // Отсеиваем HEAD запросы
 
 define('INIT_CORE_START', microtime(true));
 
-@ini_set('error_reporting', E_ALL | E_STRICT); // Всегда максимальный уровень
-@error_reporting(E_ALL | E_STRICT);
+@ini_set('error_reporting', E_ALL); // Всегда максимальный уровень
+@error_reporting(E_ALL);
 
 @ini_set('html_errors', true);
 @ini_set('display_errors', true); // Включаем вывод ошибок

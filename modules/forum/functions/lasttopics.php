@@ -161,5 +161,3 @@ function IndexForumLastTopics(){
 	Forum_Online_Render_Online($online_user, $lang['all_online'], 'forum_topics_online');
 	$site->AddBlock('old', false, false, 'mark');
 }
-
-?>

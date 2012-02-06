@@ -27,5 +27,3 @@ include_once($forum_lib_dir.'forum_autoclear_basket.php');
 include_once($forum_lib_dir.'forum_basket.php');
 
 Index_Forum_Add_Java();
-
-?>

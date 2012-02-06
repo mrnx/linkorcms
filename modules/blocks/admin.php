@@ -160,7 +160,7 @@ function AdminBlocksMain(){
 
 			$text .= '
 			<tr>
-			<td><a href="'.$config['admin_file'].'?exe=blocks&a=edit&id='.$block_id.'">'.'<b>'.SafeDB($block['title'], 255, str).'</b></a></td>
+			<td><a href="'.ADMIN_FILE.'?exe=blocks&a=edit&id='.$block_id.'">'.'<b>'.SafeDB($block['title'], 255, str).'</b></a></td>
 			<td>'.$move_menu.'</td>
 			<td>'.$types[SafeDB($block['type'], 255, str)].'</td>
 			<td>'.$vi.'</td>
@@ -180,7 +180,7 @@ function AdminBlocksMain(){
 		$site->DataAdd($btd, SafeDB($row['folder'], 255, str), SafeDB($row['name'], 255, str));
 	}
 	FormRow('Тип', $site->Select('type', $btd, false, 'style="width:200px;"'), 60);
-	AddForm('<form action="'.$config['admin_file'].'?exe=blocks&a=add" method="post">', $site->Submit('Далее'));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=blocks&a=add" method="post">', $site->Submit('Далее'));
 }
 
 function AdminBlocksEdit( $a ){
@@ -207,7 +207,7 @@ function AdminBlocksEdit( $a ){
 			$b_type = SafeDB($r['type'], 255, str);
 			$template = SafeDB($r['template'], 255, str);
 			$title = 'Редактирование блока';
-			$a_form = $config['admin_file'].'?exe=blocks&a=update&id='.SafeEnv($_GET['id'], 11, int);
+			$a_form = ADMIN_FILE.'?exe=blocks&a=update&id='.SafeEnv($_GET['id'], 11, int);
 			$button = 'Сохранить изменения';
 			if (isset($r['showin']) and $r['showin']<>''){
 				$showin = unserialize($r['showin']);
@@ -216,7 +216,7 @@ function AdminBlocksEdit( $a ){
 				$extrauri =SafeDB($extrauri,0, str);
 			}
 		}else{
-			$a_form = $config['admin_file'].'?exe=blocks&a=newsave';
+			$a_form = ADMIN_FILE.'?exe=blocks&a=newsave';
 			$b_type = SafeEnv($_POST['type'], 255, str);
 			$b_vi[4] = true;
 			$title = 'Конфигурация блока';
@@ -284,7 +284,7 @@ function AdminBlocksEdit( $a ){
 		AddCenterBox($title);
 		AddForm('<form action="'.$a_form.'" method="post">'.$site->Hidden('type', $b_type), $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit($button));
 	}else{
-		GO($config['admin_file']);
+		GO(ADMIN_FILE);
 	}
 }
 
@@ -335,17 +335,17 @@ function AdminBlocksSave( $a ){
 	}elseif($a == 'update'){
 		$db->Update('blocks', $vals, "`id`='".$id."'", true);
 	}
-	GO($config['admin_file'].'?exe=blocks');
+	GO(ADMIN_FILE.'?exe=blocks');
 }
 
 function AdminBlockDelete(){
 	global $config, $db;
 	if(isset($_GET['ok']) && $_GET['ok'] == '1' || IsAjax()){
 		$db->Delete('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO($config['admin_file'].'?exe=blocks');
+		GO(ADMIN_FILE.'?exe=blocks');
 	}else{
 		$r = $db->Select('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить блок "'.$r[0]['title'].'"<br />'.'<a href="'.$config['admin_file'].'?exe=blocks&a=del&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите удалить блок "'.$r[0]['title'].'"<br />'.'<a href="'.ADMIN_FILE.'?exe=blocks&a=del&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание", $text);
 	}
 }
@@ -362,7 +362,7 @@ function AdminBlocksChangeStatus(){
 		}
 		$db->Update('blocks', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO($config['admin_file'].'?exe=blocks');
+	GO(ADMIN_FILE.'?exe=blocks');
 }
 
 function AdminBlocksSort( $a, $b ){
@@ -409,7 +409,7 @@ function AdminBlocksMove(){
 			$db->Update('blocks', "place='".SafeDB($blocks[$i]['place'], 11, int)."'", "`id`='".SafeDB($blocks[$i]['id'], 11, int)."'");
 		}
 	}
-	GO($config['admin_file'].'?exe=blocks');
+	GO(ADMIN_FILE.'?exe=blocks');
 }
 
 

@@ -128,5 +128,3 @@ function Forum_Render_Topics(&$forum, &$topics, &$read_data,
 		}
 	}
 }
-
-?>

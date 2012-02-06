@@ -19,32 +19,32 @@ function AdminMailMain()
 		$tid = SafeDB($row['id'], 11, int);
 		switch($row['status']){
 			case '1':
-				$st = '<a href="'.$config['admin_file'].'?exe=mail&a=change_status&id='.$tid.'" title="Выключить"><font color="#008000">Вкл.</font></a>';
+				$st = '<a href="'.ADMIN_FILE.'?exe=mail&a=change_status&id='.$tid.'" title="Выключить"><font color="#008000">Вкл.</font></a>';
 				break;
 			case '0':
-				$st = '<a href="'.$config['admin_file'].'?exe=mail&a=change_status&id='.$tid.'" title="Включить"><font color="#FF0000">Выкл.</font></a>';
+				$st = '<a href="'.ADMIN_FILE.'?exe=mail&a=change_status&id='.$tid.'" title="Включить"><font color="#FF0000">Выкл.</font></a>';
 				break;
 		}
 		switch($row['active']){
 			case '1':
-				$active = '<a href="'.$config['admin_file'].'?exe=mail&a=change_active&id='.$tid.'" title="Тема открыта. Новые рассылки выходят по этой теме."><font color="#008000">Открыта</font></a>';
+				$active = '<a href="'.ADMIN_FILE.'?exe=mail&a=change_active&id='.$tid.'" title="Тема открыта. Новые рассылки выходят по этой теме."><font color="#008000">Открыта</font></a>';
 				break;
 			case '0':
-				$active = '<a href="'.$config['admin_file'].'?exe=mail&a=change_active&id='.$tid.'" title="Тема закрыта. Новые рассылки не выходят по этой теме."><font color="#FF0000">Закрыта</font></a>';
+				$active = '<a href="'.ADMIN_FILE.'?exe=mail&a=change_active&id='.$tid.'" title="Тема закрыта. Новые рассылки не выходят по этой теме."><font color="#FF0000">Закрыта</font></a>';
 				break;
 		}
 
 		$func = '';
-		$func .= SpeedButton('Подготовить рассылку', $config['admin_file'].'?exe=mail&a=mail&topic_id='.$tid, 'images/admin/mail.png');
-		$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=mail&a=edit_topic&id='.$tid, 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=mail&a=delete_topic&id='.$tid.'&ok=0', 'images/admin/delete.png');
+		$func .= SpeedButton('Подготовить рассылку', ADMIN_FILE.'?exe=mail&a=mail&topic_id='.$tid, 'images/admin/mail.png');
+		$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=mail&a=edit_topic&id='.$tid, 'images/admin/edit.png');
+		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=mail&a=delete_topic&id='.$tid.'&ok=0', 'images/admin/delete.png');
 
 		$text .= '
 		<tr>
-		<td><b><a href="'.$config['admin_file'].'?exe=mail&a=edit_topic&id='.$tid.'">'.SafeDB($row['title'], 255, str).'</a></b></td>
+		<td><b><a href="'.ADMIN_FILE.'?exe=mail&a=edit_topic&id='.$tid.'">'.SafeDB($row['title'], 255, str).'</a></b></td>
 		<td>'.TimeRender(SafeDB($row['last_send'], 11, int)).'</td>
-		<td>'.SafeDB($row['count'], 11, int).' / <a href="'.$config['admin_file'].'?exe=mail&a=list&topic_id='.$tid.'">Просмотр</a></td>
-		<td>'.SafeDB($row['send_count'], 11, int).' / <a href="'.$config['admin_file'].'?exe=mail&a=history&topic_id='.$tid.'">Просмотр</a></td>
+		<td>'.SafeDB($row['count'], 11, int).' / <a href="'.ADMIN_FILE.'?exe=mail&a=list&topic_id='.$tid.'">Просмотр</a></td>
+		<td>'.SafeDB($row['send_count'], 11, int).' / <a href="'.ADMIN_FILE.'?exe=mail&a=history&topic_id='.$tid.'">Просмотр</a></td>
 		<td>'.$active.'</td>
 		<td>'.$st.'</td>
 		<td>'.$func.'</td>
@@ -85,7 +85,7 @@ function AdminMailEditTopic()
 	FormRow('Активна', $site->Select('active', GetEnData($active[1])));
 	FormRow('Включить', $site->Select('status', GetEnData($status[1])));
 	AddCenterBox($top);
-	AddForm('<form action="'.$config['admin_file'].'?exe=mail&a='.$action.'" method="post">',
+	AddForm('<form action="'.ADMIN_FILE.'?exe=mail&a='.$action.'" method="post">',
 		$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
 }
 
@@ -106,7 +106,7 @@ function AdminMailTopicSave()
 	}
 	$cache = LmFileCache::Instance();
 	$cache->Delete('block', 'mail');
-	GO($config['admin_file'].'?exe=mail');
+	GO(ADMIN_FILE.'?exe=mail');
 }
 
 function AdminMailChangeTopicActive()
@@ -122,7 +122,7 @@ function AdminMailChangeTopicActive()
 	$db->Update('mail_topics', "active='$active'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	$cache = LmFileCache::Instance();
 	$cache->Delete('block', 'mail');
-	GO($config['admin_file'].'?exe=mail');
+	GO(ADMIN_FILE.'?exe=mail');
 }
 
 function AdminMailChangeTopicStatus()
@@ -138,7 +138,7 @@ function AdminMailChangeTopicStatus()
 	$db->Update('mail_topics', "status='$status'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	$cache = LmFileCache::Instance();
 	$cache->Delete('block', 'mail');
-	GO($config['admin_file'].'?exe=mail');
+	GO(ADMIN_FILE.'?exe=mail');
 }
 
 function AdminMailDeleteTopic()
@@ -148,11 +148,11 @@ function AdminMailDeleteTopic()
 		$db->Delete('mail_topics', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$cache = LmFileCache::Instance();
 		$cache->Delete('block', 'mail');
-		GO($config['admin_file'].'?exe=mail');
+		GO(ADMIN_FILE.'?exe=mail');
 	}else{
 		TAddSubTitle('Удаление темы');
 		$r = $db->Select('mail_topics', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить тему "'.$r[0]['title'].'"<br />'.'<a href="'.$config['admin_file'].'?exe=mail&a=delete_topic&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a>'
+		$text = 'Вы действительно хотите удалить тему "'.$r[0]['title'].'"<br />'.'<a href="'.ADMIN_FILE.'?exe=mail&a=delete_topic&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a>'
 			.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание!", $text);
 	}
@@ -202,7 +202,7 @@ function AdminMailMail()
 	FormTextRow('Текст письма', $site->TextArea('text', $text, 'style="width:600px;height:400px;"'));
 	FormTextRow('Текст HTML', $site->HtmlEditor('html', $text_html, 600, 400));
 	FormRow('Вставлять тег &lt;br&gt;<br />автоматически', $site->Check('auto_br', '1', $auto_br[1]));
-	AddForm('<form action="'.$config['admin_file'].'?exe=mail&a=send'.(isset($id) ? '&id='.$id : '').'" method="POST">',
+	AddForm('<form action="'.ADMIN_FILE.'?exe=mail&a=send'.(isset($id) ? '&id='.$id : '').'" method="POST">',
 		$site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit($b));
 }
 
@@ -254,7 +254,7 @@ function AdminMailSend()
 		$id = SafeEnv($_GET['id'], 11, int);
 		$set = "topic_id='$topic',subject='$subject',from='$from',from_email='$from_email',plain_text='$text',text_html='$text_html',auto_br='$auto_br'";
 		$db->Update('mail_history', $set, "`id`='$id'");
-		GO($config['admin_file'].'?exe=mail&a=history&topic_id='.$topic);
+		GO(ADMIN_FILE.'?exe=mail&a=history&topic_id='.$topic);
 	}
 }
 
@@ -286,7 +286,7 @@ function AdminMailHistory()
 	$num = 10;
 	if(count($msgs) > $num){
 		$nav = new Navigation($page);
-		$nav->GenNavigationMenu($msgs, $num, $config['admin_file'].'?exe=mail&a=history&topic_id='.$topic);
+		$nav->GenNavigationMenu($msgs, $num, ADMIN_FILE.'?exe=mail&a=history&topic_id='.$topic);
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -302,8 +302,8 @@ function AdminMailHistory()
 		$mailtext = nl2br(SafeDB($msg['plain_text'], 0, str));
 
 		$func = '';
-		$func .= SpeedButton('Редактировать письмо', $config['admin_file'].'?exe=mail&a=edit&id='.$mid.'&topic_id='.$topic, 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить письмо', $config['admin_file'].'?exe=mail&a=delete&id='.$mid.'&topic_id='.$topic.'&ok=0', 'images/admin/delete.png');
+		$func .= SpeedButton('Редактировать письмо', ADMIN_FILE.'?exe=mail&a=edit&id='.$mid.'&topic_id='.$topic, 'images/admin/edit.png');
+		$func .= SpeedButton('Удалить письмо', ADMIN_FILE.'?exe=mail&a=delete&id='.$mid.'&topic_id='.$topic.'&ok=0', 'images/admin/delete.png');
 
 		$text .= '<table cellspacing="0" cellpadding="0" class="cfgtable" style="width:80%;">';
 		$text .= '<tr>
@@ -328,14 +328,14 @@ function AdminMailDelete()
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 		$db->Delete('mail_history', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		CalcMailCounter(SafeEnv($_GET['topic_id'], 11, int), false);
-		GO($config['admin_file'].'?exe=mail&a=history&topic_id='.SafeEnv($_GET['topic_id'], 11, int));
+		GO(ADMIN_FILE.'?exe=mail&a=history&topic_id='.SafeEnv($_GET['topic_id'], 11, int));
 		exit();
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
 		$topic_id = SafeEnv($_GET['topic_id'], 11, int);
 		$r = $db->Select('mail_history', "`id`='".$id."'");
 		$text = 'Вы действительно хотите удалить письмо с темой: '.$r[0]['subject'].'<br />'
-		.'<a href="'.$config['admin_file'].'?exe=mail&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&topic_id='.$topic_id.'&ok=1">Да</a>'
+		.'<a href="'.ADMIN_FILE.'?exe=mail&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&topic_id='.$topic_id.'&ok=1">Да</a>'
 			.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание!", $text);
 	}
@@ -345,7 +345,7 @@ function AdminMailList()
 {
 	global $db, $config, $site;
 	if(!isset($_GET['topic_id'])){
-		GO($config['admin_file'].'?exe=mail');
+		GO(ADMIN_FILE.'?exe=mail');
 	}
 	$topic_id = SafeEnv($_GET['topic_id'], 11, int);
 	$db->Select('mail_topics', "`id`='$topic_id'");
@@ -376,7 +376,7 @@ function AdminMailList()
 		}
 
 		$func = '';
-		$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=mail&a=delete_email&topic_id='.SafeDB($row['topic_id'], 11, int).'&email='.SafeDB($row['email'], 50, str).'&ok=0', 'images/admin/delete.png');
+		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=mail&a=delete_email&topic_id='.SafeDB($row['topic_id'], 11, int).'&email='.SafeDB($row['email'], 50, str).'&ok=0', 'images/admin/delete.png');
 		$text .= '<tr><td>'.PrintEmail($row['email']).'</a></td><td>'.$isuser.'</td><td>'.$html.'</td><td>'.$func.'</td></tr>';
 	}
 	$text .= '<tr><td>'.$c_all.'</a></td><td>'.$c_users.'</td><td>'.$c_html.'</td><td>&nbsp;</td></tr>';
@@ -389,18 +389,18 @@ function AdminMailList()
 	$site->DataAdd($format, '1', 'HTML');
 	$site->DataAdd($format, '0', 'Текст');
 	FormRow('Формат рассылки', $site->Select('html', $format));
-	AddForm('<form name="addemail" action="'.$config['admin_file'].'?exe=mail&a=add_email&topic_id='.$topic_id.'" method="post">', $site->Submit('Добавить'));
+	AddForm('<form name="addemail" action="'.ADMIN_FILE.'?exe=mail&a=add_email&topic_id='.$topic_id.'" method="post">', $site->Submit('Добавить'));
 }
 
 function AdminMailAddEmail()
 {
 	global $config, $db;
 	if(!isset($_GET['topic_id'])){
-		GO($config['admin_file'].'?exe=mail');
+		GO(ADMIN_FILE.'?exe=mail');
 	}
 	$topic_id = SafeEnv($_GET['topic_id'], 11, int);
 	if(!isset($_POST['email'])){
-		GO($config['admin_file'].'?exe=mail');
+		GO(ADMIN_FILE.'?exe=mail');
 	}
 	if(CheckEmail($_POST['email'])){
 		$email = SafeEnv($_POST['email'], 50, str, true);
@@ -413,7 +413,7 @@ function AdminMailAddEmail()
 	$vals = Values('0', $topic_id, $email, $html);
 	$db->Insert('mail_list', $vals);
 	CalcListCounter($topic_id, true);
-	GO($config['admin_file'].'?exe=mail&a=list&topic_id='.$topic_id);
+	GO(ADMIN_FILE.'?exe=mail&a=list&topic_id='.$topic_id);
 }
 
 function AdminMailDeleteEmail()
@@ -422,10 +422,10 @@ function AdminMailDeleteEmail()
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 		$db->Delete('mail_list', "`topic_id`='".SafeEnv($_GET['topic_id'], 11, int)."' and `email`='".SafeEnv($_GET['email'], 50, str)."'");
 		CalcListCounter(SafeEnv($_GET['topic_id'], 11, int), false);
-		GO($config['admin_file'].'?exe=mail&a=list&topic_id='.SafeEnv($_GET['topic_id'], 11, int));
+		GO(ADMIN_FILE.'?exe=mail&a=list&topic_id='.SafeEnv($_GET['topic_id'], 11, int));
 	}else{
 		$id = SafeEnv($_GET['email'], 50, str);
-		$text = 'Вы действительно хотите удалить E-mail: <b>'.$id.'</b><br />'.'<a href="'.$config['admin_file'].'?exe=mail&a=delete_email&topic_id='.SafeEnv($_GET['topic_id'], 11, int).'&email='.$id.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите удалить E-mail: <b>'.$id.'</b><br />'.'<a href="'.ADMIN_FILE.'?exe=mail&a=delete_email&topic_id='.SafeEnv($_GET['topic_id'], 11, int).'&email='.$id.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание!", $text);
 	}
 }

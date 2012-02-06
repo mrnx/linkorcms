@@ -100,7 +100,7 @@ switch($action){
 		}
 		global $tree, $config;
 		$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
-		GO($config['admin_file'].'?exe=downloads&a=cats');
+		GO(ADMIN_FILE.'?exe=downloads&a=cats');
 		break;
 	case 'delcat':
 		if(!$user->CheckAccess2('downloads', 'edit_cats')){
@@ -109,7 +109,7 @@ switch($action){
 		}
 		global $tree, $config;
 		if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
-			GO($config['admin_file'].'?exe=downloads&a=cats');
+			GO(ADMIN_FILE.'?exe=downloads&a=cats');
 		}
 		break;
 	case 'changestatus':
@@ -169,7 +169,7 @@ function AdminDownloadsMain(){
 	SortArray($db->QueryResult, 'public', true);
 	if(count($db->QueryResult) > $config['downloads']['filesonpage']){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($db->QueryResult, $config['downloads']['filesonpage'], $config['admin_file'].'?exe=downloads'.($cat > 0 ? '&cat='.$cat : ''));
+		$navigator->GenNavigationMenu($db->QueryResult, $config['downloads']['filesonpage'], ADMIN_FILE.'?exe=downloads'.($cat > 0 ? '&cat='.$cat : ''));
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -191,19 +191,19 @@ function AdminDownloadsMain(){
 				break;
 		}
 		if($editfiles){
-			$st = '<a href="'.$config['admin_file'].'?exe=downloads&a=changestatus&id='.SafeDB($row['id'], 11, int).'">'.$st.'</a>';
+			$st = '<a href="'.ADMIN_FILE.'?exe=downloads&a=changestatus&id='.SafeDB($row['id'], 11, int).'">'.$st.'</a>';
 		}
 		$rating = '<img src="'.GetRatingImage(SafeDB($row['votes_amount'], 11, int), SafeDB($row['votes'], 11, int)).'" border="0" />/ (всего '.SafeDB($row['votes_amount'], 11, int).')'
-		.($editfiles ? ' / <a href="'.$config['admin_file'].'?exe=downloads&a=resetrating&id='.SafeDB($row['id'], 11, int).'" title="Обнулить счётчик оценок">Сброс</a>' : '');
+		.($editfiles ? ' / <a href="'.ADMIN_FILE.'?exe=downloads&a=resetrating&id='.SafeDB($row['id'], 11, int).'" title="Обнулить счётчик оценок">Сброс</a>' : '');
 		if($editfiles){
 			$func = '';
-			$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=downloads&a=editor&id='.SafeDB($row['id'], 11, int), 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=downloads&a=deletefile&id='.SafeDB($row['id'], 11, int).'&ok=0', 'images/admin/delete.png');
+			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=downloads&a=editor&id='.SafeDB($row['id'], 11, int), 'images/admin/edit.png');
+			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=downloads&a=deletefile&id='.SafeDB($row['id'], 11, int).'&ok=0', 'images/admin/delete.png');
 		}else{
 			$func = '-';
 		}
-		$text .= '<tr><td>'.($editfiles ? '<b><a href="'.$config['admin_file'].'?exe=downloads&a=editor&id='.SafeDB($row['id'], 11, int).'">' : '').SafeDB($row['title'], 255, str).($editfiles ? '</a><b>' : '').'</td>
-		<td>'.SafeDB($row['hits'], 11, int).($editfiles ? ' / <a href="'.$config['admin_file'].'?exe=downloads&a=resetcounter&id='.SafeDB($row['id'], 11, str).'" title="Сбросить счётчик скачиваний">Сброс</a>' : '').'</td>
+		$text .= '<tr><td>'.($editfiles ? '<b><a href="'.ADMIN_FILE.'?exe=downloads&a=editor&id='.SafeDB($row['id'], 11, int).'">' : '').SafeDB($row['title'], 255, str).($editfiles ? '</a><b>' : '').'</td>
+		<td>'.SafeDB($row['hits'], 11, int).($editfiles ? ' / <a href="'.ADMIN_FILE.'?exe=downloads&a=resetcounter&id='.SafeDB($row['id'], 11, str).'" title="Сбросить счётчик скачиваний">Сброс</a>' : '').'</td>
 		<td>'.SafeDB($row['comments_counter'], 11, int).'</a></td>
 		<td>'.$rating.'</td>
 		<td>'.$vi.'</td>
@@ -309,7 +309,7 @@ function AdminDownloadsFileEditor( $action ){
 	FormRow('Кто видит', $site->Select('view', $visdata));
 	FormRow('Активен', $site->Radio('active', 'on', $active[1]).' Да&nbsp;<br />'.$site->Radio('active', 'off', $active[0]).' Нет');
 	AddCenterBox($top);
-	AddForm('<form action="'.$config['admin_file'].'?exe=downloads&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data" name="edit_form">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=downloads&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data" name="edit_form">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
 }
 
 function AdminDownloadsSaveFile( $action ){
@@ -327,7 +327,7 @@ function AdminDownloadsSaveFile( $action ){
 	}
 	$category = SafeEnv($_POST['category'], 11, int);
 	if(in_array($category, $tree->GetAllChildId(0)) === false || $category == 0){
-		GO($config['admin_file'].'?exe=downloads');
+		GO(ADMIN_FILE.'?exe=downloads');
 	}
 	$title = SafeEnv($_POST['title'], 250, str);
 
@@ -429,7 +429,7 @@ function AdminDownloadsSaveFile( $action ){
 		}
 	}
 	if($Error == ''){
-		//GO($config['admin_file'].'?exe=downloads');
+		//GO(ADMIN_FILE.'?exe=downloads');
 		GoRefererUrl($_GET['back']);
 		AddTextBox('Сообщение', 'Изменения успешно сохранены.'); // В случае, если не будет произведено перенаправление
 	}else{
@@ -445,7 +445,7 @@ function AdminDownloadsDeleteFile(){
 		return;
 	}
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=downloads');
+		GO(ADMIN_FILE.'?exe=downloads');
 	}
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -457,13 +457,13 @@ function AdminDownloadsDeleteFile(){
 		}
 		$db->Delete('downloads', "`id`='$id'");
 		$db->Delete('downloads_comments', "`object_id`='$id'");
-		//GO($config['admin_file'].'?exe=downloads');
+		//GO(ADMIN_FILE.'?exe=downloads');
 		GoRefererUrl($_GET['back']);
 		AddTextBox('Сообщение', 'Файл удален успешно.');
 	}else{
 		$r = $db->Select('downloads', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$text = 'Вы действительно хотите удалить файл "'.SafeDB($r[0]['title'], 250, str).'"<br />'
-		.'<a href="'.$config['admin_file'].'?exe=downloads&a=deletefile&id='.SafeEnv($_GET['id'], 11, int).'&back='.SaveRefererUrl().'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		.'<a href="'.ADMIN_FILE.'?exe=downloads&a=deletefile&id='.SafeEnv($_GET['id'], 11, int).'&back='.SaveRefererUrl().'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox('Внимание', $text);
 	}
 }
@@ -475,7 +475,7 @@ function AdminDownloadsChangeStatus(){
 		return;
 	}
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=downloads');
+		GO(ADMIN_FILE.'?exe=downloads');
 	}
 	$db->Select('downloads', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	if($db->NumRows() > 0){
@@ -489,7 +489,7 @@ function AdminDownloadsChangeStatus(){
 		}
 		$db->Update('downloads', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO($config['admin_file'].'?exe=downloads');
+	GO(ADMIN_FILE.'?exe=downloads');
 }
 
 function AdminDownloadsResetRating(){
@@ -500,11 +500,11 @@ function AdminDownloadsResetRating(){
 	}
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$db->Update('downloads', "votes_amount='0',votes='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO($config['admin_file'].'?exe=downloads');
+		GO(ADMIN_FILE.'?exe=downloads');
 	}else{
 		$r = $db->Select('downloads', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$text = 'Вы действительно хотите сбросить оценки файла? "'.SafeDB($r[0]['title'], 250, str).'"<br />'
-			.'<a href="'.$config['admin_file'].'?exe=downloads&a=resetrating&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+			.'<a href="'.ADMIN_FILE.'?exe=downloads&a=resetrating&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание", $text);
 	}
 }
@@ -516,6 +516,6 @@ function AdminDownloadsResetCounter(){
 		return;
 	}
 	$db->Update('downloads', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	GO($config['admin_file'].'?exe=downloads');
+	GO(ADMIN_FILE.'?exe=downloads');
 }
 

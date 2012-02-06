@@ -225,5 +225,3 @@ function ForumGetViewAccessTable( &$table = array() ){
 	}
 	return $result;
 }
-
-?>

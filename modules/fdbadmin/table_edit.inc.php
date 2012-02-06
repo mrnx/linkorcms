@@ -47,7 +47,7 @@ if($action == 'edittable'){
 	$param = 'savetable';
 }
 
-$text = '<form action="'.$config['admin_file'].'?exe=fdbadmin&a='.$param.'" method="post">
+$text = '<form action="'.ADMIN_FILE.'?exe=fdbadmin&a='.$param.'" method="post">
 	<table cellspacing="0" cellspacing="0" class="cfgtable">
 		<tr>
 			<th>Поле</th>

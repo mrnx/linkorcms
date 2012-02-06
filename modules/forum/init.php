@@ -16,5 +16,3 @@ function mod_initialization() {
 function mod_finalization() {
 	//
 }
-
-?>

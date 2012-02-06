@@ -122,7 +122,7 @@ switch($action){
 		}
 		global $tree, $config;
 		$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
-		GO($config['admin_file'].'?exe=gallery&a=cats');
+		GO(ADMIN_FILE.'?exe=gallery&a=cats');
 		break;
 	case 'delcat':
 		if(!$editcats){
@@ -130,7 +130,7 @@ switch($action){
 		}
 		global $tree, $config;
 		if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
-			GO($config['admin_file'].'?exe=gallery&a=cats');
+			GO(ADMIN_FILE.'?exe=gallery&a=cats');
 		}
 		break;
 	////////////////// Настройки
@@ -178,7 +178,7 @@ function AdminGalleryMainFunc(){
 
 	if(count($r) > $config['gallery']['images_on_page']){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($r, $config['gallery']['images_on_page'], $config['admin_file'].'?exe=gallery'.($cat > 0 ? '&cat='.$cat : ''));
+		$navigator->GenNavigationMenu($r, $config['gallery']['images_on_page'], ADMIN_FILE.'?exe=gallery'.($cat > 0 ? '&cat='.$cat : ''));
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -198,13 +198,13 @@ function AdminGalleryMainFunc(){
 				break;
 		}
 		if($editimages){
-			$st = '<a href="'.$config['admin_file'].'?exe=gallery&a=changestatus&id='.SafeDB($img['id'], 11, int).'">'.$st.'</a>';
+			$st = '<a href="'.ADMIN_FILE.'?exe=gallery&a=changestatus&id='.SafeDB($img['id'], 11, int).'">'.$st.'</a>';
 		}
 		if($editimages){
 			$func = '';
-			$func .= SpeedButton('Обновить эскиз', $config['admin_file'].'?exe=gallery&a=refreshthumb&id='.$id, 'images/admin/refresh.png');
-			$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=gallery&a=editor&id='.$id, 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=gallery&a=delete&id='.$id.'&ok=0', 'images/admin/delete.png');
+			$func .= SpeedButton('Обновить эскиз', ADMIN_FILE.'?exe=gallery&a=refreshthumb&id='.$id, 'images/admin/refresh.png');
+			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=gallery&a=editor&id='.$id, 'images/admin/edit.png');
+			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=gallery&a=delete&id='.$id.'&ok=0', 'images/admin/delete.png');
 		}else{
 			$func = '-';
 		}
@@ -213,12 +213,12 @@ function AdminGalleryMainFunc(){
 		$asize = getimagesize($GalleryDir.$filename);
 		$asize = $asize[0].'x'.$asize[1];
 		$vi = ViewLevelToStr(SafeDB($img['view'], 1, int));
-			//$rating = '<img src="'.GetRatingImage($img[14],$img[15]).'" border="0" />/ (всего '.$img[14].')'.($editimages?' / <a href="'.$config['admin_file'].'?exe=gallery&a=resetrating&id='.$img[0].'" title="Обнулить счётчик оценок">Сброс</a>':'');
+			//$rating = '<img src="'.GetRatingImage($img[14],$img[15]).'" border="0" />/ (всего '.$img[14].')'.($editimages?' / <a href="'.ADMIN_FILE.'?exe=gallery&a=resetrating&id='.$img[0].'" title="Обнулить счётчик оценок">Сброс</a>':'');
 		$text .= '<tr>
 		<td><a href="'.$GalleryDir.SafeDB($img['file'], 255, str).'" target="_blank">'.($config['gallery']['show_thumbs'] == 0 ? '<b>'.SafeDB($img['title'], 255, str).'</b>' : '<img title="'.SafeDB($img['title'], 255, str).'" src="'.$ThumbsDir.$filename.'" />
 			<br /><b>'.SafeDB($img['title'], 255, str).'</b>')." ($asize, $size)".'</a>
 		</td>
-		<td>'.SafeDB($img['hits'], 11, int).($editimages ? ' / <a href="'.$config['admin_file'].'?exe=gallery&a=resethits&id='.$id.'" title="Сбросить счётчик">Сброс</a>' : '').'</td>
+		<td>'.SafeDB($img['hits'], 11, int).($editimages ? ' / <a href="'.ADMIN_FILE.'?exe=gallery&a=resethits&id='.$id.'" title="Сбросить счётчик">Сброс</a>' : '').'</td>
 		<td>'.SafeDB($img['com_counter'], 11, int).'</td>
 		<td>'.$vi.'</td>
 		<td>'.$st.'</td>
@@ -572,7 +572,7 @@ function AdminGallerySaveImage(){
 		}
 		$db->Update('gallery', $set, "`id`='$id'");
 	}
-	GO($config['admin_file'].'?exe=gallery');
+	GO(ADMIN_FILE.'?exe=gallery');
 }
 
 function AdminGalleryDeleteImage(){
@@ -582,7 +582,7 @@ function AdminGalleryDeleteImage(){
 		return;
 	}
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=gallery');
+		GO(ADMIN_FILE.'?exe=gallery');
 	}
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -598,14 +598,14 @@ function AdminGalleryDeleteImage(){
 		}
 		$db->Delete('gallery', "`id`='$id'");
 		$db->Delete('gallery_comments', "`object_id`='$id'");
-		GO($config['admin_file'].'?exe=gallery');
+		GO(ADMIN_FILE.'?exe=gallery');
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Select('gallery', "`id`='$id'");
 		if($db->NumRows() > 0){
 			$img = $db->FetchRow();
 			$filename = $GalleryDir.SafeDB($img['file'], 255, str);
-			$text = '<table cellspacing="0" cellpadding="5" border="0" align="center"><tr><td align="center">'.($config['gallery']['show_thumbs'] == 1 ? '<img width="400" src="'.$filename.'" border="0" /></tr></td><tr><td align="center">' : '').'Удалить изображение "'.SafeDB($img['title'], 255, str).'" из галереи?<br />'.'<a href="'.$config['admin_file'].'?exe=gallery&a=delete&id='.$id.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a><br /><br />'.'</td></tr></table>';
+			$text = '<table cellspacing="0" cellpadding="5" border="0" align="center"><tr><td align="center">'.($config['gallery']['show_thumbs'] == 1 ? '<img width="400" src="'.$filename.'" border="0" /></tr></td><tr><td align="center">' : '').'Удалить изображение "'.SafeDB($img['title'], 255, str).'" из галереи?<br />'.'<a href="'.ADMIN_FILE.'?exe=gallery&a=delete&id='.$id.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a><br /><br />'.'</td></tr></table>';
 		}else{
 			$text = '<center>Изображение, которое Вы пытаетесь удалить, не найдено в галерее.<br /><a href="javascript:history.go(-1)">Назад в галерею</a></center>';
 		}
@@ -620,7 +620,7 @@ function AdminGalleryChangeStatus(){
 		return;
 	}
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=gallery');
+		GO(ADMIN_FILE.'?exe=gallery');
 	}
 	$db->Select('gallery', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	if($db->NumRows() > 0){
@@ -634,7 +634,7 @@ function AdminGalleryChangeStatus(){
 		}
 		$db->Update('gallery', "show='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO($config['admin_file'].'?exe=gallery');
+	GO(ADMIN_FILE.'?exe=gallery');
 }
 
 function AdminGalleryResetHits(){
@@ -646,7 +646,7 @@ function AdminGalleryResetHits(){
 	if(isset($_GET['id'])){
 		$db->Update('gallery', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO($config['admin_file'].'?exe=gallery');
+	GO(ADMIN_FILE.'?exe=gallery');
 }
 
 function AdminGalleryThumbRefresh(){

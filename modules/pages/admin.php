@@ -414,7 +414,7 @@ function AdminPagesEditor(){
 	FormRow('Включить', System::admin()->Select('enabled', GetEnData($enabled, 'Да', 'Нет')));
 
 	AddCenterBox($headt);
-	AddForm('<form action="'.$config['admin_file'].'?exe=pages&a=editor'.$url.'" method="post">', $site->Hidden('method', $met).$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Select('action', $acts).$site->Submit('Выполнить'));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=pages&a=editor'.$url.'" method="post">', $site->Hidden('method', $met).$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Select('action', $acts).$site->Submit('Выполнить'));
 }
 
 /**
@@ -485,7 +485,7 @@ function AdminPagesSave(){
 		$db->Update('pages', $values, "`id`='".$id."'", true);
 	}
 	AdminPagesClearCache();
-	GO($config['admin_file'].'?exe=pages');
+	GO(ADMIN_FILE.'?exe=pages');
 }
 
 /**
@@ -548,7 +548,7 @@ function AdminPagesLinkEditor(){
 	FormRow('Включить', System::admin()->Select('enabled', GetEnData($enabled, 'Да', 'Нет')));
 
 	AddCenterBox($form_title);
-	AddForm('<form action="'.$config['admin_file'].'?exe=pages&a=savelink'.($id != -1 ? '&id='.$id : '').'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($submit));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=pages&a=savelink'.($id != -1 ? '&id='.$id : '').'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($submit));
 }
 
 /**
@@ -583,7 +583,7 @@ function AdminPagesLinkSave(){
 		$db->Insert('pages', $values);
 	}
 	AdminPagesClearCache();
-	GO($config['admin_file'].'?exe=pages');
+	GO(ADMIN_FILE.'?exe=pages');
 }
 
 /**
@@ -705,7 +705,7 @@ function AdminPagesChangeMenu(){
 	$db->Update('pages', "showinmenu='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	AdminPagesClearCache();
 	if(!isset($_GET['ajax'])){
-		GO($config['admin_file'].'?exe=pages');
+		GO(ADMIN_FILE.'?exe=pages');
 	}else{
 		echo 'OK';
 		exit;
@@ -740,7 +740,7 @@ function AdminPagesDelete(){
 function AdminPagesResetCounter(){
 	global $config, $db;
 	$db->Update('pages', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	GO($config['admin_file'].'?exe=pages');
+	GO(ADMIN_FILE.'?exe=pages');
 }
 
 function AdminPagesBSort( $a, $b ){
@@ -794,7 +794,7 @@ function AdminPagesMove(){
 		}
 	}
 	AdminPagesClearCache();
-	GO($config['admin_file'].'?exe=pages');
+	GO(ADMIN_FILE.'?exe=pages');
 }
 
 /**

@@ -3,8 +3,6 @@ AddDefaultCharset windows-1251
 
 RewriteEngine On
 RewriteRule ^index\.html$ index.php
-RewriteRule ^admin/?$ admin.php
-
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_URI} !^/?(forum|images|base|blocks|blog|blogs|modules|plugins|scripts|setup|templates|uploads|admin|/.*\.php).*
+RewriteCond %{REQUEST_URI} !^/?(backup|images|base|blocks|blog|blogs|modules|plugins|scripts|setup|templates|uploads|admin|/.*\.php).*
 RewriteRule ^(.*)$ index.php?ufu=$1 [L]

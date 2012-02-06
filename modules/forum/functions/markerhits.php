@@ -13,5 +13,3 @@ function IndexForumMarkerHits($topic_id) {
 	// Восстанавливаем Referer
 	//$user->Def('REFERER',$_SERVER['HTTP_REFERER']);
 }
-
-?>

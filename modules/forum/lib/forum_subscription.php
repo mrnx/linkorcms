@@ -101,8 +101,3 @@ function Forum_Subscription_Send($topic_id = 0){
 		}
 	}
 }
-
-
-
-
-?>

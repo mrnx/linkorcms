@@ -66,7 +66,7 @@ function AdminAuditMain()
 	$num = 50;
 	if($count > $num){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($query, $num, $config['admin_file'].'?exe=audit');
+		$navigator->GenNavigationMenu($query, $num, ADMIN_FILE.'?exe=audit');
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -90,14 +90,14 @@ function AdminAuditMain()
 			$text = '<tr>
 			<td>'.$action.'</td>
 			<td>'.$date.'</td>
-			<td><a href="'.$config['admin_file'].'?exe=admins&a=editadmin&id='.SafeDB($user['id'], 11, int).'">'.SafeDB($user['name'], 50, str).'</td>
+			<td><a href="'.ADMIN_FILE.'?exe=admins&a=editadmin&id='.SafeDB($user['id'], 11, int).'">'.SafeDB($user['name'], 50, str).'</td>
 			<td>'.$ip.'</td>
 			</tr>';
 			AddText($text);
 		}
 		$text = '</table>';
 		AddText($text);
-		$text = '<a href="'.$config['admin_file'].'?exe=audit&a=clear">Очистить  лог</a>';
+		$text = '<a href="'.ADMIN_FILE.'?exe=audit&a=clear">Очистить  лог</a>';
 		AddText($text);
 	}
 }
@@ -111,9 +111,9 @@ function AdminAuditClear()
 	global $db, $config;
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 		$db->Delete('audit', '');
-		GO($config['admin_file'].'?exe=audit');
+		GO(ADMIN_FILE.'?exe=audit');
 	}else{
-		$text = 'Вы действительно хотите очистить лог действий пользователей?<br />'.'<a href="'.$config['admin_file'].'?exe=audit&a=clear&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите очистить лог действий пользователей?<br />'.'<a href="'.ADMIN_FILE.'?exe=audit&a=clear&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Подтверждение удаления", $text);
 	}
 }
@@ -138,7 +138,7 @@ function AdminAuditReferers()
 	$num = 50;
 	if($count > $num){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($query, $num, $config['admin_file'].'?exe=audit&a=referers');
+		$navigator->GenNavigationMenu($query, $num, ADMIN_FILE.'?exe=audit&a=referers');
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -164,7 +164,7 @@ function AdminAuditReferers()
 		}
 		$text = '</table>';
 		AddText($text);
-		$text = '<a href="'.$config['admin_file'].'?exe=audit&a=clear_referers">Очистить  лог</a>';
+		$text = '<a href="'.ADMIN_FILE.'?exe=audit&a=clear_referers">Очистить  лог</a>';
 		AddText($text);
 		$text = '<BR>Переходов на этой странице: <B>'.$allcount.'</B>';
 		AddText($text);
@@ -220,7 +220,7 @@ function AdminAuditKeywords()
 	$num = 100;
 	if($count > $num){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($key, $num, $config['admin_file'].'?exe=audit&a=keywords');
+		$navigator->GenNavigationMenu($key, $num, ADMIN_FILE.'?exe=audit&a=keywords');
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -254,9 +254,9 @@ function AdminAuditClearReferers()
 	global $db, $config;
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 		$db->Delete('referers', '');
-		GO($config['admin_file'].'?exe=audit&a=referers');
+		GO(ADMIN_FILE.'?exe=audit&a=referers');
 	}else{
-		$text = 'Вы действительно хотите очистить лог рефералов?<br />'.'<a href="'.$config['admin_file'].'?exe=audit&a=clear_referers&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите очистить лог рефералов?<br />'.'<a href="'.ADMIN_FILE.'?exe=audit&a=clear_referers&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Подтверждение удаления", $text);
 	}
 }

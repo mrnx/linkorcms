@@ -118,7 +118,5 @@ function IndexForumUserTopics(){
 	}else{
 		$site->AddTextBox($lang['error'], $lang['error_no_forum']);
 	}
-
 }
 
-?>

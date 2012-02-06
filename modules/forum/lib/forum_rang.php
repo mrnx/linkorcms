@@ -136,5 +136,3 @@ function Rang_GetUsersRang( $rang_access = 0 ) {
 	}
 	return $result;
 }
-
-?>

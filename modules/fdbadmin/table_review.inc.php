@@ -20,7 +20,7 @@ if(isset($_GET['page'])){
 $rows_on_page = 20;
 if(count($rows) > $rows_on_page){
 	$navigator = new Navigation($page);
-	$navigator->GenNavigationMenu($rows, $rows_on_page, $config['admin_file'].'?exe=fdbadmin&a=review&name='.$name);
+	$navigator->GenNavigationMenu($rows, $rows_on_page, ADMIN_FILE.'?exe=fdbadmin&a=review&name='.$name);
 	AddNavigation();
 	$nav = true;
 }else{
@@ -44,9 +44,9 @@ $text .= '</tr>';
 $i = ($rows_on_page * $page) - $rows_on_page;
 foreach($rows as $col){
 	$func = '';
-	$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=fdbadmin&a=editfield&name='.SafeEnv($_GET['name'], 255, str).'&index='.$i, 'images/admin/edit.png');
+	$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=fdbadmin&a=editfield&name='.SafeEnv($_GET['name'], 255, str).'&index='.$i, 'images/admin/edit.png');
 	$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=fdbadmin&a=deleterow&name='.SafeEnv($_GET['name'], 255, str).'&index='.$i, 'images/admin/delete.png', 'Удалить запись?');
-	$func .= SpeedButton('PHP код вставки', $config['admin_file'].'?exe=fdbadmin&a=viewcode&name='.SafeEnv($_GET['name'], 255, str).'&index='.$i, 'images/admin/php.png');
+	$func .= SpeedButton('PHP код вставки', ADMIN_FILE.'?exe=fdbadmin&a=viewcode&name='.SafeEnv($_GET['name'], 255, str).'&index='.$i, 'images/admin/php.png');
 
 	$text .= '<tr><td nowrap="nowrap">'.$func.'</td><td></td>';
 	for($j = 0; $j < $nc; $j++){

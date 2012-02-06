@@ -36,7 +36,7 @@ function AdminPollsMainFunc()
 				break;
 		}
 		if($editpolls){
-			$active = '<a href="'.$config['admin_file'].'?exe=polls&a=changestatus&id='.$pid.'">'.$active.'</a>';
+			$active = '<a href="'.ADMIN_FILE.'?exe=polls&a=changestatus&id='.$pid.'">'.$active.'</a>';
 		}
 		$answers = unserialize($poll['answers']);
 		$c = count($answers);
@@ -47,13 +47,13 @@ function AdminPollsMainFunc()
 
 		if($editpolls){
 			$func = '';
-			$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=polls&a=editor&id='.$pid, 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=polls&a=delete&id='.$pid.'&ok=0', 'images/admin/delete.png');
+			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=polls&a=editor&id='.$pid, 'images/admin/edit.png');
+			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=polls&a=delete&id='.$pid.'&ok=0', 'images/admin/delete.png');
 		}else{
 			$func = '-';
 		}
 		$text .= '<tr>
-		<td><a href="'.$config['admin_file'].'?exe=polls&a=editor&id='.$pid.'"><b>'.SafeDB($poll['question'], 255, str).'</b></a></td>
+		<td><a href="'.ADMIN_FILE.'?exe=polls&a=editor&id='.$pid.'"><b>'.SafeDB($poll['question'], 255, str).'</b></a></td>
 		<td>'.$num_voices.'</td>
 		<td>'.SafeDB($poll['com_counter'], 11, int).'</td>
 		<td>'.ViewLevelToStr($poll['view']).'</td>
@@ -127,7 +127,7 @@ function AdminPollsEditor()
 	FormRow('Включить', $site->Select('active', GetEnData($active, 'Да', 'Нет')));
 	FormRow('Кто может отвечать', $site->Select('view', GetUserTypesFormData($view)));
 	AddCenterBox($title);
-	AddForm('<form action="'.$config['admin_file'].'?exe=polls&a=save'.$uid.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($btitle));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=polls&a=save'.$uid.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($btitle));
 }
 
 function AdminPollsSave()
@@ -163,7 +163,7 @@ function AdminPollsSave()
 		$db->Insert('polls', $vals);
 	}
 	global $config;
-	GO($config['admin_file'].'?exe=polls');
+	GO(ADMIN_FILE.'?exe=polls');
 }
 
 function AdminPollsDelete()
@@ -174,19 +174,19 @@ function AdminPollsDelete()
 		return;
 	}
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=polls');
+		GO(ADMIN_FILE.'?exe=polls');
 		exit();
 	}
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Delete('polls', "`id`='$id'");
 		$db->Delete('polls_comments', "`object_id`='$id'");
-		GO($config['admin_file'].'?exe=polls');
+		GO(ADMIN_FILE.'?exe=polls');
 		exit();
 	}else{
 		$r = $db->Select('polls', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$text = 'Вы действительно хотите удалить опрос "'.SafeDB($r[0]['question'], 255, str).'" ?<br />'
-		.'<a href="'.$config['admin_file'].'?exe=polls&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a>'
+		.'<a href="'.ADMIN_FILE.'?exe=polls&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a>'
 		.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание!", $text);
 	}
@@ -207,7 +207,7 @@ function AdminPollsChangeStatus()
 		$en = '1';
 	}
 	$db->Update('polls', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	GO($config['admin_file'].'?exe=polls');
+	GO(ADMIN_FILE.'?exe=polls');
 }
 if(isset($_GET['a'])){
 	$action = $_GET['a'];

@@ -9,7 +9,7 @@ $name = SafeEnv($_GET['name'], 255, str);
 $id = SafeEnv($_GET['collid'], 11, int);
 $db->DeleteColl($name, $id);
 
-//GO($config['admin_file'].'?exe=fdbadmin&a=structure&name='.$name);
+//GO(ADMIN_FILE.'?exe=fdbadmin&a=structure&name='.$name);
 GoBack();
 
 ?>

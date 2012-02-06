@@ -31,22 +31,22 @@ function AdminFormsMain()
 		$vi = ViewLevelToStr(SafeDB($form['view'], 1, int));
 		switch($form['active']){
 			case "1":
-				$st = '<a href="'.$config['admin_file'].'?exe=forms&a=changestatus&id='.$id.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
+				$st = '<a href="'.ADMIN_FILE.'?exe=forms&a=changestatus&id='.$id.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
 				break;
 			case "0":
-				$st = '<a href="'.$config['admin_file'].'?exe=forms&a=changestatus&id='.$id.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
+				$st = '<a href="'.ADMIN_FILE.'?exe=forms&a=changestatus&id='.$id.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
 				break;
 		}
-		$answ = (SafeDB($form['answ'], 11, int) > 0 ? '<b>'.SafeDB($form['answ'], 11, int).'</b> / <a href="'.$config['admin_file'].'?exe=forms&a=posts&id='.$id.'">Просмотр</a>' : SafeDB($form['answ'], 11, int));
-		$new_answ = (SafeDB($form['new_answ'], 11, int) > 0 ? '<b>'.SafeDB($form['new_answ'], 11, int).'</b> / <a href="'.$config['admin_file'].'?exe=forms&a=newposts&id='.$id.'">Просмотр</a>' : SafeDB($form['new_answ'], 11, int));
+		$answ = (SafeDB($form['answ'], 11, int) > 0 ? '<b>'.SafeDB($form['answ'], 11, int).'</b> / <a href="'.ADMIN_FILE.'?exe=forms&a=posts&id='.$id.'">Просмотр</a>' : SafeDB($form['answ'], 11, int));
+		$new_answ = (SafeDB($form['new_answ'], 11, int) > 0 ? '<b>'.SafeDB($form['new_answ'], 11, int).'</b> / <a href="'.ADMIN_FILE.'?exe=forms&a=newposts&id='.$id.'">Просмотр</a>' : SafeDB($form['new_answ'], 11, int));
 
 		$func = '';
-		$func .= SpeedButton('Редактировать форму', $config['admin_file'].'?exe=forms&a=edit&id='.$id, 'images/admin/edit.png');
-		$func .= SpeedButton('Редактировать поля', $config['admin_file'].'?exe=forms&a=fields&id='.$id, 'images/admin/config.png');
-		$func .= SpeedButton('Удалить форму', $config['admin_file'].'?exe=forms&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
+		$func .= SpeedButton('Редактировать форму', ADMIN_FILE.'?exe=forms&a=edit&id='.$id, 'images/admin/edit.png');
+		$func .= SpeedButton('Редактировать поля', ADMIN_FILE.'?exe=forms&a=fields&id='.$id, 'images/admin/config.png');
+		$func .= SpeedButton('Удалить форму', ADMIN_FILE.'?exe=forms&a=del&id='.$id.'&ok=0', 'images/admin/delete.png');
 
 		$text .= '<tr>
-		<td><b><a href="'.$config['admin_file'].'?exe=forms&a=edit&id='.$id.'" title="Редактировать">'.SafeDB($form['hname'], 255, str).'</a></b></td>
+		<td><b><a href="'.ADMIN_FILE.'?exe=forms&a=edit&id='.$id.'" title="Редактировать">'.SafeDB($form['hname'], 255, str).'</a></b></td>
 		<td>'.$new_answ.'</td>
 		<td>'.$answ.'</td>
 		<td>'.SafeDB($form['numfields'], 11, int).'</td>
@@ -111,7 +111,7 @@ function AdminFormsEditor()
 	FormRow('Кто видит', $site->Select('view', $visdata));
 	FormRow('Активна', $site->Radio('active', 'on', $active[1]).' Да&nbsp;<br />'.$site->Radio('active', 'off', $active[0]).' Нет');
 	AddCenterBox($top);
-	AddForm('<form action="'.$config['admin_file'].'?exe=forms&a='.$action.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=forms&a='.$action.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
 }
 
 // Сохранение формы
@@ -130,12 +130,12 @@ function AdminFormsSave()
 		$set = "`hname`='$hname',`name`='$name',`desc`='$desc',`view`='$view',`active`='$active',`action`='$form_action',`email`='$email',`send_ok_msg`='$msg_ok'";
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Update('forms', $set, "`id`='$id'");
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}else{
 		$form_data = serialize(array());
 		$values = Values('', $hname, $name, $desc, 0, 0, 0, $form_data, $active, $view, $form_action, $email, $msg_ok);
 		$db->Insert('forms', $values);
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}
 }
 
@@ -144,7 +144,7 @@ function AdminFormsFieldEditor( $action )
 {
 	global $site, $cl_plugins, $cs_plugins, $config, $db;
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}
 	$id = SafeEnv($_GET['id'], 11, int);
 	$collsd = array();
@@ -232,14 +232,14 @@ function AdminFormsFieldEditor( $action )
 	FormRow('Функция обработчик', $site->Select('savefunc', $savefuncdata));
 	FormRow('Тип данных', $site->Select('datatype', $datatypes));
 	FormRow('Длина поля(Размер файла Кб.)<br /><small>0 - неограниченно</small>', $site->Edit('maxlength', $length, false, 'style="width:60px;" maxlength="11"'));
-	AddForm($site->FormOpen($config['admin_file'].'?exe=forms&a=addfield&id='.$id.($edit ? '&index='.$index : '')), ($edit ? $site->Button('Отмена', 'onclick="history.go(-1);"') : '').$site->Submit($cp));
+	AddForm($site->FormOpen(ADMIN_FILE.'?exe=forms&a=addfield&id='.$id.($edit ? '&index='.$index : '')), ($edit ? $site->Button('Отмена', 'onclick="history.go(-1);"') : '').$site->Submit($cp));
 }
 
 function AdminFormsFields()
 {
 	global $db, $config, $site;
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}
 	$id = SafeEnv($_GET['id'], 11, int);
 	$db->Select('forms', "`id`='$id'");
@@ -253,8 +253,8 @@ function AdminFormsFields()
 		$text .= '<tr><th>Название</th><th>Имя HTML</th><th>Предпросмотр</th><th>Тип</th><th>Максимальная длина</th><th>Элемент управления</th><th>Функции</th></tr>';
 		for($i = 0; $i < $cnt; $i++){
 			$func = '';
-			$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=forms&a=editfield&id='.SafeDB($form['id'], 11, int).'&index='.$i, 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=forms&a=delfield&id='.SafeDB($form['id'], 11, int).'&index='.$i.'&ok=0', 'images/admin/delete.png');
+			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=forms&a=editfield&id='.SafeDB($form['id'], 11, int).'&index='.$i, 'images/admin/edit.png');
+			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=forms&a=delfield&id='.SafeDB($form['id'], 11, int).'&index='.$i.'&ok=0', 'images/admin/delete.png');
 
 			$type = explode(',', $fields[$i]['type']);
 			$text .= '<tr><td>'.SafeDB($fields[$i]['hname'], 255, str).'</td><td>'.SafeDB($fields[$i]['name'], 255, str).'</td><td>'.FormsGetControl($fields[$i]['name'], '', $fields[$i]['kind'], $fields[$i]['type'], $fields[$i]['values']).'</td><td>'.SafeDB($type[1], 50, str).'</td><td>'.SafeDB($type[0], 11, int).'</td><td>'.$fields[$i]['kind'].'</td><td>'.$func.'</td></tr>';
@@ -271,12 +271,12 @@ function AdminFormsFieldSave()
 {
 	global $db, $config;
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}
 	$id = SafeEnv($_GET['id'], 11, int);
 	$db->Select('forms', "`id`='$id'");
 	if($db->NumRows() == 0){
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}
 	$form = $db->FetchRow();
 	$fields = unserialize($form['form_data']);
@@ -332,7 +332,7 @@ function AdminFormsFieldSave()
 	$cnt = count($fields);
 	$fields = serialize($fields);
 	$db->Update('forms', "numfields='$cnt',form_data='$fields'", "`id`='$id'");
-	GO($config['admin_file'].'?exe=forms&a=fields&id='.$id);
+	GO(ADMIN_FILE.'?exe=forms&a=fields&id='.$id);
 }
 
 function AdminFormsEditFields()
@@ -364,9 +364,9 @@ function AdminFormsDelField()
 		$cnt = count($fields2);
 		$fields = serialize($fields2);
 		$db->Update('forms', "numfields='$cnt',form_data='$fields'", "`id`='$id'");
-		GO($config['admin_file'].'?exe=forms&a=fields&id='.$id);
+		GO(ADMIN_FILE.'?exe=forms&a=fields&id='.$id);
 	}else{
-		$text = 'Вы действительно хотите удалить поле "'.$fields[$index]['hname'].'"<br />'.'<a href="'.$config['admin_file'].'?exe=forms&a=delfield&id='.$id.'&index='.$index.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите удалить поле "'.$fields[$index]['hname'].'"<br />'.'<a href="'.ADMIN_FILE.'?exe=forms&a=delfield&id='.$id.'&index='.$index.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание", $text);
 	}
 }
@@ -375,16 +375,16 @@ function AdminFormsDelete()
 {
 	global $config, $db;
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$db->Delete('forms', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$db->Delete('forms_data', "`form_id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}else{
 		$r = $db->Select('forms', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$text = 'Вы действительно хотите удалить Web-форму "'.$r[0]['hname'].'"<br />'
-		.'<a href="'.$config['admin_file'].'?exe=forms&a=del&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		.'<a href="'.ADMIN_FILE.'?exe=forms&a=del&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание", $text);
 	}
 }
@@ -402,7 +402,7 @@ function AdminFormsChangeStatus()
 		}
 		$db->Update('forms', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO($config['admin_file'].'?exe=forms');
+	GO(ADMIN_FILE.'?exe=forms');
 }
 
 function AdminFormsViewPosts( $new )
@@ -440,14 +440,14 @@ function AdminFormsViewPosts( $new )
 		foreach($data_rows as $row){
 			$post_text .= '<b>'.SafeDB($row[0], 255, str).':</b><br />'.SafeDB($row[1], 0, str).'<br />';
 		}
-		$delfunc = '<a href="'.$config['admin_file'].'?exe=forms&a=delpost&id='.$id.'&pid='.SafeDB($post['id'], 11, int).'&ok=0&new=1"><img src="images/admin/delete.png" title="Удалить эти данные" /></a>';
+		$delfunc = '<a href="'.ADMIN_FILE.'?exe=forms&a=delpost&id='.$id.'&pid='.SafeDB($post['id'], 11, int).'&ok=0&new=1"><img src="images/admin/delete.png" title="Удалить эти данные" /></a>';
 		$text .= '<table cellspacing="0" cellpadding="0" border="0" class="cfgtable">';
 		$text .= '<tr><th>Дата: '.$time.'</td><th>Пользователь: '.$user_name.'</td><th>IP: '.$ip.'</td><th width="30">'.$delfunc.'</td></tr>';
 		$text .= '<tr><td colspan="4" style="text-align:left;padding-left:10px;">'.$post_text.'</td></tr>';
 		$text .= '</table>';
 	}
 	if($new){
-		$text .= '<br /><a href="'.$config['admin_file'].'?exe=forms&a=checkall&id='.$id.'">Отметить все как просмотренные</a><br /><br />';
+		$text .= '<br /><a href="'.ADMIN_FILE.'?exe=forms&a=checkall&id='.$id.'">Отметить все как просмотренные</a><br /><br />';
 	}
 	AddTextBox('Новые поcты формы "'.$box_title.'"', $text);
 }
@@ -456,7 +456,7 @@ function AdminFormsDeletePost()
 {
 	global $config, $db;
 	if(!isset($_GET['pid']) || !isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}
 	$post_id = SafeEnv($_GET['pid'], 11, int);
 	$form_id = SafeEnv($_GET['id'], 11, int);
@@ -478,9 +478,9 @@ function AdminFormsDeletePost()
 		$value2 = (int)$form['answ'] - 1;
 		$set = "new_answ='$value1',answ='$value2'";
 		$db->Update('forms', $set, "`id`='$form_id'");
-		GO($config['admin_file'].'?exe=forms'.(isset($_GET['new']) ? '&a=newposts&id='.SafeEnv($_GET['id'], 11, int) : ''));
+		GO(ADMIN_FILE.'?exe=forms'.(isset($_GET['new']) ? '&a=newposts&id='.SafeEnv($_GET['id'], 11, int) : ''));
 	}else{
-		$text = 'Вы действительно хотите удалить данные формы.<br />'.'<a href="'.$config['admin_file'].'?exe=forms&a=delpost&id='.$form_id.'&pid='.$post_id.'&ok=1'.(isset($_GET['new']) ? '&new=1' : '').'">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите удалить данные формы.<br />'.'<a href="'.ADMIN_FILE.'?exe=forms&a=delpost&id='.$form_id.'&pid='.$post_id.'&ok=1'.(isset($_GET['new']) ? '&new=1' : '').'">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание", $text);
 	}
 }
@@ -489,12 +489,12 @@ function AdminFormsCheckAll()
 {
 	global $db, $config;
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=forms');
+		GO(ADMIN_FILE.'?exe=forms');
 	}
 	$form_id = SafeEnv($_GET['id'], 11, int);
 	$db->Update('forms_data', "moderated='1'", "`form_id`='$form_id'");
 	$db->Update('forms', "new_answ='0'", "`id`='$form_id'");
-	GO($config['admin_file'].'?exe=forms');
+	GO(ADMIN_FILE.'?exe=forms');
 }
 
 function AdminForms( $action )

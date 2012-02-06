@@ -38,7 +38,7 @@ foreach($columns as $col){
 }
 
 AddCenterBox($title);
-AddForm('<form action="'.$config['admin_file'].'?exe=fdbadmin&a='.($edit ? 'editsave' : 'insertsave').'&name='.$table.($edit ? '&index='.$index : '').'&back='.SaveRefererUrl().'" method="post">', $site->Submit($cap));
+AddForm('<form action="'.ADMIN_FILE.'?exe=fdbadmin&a='.($edit ? 'editsave' : 'insertsave').'&name='.$table.($edit ? '&index='.$index : '').'&back='.SaveRefererUrl().'" method="post">', $site->Submit($cap));
 AdminFdbAdminGenTableMenu($table);
 
 ?>

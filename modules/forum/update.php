@@ -222,4 +222,3 @@ function Forum_Update( $auto_update = false) {
 	Forum_Update_Delete_Bag();
 
 }
-?>

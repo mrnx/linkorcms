@@ -269,6 +269,3 @@ function Posts_RenderPostForm($edit = false, $forum = 0, $topic = 0, $id = 0,
 		$site->AddBlock('files', false ,true, 'u_files');
 	}
 }
-
-
-?>

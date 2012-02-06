@@ -58,5 +58,3 @@ function Navigation_Patch( $cat, $view_end_url = false){
 	$nav_url = 'index.php?name=forum';
 	$tree->ShowPath($cat, $UFU, $view_end_url);
 }
-
-?>

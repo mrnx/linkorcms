@@ -13,7 +13,7 @@ if(!$user->CheckAccess2('smilies', 'smilies')){
 }
 
 $smilies_dir = 'uploads/smilies/';
-$mod = $config['admin_file'].'?exe=smilies';
+$mod = ADMIN_FILE.'?exe=smilies';
 
 function AdminSmilesGetAllSmiles( &$sid, $dir_name, $selected = '', $smilies = array() )
 {
@@ -183,7 +183,7 @@ function AdminSmiliesAutoAdd()
 	}
 
 	$text = '';
-	$text .= $site->FormOpen($config['admin_file'].'?exe=smilies&a=autosave');
+	$text .= $site->FormOpen(ADMIN_FILE.'?exe=smilies&a=autosave');
 	$text .= '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 	$text .= '<tr>
 		<th>Добавить</th>

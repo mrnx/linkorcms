@@ -9,5 +9,3 @@
 function Index_Forum_Add_Java(){
 	include_once 'scripts/forum_scripts/script.php';
 }
-
-?>

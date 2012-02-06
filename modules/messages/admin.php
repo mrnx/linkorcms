@@ -22,10 +22,10 @@ function AdminSiteMessagesMain()
 		$mid = SafeDB($msg['id'], 11, int);
 		switch($msg['active']){
 			case "1":
-				$st = '<a href="'.$config['admin_file'].'?exe=messages&a=changestatus&id='.$mid.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
+				$st = '<a href="'.ADMIN_FILE.'?exe=messages&a=changestatus&id='.$mid.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
 				break;
 			case "0":
-				$st = '<a href="'.$config['admin_file'].'?exe=messages&a=changestatus&id='.$mid.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
+				$st = '<a href="'.ADMIN_FILE.'?exe=messages&a=changestatus&id='.$mid.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
 				break;
 		}
 		$resettime = '';
@@ -49,10 +49,10 @@ function AdminSiteMessagesMain()
 		}
 
 		$func = '';
-		$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=messages&a=msgeditor&id='.$mid, 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=messages&a=delete&id='.$mid.'&ok=0', 'images/admin/delete.png');
+		$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=messages&a=msgeditor&id='.$mid, 'images/admin/edit.png');
+		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=messages&a=delete&id='.$mid.'&ok=0', 'images/admin/delete.png');
 
-		$text .= '<tr><td><b><a href="'.$config['admin_file'].'?exe=messages&a=msgeditor&id='.$mid.'" title="Редактировать">'.SafeDB($msg['title'], 250, str).'</a></b></td>
+		$text .= '<tr><td><b><a href="'.ADMIN_FILE.'?exe=messages&a=msgeditor&id='.$mid.'" title="Редактировать">'.SafeDB($msg['title'], 250, str).'</a></b></td>
 		<td>'.$resettime.'</td>
 		<td>'.ViewLevelToStr(SafeDB($msg['view'], 1, int)).'</td>
 		<td>'.$st.'</td>
@@ -161,7 +161,7 @@ function AdminSiteMessagesEditor()
 	FormRow('Кто видит', $site->Select('view', $visdata));
 	FormRow('Включить', $site->Select('enabled', GetEnData($enabled[1])));
 	AddCenterBox($btitle);
-	AddForm('<form action="'.$config['admin_file'].'?exe=messages&a=save'.$url.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($method));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=messages&a=save'.$url.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($method));
 }
 
 function AdminSiteMessagesSave()
@@ -208,7 +208,7 @@ function AdminSiteMessagesSave()
 		$vals = "'','$title','$text','$date','$time','$showin','$extra_uri','$pos','$view_title','$view','$active'";
 		$db->Update('messages', $vals, "`id`='$id'", true);
 	}
-	GO($config['admin_file'].'?exe=messages');
+	GO(ADMIN_FILE.'?exe=messages');
 	exit();
 }
 
@@ -216,16 +216,16 @@ function AdminSiteMessagesDelete()
 {
 	global $config, $db;
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=messages');
+		GO(ADMIN_FILE.'?exe=messages');
 		exit();
 	}
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$db->Delete('messages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO($config['admin_file'].'?exe=messages');
+		GO(ADMIN_FILE.'?exe=messages');
 		exit();
 	}else{
 		$r = $db->Select('messages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить сообщение '.$r[0]['title'].'?<br />'.'<a href="'.$config['admin_file'].'?exe=messages&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите удалить сообщение '.$r[0]['title'].'?<br />'.'<a href="'.ADMIN_FILE.'?exe=messages&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание!", $text);
 	}
 }
@@ -243,7 +243,7 @@ function AdminSiteMessagesChangeStatus()
 		}
 		$db->Update('messages', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO($config['admin_file'].'?exe=messages');
+	GO(ADMIN_FILE.'?exe=messages');
 	exit();
 }
 

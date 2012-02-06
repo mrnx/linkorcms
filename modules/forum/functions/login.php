@@ -9,5 +9,3 @@ function IndexForumLogin(){
 		GO($user->Get('forum_referrer'), 202);
 	}
 }
-
-?>

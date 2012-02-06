@@ -2,12 +2,10 @@
 
 function IndexForumSubscription(){
 	global $user, $site, $lang, $UFU, $config;
-
 	$topic = 0;
 	if(isset($_GET['topic'])){
 		$topic = SafeEnv($_GET['topic'], 11, int);
 	}
-
 	if($user->Auth){
 		$result = Forum_Subscription($topic);
 		if($UFU){
@@ -19,5 +17,3 @@ function IndexForumSubscription(){
 		$site->AddTextBox($lang['subscription'], $lang['error_auth']);
 	}
 }
-
-?>

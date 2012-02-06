@@ -295,5 +295,3 @@ function IndexForumRender( &$forum, $read = false, $pod_forums=array() ){
 	}
 	$site->AddSubBlock('forums', true, $forum);
 }
-
-?>

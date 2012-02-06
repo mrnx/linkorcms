@@ -105,7 +105,7 @@ switch($action){
 		}else{
 			global $tree, $config;
 			$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
-			GO($config['admin_file'].'?exe=articles&a=cats');
+			GO(ADMIN_FILE.'?exe=articles&a=cats');
 		}
 		break;
 	case 'delcat':
@@ -114,7 +114,7 @@ switch($action){
 		}else{
 			global $tree, $config;
 			if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
-				GO($config['admin_file'].'?exe=articles&a=cats');
+				GO(ADMIN_FILE.'?exe=articles&a=cats');
 			}
 		}
 		break;
@@ -172,7 +172,7 @@ function AdminArticlesMain(){
 	SortArray($r, 'public', true); // Сортируем по дате добавления
 	if(count($r) > $config['articles']['articles_on_page']){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($r, $config['articles']['articles_on_page'], $config['admin_file'].'?exe=articles'.($cat > 0 ? '&cat='.$cat : ''));
+		$navigator->GenNavigationMenu($r, $config['articles']['articles_on_page'], ADMIN_FILE.'?exe=articles'.($cat > 0 ? '&cat='.$cat : ''));
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -193,20 +193,20 @@ function AdminArticlesMain(){
 				break;
 		}
 		if($editarticles){
-			$st = '<a href="'.$config['admin_file'].'?exe=articles&a=changestatus&id='.SafeDB($art['id'], 11, int).'">'.$st.'</a>';
+			$st = '<a href="'.ADMIN_FILE.'?exe=articles&a=changestatus&id='.SafeDB($art['id'], 11, int).'">'.$st.'</a>';
 			$func = '';
-			$func .= SpeedButton('Редактировать', $config['admin_file'].'?exe=articles&a=editor&id='.SafeDB($art['id'], 11, int), 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', $config['admin_file'].'?exe=articles&a=delete&id='.SafeDB($art['id'], 11, int).'&ok=0', 'images/admin/delete.png');
+			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=articles&a=editor&id='.SafeDB($art['id'], 11, int), 'images/admin/edit.png');
+			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=articles&a=delete&id='.SafeDB($art['id'], 11, int).'&ok=0', 'images/admin/delete.png');
 		}else{
 			$func = '-';
 		}
 		$vi = ViewLevelToStr(SafeDB($art['view'], 1, int));
 
-		$rating = '<img src="'.GetRatingImage(SafeDB($art['num_votes'], 11, int), SafeDB($art['all_votes'], 11, int)).'" border="0" />/ (всего '.SafeDB($art['num_votes'], 11, int).')'.($editarticles ? ' / <a href="'.$config['admin_file'].'?exe=articles&a=resetrating&id='.SafeDB($art['id'], 11, int).'" title="Обнулить счётчик оценок">Сброс</a>' : '');
+		$rating = '<img src="'.GetRatingImage(SafeDB($art['num_votes'], 11, int), SafeDB($art['all_votes'], 11, int)).'" border="0" />/ (всего '.SafeDB($art['num_votes'], 11, int).')'.($editarticles ? ' / <a href="'.ADMIN_FILE.'?exe=articles&a=resetrating&id='.SafeDB($art['id'], 11, int).'" title="Обнулить счётчик оценок">Сброс</a>' : '');
 
 		$text .= '<tr>
-		<td><b><a href="'.$config['admin_file'].'?exe=articles&a=editor&id='.SafeDB($art['id'], 11, int).'">'.SafeDB($art['title'], 255, str).'</a></b></td>
-		<td>'.SafeDB($art['hits'], 11, int).($editarticles ? ' / <a href="'.$config['admin_file'].'?exe=articles&a=resethits&id='.SafeDB($art['id'], 11, int).'" title="Сбросить счётчик">Сброс</a>' : '').'</td>
+		<td><b><a href="'.ADMIN_FILE.'?exe=articles&a=editor&id='.SafeDB($art['id'], 11, int).'">'.SafeDB($art['title'], 255, str).'</a></b></td>
+		<td>'.SafeDB($art['hits'], 11, int).($editarticles ? ' / <a href="'.ADMIN_FILE.'?exe=articles&a=resethits&id='.SafeDB($art['id'], 11, int).'" title="Сбросить счётчик">Сброс</a>' : '').'</td>
 		<td>'.SafeDB($art['comments_counter'], 11, int) .'</td>
 		<td>'.$rating.'</td>
 		<td>'.$vi.'</td>
@@ -318,7 +318,7 @@ function AdminArticlesEditor(){
 	FormRow('Кто видит', $site->Select('view', GetUserTypesFormData($view)));
 	FormRow('Активна', $site->Select('active', GetEnData($active, 'Да', 'Нет')));
 	AddCenterBox($top);
-	AddForm('<form name="edit_form" action="'.$config['admin_file'].'?exe=articles&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Button('Предпросмотр', 'onclick="PreviewOpen();"').$site->Submit($cap));
+	AddForm('<form name="edit_form" action="'.ADMIN_FILE.'?exe=articles&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Button('Предпросмотр', 'onclick="PreviewOpen();"').$site->Submit($cap));
 }
 
 // Сохранение статьи или изменений
@@ -330,7 +330,7 @@ function AdminArticlesSaveArticle( $action ){
 	}
 	$cat_id = SafeEnv($_POST['category'], 11, int);
 	if(in_array($cat_id, $tree->GetAllChildId(0)) === false || $cat_id == 0){
-		GO($config['admin_file'].'?exe=articles');
+		GO(ADMIN_FILE.'?exe=articles');
 	}
 	$author = SafeEnv($_POST['author'], 200, str, true);
 	$email = SafeEnv($_POST['email'], 50, str, true);
@@ -379,7 +379,7 @@ function AdminArticlesSaveArticle( $action ){
 		}
 		$db->Update('articles', $set, "`id`='$id'");
 	}
-	//GO($config['admin_file'].'?exe=articles');
+	//GO(ADMIN_FILE.'?exe=articles');
 	GoRefererUrl($_GET['back']);
 	AddTextBox('Сообщение', 'Изменения успешно сохранены.');
 }
@@ -392,7 +392,7 @@ function AdminArticlesChangeStatus(){
 		return;
 	}
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=articles');
+		GO(ADMIN_FILE.'?exe=articles');
 	}
 	$db->Select('articles', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	if($db->NumRows() > 0){
@@ -406,7 +406,7 @@ function AdminArticlesChangeStatus(){
 		}
 		$db->Update('articles', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO($config['admin_file'].'?exe=articles');
+	GO(ADMIN_FILE.'?exe=articles');
 }
 
 // Удаление статьи
@@ -417,7 +417,7 @@ function AdminArticlesDelete(){
 		return;
 	}
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=articles');
+		GO(ADMIN_FILE.'?exe=articles');
 	}
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -429,7 +429,7 @@ function AdminArticlesDelete(){
 		AddTextBox('Сообщение', 'Статья удалена.'); // В случае, если не будет произведено перенаправление
 	}else{
 		$r = $db->Select('articles', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Удалить статью "'.$r[0]['title'].'"<br />'.'<a href="'.$config['admin_file'].'?exe=articles&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&back='.SaveRefererUrl().'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Удалить статью "'.$r[0]['title'].'"<br />'.'<a href="'.ADMIN_FILE.'?exe=articles&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&back='.SaveRefererUrl().'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox('Внимание', $text);
 	}
 }
@@ -444,7 +444,7 @@ function AdminArticlesResetHits(){
 	if(isset($_GET['id'])){
 		$db->Update('articles', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO($config['admin_file'].'?exe=articles');
+	GO(ADMIN_FILE.'?exe=articles');
 }
 
 // Сброс оценок статьи
@@ -456,10 +456,10 @@ function AdminArticlesResetRating(){
 	}
 	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$db->Update('articles', "num_votes='0',all_votes='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO($config['admin_file'].'?exe=articles');
+		GO(ADMIN_FILE.'?exe=articles');
 	}else{
 		$r = $db->Select('articles', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите сбросить оценки для статьи "'.$r[0]['title'].'"<br />'.'<a href="'.$config['admin_file'].'?exe=articles&a=resetrating&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите сбросить оценки для статьи "'.$r[0]['title'].'"<br />'.'<a href="'.ADMIN_FILE.'?exe=articles&a=resetrating&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Внимание", $text);
 	}
 }

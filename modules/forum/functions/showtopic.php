@@ -216,7 +216,4 @@ function IndexForumShowTopic( $one_post = false ){
 			$cache->Write('forum', $cache_name.'_quest_', $site, 0);
 		}
 	}
-
 }
-
-?>

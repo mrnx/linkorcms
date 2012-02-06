@@ -81,12 +81,12 @@ function AdminsMain()
 
 	foreach($admins as $adm){
 		$funcs = '';
-		$funcs .= SpeedButton('Редактировать', $config['admin_file'].'?exe=admins&a=editadmin&id='.SafeDB($adm['id'], 11, int), 'images/admin/edit.png');
+		$funcs .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=admins&a=editadmin&id='.SafeDB($adm['id'], 11, int), 'images/admin/edit.png');
 		if($system > 1 || SafeDB($adm['access'], 11, int) == 0){
-			$funcs .= SpeedButton('Удалить или перевести в пользователи', $config['admin_file'].'?exe=admins&a=deladmin&id='.SafeDB($adm['id'], 11, int), 'images/admin/delete.png');
+			$funcs .= SpeedButton('Удалить или перевести в пользователи', ADMIN_FILE.'?exe=admins&a=deladmin&id='.SafeDB($adm['id'], 11, int), 'images/admin/delete.png');
 		}
 		$text .= '<tr>
-			<td><a href="'.$config['admin_file'].'?exe=admins&a=editadmin&id='.SafeDB($adm['id'], 11, int).'"><b>'.SafeDB($adm['name'], 50, str).'</b></a>'.'</td>
+			<td><a href="'.ADMIN_FILE.'?exe=admins&a=editadmin&id='.SafeDB($adm['id'], 11, int).'"><b>'.SafeDB($adm['name'], 50, str).'</b></a>'.'</td>
 			<td>'.PrintEmail($adm['email'], $adm['name']).'</td>
 			<td>'.$types[SafeDB($adm['access'], 11, int)][0].'</td>
 			<td>'.TimeRender(SafeDB($adm['lastvisit'], 11, int)).'</td>
@@ -121,9 +121,9 @@ function AdminsGroups()
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable"><th>Группа</th><th>Доступ</th><th>Функции</th></tr>';
 	foreach($types as $type){
 		$funcs = '';
-		$funcs .= SpeedButton('Редактировать', $config['admin_file'].'?exe=admins&a=editgroup&id='.$type[2], 'images/admin/edit.png');
+		$funcs .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=admins&a=editgroup&id='.$type[2], 'images/admin/edit.png');
 		if($type[3] == '0'){
-			$funcs .= SpeedButton('Удалить', $config['admin_file'].'?exe=admins&a=delgroup&id='.$type[2], 'images/admin/delete.png');
+			$funcs .= SpeedButton('Удалить', ADMIN_FILE.'?exe=admins&a=delgroup&id='.$type[2], 'images/admin/delete.png');
 		}
 		$text .= '<tr>
 		<td>'.$type[0].'</td>
@@ -177,7 +177,7 @@ function AdminsEditGroup()
 	}
 	FormRow('Доступ', $ac);
 	AddCenterBox($title);
-	AddForm('<form action="'.$config['admin_file'].'?exe=admins&a='.$method.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
+	AddForm('<form action="'.ADMIN_FILE.'?exe=admins&a='.$method.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
 }
 
 function AdminsEditGroupSave()
@@ -223,14 +223,14 @@ function AdminsEditGroupSave()
 	$cache = LmFileCache::Instance();
 	$cache->Delete(system_cache, 'usertypes');
 
-	GO($config['admin_file'].'?exe=admins&a=groups');
+	GO(ADMIN_FILE.'?exe=admins&a=groups');
 }
 
 function AdminsDeleteGroup()
 {
 	global $db, $config, $site;
 	if(!isset($_GET['id'])){
-		GO($config['admin_file'].'?exe=admins&a=groups');
+		GO(ADMIN_FILE.'?exe=admins&a=groups');
 		exit();
 	}
 	$id = SafeEnv($_GET['id'], 11, int);
@@ -246,21 +246,21 @@ function AdminsDeleteGroup()
 		$num_users = $db->NumRows();
 		if($num_users == 0){
 			$db->Delete('usertypes', "`id`='".$id."'");
-			GO($config['admin_file'].'?exe=admins&a=groups');
+			GO(ADMIN_FILE.'?exe=admins&a=groups');
 			exit();
 		}else{
 			if(!isset($_GET['users'])){
 				$text = 'К этой группе принадлежат '.$num_users.' пользователей. Вы можете:<br />'
-				.'<a href="'.$config['admin_file'].'?exe=admins&a=delgroup&id='.$id.'&ok=1&users=del">Удалить их...</a> <br />'
-				.'<a href="'.$config['admin_file'].'?exe=admins&a=delgroup&id='.SafeEnv($_GET['id'], 11, int).'&ok=1&users=move">Переместить их в другую группу.</a>';
+				.'<a href="'.ADMIN_FILE.'?exe=admins&a=delgroup&id='.$id.'&ok=1&users=del">Удалить их...</a> <br />'
+				.'<a href="'.ADMIN_FILE.'?exe=admins&a=delgroup&id='.SafeEnv($_GET['id'], 11, int).'&ok=1&users=move">Переместить их в другую группу.</a>';
 				AddTextBox('Внимание!', $text);
 			}else{
 				if($_GET['users'] == 'del'){
 					$db->Delete('users', "`access`='".$id."'");
-					GO($config['admin_file'].'?exe=user&a=delgroup&id='.$id.'&ok=1');
+					GO(ADMIN_FILE.'?exe=user&a=delgroup&id='.$id.'&ok=1');
 					exit();
 				}elseif($_GET['users'] == 'move' && !isset($_POST['to'])){
-					$text = 'Выберите группу, в которую Вы желаете переместить пользователей:<br />'.'<form action="'.$config['admin_file'].'?exe=admins&a=delgroup&id='.$id.'&ok=1&users=move" method="post">';
+					$text = 'Выберите группу, в которую Вы желаете переместить пользователей:<br />'.'<form action="'.ADMIN_FILE.'?exe=admins&a=delgroup&id='.$id.'&ok=1&users=move" method="post">';
 					$db->Select('usertypes', "`id`<>'".$id."'");
 					$site->DataAdd($group_data, '-1', 'Пользователи');
 					while($tp = $db->FetchRow()){
@@ -278,7 +278,7 @@ function AdminsDeleteGroup()
 						$set = "access='".$to."'";
 					}
 					$db->Update('users', $set, "`access`='".$id."'");
-					GO($config['admin_file'].'?exe=admins&a=delgroup&id='.$id.'&ok=1', 302);
+					GO(ADMIN_FILE.'?exe=admins&a=delgroup&id='.$id.'&ok=1', 302);
 					exit();
 				}
 			}
@@ -286,7 +286,7 @@ function AdminsDeleteGroup()
 	}else{
 		$db->Select('usertypes', "`id`='".$id."'");
 		$group = $db->FetchRow();
-		$text = 'Вы действительно хотите удалить группу "'.$group['name'].'"?<br />'.'<a href="'.$config['admin_file'].'?exe=admins&a=delgroup&id='.$id.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
+		$text = 'Вы действительно хотите удалить группу "'.$group['name'].'"?<br />'.'<a href="'.ADMIN_FILE.'?exe=admins&a=delgroup&id='.$id.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Предупреждение", $text);
 	}
 }
@@ -321,7 +321,7 @@ function AdminsDelete()
 		$cache = LmFileCache::Instance();
 		$cache->Delete(system_cache, 'users');
 
-		GO($config['admin_file'].'?exe=admins');
+		GO(ADMIN_FILE.'?exe=admins');
 		exit();
 	}elseif(isset($_GET['ok']) && $_GET['ok'] == '2'){
 		$db->Update('users', "type='2',access='-1'", "`id`='".SafeEnv($_GET['id'], 11, int)."' and `type`='1'");
@@ -330,12 +330,12 @@ function AdminsDelete()
 		$cache = LmFileCache::Instance();
 		$cache->Delete(system_cache, 'users');
 
-		GO($config['admin_file'].'?exe=admins');
+		GO(ADMIN_FILE.'?exe=admins');
 		exit();
 	}else{
-		$text = '<form action="'.$config['admin_file'].'?exe=admins&a=deladmin&id='.SafeEnv($_GET['id'], 11, int).'&ok=1" method="post">Что вы хотите сделать с администратором "'.$r[0]['name'].'"?<br />'
+		$text = '<form action="'.ADMIN_FILE.'?exe=admins&a=deladmin&id='.SafeEnv($_GET['id'], 11, int).'&ok=1" method="post">Что вы хотите сделать с администратором "'.$r[0]['name'].'"?<br />'
 			.$site->Check('del_comments', '1').'Удалить все комментарии этого пользователя.<br />'.$site->Submit('Удалить')
-			.' &nbsp;&nbsp;&nbsp; <a href="'.$config['admin_file'].'?exe=admins&a=deladmin&id='.SafeEnv($_GET['id'], 11, int).'&ok=2">Сделать пользователем</a> &nbsp;&nbsp;&nbsp; '
+			.' &nbsp;&nbsp;&nbsp; <a href="'.ADMIN_FILE.'?exe=admins&a=deladmin&id='.SafeEnv($_GET['id'], 11, int).'&ok=2">Сделать пользователем</a> &nbsp;&nbsp;&nbsp; '
 			.$site->Button('Отмена', 'onclick="history.go(-1)"').'</form>';
 		AddTextBox("Предупреждение", $text);
 	}

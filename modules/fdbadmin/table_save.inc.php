@@ -61,7 +61,7 @@ $query['cols'] = $cols;
 
 if($action == 'savetable'){
 	$db->CreateTable($table, $query);
-	GO($config['admin_file'].'?exe=fdbadmin');
+	GO(ADMIN_FILE.'?exe=fdbadmin');
 }elseif($action == 'editsavetable'){
 	$info = $db->GetTableInfo($table);
 	$info = $info[0];
@@ -76,9 +76,9 @@ if($action == 'savetable'){
 	foreach($query['cols'] as $i=>$col){
 		$db->EditColl( $table, $i, $col );
 	}
-	GO($config['admin_file'].'?exe=fdbadmin&a=structure&name='.SafeEnv($_POST['tablename'], 250, str));
+	GO(ADMIN_FILE.'?exe=fdbadmin&a=structure&name='.SafeEnv($_POST['tablename'], 250, str));
 }
 
-GO($config['admin_file'].'?exe=fdbadmin');
+GO(ADMIN_FILE.'?exe=fdbadmin');
 
 ?>

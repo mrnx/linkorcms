@@ -24,5 +24,5 @@ foreach($row as $key=>$value){
 $sql = substr($sql, 0, strlen($sql) - 4);
 $db->Delete($table, $sql);
 
-//GO($config['admin_file'].'?exe=fdbadmin&a=review&name='.$table);
+//GO(ADMIN_FILE.'?exe=fdbadmin&a=review&name='.$table);
 GoBack();

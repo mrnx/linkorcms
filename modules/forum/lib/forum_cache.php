@@ -126,5 +126,3 @@ function Forum_Cache_ClearAllCacheForum() {
 		}
 	}
 }
-
-?>

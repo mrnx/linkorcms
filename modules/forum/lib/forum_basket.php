@@ -174,5 +174,3 @@ function Forum_Basket_RenderBasketComAdmin($id = 0,$text= '', $basket = array() 
 	}
 	return $out_text;
 }
-
-?>

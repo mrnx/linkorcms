@@ -47,5 +47,3 @@ if(isset($config['forum']['basket'])){
 		}
 	}
 }
-
-?>

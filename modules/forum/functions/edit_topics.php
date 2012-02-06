@@ -49,5 +49,3 @@ function IndexForumEditTopics(){
 		$site->AddTextBox($text2.Moderation_GetDo($_POST['do']).' :&nbsp;'.$lang['confirm'], '<span allign="left">'.$text.'</span><BR><BR>'.$site->Submit($lang['execute']).'<a href="javascript:history.go(-1)">'.$site->Button($lang['back']).'</a>');
 	}
 }
-
-?>

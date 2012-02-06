@@ -16,5 +16,3 @@ function Forum_Marker_GetReadData() {
 	}
 	return $read_array;
 }
-
-?>

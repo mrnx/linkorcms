@@ -53,5 +53,3 @@ if(!isset($config['forum']['cache'])) {
 
 $site->Title = $lang['forum'];
 $forum_navigation = '';
-
-?>

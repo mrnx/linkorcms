@@ -85,5 +85,3 @@ function Forum_Topic_SetHitsData($topic_id) {
 	}
 
 }
-
-?>

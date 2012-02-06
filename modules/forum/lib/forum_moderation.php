@@ -344,5 +344,3 @@ function Moderation_GetPostsDo( $do ) {
 			break;
 	}
 }
-
-?>

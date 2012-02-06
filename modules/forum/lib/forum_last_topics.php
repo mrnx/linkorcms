@@ -53,5 +53,3 @@ function Forum_Last_Combo($forum_id=-1) {
 
 	return $text ;
 }
-
-?>

@@ -62,6 +62,3 @@ function Forum_Add_AddPost2( $topic = null ) {
 		}
 	}
 }
-
-
-?>

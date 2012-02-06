@@ -31,5 +31,3 @@ function IndexForumEditPost() {
 		$site->AddTextBox($lang['topic_basket_current_post'], '<center> '.$lang['topic_basket_post'].'</BR><input type="button" value="'.$lang['back'].'" onclick="history.back();"></center>');
 	}
 }
-
-?>

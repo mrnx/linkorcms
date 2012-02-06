@@ -37,7 +37,7 @@ foreach($info as $col){
 	}
 
 	$func = '';
-	$func .= SpeedButton('Просмотреть информацию для установки', $config['admin_file'].'?exe=fdbadmin&a=viewcollinfo&name='.$name.'&collid='.$i, 'images/admin/info.png');
+	$func .= SpeedButton('Просмотреть информацию для установки', ADMIN_FILE.'?exe=fdbadmin&a=viewcollinfo&name='.$name.'&collid='.$i, 'images/admin/info.png');
 	$func .= System::admin()->SpeedConfirm('Удалить колонку', ADMIN_FILE.'?exe=fdbadmin&a=deletecoll&name='.$name.'&collid='.$i, 'images/admin/delete.png', 'Удалить колонку?');
 
 	$text .= '<tr>
@@ -59,5 +59,5 @@ AddText($text);
 
 System::admin()->FormTitleRow('Вставить колонку');
 FormRow('После (индекс поля)', $site->Edit('toindex', '', false, 'style="width: 100px;"'), 160);
-AddForm('<form action="'.$config['admin_file'].'?exe=fdbadmin&a=newcoll&name='.$name.'" method="post">', $site->Submit('Далее', 'title="Перейти к след. шагу добавления колонки."'));
+AddForm('<form action="'.ADMIN_FILE.'?exe=fdbadmin&a=newcoll&name='.$name.'" method="post">', $site->Submit('Далее', 'title="Перейти к след. шагу добавления колонки."'));
 AdminFdbAdminGenTableMenu($name);

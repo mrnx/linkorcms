@@ -28,7 +28,7 @@ function AdminGuestBookPremoderationSave( $action )
 	}elseif($action == 'prem_del_all'){
 		$db->Delete('guestbook', "`premoderate`='0'");
 	}
-	GO($config['admin_file'].'?exe=guestbook&a=premoderation');
+	GO(ADMIN_FILE.'?exe=guestbook&a=premoderation');
 }
 
 function countmess( $where, $that, $value )
@@ -59,7 +59,7 @@ function AdminGuestBookPremoderationMain()
 	$num = $config['gb']['msgonpage'];
 	if(count($premoderate) > $num){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($premoderate, $num, $config['admin_file'].'?exe=guestbook&a=premoderation');
+		$navigator->GenNavigationMenu($premoderate, $num, ADMIN_FILE.'?exe=guestbook&a=premoderation');
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -80,16 +80,16 @@ function AdminGuestBookPremoderationMain()
 			$name = PrintEmail($pre['name'], $pre['email']);
 		}
 		$mid = SafeDB($pre['id'], 11, int);
-		$del = '<a href="'.$config['admin_file'].'?exe=guestbook&a=delete&id='.$mid.'&ok=0"><img src="images/admin/delete.png" title="Удалить сообщение" /></a>';
+		$del = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=delete&id='.$mid.'&ok=0"><img src="images/admin/delete.png" title="Удалить сообщение" /></a>';
 		$func2 = '';
-		$func2 = '<a href="'.$config['admin_file'].'?exe=guestbook&a=prem_yes&id='.$mid.'">Разрешить</a>';
+		$func2 = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=prem_yes&id='.$mid.'">Разрешить</a>';
 		$text .= '<table cellspacing="0" cellpadding="0" class="cfgtable" style="width:75%;">';
 		$text .= '<tr><td style="text-align:left;padding-left:10px;">Сообщение от '.$name.'</td><td>Сайт: '.$url.'</td><td>ICQ: '.SafeDB($pre['icq'], 15, str).'</td><td>IP: '.SafeDB($pre['user_ip'], 20, str).'</td><td> '.$del.' </td></tr>';
 		$text .= '<tr><td colspan="5" style="text-align:left;padding:10px;">'.SafeDB($pre['message'], 0, str).'</td></tr>';
 		$text .= '<tr><td>Дата: '.TimeRender($pre['date']).'</td><td colspan="4" style="text-align:right;">'.$func2.'</td></tr>';
 		$text .= '</table>';
 	}
-	$text_all_prem_del = '<a href="'.$config['admin_file'].'?exe=guestbook&a=prem_yes_all">Разрешить все</a> | <a href="'.$config['admin_file'].'?exe=guestbook&a=prem_del_all">Удалить все</a>';
+	$text_all_prem_del = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=prem_yes_all">Разрешить все</a> | <a href="'.ADMIN_FILE.'?exe=guestbook&a=prem_del_all">Удалить все</a>';
 	AddText($text);
 	AddText($text_all_prem_del);
 	if($nav){
@@ -118,7 +118,7 @@ function AdminGuestBookMain()
 	$num = $config['gb']['msgonpage'];
 	if(count($msgs) > $num){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($msgs, $num, $config['admin_file'].'?exe=guestbook');
+		$navigator->GenNavigationMenu($msgs, $num, ADMIN_FILE.'?exe=guestbook');
 		AddNavigation();
 		$nav = true;
 	}else{
@@ -139,8 +139,8 @@ function AdminGuestBookMain()
 
 		$mid = SafeDB($msg['id'], 11, int);
 		$func = '';
-		$func .= SpeedButton('Редактировать сообщение', $config['admin_file'].'?exe=guestbook&a=edit&id='.$mid, 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить сообщение', $config['admin_file'].'?exe=guestbook&a=delete&id='.$mid.'&ok=0', 'images/admin/delete.png');
+		$func .= SpeedButton('Редактировать сообщение', ADMIN_FILE.'?exe=guestbook&a=edit&id='.$mid, 'images/admin/edit.png');
+		$func .= SpeedButton('Удалить сообщение', ADMIN_FILE.'?exe=guestbook&a=delete&id='.$mid.'&ok=0', 'images/admin/delete.png');
 
 		if($msg['answers'] == ''){
 			$answers = array();
@@ -149,10 +149,10 @@ function AdminGuestBookMain()
 		}
 		$func2 = '';
 		if(key_exists($user->Name(), $answers)){
-			$func2 = ($user->CheckAccess2('guestbook', 'answer') ? '<a href="'.$config['admin_file'].'?exe=guestbook&a=editanswer&id='.$mid.'">Редактировать ответ</a> :: ' : '')
-				.'<a href="'.$config['admin_file'].'?exe=guestbook&a=delanswer&id='.$mid.'">Удалить ответ</a>';
+			$func2 = ($user->CheckAccess2('guestbook', 'answer') ? '<a href="'.ADMIN_FILE.'?exe=guestbook&a=editanswer&id='.$mid.'">Редактировать ответ</a> :: ' : '')
+				.'<a href="'.ADMIN_FILE.'?exe=guestbook&a=delanswer&id='.$mid.'">Удалить ответ</a>';
 		}elseif($user->CheckAccess2('guestbook', 'answer')){
-			$func2 = '<a href="'.$config['admin_file'].'?exe=guestbook&a=addanswer&id='.$mid.'">Ответить</a>';
+			$func2 = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=addanswer&id='.$mid.'">Ответить</a>';
 		}
 		$keys = array_keys($answers);
 		$answerstext = '';
@@ -194,9 +194,9 @@ function AdminGuestBookMessageEditor()
 		FormRow('Номер ICQ', $site->Edit('icq', SafeDB($msg['icq'], 15, str), false, 'maxlength="15"'));
 		FormRow('Сообщение', $site->TextArea('message', SafeDB($msg['message'], 0, str), 'style="width:400px;height:200px;"'));
 		AddCenterBox('Редактирование записи');
-		AddForm('<form action="'.$config['admin_file'].'?exe=guestbook&a=save&id='.$id.'&back='.SaveRefererUrl().'" method="POST">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
+		AddForm('<form action="'.ADMIN_FILE.'?exe=guestbook&a=save&id='.$id.'&back='.SaveRefererUrl().'" method="POST">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
 	}else{
-		GO($config['admin_file'].'?exe=guestbook');
+		GO(ADMIN_FILE.'?exe=guestbook');
 	}
 }
 
@@ -219,7 +219,7 @@ function AdminGuestBookSave()
 	$icq = SafeEnv($_POST['icq'], 50, str);
 	$message = SafeEnv($_POST['message'], 0, str);
 	$db->Update('guestbook', "name='$name',email='$email',hide_email='$hideemail',url='$url',icq='$icq',message='$message'", "`id`='$id'");
-	//GO($config['admin_file'].'?exe=guestbook');
+	//GO(ADMIN_FILE.'?exe=guestbook');
 	GoRefererUrl($_GET['back']);
 	AddTextBox('Сообщение', 'Изменения успешно сохранены.');
 }
@@ -247,9 +247,9 @@ function AdminGuestBookAnswerEditor()
 		}
 		FormRow('Ответ', $site->TextArea('answer', htmlspecialchars($ans), 'style="width:400px;height:200px;"'));
 		AddCenterBox('Ответ на сообщение');
-		AddForm('<form action="'.$config['admin_file'].'?exe=guestbook&a=saveanswer&id='.$id.'&back='.SaveRefererUrl().'" method="POST">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
+		AddForm('<form action="'.ADMIN_FILE.'?exe=guestbook&a=saveanswer&id='.$id.'&back='.SaveRefererUrl().'" method="POST">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
 	}else{
-		GO($config['admin_file'].'?exe=guestbook');
+		GO(ADMIN_FILE.'?exe=guestbook');
 	}
 }
 
@@ -273,7 +273,7 @@ function AdminGuestBookAnswerSave()
 		$answers = serialize($answers);
 		$db->Update('guestbook', "answers='$answers'", "`id`='".$id."'");
 	}
-	//GO($config['admin_file'].'?exe=guestbook');
+	//GO(ADMIN_FILE.'?exe=guestbook');
 	GoRefererUrl($_GET['back']);
 	AddTextBox('Сообщение', 'Изменения успешно сохранены.');
 }
@@ -296,7 +296,7 @@ function AdminGuestBookDeleteAnswer()
 		$answers = serialize($answers);
 		$db->Update('guestbook', "answers='$answers'", "`id`='".$id."'");
 	}
-	//GO($config['admin_file'].'?exe=guestbook');
+	//GO(ADMIN_FILE.'?exe=guestbook');
 	GoBack();
 }
 
@@ -309,13 +309,13 @@ function AdminGuestBookDeleteMessage()
 	}
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
 		$db->Delete('guestbook', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		//GO($config['admin_file'].'?exe=guestbook');
+		//GO(ADMIN_FILE.'?exe=guestbook');
 		GoRefererUrl($_GET['back']);
 		AddTextBox('Сообщение', 'Сообщение удалено.');
 	}else{
 		$r = $db->Select('guestbook', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 		$text = 'Вы действительно хотите удалить сообщение от '.$r[0]['name'].'<br />'
-		.'<a href="'.$config['admin_file'].'?exe=guestbook&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&back='.SaveRefererUrl().'&ok=1">Да</a>'
+		.'<a href="'.ADMIN_FILE.'?exe=guestbook&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&back='.SaveRefererUrl().'&ok=1">Да</a>'
 		.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 		AddTextBox("Предупреждение", $text);
 	}
