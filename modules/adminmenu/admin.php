@@ -147,18 +147,18 @@ function AdminAdminMenuAjaxMove(){
 function AdminAdminMenuEditor(){
 	UseScript('jquery');
 	System::admin()->AddJS(<<<JS
-function SelectLinkType(type, first){
+SelectLinkType = function(type, first){
 	$('.aaml').hide();
 	if(first){
 		$('.aaml_'+type).show();
 	}else{
 		$('.aaml_'+type).fadeIn();
 	}
-}
-function SelectModule(mod){
+};
+SelectModule = function(mod){
 		var mod = $(mod).find('option:selected').attr('title');
 		$('#item_title').val(mod).focus();
-}
+};
 JS
 );
 

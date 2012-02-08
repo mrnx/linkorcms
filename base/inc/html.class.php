@@ -37,7 +37,7 @@ class HTML{
 	 * @return string
 	 */
 	public function Edit( $name, $text = '', $password = false, $other = '' ){
-		return '<input type="'.($password ? 'password' : 'text').'" name="'.$name.'"'.($text != '' ? ' value="'.$text.'"' : '').($other != '' ? ' '.$other : '').">\n";
+		return '<input type="'.($password ? 'password' : 'text').'" name="'.$name.'"'.(strval($text) != '' ? ' value="'.$text.'"' : '').($other != '' ? ' '.$other : '').">\n";
 	}
 
 	public function TextArea( $name, $text = '', $other = '' ){

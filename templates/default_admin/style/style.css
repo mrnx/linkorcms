@@ -38,6 +38,18 @@ body {
 	margin-bottom: 10px;
 }
 
+#errors {
+	padding: 5px;
+	margin-bottom: 5px;
+	display: none;
+	border: 1px solid #e2d0d0;
+	background: #fcf0f0;
+	color: #280b0b;
+	-moz-border-radius: 0 !important;
+	-webkit-border-radius: 0 !important;
+	border-radius: 0 !important;
+}
+
 #wrapper {
 	text-align: left;
 	max-width: 1200px;

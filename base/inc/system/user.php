@@ -197,7 +197,7 @@ function GetUserInfo($user_id){
 		$usr['avatar_file_small'] = GetSmallUserAvatar($user_id, $usr['avatar_file']);
 		$usr['avatar_file_smallest'] = GetSmallestUserAvatar($user_id,  $usr['avatar_file']);
 		// Ранг
-		$rank = GetUserRank($usr['points'],$usr['type'],$usr['access']);
+		$rank = GetUserRank($usr['points'], $usr['type'], $usr['access']);
 		$usr['rank_name'] = $rank[0];
 		$usr['rank_image'] = $rank[1];
 		// Статус онлайн
@@ -742,7 +742,7 @@ function AdminUserEditor($save_link, $a = 'adduser', $id = 0, $isadmin = false){
 		$selected = GetGalleryAvatar($avatars[1]);
 	}
 	$site->AddJS('
-	function ShowAvatar(){
+	ShowAvatar = function(){
 		if(document.userform.avatar.value==\'\'){
 			document.userform.avatarview.src = \''.(
 	$config['user']['secure_avatar_upload'] == '1' ? 'index.php?name=plugins&p=avatars_render&user='.$id : $config['general']['personal_avatars_dir'].$avatar).'\';

@@ -127,11 +127,10 @@ function AdminViewRetrofittingList(){
 	$id = 0;
 	while($conf = $db->FetchRow()){
 		$id++;
+		$confid = SafeDB($conf['id'], 11, int);
 		$func = '';
-		$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=config_admin&a=edit&id='.SafeDB($conf['id'], 11, int)
-		.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=config_admin&a=delete&id='.SafeDB($conf['id'], 11, int).'&ok=0'
-		.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/delete.png');
+		$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=config_admin&a=edit&id='.$confid.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/edit.png');
+		$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=config_admin&a=delete&id='.$confid.'&ok=0'.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/delete.png', 'Это может повлиять на работу системы. Нажмите отмена, если не уверены. Удалить настройку?');
 
 		$access = $access_config."<span style=\"color: #008200\">'".$groups[$conf['group_id']]['name'].'/'."".$conf['name']."'</span>)";
 
@@ -398,24 +397,19 @@ function AdminConfigDeleteRetrofitting(){
 	}else{
 		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_all_plugins&plugins=1&delok';
 	}
-
 	if(!isset($_GET['id'])){
 		GO($back_url);
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
 	}
-
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
+	if(isset($_GET['ok']) && $_GET['ok'] == '1' || IsAjax()){
 		$db->Delete(AdminConfigConfigTable(), "`id`='$id'");
 		GO($back_url);
 	}else{
 		$r = $db->Select(AdminConfigConfigTable(), "`id`='$id'");
-		$text = 'Вы действительно хотите удалить настройку "'.SafeDB($r[0]['hname'], 255, str)
-		.'"<br />'
-		.'<a href="'.ADMIN_FILE.'?exe=config_admin&a=delete&id='.$id.'&ok=1'
-		.(AdminConfigPlugins() ? '&plugins=1' : '').'">Да</a>'
-		.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
+		AddCenterBox('Удаление настройки');
+		System::admin()->HighlightConfirm('Это может повлиять на работу системы. Нажмите отмена, если не уверены. Удалить группу настроек "'.SafeDB($r[0]['hname'], 255, str).'"?',
+			ADMIN_FILE.'?exe=config_admin&a=delete&id='.$id.'&ok=1'.(AdminConfigPlugins() ? '&plugins=1' : ''));
 	}
 }
 
@@ -436,11 +430,11 @@ function AdminConfigViewGroups(){
 	.'</tr>';
 
 	while($group = $db->FetchRow()){
+		$groupid = SafeDB($group['id'], 11, int);
 		$func = '';
-		$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=config_admin&a=editgroup&id='.SafeDB($group['id'], 11, int)
-		.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=config_admin&a=deletegroup&id='.SafeDB($group['id'], 11, int).'&ok=0'
-		.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/delete.png');
+		$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=config_admin&a=editgroup&id='.$groupid.(AdminConfigPlugins() ? '&plugins=1' : ''), 'images/admin/edit.png');
+		$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=config_admin&a=deletegroup&id='.$groupid.'&ok=0'.(AdminConfigPlugins() ? '&plugins=1' : ''),
+			'images/admin/delete.png', 'Это может повлиять на работу системы. Нажмите отмена, если не уверены. Удалить группу настроек?');
 
 		if($group['visible'] == '1'){
 			$visible = '<font color="#008000">Да</font>';
@@ -448,9 +442,8 @@ function AdminConfigViewGroups(){
 			$visible = '<font color="#FF0000">Нет</font>';
 		}
 
-		$install_vals = Values('', $group['name'], $group['hname'], $group['description'],
-			$group['visible']);
-		$install = '$db->Insert("'.AdminConfigGroupTable().'","'.$install_vals.'");';
+		//$install_vals = Values('', $group['name'], $group['hname'], $group['description'], $group['visible']);
+		//$install = '$db->Insert("'.AdminConfigGroupTable().'","'.$install_vals.'");';
 
 		$text .= '<tr>
 		<td>'.SafeDB($group['name'], 255, str).'</td>
@@ -484,16 +477,13 @@ function AdminConfigViewGroups(){
 // Редактирование группы
 function AdminConfigGroupEdit(){
 	global $db, $site, $config;
-
 	$id = SafeEnv($_GET['id'], 11, int);
 	$db->Select(AdminConfigGroupTable(), "`id`='$id'");
 	$group = $db->FetchRow();
-
 	FormRow('Имя', $site->Edit('name', SafeDB($group['name'],255,str), false, 'style="width:400px;"'));
 	FormRow('Заголовок', $site->Edit('hname', SafeDB($group['hname'],255,str), false, 'style="width:400px;"'));
 	FormRow('Описание', $site->TextArea('description', SafeDB($group['description'],255,str), 'style="width:400px;height:100px;"'));
 	FormRow('Видимая', $site->Check('visible', '1', $group['visible']=='1'));
-
 	AddCenterBox('Редактирование группы');
 	AddForm('<form action="'.ADMIN_FILE.'?exe=config_admin&a=savegroup&id='.$id.(AdminConfigPlugins() ? '&plugins=1' : '').'" method="post">',
 		$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit('Сохранить')
@@ -511,7 +501,6 @@ function AdminConfigGroupSave(){
 	}else{
 		$visible = '0';
 	}
-
 	$vals = Values('', $name, $hname, $description, $visible);
 	if(isset($_GET['id'])){
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -528,30 +517,24 @@ function AdminConfigGroupSave(){
 function AdminConfigGroupDelete(){
 	global $config, $db;
 	$back_url = '';
-
 	if(!AdminConfigPlugins()){
 		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_groups&delok';
 	}else{
 		$back_url = ADMIN_FILE.'?exe=config_admin&a=view_groups_plugins&plugins=1&delok';
 	}
-
 	if(!isset($_GET['id'])){
 		GO($back_url);
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
 	}
-
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
+	if(isset($_GET['ok']) && $_GET['ok'] == '1' || IsAjax()){
 		$db->Delete(AdminConfigGroupTable(), "`id`='$id'");
 		$db->Delete(AdminConfigConfigTable(), "`group_id`='$id'");
 		GO($back_url);
 	}else{
 		$r = $db->Select(AdminConfigGroupTable(), "`id`='$id'");
-		$text = 'Вы действительно хотите удалить группу "'.SafeDB($r[0]['hname'], 255, str)
-		.'"?<br />Все настройки группы будут удалены.<br />'
-		.'<a href="'.ADMIN_FILE.'?exe=config_admin&a=deletegroup&id='.$id.'&ok=1'
-		.(AdminConfigPlugins() ? '&plugins=1' : '').'">Да</a>'
-		.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
+		AddCenterBox('Удаление группы навтроек');
+		System::admin()->HighlightConfirm('Это может повлиять на работу системы. Нажмите отмена, если не уверены. Удалить группу настроек "'.SafeDB($r[0]['hname'], 255, str).'"?',
+			ADMIN_FILE.'?exe=config_admin&a=delete&id='.$id.'&ok=1'.(AdminConfigPlugins() ? '&plugins=1' : ''));
 	}
 }

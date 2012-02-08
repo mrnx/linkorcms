@@ -12,22 +12,40 @@ if(!$user->CheckAccess2('messages', 'messages')){
 	return;
 }
 
-function AdminSiteMessagesMain()
-{
-	global $db, $config;
-	$db->Select('messages', '');
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+
+TAddToolLink('Все сообщения', 'main', 'messages');
+TAddToolLink('Редактор сообщений', 'msgeditor', 'messages&a=msgeditor');
+TAddToolBox($action);
+switch($action){
+	case 'main':
+		AdminSiteMessagesMain();
+		break;
+	case 'msgeditor':
+		AdminSiteMessagesEditor();
+		break;
+	case 'save':
+		AdminSiteMessagesSave();
+		break;
+	case 'delete':
+		AdminSiteMessagesDelete();
+		break;
+	case 'changestatus':
+		AdminSiteMessagesChangeStatus();
+		break;
+}
+
+function AdminSiteMessagesMain(){
+	System::database()->Select('messages', '');
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 	$text .= '<tr><th>Название</th><th>Осталось времени</th><th>Кто видит</th><th>Статус</th><th>Функции</th></tr>';
-	while($msg = $db->FetchRow()){
+	while($msg = System::database()->FetchRow()){
 		$mid = SafeDB($msg['id'], 11, int);
-		switch($msg['active']){
-			case "1":
-				$st = '<a href="'.ADMIN_FILE.'?exe=messages&a=changestatus&id='.$mid.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
-				break;
-			case "0":
-				$st = '<a href="'.ADMIN_FILE.'?exe=messages&a=changestatus&id='.$mid.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
-				break;
-		}
+		$st = System::admin()->SpeedStatus('Вкл.', 'Выкл.', ADMIN_FILE.'?exe=messages&a=changestatus&id='.$mid, $msg['active'] == '1');
 		$resettime = '';
 		if($msg['expire'] != '0'){
 			$total = TotalTime(time(), SafeDB($msg['date'], 11, int) + (Day2Sec * SafeDB($msg['expire'], 11, int)));
@@ -50,23 +68,21 @@ function AdminSiteMessagesMain()
 
 		$func = '';
 		$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=messages&a=msgeditor&id='.$mid, 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=messages&a=delete&id='.$mid.'&ok=0', 'images/admin/delete.png');
+		$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=messages&a=delete&id='.$mid.'&ok=0', 'images/admin/delete.png', 'Удалить сообщение?');
 
-		$text .= '<tr><td><b><a href="'.ADMIN_FILE.'?exe=messages&a=msgeditor&id='.$mid.'" title="Редактировать">'.SafeDB($msg['title'], 250, str).'</a></b></td>
+		$text .= '<tr><td><b>'.System::admin()->Link(SafeDB($msg['title'], 250, str), ADMIN_FILE.'?exe=messages&a=msgeditor&id='.$mid).'</b></td>
 		<td>'.$resettime.'</td>
 		<td>'.ViewLevelToStr(SafeDB($msg['view'], 1, int)).'</td>
 		<td>'.$st.'</td>
 		<td>'.$func.'</td>
-		</tr>
-		';
+		</tr>';
 	}
 	$text .= '</table>';
 	AddTextBox('Все сообщения', $text);
 }
 
-function AdminSiteMessagesEditor()
-{
-	global $site, $db, $config;
+function AdminSiteMessagesEditor(){
+	global $site;
 	$title = '';
 	$text = '';
 	$showin = array();
@@ -89,8 +105,8 @@ function AdminSiteMessagesEditor()
 		$a = 'add';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
-		$db->Select('messages', "`id`='$id'");
-		$msg = $db->FetchRow();
+		System::database()->Select('messages', "`id`='$id'");
+		$msg = System::database()->FetchRow();
 		$title = SafeDB($msg['title'], 250, str);
 		$text = SafeDB($msg['text'], 0, str, false);
 		$time = SafeDB($msg['expire'], 11, int);
@@ -126,7 +142,7 @@ function AdminSiteMessagesEditor()
 		FormRow('Сбросить таймер', $site->Check('resettime', '1', false));
 	}
 	//Сначала загружаем все модули из базы данных которые работают с пользователем
-	$mods = $db->Select('modules', "`isindex`='1'");
+	$mods = System::database()->Select('modules', "`isindex`='1'");
 	array_unshift($mods, array('name'=>'Главная страница', 'folder'=>'INDEX'));
 	//$showin = AdminsGetAccessArray($showin);
 	$ac = '';
@@ -164,9 +180,7 @@ function AdminSiteMessagesEditor()
 	AddForm('<form action="'.ADMIN_FILE.'?exe=messages&a=save'.$url.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($method));
 }
 
-function AdminSiteMessagesSave()
-{
-	global $config, $db;
+function AdminSiteMessagesSave(){
 	$title = SafeEnv($_POST['title'], 250, str);
 	$view_title = EnToInt($_POST['vtitle']);
 	$text = SafeEnv($_POST['text'], 0, str);
@@ -186,97 +200,52 @@ function AdminSiteMessagesSave()
 	}
 	$showin = SafeEnv($_POST['showin'], 255, str);
 	$showin = serialize($showin);
-	//Теперь обрабатываем URI
+	//Обрабатываем URI
 	$extra_uri = explode("\r\n", $_POST['extra_uri']);
 	$extra_uri = SafeEnv($extra_uri, 255, str);
 	$extra_uri = serialize($extra_uri);
 	//Записываем или обновляем данные в базе данных
 	if(!isset($_GET['id'])){
 		$vals = "'','$title','$text','$date','$time','$showin','$extra_uri','$pos','$view_title','$view','$active'";
-		$db->Insert('messages', $vals);
+		System::database()->Insert('messages', $vals);
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
 		if(!isset($_POST['resettime'])){
-			$db->Select('messages', "`id`='$id'");
-			if($db->NumRows() > 0){
-				$msg = $db->FetchRow();
+			System::database()->Select('messages', "`id`='$id'");
+			if(System::database()->NumRows() > 0){
+				$msg = System::database()->FetchRow();
 				$date = $msg['date'];
 			}else{
 				$date = time();
 			}
 		}
 		$vals = "'','$title','$text','$date','$time','$showin','$extra_uri','$pos','$view_title','$view','$active'";
-		$db->Update('messages', $vals, "`id`='$id'", true);
+		System::database()->Update('messages', $vals, "`id`='$id'", true);
 	}
 	GO(ADMIN_FILE.'?exe=messages');
-	exit();
 }
 
-function AdminSiteMessagesDelete()
-{
-	global $config, $db;
+function AdminSiteMessagesDelete(){
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=messages');
-		exit();
 	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$db->Delete('messages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO(ADMIN_FILE.'?exe=messages');
-		exit();
-	}else{
-		$r = $db->Select('messages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить сообщение '.$r[0]['title'].'?<br />'.'<a href="'.ADMIN_FILE.'?exe=messages&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
-	}
+	System::database()->Delete('messages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	GO(ADMIN_FILE.'?exe=messages');
 }
 
-function AdminSiteMessagesChangeStatus()
-{
-	global $config, $db;
-	$db->Select('messages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	if($db->NumRows() > 0){
-		$r = $db->FetchRow();
+function AdminSiteMessagesChangeStatus(){
+	System::database()->Select('messages', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	if(System::database()->NumRows() > 0){
+		$r = System::database()->FetchRow();
 		if($r['active'] == 1){
 			$en = '0';
 		}else{
 			$en = '1';
 		}
-		$db->Update('messages', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('messages', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	}
+	if(IsAjax()){
+		exit("OK");
 	}
 	GO(ADMIN_FILE.'?exe=messages');
-	exit();
 }
-
-function AdminSiteMessages( $action )
-{
-	TAddToolLink('Все сообщения', 'main', 'messages');
-	TAddToolLink('Редактор сообщений', 'msgeditor', 'messages&a=msgeditor');
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminSiteMessagesMain();
-			break;
-		case 'msgeditor':
-			AdminSiteMessagesEditor();
-			break;
-		case 'save':
-			AdminSiteMessagesSave();
-			break;
-		case 'delete':
-			AdminSiteMessagesDelete();
-			break;
-		case 'changestatus':
-			AdminSiteMessagesChangeStatus();
-			break;
-		default:
-			die('No Hack');
-	}
-}
-
-if(isset($_GET['a'])){
-	AdminSiteMessages($_GET['a']);
-}else{
-	AdminSiteMessages('main');
-}
-
-?>

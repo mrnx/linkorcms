@@ -72,6 +72,11 @@
 									slf.SideBarHide();
 								}
 								$('#main-content').html(data.content);
+								if(data.errors != ''){
+									$('#errors').html(data.errors).show();
+								}else{
+									$('#errors').html('').hide();
+								}
 								eval(data.js_inline);
 								document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
 								slf.SetLoc(data.uri);

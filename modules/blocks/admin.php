@@ -92,8 +92,8 @@ function GetPlace( $pos, $id ){
 
 function AdminBlocksMain(){
 	global $config, $db, $site;
-	$db->Select('block_types', '');
-	while($type = $db->FetchRow()){
+	System::database()->Select('block_types', '');
+	while($type = System::database()->FetchRow()){
 		$types[SafeDB($type['folder'], 255, str)] = SafeDB($type['name'], 255, str);
 	}
 	unset($type);
@@ -124,43 +124,32 @@ function AdminBlocksMain(){
 				$pos = 'Нижние блоки';
 				break;
 		}
-		$db->Select('blocks', "`position`='".$b_pos[$i]."'");
-		$maxplace = $db->NumRows() - 1;
+		System::database()->Select('blocks', "`position`='".$b_pos[$i]."'");
+		$maxplace = System::database()->NumRows() - 1;
 		if($maxplace + 1 > 0){
 			$text .= '<tr><th colspan="6">'.$pos.'</th></tr>';
 		}
-		usort($db->QueryResult, 'AdminBlocksSort');
-		while($block = $db->FetchRow()){
+		usort(System::database()->QueryResult, 'AdminBlocksSort');
+		while($block = System::database()->FetchRow()){
 			$block_id = SafeDB($block['id'], 11, int);
-			switch($block['enabled']){
-				case "1":
-					$st = '<a href="'.ADMIN_FILE.'?exe=blocks&a=changestatus&id='.$block_id.'" title="Изменить статус"><font color="#008000">Вкл.</font></a>';
-					break;
-				case "0":
-					$st = '<a href="'.ADMIN_FILE.'?exe=blocks&a=changestatus&id='.$block_id.'" title="Изменить статус"><font color="#FF0000">Выкл.</font></a>';
-					break;
-			}
+			$st = System::admin()->SpeedStatus('Вкл.', 'Выкл.', ADMIN_FILE.'?exe=blocks&a=changestatus&id='.$block_id, $block['enabled'] == '1');
 			$vi = ViewLevelToStr(SafeDB($block['view'], 1, int));
-
 			$move_menu = '';
 			if($maxplace == 0){ // Единственный элемент в списке
 				$move_menu .= ' - ';
 			}else{
 				if($block['place'] >= 0 && $block['place'] < $maxplace){ // Первый элемент
-					$move_menu .= SpeedButton('Вниз', ADMIN_FILE.'?exe=blocks&a=move&to=down&id='.$block_id, 'images/admin/down.png');
+					$move_menu .= System::admin()->SpeedButton('Вниз', ADMIN_FILE.'?exe=blocks&a=move&to=down&id='.$block_id, 'images/admin/down.png');
 				}
 				if($block['place'] <= $maxplace && $block['place'] > 0){
-					$move_menu .= SpeedButton('Вверх', ADMIN_FILE.'?exe=blocks&a=move&to=up&id='.$block_id, 'images/admin/up.png');
+					$move_menu .= System::admin()->SpeedButton('Вверх', ADMIN_FILE.'?exe=blocks&a=move&to=up&id='.$block_id, 'images/admin/up.png');
 				}
 			}
-
 			$func = '';
-			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=blocks&a=edit&id='.$block_id, 'images/admin/edit.png');
-			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=blocks&a=del&id='.$block_id.'&ok=0', 'images/admin/delete.png', 'Удалить блок?');
-
-			$text .= '
-			<tr>
-			<td><a href="'.ADMIN_FILE.'?exe=blocks&a=edit&id='.$block_id.'">'.'<b>'.SafeDB($block['title'], 255, str).'</b></a></td>
+			$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=blocks&a=edit&id='.$block_id, 'images/admin/edit.png');
+			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=blocks&a=del&id='.$block_id, 'images/admin/delete.png', 'Удалить блок?');
+			$text .= '<tr>
+			<td><b>'.System::admin()->Link(SafeDB($block['title'], 255, str), ADMIN_FILE.'?exe=blocks&a=edit&id='.$block_id).'</b></td>
 			<td>'.$move_menu.'</td>
 			<td>'.$types[SafeDB($block['type'], 255, str)].'</td>
 			<td>'.$vi.'</td>
@@ -175,8 +164,8 @@ function AdminBlocksMain(){
 
 	// Форма добавления блока
 	System::admin()->FormTitleRow('Добавить блок');
-	$db->Select('block_types', '');
-	while($row = $db->FetchRow()){
+	System::database()->Select('block_types', '');
+	while($row = System::database()->FetchRow()){
 		$site->DataAdd($btd, SafeDB($row['folder'], 255, str), SafeDB($row['name'], 255, str));
 	}
 	FormRow('Тип', $site->Select('type', $btd, false, 'style="width:200px;"'), 60);
@@ -184,7 +173,7 @@ function AdminBlocksMain(){
 }
 
 function AdminBlocksEdit( $a ){
-	global $config, $db, $site;
+	global $config, $site;
 	$text = '';
 	$title = '';
 	$showin = array();
@@ -197,8 +186,8 @@ function AdminBlocksEdit( $a ){
 		$b_title = '';
 		$b_en = false;
 		if($a == 'edit'){
-			$db->Select('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-			$r = $db->FetchRow();
+			System::database()->Select('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+			$r = System::database()->FetchRow();
 			$b_title = SafeDB($r['title'], 255, str);
 			$b_pos[SafeDB($r['position'], 1, str)] = true;
 			$b_vi[SafeDB($r['view'], 1, int)] = true;
@@ -248,11 +237,11 @@ function AdminBlocksEdit( $a ){
 		$site->DataAdd($endata, 'on', 'Да');
 		$site->DataAdd($endata, 'off', 'Нет', $b_en);
 		FormRow('Включить', $site->Select('enabled', $endata));
-		$mods = $db->Select('modules',"`isindex`='1'");
+		$mods = System::database()->Select('modules',"`isindex`='1'");
 	array_unshift($mods,array(1=>'Главная страница',2=>'INDEX'));
 
 	//Сначала загружаем все модули из базы данных которые работают с пользователем
-	$mods = $db->Select('modules', "`isindex`='1'");
+	$mods = System::database()->Select('modules', "`isindex`='1'");
 	array_unshift($mods, array('name'=>'Главная страница', 'folder'=>'INDEX'));
 	//$showin = AdminsGetAccessArray($showin);
 	$ac = '';
@@ -289,7 +278,7 @@ function AdminBlocksEdit( $a ){
 }
 
 function AdminBlocksSave( $a ){
-	global $config, $db;
+	global $config;
 	$block_config = '';
 	$editsave = $config['blocks_dir'].SafeEnv($_POST['type'], 255, str).'/editsave.php';
 	if(file_exists($editsave)){
@@ -331,43 +320,37 @@ function AdminBlocksSave( $a ){
 	$place = GetPlace(SafeEnv($_POST['position'][0], 1, str), $id);
 	$vals = Values('', SafeEnv($_POST['title'], 255, str), SafeEnv($_POST['type'], 255, str), $place, '', '1', $block_config, SafeEnv($_POST['template'], 255, str), SafeEnv($_POST['position'][0], 1, str), $b_v, $b_en, $showin, $extra_uri);
 	if($a == 'newsave'){
-		$db->Insert('blocks', $vals);
+		System::database()->Insert('blocks', $vals);
 	}elseif($a == 'update'){
-		$db->Update('blocks', $vals, "`id`='".$id."'", true);
+		System::database()->Update('blocks', $vals, "`id`='".$id."'", true);
 	}
 	GO(ADMIN_FILE.'?exe=blocks');
 }
 
 function AdminBlockDelete(){
-	global $config, $db;
-	if(isset($_GET['ok']) && $_GET['ok'] == '1' || IsAjax()){
-		$db->Delete('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO(ADMIN_FILE.'?exe=blocks');
-	}else{
-		$r = $db->Select('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить блок "'.$r[0]['title'].'"<br />'.'<a href="'.ADMIN_FILE.'?exe=blocks&a=del&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание", $text);
-	}
+	System::database()->Delete('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	GO(ADMIN_FILE.'?exe=blocks');
 }
 
 function AdminBlocksChangeStatus(){
-	global $config, $db;
-	$db->Select('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	if($db->NumRows() > 0){
-		$r = $db->FetchRow();
+	System::database()->Select('blocks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	if(System::database()->NumRows() > 0){
+		$r = System::database()->FetchRow();
 		if(SafeDB($r['enabled'], 1, int) == 1){
 			$en = '0';
 		}else{
 			$en = '1';
 		}
-		$db->Update('blocks', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('blocks', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	}
+	if(IsAjax()){
+		exit("OK");
 	}
 	GO(ADMIN_FILE.'?exe=blocks');
 }
 
 function AdminBlocksSort( $a, $b ){
-	if($a['place'] == $b['place'])
-		return 0;
+	if($a['place'] == $b['place']) return 0;
 	return ($a['place'] < $b['place']) ? -1 : 1;
 }
 
@@ -411,5 +394,3 @@ function AdminBlocksMove(){
 	}
 	GO(ADMIN_FILE.'?exe=blocks');
 }
-
-

@@ -12,8 +12,50 @@ if(!$user->isSuperUser()){
 	return;
 }
 
-function AdminsGenAccessStr( &$useraccess, &$accesses, $system = false )
-{
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+
+TAddToolLink('Администраторы', 'main', 'admins');
+TAddToolLink('Группы администраторов', 'groups', 'admins&a=groups');
+TAddToolLink('Добавить группу', 'addgroup', 'admins&a=addgroup');
+TAddToolBox($action);
+switch($action){
+	case 'main':
+		AdminsMain();
+		break;
+	case 'groups':
+		AdminsGroups();
+		break;
+	case 'editgroup':
+		AdminsEditGroup();
+		break;
+	case 'addgroup':
+		AdminsEditGroup();
+		break;
+	case 'addsave':
+	case 'editsave':
+		AdminsEditGroupSave();
+		break;
+	case 'delgroup':
+		AdminsDeleteGroup();
+		break;
+	case 'editadmin':
+		AdminUserEditor('admins&a=adminsave', 'edit', SafeEnv($_GET['id'], 11, int), true);
+		break;
+	case 'adminsave':
+		AdminUserEditSave('admins', 'update', SafeEnv($_GET['id'], 11, int), true);
+		break;
+	case 'deladmin':
+		AdminsDelete();
+		break;
+	default:
+		AdminsMain();
+}
+
+function AdminsGenAccessStr( &$useraccess, &$accesses, $system = false ){
 	$msg = '';
 	if($system == '1'){
 		$msg = 'Системный  ';
@@ -34,8 +76,7 @@ function AdminsGenAccessStr( &$useraccess, &$accesses, $system = false )
 	return $msg;
 }
 
-function AdminsGetAccessArray( $useraccess )
-{
+function AdminsGetAccessArray( $useraccess ){
 	global $config, $db;
 	$all = (trim($useraccess) == 'ALL');
 	$result['ALL'][] = array('ALL', 'ALL', '<b><font color="#FF0000">Полный доступ</font></b>', $all);
@@ -61,46 +102,101 @@ function AdminsGetAccessArray( $useraccess )
 	return $result;
 }
 
-function AdminsMain()
-{
-	global $config, $db;
-	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable"><tr><th>Имя</th><th>E-mail</th><th>Группа</th><th>Посл. посещение</th><th>Посещений</th><th>Функции</th></tr>';
-	$atypes = $db->Select('usertypes', '');
+// Список администраторов
+function AdminsMain(){
+	$atypes = System::database()->Select('usertypes', '');
 	foreach($atypes as $type){
-		$types[SafeDB($type['id'], 11, int)] = array('<font color="'.SafeDB($type['color'], 9, str).'">'.SafeDB($type['name'], 255, str).'</font>', SafeDB($type['system'], 1, bool));
+		$types[SafeDB($type['id'], 11, int)] = array(
+			'<span style="color: '.SafeDB($type['color'], 9, str).';">'.SafeDB($type['name'], 255, str).'</span>',
+			SafeDB($type['system'], 1, bool),
+			($type['image'] != '' ? '<img src="'.System::config('general/ranks_dir').SafeDB($type['image'], 255, str).'"><br>': '')
+		);
 	}
-	unset($atypes);
-	$admins = $db->Select('users', "`type`='1'");
+	$admins = System::database()->Select('users', "`type`='1'");
 	//Подсчитываем количество главных администраторов
 	$system = 0;
 	for($i = 0, $c = count($admins); $i < $c; $i++){
-		if($types[SafeDB($admins[$i]['access'], 11, int)][1] == '1'){
+		if($types[$admins[$i]['access']][1]){
 			$system++;
 		}
 	}
-
+	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable"><tr><th>&nbsp;</th><th>Имя</th><th>E-mail</th><th>Группа</th><th>Посл. посещение</th><th>Посещений</th><th>Функции</th></tr>';
 	foreach($admins as $adm){
+		$id = SafeDB($adm['id'], 11, int);
 		$funcs = '';
-		$funcs .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=admins&a=editadmin&id='.SafeDB($adm['id'], 11, int), 'images/admin/edit.png');
-		if($system > 1 || SafeDB($adm['access'], 11, int) == 0){
-			$funcs .= SpeedButton('Удалить или перевести в пользователи', ADMIN_FILE.'?exe=admins&a=deladmin&id='.SafeDB($adm['id'], 11, int), 'images/admin/delete.png');
+		$funcs .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=admins&a=editadmin&id='.$id, 'images/admin/edit.png');
+		if($system > 1 || !$types[$adm['access']][1]){
+			$funcs .= System::admin()->SpeedButton('Удалить или перевести в пользователи', ADMIN_FILE.'?exe=admins&a=deladmin&id='.$id, 'images/admin/delete.png');
 		}
 		$text .= '<tr>
-			<td><a href="'.ADMIN_FILE.'?exe=admins&a=editadmin&id='.SafeDB($adm['id'], 11, int).'"><b>'.SafeDB($adm['name'], 50, str).'</b></a>'.'</td>
+			<td><img src="'.GetSmallestUserAvatar($id).'"></td>
+			<td><b>'.System::admin()->Link(SafeDB($adm['name'], 50, str), ADMIN_FILE.'?exe=admins&a=editadmin&id='.$id).'</b></td>
 			<td>'.PrintEmail($adm['email'], $adm['name']).'</td>
-			<td>'.$types[SafeDB($adm['access'], 11, int)][0].'</td>
-			<td>'.TimeRender(SafeDB($adm['lastvisit'], 11, int)).'</td>
+			<td>'.$types[$adm['access']][2].$types[$adm['access']][0].'</td>
+			<td>'.TimeRender($adm['lastvisit']).'</td>
 			<td>'.SafeDB($adm['visits'], 11, int).'</td>
 			<td>'.$funcs.'</td>
 			</tr>';
 	}
-	unset($admins);
 	$text .= '</table>';
-	AddTextBox('Администраторы сайта', $text);
+	AddTextBox('Администраторы сайта ('.count($admins).')', $text);
 }
 
-function AdminsGroups()
-{
+// Удаление администратора
+function AdminsDelete(){
+	global $config, $site;
+	$userid = SafeEnv($_GET['id'], 11, int);
+	System::database()->Select('users', "`id`='".$userid."' and `type`='1'");
+	$user = System::database()->FetchRow();
+	if(groupIsSystem(SafeEnv($user['access'], 11, int)) && GetSystemAdminsCount() <= 1){
+		System::admin()->AddCenterBox('Ошибка');
+		System::admin()->HighlightError('Нельзя удалить последнего системного администратора.');
+		return;
+	}
+	if(isset($_GET['ok']) && $_GET['ok'] == '1'){ // Удалить
+		$id = SafeEnv($_GET['id'], 11, int);
+		if(!isset($_POST['del_comments'])){
+			System::database()->Select('users', "`id`='$id'");
+			if(System::database()->NumRows() > 0){
+				$suser = System::database()->FetchRow();
+				UpdateUserComments($id, '0', SafeEnv($suser['name'], 50, str), SafeEnv($suser['email'], 50, str), SafeEnv($suser['hideemail'], 1, bool), SafeEnv($suser['url'], 250, str));
+			}
+		}else{
+			DeleteAllUserComments($id);
+		}
+		System::database()->Delete('users', "`id`='$id' and `type`='1'");
+		System::cache()->Delete(system_cache, 'users');
+		GO(ADMIN_FILE.'?exe=admins');
+	}elseif(isset($_GET['ok']) && $_GET['ok'] == '2'){ // Сделать пользователем
+		System::database()->Update('users', "type='2',access='-1'", "`id`='".SafeEnv($_GET['id'], 11, int)."' and `type`='1'");
+		System::cache()->Delete(system_cache, 'users');
+		GO(ADMIN_FILE.'?exe=admins');
+	}else{
+		System::admin()->AddJS('
+		AjaxDeleteAdmin = function(){
+			var del = $("#del_comments:checked").val();
+			if(del == null){
+				del = "0";
+			}
+			Admin.LoadPage("'.ADMIN_FILE.'?exe=admins&a=deladmin&id='.$userid.'&ok=1&del_comments="+del, undefined, "Удаление");
+		};
+		AjaxAdminSetToUser = function(){
+			Admin.LoadPage("'.ADMIN_FILE.'?exe=admins&a=deladmin&id='.$userid.'&ok=2");
+		};
+		');
+		AddCenterBox('Удаление администратора');
+		$Text = 'Что вы хотите сделать с администратором "'.SafeDB($user['name'], 255, str).'"?';
+		$Text .= '<br /><br />'
+			.System::admin()->Check('del_comments', '1', false, 'id="del_comments"').'<label for="del_comments" style="cursor: pointer;">Удалить все комментарии этого пользователя</label><br /><br />'
+			.System::admin()->SpeedButton('Отмена', 'javascript:history.go(-1)', 'images/admin/cancel.png', false, true).'&nbsp;&nbsp;'
+			.System::admin()->SpeedConfirmJs('Удалить', 'AjaxDeleteAdmin();', 'images/admin/delete.png', '', true).'&nbsp;&nbsp;'
+			.System::admin()->SpeedConfirmJs('Сделать пользователем', 'AjaxAdminSetToUser();', 'images/user_green.png', '', true);
+		System::admin()->Highlight($Text);
+	}
+}
+
+// Список групп
+function AdminsGroups(){
 	global $config, $db;
 	$accesses = $db->Select('access', '');
 	foreach($accesses as $ac){
@@ -135,8 +231,8 @@ function AdminsGroups()
 	AddTextBox('Группы администраторов', $text);
 }
 
-function AdminsEditGroup()
-{
+// Редактирование / добавление группы
+function AdminsEditGroup(){
 	global $config, $db, $action, $site;
 	if($action == 'editgroup'){
 		$db->Select('usertypes', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
@@ -180,8 +276,8 @@ function AdminsEditGroup()
 	AddForm('<form action="'.ADMIN_FILE.'?exe=admins&a='.$method.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
 }
 
-function AdminsEditGroupSave()
-{
+// Сохранение группы
+function AdminsEditGroupSave(){
 	global $db, $config, $action;
 	$access = array();
 	$access2 = array();
@@ -226,8 +322,9 @@ function AdminsEditGroupSave()
 	GO(ADMIN_FILE.'?exe=admins&a=groups');
 }
 
-function AdminsDeleteGroup()
-{
+
+// Удаление группы администраторов
+function AdminsDeleteGroup(){
 	global $db, $config, $site;
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=admins&a=groups');
@@ -291,102 +388,3 @@ function AdminsDeleteGroup()
 	}
 }
 
-function AdminsDelete()
-{
-	global $config, $db, $site;
-	$r = $db->Select('users', "`id`='".SafeEnv($_GET['id'], 11, int)."' and `type`='1'");
-	if($db->NumRows() == 0){
-		$text = 'Администратор, которого вы хотите удалить, не найден.';
-		AddTextBox("Ошибка", $text);
-		return;
-	}elseif(groupIsSystem(SafeEnv($r[0]['access'], 11, int)) && GetSystemAdminsCount() <= 1){
-		$text = 'Нельзя удалить последнего системного администратора.';
-		AddTextBox("Ошибка", $text);
-		return;
-	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$id = SafeEnv($_GET['id'], 11, int);
-		if(!isset($_POST['del_comments'])){
-			$db->Select('users', "`id`='$id'");
-			if($db->NumRows() > 0){
-				$suser = $db->FetchRow();
-				UpdateUserComments($id, '0', SafeEnv($suser['name'], 50, str), SafeEnv($suser['email'], 50, str), SafeEnv($suser['hideemail'], 1, bool), SafeEnv($suser['url'], 250, str));
-			}
-		}else{
-			DeleteAllUserComments($id);
-		}
-		$db->Delete('users', "`id`='$id' and `type`='1'");
-
-		// Очищаем кэш пользователей
-		$cache = LmFileCache::Instance();
-		$cache->Delete(system_cache, 'users');
-
-		GO(ADMIN_FILE.'?exe=admins');
-		exit();
-	}elseif(isset($_GET['ok']) && $_GET['ok'] == '2'){
-		$db->Update('users', "type='2',access='-1'", "`id`='".SafeEnv($_GET['id'], 11, int)."' and `type`='1'");
-
-		// Очищаем кэш пользователей
-		$cache = LmFileCache::Instance();
-		$cache->Delete(system_cache, 'users');
-
-		GO(ADMIN_FILE.'?exe=admins');
-		exit();
-	}else{
-		$text = '<form action="'.ADMIN_FILE.'?exe=admins&a=deladmin&id='.SafeEnv($_GET['id'], 11, int).'&ok=1" method="post">Что вы хотите сделать с администратором "'.$r[0]['name'].'"?<br />'
-			.$site->Check('del_comments', '1').'Удалить все комментарии этого пользователя.<br />'.$site->Submit('Удалить')
-			.' &nbsp;&nbsp;&nbsp; <a href="'.ADMIN_FILE.'?exe=admins&a=deladmin&id='.SafeEnv($_GET['id'], 11, int).'&ok=2">Сделать пользователем</a> &nbsp;&nbsp;&nbsp; '
-			.$site->Button('Отмена', 'onclick="history.go(-1)"').'</form>';
-		AddTextBox("Предупреждение", $text);
-	}
-}
-if(isset($_GET['a'])){
-	$action = $_GET['a'];
-}else{
-	$action = 'main';
-}
-
-function Admins()
-{
-	global $action, $config;
-	TAddToolLink('Администраторы', 'main', 'admins');
-	TAddToolLink('Группы администраторов', 'groups', 'admins&a=groups');
-	TAddToolLink('Добавить группу', 'addgroup', 'admins&a=addgroup');
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminsMain();
-			break;
-		case 'groups':
-			AdminsGroups();
-			break;
-		case 'editgroup':
-			AdminsEditGroup();
-			break;
-		case 'addgroup':
-			AdminsEditGroup();
-			break;
-		case 'addsave':
-		case 'editsave':
-			AdminsEditGroupSave();
-			break;
-		case 'delgroup':
-			AdminsDeleteGroup();
-			break;
-		case 'editadmin':
-			AdminUserEditor('admins&a=adminsave', 'edit', SafeEnv($_GET['id'], 11, int), true);
-			break;
-		case 'adminsave':
-			AdminUserEditSave('admins', 'update', SafeEnv($_GET['id'], 11, int), true);
-			break;
-		case 'deladmin':
-			AdminsDelete();
-			break;
-		default:
-			AdminsMain();
-	}
-}
-
-Admins();
-
-?>

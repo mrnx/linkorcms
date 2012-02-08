@@ -3,8 +3,7 @@
 // Модуль для очистки кэша
 TAddSubTitle('Управление кэшем');
 
-function AdminCache( $action )
-{
+function AdminCache( $action ){
 	switch ($action){
 		case 'main':
 			AdminCacheMain();
@@ -73,21 +72,20 @@ function AdminCacheMain(){
 	}
 
 	$text .= '</table><br />';
-	$text .= 'Итого <b>'.count($groups).'</b> групп(ы), <b>'.$num_rows.'</b> записей и <b>'.FormatFileSize($total_size).'</b> занято. <a href="'.ADMIN_FILE.'?exe=cache&a=cleanup" class="button">Очистить все группы</a>';
+	$text .= 'Итого <b>'.count($groups).'</b> групп(ы), <b>'.$num_rows.'</b> записей и <b>'.FormatFileSize($total_size).'</b> занято.&nbsp;'
+		.System::admin()->SpeedButton('Очистить все группы', ADMIN_FILE.'?exe=cache&a=cleanup', '', true, true);
 	$text .= '<br /><br />';
 	AddText($text);
 }
 
-function AdminCacheClean()
-{
+function AdminCacheClean(){
 	$group = $_GET['group'];
 	$cache = LmFileCache::Instance();
 	$cache->Clear($group);
 	AdminCacheMain();
 }
 
-function AdminCacheCleanup()
-{
+function AdminCacheCleanup(){
 	$cache = LmFileCache::Instance();
 	$groups = $cache->GetGroups();
 	foreach($groups as $g){
@@ -96,4 +94,3 @@ function AdminCacheCleanup()
 	AdminCacheMain();
 }
 
-?>

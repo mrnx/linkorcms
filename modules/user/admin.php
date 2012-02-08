@@ -17,28 +17,40 @@ $rankedit = $user->CheckAccess2('user', 'ranks');
 $galeryedit = $user->CheckAccess2('user', 'avatars_gallery');
 $confedit = $user->CheckAccess2('user', 'config');
 
-function AdminUserGetUsers( $where = '`type`=\'2\'' ){
-	global $config, $db;
-	return $db->Select('users', $where);
+function AdminUserGetUsers( $where = "`type`='2'" ){
+	return System::database()->Select('users', $where);
 }
 
-function AdminUserQueryStristrFilter( $str, $inez ){
-	global $db;
+function AdminUserQueryStristrFilter( &$users, $str, $inez ){
 	if($str == ''){
 		return;
 	}
 	$newResult = array();
-	foreach($db->QueryResult as $user){
+	foreach($users as $user){
 		if(stristr($user[$inez], $str) !== false){
 			$newResult[] = $user;
 		}
 	}
-	$db->QueryResult = $newResult;
+	$users = $newResult;
+}
+
+function AdminUserQueryStristrFilter2( &$users, $int, $inez ){
+	if($str == ''){
+		return;
+	}
+	$newResult = array();
+	foreach($users as $user){
+		if($user[$inez] >= $int){
+			$newResult[] = $user;
+		}
+	}
+	$users = $newResult;
 }
 
 function AdminUserMain(){
 	global $db, $config, $site, $user, $editing;
-	$db->FreeResult();
+	$searchm = false;
+
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 10, int);
 	}else{
@@ -49,97 +61,70 @@ function AdminUserMain(){
 	}else{
 		$show = '';
 	}
-	$showd = array();
-	$site->DataAdd($showd, 'all', 'Все пользователи', $show == '');
-	$site->DataAdd($showd, 'online', 'Пользователи OnLine', $show == 'online');
 
 	//Пользователи online
 	$sonline = false;
 	$onlwhere = '';
 	$where = '`type`=\'2\'';
-	if(isset($_GET['show'])){
-		if($_GET['show'] == 'online'){
-			$donline = $user->Online();
-			$donline = $donline['members'];
-			$onlwhere = '';
-			foreach($donline as $memb){
-				$onlwhere .= "or `id`='".SafeDB($memb['u_id'], 11, int)."'";
-			}
-			$onlwhere = substr($onlwhere, 3);
-			$sonline = true;
-			if(count($donline) > 0){
-				$where = '`type`=\'2\' and ('.$onlwhere.')';
-			}else{
-				$where = '`type`=\'2\' and `id`=\'-1\'';
-			}
-			AdminUserGetUsers($where);
+	if($show == 'online'){
+		$donline = $user->Online();
+		$donline = $donline['members'];
+		$onlwhere = '';
+		foreach($donline as $memb){
+			$onlwhere .= "or `id`='".SafeDB($memb['u_id'], 11, int)."'";
 		}
+		$onlwhere = substr($onlwhere, 3);
+		$sonline = true;
+		if(count($donline) > 0){
+			$where = "`type`='2' and ($onlwhere)";
+			$users = AdminUserGetUsers($where);
+		}else{
+			$users = array();
+		}
+		$searchm = true;
+	}else{
+		$users = AdminUserGetUsers();
 	}
 
 	//Поиск
-	$searchm = false;
 	$criterion = '';
 	$sstr = '';
-	if(!$sonline && isset($_GET['criterion']) && isset($_GET['stext'])){
+	if(isset($_GET['criterion']) && isset($_GET['stext']) && $_GET['stext'] != ''){
 		$searchm = true;
 		$criterion = $_GET['criterion'];
-		$sstr = $_GET['stext'];
-		//генерируем where
+		$sstr = SafeEnv($_GET['stext'], 255, str);
 		switch($criterion){
-			case 'nikname':
-				$sstr = SafeEnv($sstr, 50, str);
-				AdminUserGetUsers();
-				AdminUserQueryStristrFilter($sstr, 3);
+			case 'nikname': AdminUserQueryStristrFilter($users, $sstr, 'name');
 				break;
-			case 'email':
-				$sstr = SafeEnv($sstr, 50, str);
-				AdminUserGetUsers();
-				AdminUserQueryStristrFilter($sstr, 6);
+			case 'email': AdminUserQueryStristrFilter($users, $sstr, 'email');
 				break;
-			case 'rname':
-				$sstr = SafeEnv($sstr, 250, str);
-				AdminUserGetUsers();
-				AdminUserQueryStristrFilter($sstr, 4);
+			case 'rname': AdminUserQueryStristrFilter($users, $sstr, 'truename');
 				break;
-			case 'age':
-				$sstr = SafeEnv($sstr, 1, int);
-				AdminUserGetUsers('`type`=\'2\' and `age`=\''.$sstr.'\'');
+			case 'age': AdminUserQueryStristrFilter($users, $sstr, 'age');
 				break;
-			case 'city':
-				$sstr = SafeEnv($sstr, 100, str);
-				AdminUserGetUsers();
-				AdminUserQueryStristrFilter($sstr, 8);
+			case 'city': AdminUserQueryStristrFilter($users, $sstr, 'city');
 				break;
-			case 'site':
-				$sstr = SafeEnv($sstr, 250, str);
-				AdminUserGetUsers();
-				AdminUserQueryStristrFilter($sstr, 10);
+			case 'site': AdminUserQueryStristrFilter($users, $sstr, 'url');
 				break;
-			case 'icq':
-				$sstr = SafeEnv($sstr, 15, str);
-				AdminUserGetUsers();
-				AdminUserQueryStristrFilter($sstr, 9);
+			case 'icq': AdminUserQueryStristrFilter($users, $sstr, 'icq');
 				break;
-			case 'gmt':
-				$sstr = SafeEnv($sstr, 3, str);
-				AdminUserGetUsers('`type`=\'2\' and `timezone`=\''.$sstr.'\'');
+			case 'gmt': AdminUserQueryStristrFilter($users, $sstr, 'timezone');
 				break;
-			case 'active':
-				$sstr = SafeEnv($sstr, 1, int);
-				AdminUserGetUsers('`type`=\'2\' and `active`=\''.$sstr.'\'');
+			case 'active': AdminUserQueryStristrFilter($users, $sstr, 'active');
 				break;
-			case 'points':
-				$sstr = SafeEnv($sstr, 11, int);
-				AdminUserGetUsers("`type`='2' and (`points`='$sstr' or `points`>'$sstr')");
+			case 'points': AdminUserQueryStristrFilter2($users, $sstr, 'points');
 				break;
-			case 'ip':
-				$sstr = SafeEnv($sstr, 15, str);
-				AdminUserGetUsers();
-				AdminUserQueryStristrFilter($sstr, 9);
+			case 'ip': AdminUserQueryStristrFilter($users, $sstr, 'lastip');
 				break;
 		}
 	}
+
 	$sstr = strval($sstr);
+
+	$showd = array();
+	$site->DataAdd($showd, 'all', 'Все пользователи', $show == '');
+	$site->DataAdd($showd, 'online', 'Пользователи OnLine', $show == 'online');
+
 	$searchd = array();
 	$site->DataAdd($searchd, 'nikname', 'Ник', $criterion == 'nikname');
 	$site->DataAdd($searchd, 'email', 'E-mail', $criterion == 'email');
@@ -152,37 +137,46 @@ function AdminUserMain(){
 	$site->DataAdd($searchd, 'active', 'Активен', $criterion == 'active');
 	$site->DataAdd($searchd, 'points', 'Пунктов более', $criterion == 'points');
 	$site->DataAdd($searchd, 'ip', 'IP', $criterion == 'ip');
-	if(!$sonline && !$searchm){
-		AdminUserGetUsers();
+
+	System::admin()->AddJS('
+	SearchUsers = function(){
+		var cri = "&criterion="+$("#criterion").val();
+		var stext = "&stext="+$("#stext").val();
+		var online = "&show="+$("#online").val();
+		Admin.LoadPage("'.ADMIN_FILE.'?exe=user"+cri+stext+online, undefined, "Идёт поиск");
 	}
+	');
+
 	TAddSubTitle('Главная');
-	AddCenterBox('Зарегистрированные пользователи');
-	if($searchm){
-		$c = 'Найдено: '.$db->NumRows();
-	}else{
-		$c = 'Зарегистрированных пользователей: '.$db->NumRows();
-	}
+	AddCenterBox('Зарегистрированные пользователи ('.count($users).')');
+
 	$serchtool = '<style>.ustd td{ border: none; padding: 0; }</style>';
 	$serchtool .= '<table cellspacing="0" cellpadding="0" border="0" class="cfgtable"><tr><td>'."\n";
-	$serchtool .= '<form method="get">'.$site->Hidden('exe', 'user').'<table cellspacing="0" cellpadding="0" border="0" width="100%" class="ustd"><tr><td>'.$c.'</td><td>Показать: '.$site->Select('show', $showd).'</td><td>'.$site->Submit('Обновить список').'</td></tr></table></form>'."\n";
-	$serchtool .= '</td></tr><tr><td>'."\n";
-	$serchtool .= '<form method="get">'.$site->Hidden('exe', 'user').'<table cellspacing="0" cellpadding="0" border="0" width="100%" class="ustd"><tr><td>Поиск: </td><td>'.$site->Select('criterion', $searchd).$site->Edit('stext', $sstr).'</td><td>'.$site->Submit('Поиск').'</td></tr></table></form>'."\n";
+	$serchtool .= '<table cellspacing="0" cellpadding="0" border="0" width="100%" class="ustd">
+	<tr>
+	<td>Поиск: </td>
+	<td>'.$site->Select('criterion', $searchd, false, 'id="criterion"').$site->Edit('stext', $sstr, false, 'id="stext"').$site->Select('show', $showd, false, 'id="online"').'</td>
+	<td>'.System::admin()->SpeedConfirmJs('Поиск', 'SearchUsers();', 'images/search.png', '', true).'</td>
+	</tr>
+	</table>'."\n";
 	$serchtool .= '</td></tr></table>'."\n";
 	AddText($serchtool);
-	SortArray($db->QueryResult, 'regdate', true); // Сортируем по дате регистрации
-	if(count($db->QueryResult) > $config['user']['users_on_page']){
+
+	SortArray($users, 'regdate', true); // Сортируем по дате регистрации
+	if(count($users) > $config['user']['users_on_page']){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($db->QueryResult, $config['user']['users_on_page'], ADMIN_FILE.'?exe=user'.($searchm ? '&criterion='.$criterion.'&stext='.$sstr : ''));
+		$navigator->GenNavigationMenu($users, $config['user']['users_on_page'], ADMIN_FILE.'?exe=user'.($searchm ? '&criterion='.$criterion.'&stext='.$sstr.'&show='.$show : ''));
 		AddNavigation();
 		$nav = true;
 	}else{
 		$nav = false;
 		AddText('<br />');
 	}
+
 	$text = '';
 	$text .= '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 	$text .= '<tr><th>Ник</th><th>E-mail</th><th>Дата региcтрации</th><th>Посл. посещение</th><th>Посещений</th><th>Пунктов</th><th>Активация</th><th>IP</th><th>Функции</th></tr>';
-	while($row = $db->FetchRow()){
+	foreach($users as $row){
 		$uid = SafeDB($row['id'], 11, int);
 		if($row['active'] == '1'){
 			$active = 'Да';
@@ -193,13 +187,11 @@ function AdminUserMain(){
 		}
 		$funcs = '';
 		if($editing){
-			$funcs .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=user&a=edituser&id='.$uid, 'images/admin/edit.png');
+			$funcs .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=user&a=edituser&id='.$uid, 'images/admin/edit.png');
+			$funcs .= System::admin()->SpeedButton('Удалить', ADMIN_FILE.'?exe=user&a=deluser&id='.$uid, 'images/admin/delete.png'); // Всё верно
 		}
-		$funcs .= SpeedButton('Удалить', ADMIN_FILE.'?exe=user&a=deluser&id='.$uid, 'images/admin/delete.png');
-
-		$text .= '
-		<tr>
-		<td>'.($editing ? '<a href="'.ADMIN_FILE.'?exe=user&a=edituser&id='.$uid.'">' : '').'<b>'.SafeDB($row['name'], 50, str).'</b>'.($editing ? '</a>' : '').'</td>
+		$text .= '<tr>
+		<td>'.($editing ? '<b>'.System::admin()->Link(SafeDB($row['name'], 50, str), ADMIN_FILE.'?exe=user&a=edituser&id='.$uid).'</b>' : SafeDB($row['name'], 50, str)).'</td>
 		<td>'.PrintEmail($row['email'], $row['name']).'</td>
 		<td>'.TimeRender($row['regdate']).'</td>
 		<td>'.TimeRender($row['lastvisit']).'</td>
@@ -211,6 +203,7 @@ function AdminUserMain(){
 		</tr>';
 	}
 	$text .= '</table>';
+
 	AddText($text);
 	if($nav){
 		AddNavigation();
@@ -219,37 +212,61 @@ function AdminUserMain(){
 
 function AdminUserDelUser(){
 	global $config, $db, $site;
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$id = SafeEnv($_GET['id'], 11, int);
-		if(!isset($_POST['del_comments'])){
-			$db->Select('users', "`id`='$id'");
-			$guser = $db->FetchRow();
-			UpdateUserComments($id, '0', SafeEnv($guser['name'], 50, str), SafeEnv($guser['email'], 50, str), SafeEnv($guser['hideemail'], 1, bool), SafeEnv($guser['url'], 250, str));
-		}else{
-			DeleteAllUserComments($id);
-		}
-		$db->Delete('users', "`id`='$id'");
 
+	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
+		$userid = SafeEnv($_GET['id'], 11, int);
+		if(isset($_POST['del_comments']) && $_POST['del_comments'] == '1'){
+			DeleteAllUserComments($userid);
+		}else{
+			$db->Select('users', "`id`='$userid'");
+			$guser = $db->FetchRow();
+			UpdateUserComments($userid, '0', SafeEnv($guser['name'], 50, str), SafeEnv($guser['email'], 50, str), SafeEnv($guser['hideemail'], 1, bool), SafeEnv($guser['url'], 250, str));
+		}
+		$db->Delete('users', "`id`='$userid'");
 		// Очищаем кэш пользователей
 		$cache = LmFileCache::Instance();
 		$cache->Delete(system_cache, 'users');
-
+		if(IsAjax()) exit("OK");
 		GO(ADMIN_FILE.'?exe=user');
 	}else{
-		$r = $db->Select('users', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = '<form action="'.ADMIN_FILE.'?exe=user&a=deluser&id='.SafeEnv($_GET['id'], 11, int).'&ok=1" method="post">
-			<br />Вы действительно хотите удалить пользователя "'.$r[0]['name'].'"?<br />'
-			.$site->Check('del_comments', '1', false, 'id="del_comments"').'<label for="del_comments">Удалить все комментарии этого пользователя.</label><br /><br />'
-			.$site->Button('Отмена', 'onclick="history.go(-1)"').'&nbsp;'.$site->Submit('Удалить').'</form><br />';
-		AddTextBox("Предупреждение", $text);
+		$userid = SafeEnv($_GET['id'], 11, int);
+		$r = $db->Select('users', "`id`='".$userid."'");
+
+		$userid = SafeDB($_GET['id'], 11, int);
+		System::admin()->AddJS('
+		AjaxDeleteUser = function(){
+			Admin.ShowSplashScreen("Удаление пользователя");
+			var del = $("#del_comments:checked").val();
+			if(del == null){
+				del = "0";
+			}
+			$.ajax({
+				type: "POST",
+				url: "'.ADMIN_FILE.'?exe=user&a=deluser&id='.$userid.'&ok=1",
+				data: {del_comments: del},
+				success: function(data){
+					Admin.LoadPage("'.ADMIN_FILE.'?exe=user", undefined, "Обновление страницы");
+					Admin.HideSplashScreen();
+				}
+			});
+		};
+		');
+
+		AddCenterBox('Удаление пользователя');
+		$Text = 'Вы действительно хотите удалить пользователя "'.$r[0]['name'].'"?';
+		$Text .= '<br /><br />'
+			.System::admin()->Check('del_comments', '1', false, 'id="del_comments"').'<label for="del_comments" style="cursor: pointer;">Удалить все комментарии этого пользователя</label><br /><br />'
+			.System::admin()->SpeedButton('Отмена', 'javascript:history.go(-1)', 'images/admin/delete.png', false, true)
+			.'&nbsp;&nbsp;'
+			.System::admin()->SpeedConfirmJs('Да', 'AjaxDeleteUser();', 'images/admin/accept.png', '', true);
+		System::admin()->Highlight($Text);
 	}
 }
 
 function AdminUserRanks(){
-	global $config, $db, $site, $rankedit;
+	global $config, $site, $rankedit;
 	TAddSubTitle('Ранги пользователей');
-
-	$users = $db->Select('users', "`type`='2'");
+	$users = System::database()->Select('users', "`type`='2'");
 	foreach($users as $u){
 		$r = GetUserRank($u['points'], $u['type'], $u['access']);
 		if(!isset($rcounts[$r[2]])){
@@ -258,7 +275,7 @@ function AdminUserRanks(){
 		$rcounts[$r[2]]++;
 	}
 
-	$ranks = $db->Select('userranks', '');
+	$ranks = System::database()->Select('userranks', '');
 	SortArray($ranks, 'min');
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 	$text .= '<tr><th>Ранг</th><th>Мин. пунктов</th><th>Участников</th><th>Изображение</th><th>Функции</th></tr>';
@@ -268,15 +285,13 @@ function AdminUserRanks(){
 		}else{
 			$image = '';
 		}
-
 		$funcs = '';
 		if($rankedit){
-			$funcs .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=user&a=editrank&id='.SafeDB($rank['id'], 11, int), 'images/admin/edit.png');
-			$funcs .= SpeedButton('Удалить', ADMIN_FILE.'?exe=user&a=delrank&id='.SafeDB($rank['id'], 11, int), 'images/admin/delete.png');
+			$funcs .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=user&a=editrank&id='.SafeDB($rank['id'], 11, int), 'images/admin/edit.png');
+			$funcs .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=user&a=delrank&id='.SafeDB($rank['id'], 11, int), 'images/admin/delete.png', 'Удалить ранг?');
 		}else{
 			$funcs .= '&nbsp;';
 		}
-
 		$text .= '<tr>
 			<td>'.SafeDB($rank['title'], 250, str).'</td>
 			<td>'.SafeDB($rank['min'], 11, int).'</td>
@@ -290,61 +305,46 @@ function AdminUserRanks(){
 	AddText($text);
 	if($rankedit){
 		System::admin()->FormTitleRow('Добавить ранг');
-		FormRow('Название ранга', $site->Edit('rankname', '', false, 'style="width:140px;"'));
+		FormRow('Название ранга', $site->Edit('rankname', '', false, 'style="width:180px;"'));
 		FormRow('Изображение', $site->Edit('rankimage', '', false, 'style="width:180px;"'));
-		FormRow('Минимальное количество пунктов<br />для вступления', $site->Edit('minpoints', '0', false, 'style="width:60px;"'));
+		FormRow('Минимальное количество пунктов для вступления', $site->Edit('minpoints', '0', false, 'style="width:60px;"'));
 		AddForm('<form name="addrang" method="post" action="'.ADMIN_FILE.'?exe=user&a=addrank">', $site->Submit('Добавить')).'<br />';
 	}
 }
 
 function AdminUserEditRank(){
-	global $db, $config, $site;
+	global $site;
 	$id = SafeEnv($_GET['id'], 11, int);
-	$db->Select('userranks', "`id`='$id'");
-	$thrank = $db->FetchRow();
-	FormRow('Название ранга', $site->Edit('rankname', SafeDB($thrank['title'], 250, str), false, 'style="width:140px;"'));
+	System::database()->Select('userranks', "`id`='$id'");
+	$thrank = System::database()->FetchRow();
+	FormRow('Название ранга', $site->Edit('rankname', SafeDB($thrank['title'], 250, str), false, 'style="width:180px;"'));
 	FormRow('Изображение', $site->Edit('rankimage', SafeDB($thrank['image'], 250, str), false, 'style="width:180px;"'));
-	FormRow('Минимальное количество пунктов<br />для вступления', $site->Edit('minpoints', SafeDB($thrank['min'], 11, int), false, 'style="width:60px;"'));
+	FormRow('Минимальное количество пунктов для вступления', $site->Edit('minpoints', SafeDB($thrank['min'], 11, int), false, 'style="width:60px;"'));
 	AddCenterBox('Редактирование ранга');
 	AddForm('<form name="addrang" method="post" action="'.ADMIN_FILE.'?exe=user&a=saverank&id='.$id.'">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit('Сохранить изменения'));
 }
 
 function AdminUserRankSave( $action ){
-	global $config, $db;
 	$rankname = SafeEnv($_POST['rankname'], 250, str);
 	$rankimage = SafeEnv($_POST['rankimage'], 250, str);
 	$minpoints = SafeEnv($_POST['minpoints'], 11, int);
 	if($action == 'addrank'){
-		$db->Insert('userranks', Values('', $rankname, $minpoints, $rankimage));
+		System::database()->Insert('userranks', Values('', $rankname, $minpoints, $rankimage));
 	}elseif($action == 'saverank'){
-		$db->Update('userranks', "title='$rankname',min='$minpoints',image='$rankimage'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('userranks', "title='$rankname',min='$minpoints',image='$rankimage'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-
 	// Очищаем кэш
 	$cache = LmFileCache::Instance();
 	$cache->Delete(system_cache, 'userranks');
-
 	GO(ADMIN_FILE.'?exe=user&a=ranks');
 }
 
 function AdminUserDeleteRank(){
-	global $config, $db;
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$db->Delete('userranks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-
-		// Очищаем кэш
-		$cache = LmFileCache::Instance();
-		$cache->Delete(system_cache, 'userranks');
-
-		GO(ADMIN_FILE.'?exe=user&a=ranks');
-	}else{
-		TAddSubTitle('Удаление ранга');
-		$r = $db->Select('userranks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить ранг "'.SafeDB($r[0]['title'], 250, str).'"<br />'
-			.'<a href="'.ADMIN_FILE.'?exe=user&a=delrank&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a>'
-			.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
-	}
+	System::database()->Delete('userranks', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	// Очищаем кэш
+	$cache = LmFileCache::Instance();
+	$cache->Delete(system_cache, 'userranks');
+	GO(ADMIN_FILE.'?exe=user&a=ranks');
 }
 
 function AdminUserAvatarsGallery(){
@@ -353,7 +353,7 @@ function AdminUserAvatarsGallery(){
 	if(isset($_GET['user']) && $_GET['user'] == '1'){
 		$personal = true;
 		$dir = $config['general']['personal_avatars_dir'];
-		$dirlink = '<a href="'.ADMIN_FILE.'?exe=user&a=avatars">Показать аватары из галереи</a>';
+		$dirlink = System::admin()->Link('Показать аватары из галереи', ADMIN_FILE.'?exe=user&a=avatars');
 		$users = $db->Select('users', "`type`='2'");
 		$c = sizeof($users);
 		for($i = 0; $i < $c; $i++){
@@ -362,7 +362,7 @@ function AdminUserAvatarsGallery(){
 	}else{
 		$personal = false;
 		$dir = $config['general']['avatars_dir'];
-		$dirlink = '<a href="'.ADMIN_FILE.'?exe=user&a=avatars&user=1">Показать аватары пользователей</a>';
+		$dirlink = System::admin()->Link('Показать аватары пользователей', ADMIN_FILE.'?exe=user&a=avatars&user=1');
 	}
 	$avatars2 = GetFiles($dir, false, true, '.gif.jpg.jpeg.png');
 	$avatars = array();
@@ -388,29 +388,28 @@ function AdminUserAvatarsGallery(){
 			$fsize = filesize($imagfn);
 			$allsize = $allsize + $fsize;
 			if($galeryedit){
-				$funcs = SpeedButton('Удалить', ADMIN_FILE.'?exe=user&a=delavatar&filename='.$avatars[$i].($personal ? '&personal' : ''), 'images/admin/delete.png');
+				$funcs = System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=user&a=delavatar&filename='.$avatars[$i].($personal ? '&personal' : ''), 'images/admin/delete.png', 'Удалить аватар?');
 			}else{
 				$funcs = '&nbsp;';
 			}
-
-			$text .= '
-			<td align="center">
-				<table cellspacing="0" cellpadding="0" align="center">
-				<tr>
-				<td style="border:none"><a href="'.$imagfn.'" target="_blank"><img src="'.$imagfn.'" border="0" width="64" title="('.$size[0].' x '.$size[1].', '.FormatFileSize($fsize).') '.$avatars[$i].'" /></a></td>
-				<td valign="top" style="border:none">'.$funcs.'</td>
+			$text .= '<td align="center">
+				<table cellspacing="0" cellpadding="0" align="center" style="border:none; background: none;">
+				<tr style="border:none; background: none;">
+					<td style="border:none; background: none;"><a href="'.$imagfn.'" target="_blank"><img src="'.$imagfn.'" border="0" width="64" title="('.$size[0].' x '.$size[1].', '.FormatFileSize($fsize).') '.$avatars[$i].'" /></a></td>
+					<td valign="top" style="border:none; background: none;">'.$funcs.'</td>
 				</tr>
-				<tr>
-				<td colspan="2" align="left" style="border:none">'.(($personal && isset($users[$avatars[$i]])) ? '<a href="'.ADMIN_FILE.'?exe=user&a=edituser&id='.SafeDB($users[$users[$avatars[$i]]]['id'], 11, int).'">'.SafeDB($users[$users[$avatars[$i]]]['name'], 255, str).'</a>' : '').'</td>
-				</tr>
-				</table>
-			</td>';
+				';
+			if($personal && isset($users[$avatars[$i]])){
+				$text .= '<tr><td colspan="2" align="left" style="border:none; background: none;"><a href="'.ADMIN_FILE.'?exe=user&a=edituser&id='.SafeDB($users[$users[$avatars[$i]]]['id'], 11, int).'">'.SafeDB($users[$users[$avatars[$i]]]['name'], 255, str).'</a></td></tr>';
+			}
+			$text .= '</table></td>';
 			if($col == 5){
 				$text .= '</tr>';
 				$col = 0;
 			}
 		}
 		if($col < 5){
+			$text .= '<td colspan="'.(5-$col).'"></td>';
 			$text .= '</tr>';
 		}
 	}else{
@@ -438,17 +437,23 @@ function AdminUserAvatarsGallery(){
 
 function AdminUserSaveAvatar(){
 	global $config;
-	$alloy_mime = array('image/gif'=>'.gif', 'image/jpeg'=>'.jpg', 'image/pjpeg'=>'.jpg', 'image/png'=>'.png', 'image/x-png'=>'.png');
-	if(isset($_FILES['avatar'])){
-		if(isset($alloy_mime[$_FILES['avatar']['type']]) && $alloy_mime[$_FILES['avatar']['type']] == strtolower(GetFileExt($_FILES['avatar']['name']))){
-			copy($_FILES['avatar']['tmp_name'], $config['general']['avatars_dir'].$_FILES['avatar']['name']);
-		}elseif(!file_exists($_FILES['avatar']['tmp_name'])){
-			AddTextBox('Ошибка', '<center>Вы не выбрали файл для загрузки.<br /><a href="javascript:history.go(-1)">Назад в галерею</a></center>');
-			return;
+	$alloy_mime = array('image/gif' => '.gif', 'image/jpeg' => '.jpg', 'image/pjpeg' => '.jpg', 'image/png' => '.png', 'image/x-png' => '.png');
+	include_once($config['inc_dir'].'picture.class.php');
+	$asize = getimagesize($_FILES['avatar']['tmp_name']);
+	$alloy_mime = array('image/gif', 'image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png');
+	$alloy_exts = array('.gif', '.jpg', '.jpeg', '.png');
+	if(in_array($_FILES['avatar']['type'], $alloy_mime) && in_array(strtolower(GetFileExt($_FILES['avatar']['name'])), $alloy_exts)){
+		$NewName = $_FILES['avatar']['name'];
+		if($asize[0] > $config['user']['max_avatar_width'] || $asize[1] > $config['user']['max_avatar_height']){
+			$thumb = new TPicture($_FILES['avatar']['tmp_name']);
+			$thumb->SetImageSize($config['user']['max_avatar_width'], $config['user']['max_avatar_height']);
+			$thumb->SaveToFile($config['general']['avatars_dir'].$NewName);
 		}else{
-			AddTextBox('Ошибка', '<center>Неправильный формат файла. Можно загружать только изображения формата GIF, JPEG или PNG.<br /><a href="javascript:history.go(-1)">Назад в галерею</a></center>');
-			return;
+			copy($_FILES['avatar']['tmp_name'], $config['general']['avatars_dir'].$NewName);
 		}
+	}else{
+		System::admin()->AddCenterBox('Загрузка аватара');
+		System::admin()->HighlightError('Неправильный формат аватара. Ваш аватар должен быть формата GIF, JPEG или PNG.<br /><a href="javascript:history.go(-1)">Назад в галерею</a>');
 	}
 	GO(ADMIN_FILE.'?exe=user&a=avatars');
 }
@@ -464,24 +469,13 @@ function AdminUserDeleteAvatar(){
 	}
 	$avatar = SafeEnv($_GET['filename'], 250, str);
 	$filename = RealPath2($dir.$avatar);
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		if(file_exists($filename) && is_file($filename)){
-			unlink($filename);
-		}
-		if($personal){
-			$db->Update('users', "a_personal='0',avatar=''", "`a_personal`='1' and `avatar`='$avatar'");
-		}
-		GO(ADMIN_FILE.'?exe=user&a=avatars');
-		exit();
-	}else{
-		TAddSubTitle('Удаление аватара');
-		if(file_exists($filename) && is_file($filename)){
-			$text = '<table cellspacing="0" cellpadding="5" border="0" align="center"><tr><td align="center">'.'<img src="'.$filename.'" border="0" /></tr></td><tr><td align="center">'.'Аватар будет удален физически с жесткого диска. Продолжить?<br />'.'<a href="'.ADMIN_FILE.'?exe=user&a=delavatar&filename='.SafeEnv($_GET['filename'], 250, str).'&ok=1'.($personal ? '&personal' : '').'">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a><br /><br />'.'</td></tr></table>';
-		}else{
-			$text = '<center>Аватар, который вы пытаетесь удалить, не найден в папке с аватарами.<br /><a href="javascript:history.go(-1)">Назад в галерею</a></center>';
-		}
-		AddTextBox("Внимание!", $text);
+	if(file_exists($filename) && is_file($filename)){
+		unlink($filename);
 	}
+	if($personal){
+		$db->Update('users', "a_personal='0',avatar=''", "`a_personal`='1' and `avatar`='$avatar'");
+	}
+	GO(ADMIN_FILE.'?exe=user&a=avatars');
 }
 include_once ($config['inc_dir'].'configuration/functions.php');
 
@@ -508,14 +502,12 @@ function AdminUser( $action ){
 			break;
 		case 'add':
 			if($editing){
-				include_once ($config['inc_dir'].'members.php');
 				AdminUserEditor('user&a=addsave', 'add', 0, false);
 				return true;
 			}
 			break;
 		case 'addsave':
 			if($editing){
-				include_once ($config['inc_dir'].'members.php');
 				AdminUserEditSave('user', 'addsave', 0, false);
 				return true;
 			}
@@ -579,29 +571,37 @@ function AdminUser( $action ){
 			break;
 		case 'config':
 			if($confedit){
-				global $config, $site;
-				include_once ($config['inc_dir'].'configuration/functions.php');
-				AdminConfigurationEdit('user', 'user', true, false, 'Конфигурация модуля "Пользователи"');
+				System::admin()->AddCenterBox('Конфигурация модуля "Пользователи"');
+				if(isset($_GET['saveok'])){
+					System::admin()->Highlight('Настройки сохранены.');
+				}
+				System::admin()->ConfigGroups('user');
+				System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=user&a=configsave');
 				return true;
 			}
 			break;
 		case 'configsave':
 			if($confedit){
-				global $config;
-				include_once ($config['inc_dir'].'configuration/functions.php');
-				AdminConfigurationSave('user&a=config', 'user', true);
+				System::admin()->SaveConfigs('user');
+				GO(ADMIN_FILE.'?exe=user&a=config&saveok');
 				return true;
 			}
 			break;
 		case 'points':
 			if($rankedit){
-				AdminConfigurationEdit('user', 'points', true, false, 'Система пунктов', 'a=pointsave');
+				System::admin()->AddCenterBox('Система пунктов');
+				if(isset($_GET['saveok'])){
+					System::admin()->Highlight('Настройки сохранены.');
+				}
+				System::admin()->ConfigGroups('points');
+				System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=user&a=pointsave');
 				return true;
 			}
 			break;
 		case 'pointsave':
 			if($rankedit){
-				AdminConfigurationSave('user&a=points', 'points', true);
+				System::admin()->SaveConfigs('points');
+				GO(ADMIN_FILE.'?exe=user&a=points&saveok');
 				return true;
 			}
 			break;

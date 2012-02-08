@@ -11,13 +11,14 @@
 			$(this).mousedown(function(e){if(e.which == 1)$(this).addClass("activate"); });
 		});
 		Admin.Live(".button, input[type=button], input[type=submit]", function(){ $(this).button(); });
+		if($("#errors").html() != "") $("#errors").show();
 	})(jQuery);
 ');
 ?>
 {template}
 <body>
 <div id="wrapper">
-	{page.errors_text}
+	<div id="errors">{page.errors_text}</div>
 	<div class="menu_backing">
 		<div class="header">
 			<div class="admin_logo"></div>

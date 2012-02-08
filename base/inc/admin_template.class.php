@@ -223,7 +223,7 @@ class AdminPage extends PageTemplate{
 		if($ImgSrc != ''){
 			$text = '<img src="'.$ImgSrc.'" alt="'.$Title.'" />';
 			if($ShowText){
-				$text .= $Title;
+				$text .= '&nbsp;'.$Title;
 				$Title = '';
 			}
 		}else{
@@ -247,7 +247,7 @@ class AdminPage extends PageTemplate{
 		if($ImgSrc != ''){
 			$text = '<img src="'.$ImgSrc.'" alt="'.$Title.'" />';
 			if($ShowText){
-				$text .= $Title;
+				$text .= '&nbsp;'.$Title;
 				$Title = '';
 			}
 		}else{
@@ -265,17 +265,36 @@ class AdminPage extends PageTemplate{
 	 * Кнопка с выполнением JS кода с предупреждением
 	 *
 	 * @param string $Title Заголовок кнопки
-	 * @param string $OnClick JavaScript код при нажатии
+	 * @param string $OnClickJS JavaScript код при нажатии
 	 * @param string $ImgSrc Путь к иконке
 	 * @param string $ConfirmMsg Сообщение предупреждения, если пустое, то не сработает
 	 * @return void
 	 */
-	public function SpeedConfirmJs( $Title, $OnClick, $ImgSrc = '', $ConfirmMsg = '' ){
+	public function SpeedConfirmJs( $Title, $OnClickJS, $ImgSrc = '', $ConfirmMsg = '', $ShowText = false ){
 		$Title = htmlspecialchars($Title, ENT_QUOTES);
-		$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
-		$OnClick = "if(confirm('$ConfirmMsg')) $OnClick; event.cancelBubble = true; event.stopPropagation(); return false";
-		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
+		$OnClick = '';
+		if($ConfirmMsg != ''){
+			$ConfirmMsg = htmlspecialchars($ConfirmMsg, ENT_QUOTES);
+			$OnClick = "if(confirm('$ConfirmMsg')){ ";
+		}
+		$OnClick .= "$OnClickJS;";
+		if($ConfirmMsg != ''){
+			$OnClick .= ' } ';
+		}
+		$OnClick .= "event.cancelBubble = true;"
+		."event.stopPropagation();"
+		."return false";
+		$text = '';
+		if($ImgSrc != ''){
+			$text = '<img src="'.$ImgSrc.'" alt="'.$Title.'" />';
+			if($ShowText){
+				$text .= '&nbsp;'.$Title;
+				$Title = '';
+			}
+		}else{
+			$text = $Title;
+		}
+		return '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'.$text.'</a>';
 	}
 
 	/**
@@ -289,7 +308,7 @@ class AdminPage extends PageTemplate{
 	 * @param  $DisabledImage
 	 * @return string
 	 */
-	public function SpeedStatus( $EnabledTitle, $DisabledTitle, $AjaxUrl, $Status, $EnabledImage, $DisabledImage ){
+	public function SpeedStatus( $EnabledTitle, $DisabledTitle, $AjaxUrl, $Status, $EnabledImage = 'images/bullet_green.png', $DisabledImage = 'images/bullet_red.png' ){
 		$EnabledTitle = htmlspecialchars($EnabledTitle, ENT_QUOTES);
 		$DisabledTitle = htmlspecialchars($DisabledTitle, ENT_QUOTES);
 
@@ -723,7 +742,7 @@ class AdminPage extends PageTemplate{
 				$response['js'][] = $filename;
 			}
 			$response['js_inline'] = $this->TextJavaScript."\n".$this->OnLoadJavaScript;
-			$response['errors'] = implode(System::$Errors);
+			$response['errors'] = implode("<br>\n", System::$Errors);
 			$response['info'] = $this->GetPageInfo($start);
 			$response['title'] = $this->GenerateTitle();
 			$response['uri'] = GetPageUri();
@@ -733,7 +752,7 @@ class AdminPage extends PageTemplate{
 			$this->BlockTemplate->vars['content_block'] = $this->content_block;
 			$this->BlockTemplate->vars['tool_menu_block'] = $this->tool_menu_block;
 			$this->BlockTemplate->vars['showinfo'] = System::config('general/show_script_time');
-			$this->BlockTemplate->vars['errors_text'] = implode(System::$Errors);
+			$this->BlockTemplate->vars['errors_text'] = implode("<br>\n", System::$Errors);
 			$this->EchoAll();
 		}
 	}
