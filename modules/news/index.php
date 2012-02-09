@@ -19,12 +19,11 @@ if(isset($_GET['op'])){
 
 switch($op){
 	case 'main': IndexNewsMain();
-	break;
+		break;
 	case 'readfull': IndexNewsReadFull();
-	break;
+		break;
 	case 'topics': IndexNewsTopics();
-	break;
-	// Комментарии
+		break;
 	case 'addpost': IndexNewsAddPost();
 		break;
 	case 'editpost': IndexNewsEditPost();
@@ -33,22 +32,17 @@ switch($op){
 		break;
 	case 'deletepost': IndexNewsDeletePost();
 		break;
-	// //
-	default:
-		//HackOff();
+	default: IndexNewsMain();
 }
 
-function IndexNewsFunc( $id )
-{
+function IndexNewsFunc( $id ){
 	global $config;
-	return
-	'&nbsp'
-	."<a href=\"{$config['admin_file']}?exe=news&a=edit&id=$id\" class=\"admin_edit_link\"><img src=\"images/admin/edit.png\" title=\"Редактировать\"></a>"
-	."<a href=\"{$config['admin_file']}?exe=news&a=delnews&id=$id&ok=0\" class=\"admin_edit_link\"><img src=\"images/admin/delete.png\" title=\"Удалить\"></a>";
+	return '&nbsp'
+	.'<a href="'.ADMIN_FILE.'?exe=news&a=edit&id='.$id.'&back='.SaveRefererUrl().'" class="admin_edit_link"><img src="images/admin/edit.png" title="Редактировать"></a>'
+	.'<a href="'.ADMIN_FILE.'?exe=news&a=delete&id='.$id.'&back='.SaveRefererUrl().'&ok=0" class="admin_edit_link"><img src="images/admin/delete.png" title="Удалить"></a>';
 }
 
-function IndexNewsAdd( &$news, $topic, $readfull=false )
-{
+function IndexNewsAdd( &$news, $topic, $readfull=false ){
 	global $newsTemp, $site, $op, $config, $user;
 
 	$func = IndexNewsFunc(SafeDB($news['id'], 11, int));
@@ -146,8 +140,7 @@ function IndexNewsAdd( &$news, $topic, $readfull=false )
 }
 
 
-function IndexNewsMain()
-{
+function IndexNewsMain(){
 	global $db, $config, $site;
 
 	$site->AddBlock('news',true,true);
@@ -197,8 +190,7 @@ function IndexNewsMain()
 }
 
 
-function GetTopics()
-{
+function GetTopics(){
 	global $db, $config;
 	$db->Select('news_topics','');
 	$rs = array();
@@ -208,8 +200,7 @@ function GetTopics()
 	return $rs;
 }
 
-function IndexNewsTopics()
-{
+function IndexNewsTopics(){
 	global $site, $config;
 	$site->SetTitle('Разделы новостей');
 	$topics = GetTopics();
@@ -244,8 +235,7 @@ function IndexNewsTopics()
 	}
 }
 
-function IndexNewsReadFull()
-{
+function IndexNewsReadFull(){
 	global $db, $config, $site;
 	$site->AddTemplatedBox('', 'module/news_full.html');
 	$site->AddBlock('news', true, true);
@@ -295,8 +285,7 @@ function IndexNewsReadFull()
 	}
 }
 
-function IndexNewsAddPost()
-{
+function IndexNewsAddPost(){
 	global $db, $config, $site;
 	$get_id        = 'news';             // Имя параметра в get для получения id объекта
 	$table         = 'news_comments';    // Таблица комментариев
@@ -329,8 +318,7 @@ function IndexNewsAddPost()
 	}
 }
 
-function IndexNewsEditPost( $back_id = null )
-{
+function IndexNewsEditPost( $back_id = null ){
 	global $site, $config;
 	$get_id = 'news';             // Имя параметра в get для получения id объекта
 	$table = 'news_comments'; // Таблица комментариев
@@ -346,8 +334,7 @@ function IndexNewsEditPost( $back_id = null )
 	$posts->RenderForm(true, 'post_form');
 }
 
-function IndexNewsEditPostSave()
-{
+function IndexNewsEditPostSave(){
 	global $config;
 	$get_id = 'news';          // Имя параметра в get для получения id объекта
 	$table  = 'news_comments'; // Таблица комментариев
@@ -362,8 +349,7 @@ function IndexNewsEditPostSave()
 	}
 }
 
-function IndexNewsDeletePost()
-{
+function IndexNewsDeletePost(){
 	global $config, $db;
 	$get_id = 'news'; // Имя параметра в get для получения id объекта
 	$table = 'news_comments'; // Таблица комментариев
@@ -390,5 +376,3 @@ function IndexNewsDeletePost()
 		GoRefererUrl($back_id);
 	}
 }
-
-?>

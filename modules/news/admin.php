@@ -163,7 +163,7 @@ function AdminNewsMain(){
 
 		$table->AddRow(
 			$id,
-			'<b><a href="'.ADMIN_FILE.'?exe=news&a=edit&id='.$id.'">'.SafeDB($news['title'], 255, str).'</a></b>',
+			'<b>'.System::admin()->Link(SafeDB($news['title'], 255, str), ADMIN_FILE.'?exe=news&a=edit&id='.$id).'</b>',
 			TimeRender(SafeDB($news['date'], 11, int)),
 			SafeDB($news['hit_counter'], 11, int),
 			($allowComments ? $comments : 'Обсуждение закрыто'),
@@ -194,7 +194,7 @@ function AdminNewsEditor(){
 
 	UseScript('jquery_ui');
 	System::admin()->AddJS("
-	function NewsPreviewOpen(){
+	NewsPreviewOpen = function(){
 		window.open('index.php?name=plugins&p=preview&mod=news','Preview','resizable=yes,scrollbars=yes,menubar=no,status=no,location=no,width=640,height=480');
 	}");
 	System::admin()->AddOnLoadJS('
@@ -301,8 +301,12 @@ function AdminNewsEditor(){
 	FormRow('Включить', System::admin()->Select('enabled', GetEnData($enabled, 'Да', 'Нет')));
 
 	AddCenterBox($title);
+	$back = '';
+	if(isset($_REQUEST['back'])){
+		$back = '&back='.SafeDB($_REQUEST['back'], 255, str);
+	}
 	AddForm(
-		'<form name="news_editor" action="'.ADMIN_FILE.'?exe=news&a=save'.$met.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data" name="news_editor">',
+		'<form name="news_editor" action="'.ADMIN_FILE.'?exe=news&a=save'.$met.$back.'" method="post" enctype="multipart/form-data" name="news_editor">',
 	  System::admin()->Button('Отмена', 'onclick="history.go(-1)"')
 	  .System::admin()->Button('Предпросмотр', 'onclick="NewsPreviewOpen();"')
 	  .System::admin()->Submit($caption)
@@ -395,34 +399,47 @@ function AdminNewsSave(){
 	$bcache->Delete('block', 'news3');
 	$bcache->Delete('block', 'news4');
 
-	GoRefererUrl($_GET['back']);
-	AddTextBox('Сообщение', 'Изменения сохранены.');
+	if(isset($_REQUEST['back'])){
+		GoRefererUrl(SafeDB($_REQUEST['back'], 255, str));
+	}else{
+		GO(ADMIN_FILE.'?exe=news');
+	}
 }
 
 function AdminNewsDelete(){
 	global $news_access_editnews;
-
-	if(!isset($_POST['id']) || !$news_access_editnews){
+	if(!isset($_REQUEST['id']) || !$news_access_editnews){
 		exit('ERROR');
 	}
-
-	$id = SafeEnv($_POST['id'], 11, int);
-	System::database()->Select('news', "`id`='$id'");
-	$news = System::database()->FetchRow();
-
-	System::database()->Delete('news', "`id`='$id'");
-	System::database()->Delete('news_comments', "`object_id`='$id'");
-	if($news['enabled']){
-		CalcNewsCounter(SafeDB($news['topic_id'], 11, int), false);
+	if(IsAjax() || isset($_GET['ok']) && $_GET['ok'] == '1'){
+		$id = SafeEnv($_REQUEST['id'], 11, int);
+		System::database()->Select('news', "`id`='$id'");
+		$news = System::database()->FetchRow();
+		System::database()->Delete('news', "`id`='$id'");
+		System::database()->Delete('news_comments', "`object_id`='$id'");
+		if($news['enabled']){
+			CalcNewsCounter(SafeDB($news['topic_id'], 11, int), false);
+		}
+		$bcache = LmFileCache::Instance();
+		$bcache->Delete('block', 'news1');
+		$bcache->Delete('block', 'news2');
+		$bcache->Delete('block', 'news3');
+		$bcache->Delete('block', 'news4');
+		if(isset($_GET['back'])){
+			GoRefererUrl($_GET['back']);
+		}
+		exit('OK');
+	}else{
+		System::database()->Select('news', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");
+		$news = System::database()->FetchRow();
+		$id = SafeDB($_REQUEST['id'], 11, int);
+		$back = SafeDB($_REQUEST['back'], 255, str);
+		System::admin()->AddCenterBox('Удаление новости');
+		$Text = 'Удалить новость "'.SafeDB($news['title'], 255, str).'"?';
+		$Text .= '<br /><br />'.System::admin()->SpeedButton('Отмена', 'javascript:history.go(-1)', 'images/admin/delete.png', false, true)
+			.'&nbsp;&nbsp;'.System::admin()->SpeedButton('Да', ADMIN_FILE.'?exe=news&a=delete&id='.$id.'&back='.$back.'&ok=1', 'images/admin/accept.png', false, true);
+		System::admin()->Highlight($Text);
 	}
-
-	$bcache = LmFileCache::Instance();
-	$bcache->Delete('block', 'news1');
-	$bcache->Delete('block', 'news2');
-	$bcache->Delete('block', 'news3');
-	$bcache->Delete('block', 'news4');
-
-	exit('OK');
 }
 
 function AdminNewsChangeStatus(){
@@ -466,14 +483,7 @@ function AdminNewsTopics(){
 		$topic_id = SafeDB($topic['id'], 11, int);
 		$edit_url = ADMIN_FILE.'?exe=news&a=edittopic&id='.$topic_id;
 		$edit = System::admin()->SpeedButton('Редактировать', $edit_url, 'images/admin/edit.png');
-		$del = System::admin()->SpeedAjax(
-			'Удалить',
-			ADMIN_FILE.'?exe=news&a=deltopic&id='.$topic_id,
-			'images/admin/delete.png',
-			'Удалить раздел? Все новости в этом разделе так-же будут удалены.',
-			'',
-			"$('#topic_$topic_id').children('div').fadeOut('slow');"
-		);
+		$del = System::admin()->SpeedAjax('Удалить', ADMIN_FILE.'?exe=news&a=deltopic&id='.$topic_id,'images/admin/delete.png', 'Удалить раздел? Все новости в этом разделе так-же будут удалены.', '', "$('#topic_$topic_id').children('div').fadeOut('slow');");
 		if($cntr % 4 == 0) $text .= '<tr>';
 		$text .= '<td id="topic_'.$topic_id.'" valign="top" align="center" style="padding: 10px;"><div>';
 		$text .= '<b><a href="'.$edit_url.'">'.SafeDB($topic['title'], 255, str).'</a></b> ('. SafeDB($topic['counter'], 11, int).')';
@@ -488,13 +498,13 @@ function AdminNewsTopics(){
 	if($cntr % 4 != 0) $text .= '</tr>';
 
 	$text .= '</table>';
-	$text .= '<br />.:Создать новый раздел:.<br />';
 	AddText($text);
 
-	FormRow('Название раздела', System::admin()->Edit('topic_name', '', false, 'maxlength="255" style="width:400px;"'));
-	FormTextRow('Описание (HTML)', System::admin()->HtmlEditor('topic_description', '', 600, 200));
+	System::admin()->FormTitleRow('Создать новый раздел');
+	System::admin()->FormRow('Название раздела', System::admin()->Edit('topic_name', '', false, 'maxlength="255" style="width:400px;"'));
+	System::admin()->FormTextRow('Описание (HTML)', System::admin()->HtmlEditor('topic_description', '', 600, 200));
 	AdminImageControl('Изображение', 'Загрузить изображение', '', $icons_dir, 'topic_image', 'up_photo', 'topicsform');
-	AddForm('<form name="topicsform" action="'.ADMIN_FILE.'?exe=news&a=addtopic" method="post" enctype="multipart/form-data" name="topicsform">', System::admin()->Submit('Создать'));
+	System::admin()->AddForm('<form name="topicsform" action="'.ADMIN_FILE.'?exe=news&a=addtopic" method="post" enctype="multipart/form-data" name="topicsform">', System::admin()->Submit('Создать'));
 }
 
 function AdminNewsTopicSave(){
@@ -566,4 +576,3 @@ function AdminNewsEditTopic(){
 	);
 }
 
-?>

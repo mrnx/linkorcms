@@ -67,11 +67,20 @@ function HistoryGetUrl( $BackSteps ){
  * @param string $Url
  *
  * @internal param $ <type> $Url
- * @return \String <type>
+ * @return String <type>
  */
 function SaveRefererUrl( $Url = '' ){
-	if($Url == ''){
-		$Url = HistoryGetUrl(1);
+	static $Cache;
+	if(isset($Cache[$Url])){
+		return $Cache[$Url];
+	}
+	if($Url == ''){ // Сохраняем текущий адрес
+		$Url = GetSiteUrl().GetPageUri();
+	}
+	if(isset($_SESSION['saved_urls']) && in_array($Url, $_SESSION['saved_urls'])){
+		$key = array_keys($_SESSION['saved_urls'], $Url);
+		$Cache[$Url] = $key[0];
+		return $key[0];
 	}
 	$id = GenRandomString(10);
 	$_SESSION['saved_urls'][$id] = $Url;
