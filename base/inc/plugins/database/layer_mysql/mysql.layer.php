@@ -784,7 +784,7 @@ class LcDatabaseMySQL
 			}
 			$set = $this->Values2Set($set, $cols3);
 		}
-		$sql = 'UPDATE '.$this->Prefix().$name.' SET '.$set.' WHERE '.$where;
+		$sql = 'UPDATE '.$this->Prefix().$name.' SET '.$set.($where != '' ? ' WHERE '.$where : '');
 		if($this->MySQLQuery($sql)){
 			$this->Good();
 			return true;
