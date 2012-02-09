@@ -40,7 +40,7 @@ function AdminConfigurationEdit( $Exe, $Group = '', $ShowHiddenGroups = false, $
 	}
 	$cfg_grps = $db->Select($conf_config_groups_table, $q);
 	// Добавляем форму и начинаем генерировать текст
-	$text = '<form action="'.$config['admin_file'].'?exe='.$Exe.'&'.$SavePageParam.'" method="post">';
+	$text = '<form action="'.ADMIN_FILE.'?exe='.$Exe.'&'.$SavePageParam.'" method="post">';
 	for($i = 0, $cnt = count($cfg_grps); $i < $cnt; $i++){
 		// Если эта группа невидима то пропускаем её
 		if($Group === 0){

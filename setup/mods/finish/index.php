@@ -27,5 +27,3 @@ switch($p){
 		GO($config['admin_file']);
 		break;
 }
-
-?>

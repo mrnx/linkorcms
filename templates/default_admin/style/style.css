@@ -409,7 +409,7 @@ a.nav_item:hover {
 
 .commtable_header{
 	width: 100%;
-	margin: 10px 0;
+	margin: 10px auto;
 	border-collapse: collapse;
 	border: 1px #CCCCCC solid;
 }
@@ -425,7 +425,7 @@ a.nav_item:hover {
 
 .commtable { /* Таблица комментария */
 	width: 100%;
-	margin: 10px 0;
+	margin: 10px auto;
 	border-collapse: collapse;
 	border: 1px #CCCCCC solid;
 }

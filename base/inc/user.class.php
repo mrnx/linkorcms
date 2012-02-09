@@ -282,7 +282,7 @@ class User{
 		$where = "`u_ip`='$ip'";
 		$db->Select('online', $where);
 		$uri = SafeEnv($_SERVER['REQUEST_URI'], 255, str);
-		if(strpos($uri, $config['admin_file']) !== false){
+		if(strpos($uri, ADMIN_FILE) !== false){
 			$uri = '';
 			$page = 'Админ-панель';
 		}

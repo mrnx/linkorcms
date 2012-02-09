@@ -24,7 +24,7 @@ function HackOff( $LowProtect=false, $Redirect=true ){
 				GO(Ufu('index.php'));
 			}
 		}elseif(defined('ADMIN_SCRIPT')){
-			GO($config['admin_file']);
+			GO(ADMIN_FILE);
 		}
 	}else{
 		if($config['security']['hack_event'] == 'alert'){

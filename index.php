@@ -9,6 +9,7 @@ define('MAIN_SCRIPT', true);
 define('VALID_RUN', true);
 
 require 'config/init.php' ; // Конфигурация и инициализация
+define('ADMIN_FILE', System::config('admin_file')); // Ссылка на админ-панель
 
 // ЧПУ
 if($config['general']['ufu'] && isset($_GET['ufu'])){

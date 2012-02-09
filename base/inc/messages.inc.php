@@ -51,7 +51,7 @@ function MessagesRender( $msg ){
 			}else{
 				$vt = 'Неограниченно';
 			}
-			$adin = '(Просматривают: '.ViewLevelToStr($msg['view'], 'Только администраторы', 'Только пользователи', 'Только анонимные пользователи', 'Все посетители').' - '.$vt.' - <a href="'.$config['admin_file'].'?exe=messages&a=msgeditor&id='.$msg['id'].'">Редактировать</a>)';
+			$adin = '(Просматривают: '.ViewLevelToStr($msg['view'], 'Только администраторы', 'Только пользователи', 'Только анонимные пользователи', 'Все посетители').' - '.$vt.' - <a href="'.ADMIN_FILE.'?exe=messages&a=msgeditor&id='.$msg['id'].'">Редактировать</a>)';
 		}
 		if($msg['view_title'] == 1){ // Показывать заголовок
 			$title = $msg['title'];

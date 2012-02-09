@@ -119,8 +119,8 @@ function IndexDownloadsFunc($id)
 	global $config;
 	return
 	'&nbsp'
-	."<a href=\"{$config['admin_file']}?exe=downloads&a=editor&id=$id\" class=\"admin_edit_link\"><img src=\"images/admin/edit.png\" title=\"Редактировать\"></a>"
-	."<a href=\"{$config['admin_file']}?exe=downloads&a=deletefile&id=$id&ok=0\" class=\"admin_edit_link\"><img src=\"images/admin/delete.png\" title=\"Удалить\"></a>";
+	.'<a href="'.ADMIN_FILE.'?exe=downloads&a=editor&id='.$id.'" class="admin_edit_link"><img src="images/admin/edit.png" title="Редактировать"></a>'
+	.'<a href="'.ADMIN_FILE.'?exe=downloads&a=deletefile&id='.$id.'&ok=0" class="admin_edit_link"><img src="images/admin/delete.png" title="Удалить"></a>';
 }
 
 function AddDownload(&$down)

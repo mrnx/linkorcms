@@ -62,13 +62,12 @@ function IndexArticlesGetNumItems()
 	return $db->NumRows().'.</center>';
 }
 
-function IndexArticlesFunc( $id )
-{
+function IndexArticlesFunc( $id ){
 	global $config;
 	return
 	'&nbsp'
-	."<a href=\"{$config['admin_file']}?exe=articles&a=editor&id=$id\" class=\"admin_edit_link\"><img src=\"images/admin/edit.png\" title=\"Редактировать\"></a>"
-	."<a href=\"{$config['admin_file']}?exe=articles&a=delete&id=$id&ok=0\" class=\"admin_edit_link\"><img src=\"images/admin/delete.png\" title=\"Удалить\"></a>";
+	.'<a href="'.ADMIN_FILE.'?exe=articles&a=editor&id='.$id.'" class="admin_edit_link"><img src="images/admin/edit.png" title="Редактировать"></a>'
+	.'<a href="'.ADMIN_FILE.'?exe=articles&a=delete&id='.$id.'&ok=0" class="admin_edit_link"><img src="images/admin/delete.png" title="Удалить"></a>';
 }
 
 function RenderReadArticle( &$art )

@@ -30,9 +30,7 @@ if(!$user->Auth){
 	$vars['exit_url'] = 'index.php?name=plugins&p=login&a=exit';
 	$vars['lexit'] = 'Выход';
 	$vars['isadmin'] = $user->isAdmin();
-	$vars['adminfile_url'] = $config['admin_file'];
+	$vars['adminfile_url'] = ADMIN_FILE;
 	$vars['ladminpanel'] = 'Админ-панель';
 	$vars['title'] = 'Блок пользователя';
 }
-
-?>

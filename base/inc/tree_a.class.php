@@ -117,7 +117,7 @@ class AdminTree extends Tree{
 		FormRow('Иконка', $site->Edit('icon', $icon, false, 'maxlength="250" style="width:400px;"'));
 		FormRow('Описание', $site->TextArea('desc', $desc, 'maxlength="255" style="width:400px;height:160px;"'));
 		AddCenterBox($boxtitle);
-		AddForm('<form action="'.$config['admin_file'].'?exe='.$this->module.'&'.$this->action_par_name.'='.$save_met.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit($cmd));
+		AddForm('<form action="'.ADMIN_FILE.'?exe='.$this->module.'&'.$this->action_par_name.'='.$save_met.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit($cmd));
 	}
 
 	/**
@@ -166,7 +166,7 @@ class AdminTree extends Tree{
 			$r = $db->Select($this->Table, "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 			$text = 'Вы действительно хотите удалить категорию "'.$r[0]['title'].'".'
 			.' Все вложенные категории и файлы будут удалены. Продолжить?<br />'
-			.'<a href="'.$config['admin_file'].'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->del_met.'&'.$this->id_par_name.'='.SafeEnv($_GET[$this->id_par_name], 11, int).'&ok=1">Да</a>'
+			.'<a href="'.ADMIN_FILE.'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->del_met.'&'.$this->id_par_name.'='.SafeEnv($_GET[$this->id_par_name], 11, int).'&ok=1">Да</a>'
 			.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
 			AddTextBox('Внимание', $text);
 			return false;

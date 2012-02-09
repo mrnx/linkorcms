@@ -17,9 +17,6 @@ switch($op){
 	case 'main':
 		IndexGBMain();
 		break;
-	case 'add':
-		IndexNewsAddCommentSave();
-		break;
 	case 'save':
 		IndexGBAddMsgSave();
 		break;
@@ -27,8 +24,7 @@ switch($op){
 		HackOff();
 }
 
-function GBCheckFlood()
-{
+function GBCheckFlood(){
 	global $db, $config;
 	$flood_time = $config['gb']['floodtime'];
 	$db->Select('guestbook', "`user_ip`='".getip()."' and `date`>'".(time() - $flood_time)."'");
@@ -39,10 +35,8 @@ function GBCheckFlood()
 	}
 }
 
-//Вывод сообщения
-function IndexGBAddMessage( &$msg )
-{
-	global $site, $user, $config;
+function IndexGBAddMessage( &$msg ){
+	global $config;
 	// Имя и электронная почта
 	if($msg['email'] != '' && $msg['hide_email'] != '1'){
 		$vars['name'] = '<a href="mailto:'.SafeDB($msg['email'], 50, str).'">'.SafeDB($msg['name'], 50, str).'</a>';
@@ -84,16 +78,16 @@ function IndexGBAddMessage( &$msg )
 	// Функции для администратора
 
 	$id = SafeDB($msg['id'], 11, int);
-	$vars['access_answer'] = $user->CheckAccess2('guestbook', 'answer');
-	$vars['edit_answer_url'] = $config['admin_file'].'?exe=guestbook&amp;a=editanswer&amp;id='.$id;
-	$vars['delete_answer_url'] = $config['admin_file'].'?exe=guestbook&amp;a=delanswer&amp;id='.$id;
-	$vars['add_answer_url'] = $config['admin_file'].'?exe=guestbook&amp;a=addanswer&amp;id='.$id;
-	$vars['edit_message_url'] = $config['admin_file'].'?exe=guestbook&amp;a=edit&amp;id='.$id;
-	$vars['delete_message_url'] = $config['admin_file'].'?exe=guestbook&amp;a=delete&amp;id='.$id.'&amp;ok=0';
-	if($user->isAdmin()){
+	$vars['access_answer'] = System::user()->CheckAccess2('guestbook', 'answer');
+	$vars['edit_answer_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=editanswer&amp;id='.$id;
+	$vars['delete_answer_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=delanswer&amp;id='.$id;
+	$vars['add_answer_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=addanswer&amp;id='.$id;
+	$vars['edit_message_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=edit&amp;id='.$id;
+	$vars['delete_message_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=delete&amp;id='.$id.'&amp;ok=0';
+	if(System::user()->isAdmin()){
 		$func = '';
 		$msg_func = '';
-		if(key_exists($user->Name(), $answers)){
+		if(key_exists(System::user()->Name(), $answers)){
 			if($vars['access_answer']){
 				$func = '<a href="'.$vars['edit_answer_url'].'">Редактировать ответ</a> :: '
 				.'<a href="'.$vars['delete_answer_url'].'">Удалить ответ</a>';
@@ -123,38 +117,10 @@ function IndexGBAddMessage( &$msg )
 	$vars['date'] = TimeRender(SafeDB($msg['date'], 11, int));
 	$vars['text'] = SafeDB($msg['message'], 0, str);
 	$vars['answers'] = $answerstext;
-	$site->AddSubBlock('guestbook', true, $vars);
+	System::site()->AddSubBlock('guestbook', true, $vars);
 }
 
-function IndexGBMain()
-{
-	global $db, $config, $site, $userAuth;
-	if(isset($_GET['page'])){
-		$page = SafeEnv($_GET['page'], 10, int);
-	}else{
-		$page = 1;
-	}
-	$msgs = $db->Select('guestbook', '`premoderate`=\'1\'');
-	SortArray($msgs, 'date', true);
-	$num = $config['gb']['msgonpage'];
-	$navigation = new Navigation($page);
-	$navigation->FrendlyUrl = $config['general']['ufu'];
-	$navigation->GenNavigationMenu($msgs, $num, Ufu('index.php?name=guestbook', 'guestbook/page{page}/', true));
-
-	$site->AddBlock('guestbook', true, true, 'gb');
-	if(count($msgs) > 0){
-		foreach($msgs as $message){
-			IndexGBAddMessage($message);
-		}
-	}else{
-		$site->AddTextBox('', '<center>Сообщений пока нет.</center>');
-	}
-	$site->AddTemplatedBox('', 'module/guestbook.html');
-	IndexGBAddForm($config['gb']['formposition'] == 'top');
-}
-
-function IndexGBAddForm( $top = false )
-{
+function IndexGBAddForm( $top = false ){
 	global $site, $user, $config, $userAuth;
 	$vars['lname'] = 'Ваше имя*: ';
 	$vars['name'] = ($userAuth && $user->isDef('u_name') ? $user->Get('u_name') : '');
@@ -194,9 +160,36 @@ function IndexGBAddForm( $top = false )
 	}
 }
 
-function IndexGBAddMsgSave()
-{
-	global $db, $config, $site, $user, $userAuth;
+function IndexGBMain(){
+	global $config, $site;
+
+	if(isset($_GET['page'])){
+		$page = SafeEnv($_GET['page'], 10, int);
+	}else{
+		$page = 1;
+	}
+	$msgs = System::database()->Select('guestbook', "`premoderate`='1'");
+
+	SortArray($msgs, 'date', true);
+	$num = $config['gb']['msgonpage'];
+	$navigation = new Navigation($page);
+	$navigation->FrendlyUrl = $config['general']['ufu'];
+	$navigation->GenNavigationMenu($msgs, $num, Ufu('index.php?name=guestbook', 'guestbook/page{page}/', true));
+
+	$site->AddBlock('guestbook', true, true, 'gb');
+	if(count($msgs) > 0){
+		foreach($msgs as $message){
+			IndexGBAddMessage($message);
+		}
+	}else{
+		$site->AddTextBox('', '<center>Сообщений пока нет.</center>');
+	}
+	$site->AddTemplatedBox('', 'module/guestbook.html');
+	IndexGBAddForm($config['gb']['formposition'] == 'top');
+}
+
+function IndexGBAddMsgSave(){
+	global $config, $site;
 	$r = array();
 	$er = array();
 	if(!isset($_GET['name']) || !isset($_POST['email']) || !isset($_POST['site']) || !isset($_POST['icq']) || !isset($_POST['text'])){
@@ -223,8 +216,8 @@ function IndexGBAddMsgSave()
 	}
 
 	// Проверяем капчу
-	if(!$user->Auth || (!$user->isAdmin() && $config['gb']['show_captcha'])){
-		if(!$user->isDef('captcha_keystring') || $user->Get('captcha_keystring') != $_POST['keystr']){
+	if(!System::user()->Auth || (!System::user()->isAdmin() && $config['gb']['show_captcha'])){
+		if(!System::user()->isDef('captcha_keystring') || System::user()->Get('captcha_keystring') != $_POST['keystr']){
 			$er[] = 'Вы ошиблись при вводе кода с картинки.';
 		}
 	}
@@ -235,15 +228,20 @@ function IndexGBAddMsgSave()
 		}else{
 			$hideemail = '0';
 		}
-		if($userAuth == 1 || !$config['gb']['moderation']){
+		if(System::user()->isAdmin() || !$config['gb']['moderation']){
 			$moderated = 1;
 		}else{
 			$moderated = 0;
 		}
-		$vals = Values('', SafeEnv($_POST['name'], 50, str, true), SafeEnv($_POST['email'], 50, str, true), $hideemail, SafeEnv(Url($_POST['site']), 250, str, true), SafeEnv($_POST['icq'], 15, str, true), SafeEnv($_POST['text'], $config['gb']['msgmaxlen'], str, true), '', time(), getip(), $moderated);
-		$db->Insert('guestbook', $vals);
-		$user->ChargePoints($config['points']['gb_public']);
-		if($userAuth == '1' || !$config['gb']['moderation']){
+		$name = SafeEnv($_POST['name'], 50, str, true);
+		$email = SafeEnv($_POST['email'], 50, str, true);
+		$_site = SafeEnv(Url($_POST['site']), 250, str, true);
+		$icq = SafeEnv($_POST['icq'], 15, str, true);
+		$text = SafeEnv($_POST['text'], $config['gb']['msgmaxlen'], str, true);
+		$vals = Values('', $name, $email, $hideemail, $_site, $icq, $text, '', time(), getip(), $moderated);
+		System::database()->Insert('guestbook', $vals);
+		System::user()->ChargePoints($config['points']['gb_public']);
+		if(System::user()->isAdmin() || !$config['gb']['moderation']){
 			GO(GetSiteUrl().Ufu('index.php?name=guestbook', '{name}/'));
 		}else{
 			$text = '<center><br />Спасибо! Ваше сообщение будет добавлено после модерации.<br /><br />';
@@ -259,5 +257,3 @@ function IndexGBAddMsgSave()
 		$site->AddTextBox('', $text);
 	}
 }
-
-?>

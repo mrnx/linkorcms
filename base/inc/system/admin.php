@@ -26,7 +26,7 @@ function AdminImageControl( $Title, $LoadTitle, $FileName, $Dir, $Name = 'image'
 	$images = array();
 	$images = GetFiles($Dir,false,true,'.gif.png.jpeg.jpg');
 	$images[-1] = 'no_image/no_image.png';
-	$site->DataAdd($images_data,$images[-1],'Нет картинки',($FileName == ''));
+	System::admin()->DataAdd($images_data,$images[-1],'Нет картинки',($FileName == ''));
 
 	$selindex = -1;
 	for($i=0,$c=count($images)-1;$i<$c;$i++){
@@ -36,10 +36,10 @@ function AdminImageControl( $Title, $LoadTitle, $FileName, $Dir, $Name = 'image'
 		}else{
 			$sel = false;
 		}
-		$site->DataAdd($images_data, $images[$i], $images[$i], $sel);
+		System::admin()->DataAdd($images_data, $images[$i], $images[$i], $sel);
 	}
 
-	$select = $site->Select($Name,$images_data,false,'onchange="document.'.$FormName.'.iconview.src=\''.$Dir.'\'+document.'.$FormName.'.'.$Name.'.value;"');
+	$select = System::admin()->Select($Name,$images_data,false,'onchange="document.'.$FormName.'.iconview.src=\''.$Dir.'\'+document.'.$FormName.'.'.$Name.'.value;"');
 
 	$ctrl = <<<HTML
 <table cellspacing="0" cellpadding="0" border="0" width="100%">
@@ -51,8 +51,8 @@ function AdminImageControl( $Title, $LoadTitle, $FileName, $Dir, $Name = 'image'
 	</tr>
 </table>
 HTML;
-	FormRow($Title, $ctrl);
-	FormRow($LoadTitle, $site->FFile($LoadName).'<br /><small>Формат изображений только *.jpg,*.jpeg,*.gif,*.png</small><br /><small>Максимальный размер файла: '.$max_file_size.'</small>');
+	System::admin()->FormRow($Title, $ctrl);
+	System::admin()->FormRow($LoadTitle, System::admin()->FFile($LoadName).'<br /><small>Формат изображений только *.jpg,*.jpeg,*.gif,*.png</small><br /><small>Максимальный размер файла: '.$max_file_size.'</small>');
 }
 
 /**

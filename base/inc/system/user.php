@@ -768,7 +768,7 @@ function AdminUserEditor($save_link, $a = 'adduser', $id = 0, $isadmin = false){
 	TAddSubTitle($title);
 	AddCenterBox($title);
 	AddForm('<form name="userform" action="'.
-	        $config['admin_file'].'?exe='.$save_link.'&id='.$id.'" method="post"  enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit($caption));
+		ADMIN_FILE.'?exe='.$save_link.'&id='.$id.'" method="post"  enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit($caption));
 }
 
 /**
@@ -1007,7 +1007,7 @@ function AdminUserEditSave($back_link, $a = 'insert', $id = 0, $isadmin = false)
 		// Очищаем кэш пользователей
 		$cache = LmFileCache::Instance();
 		$cache->Delete(system_cache, 'users');
-		GO($config['admin_file'].'?exe='.$back_link);
+		GO(ADMIN_FILE.'?exe='.$back_link);
 	}
 }
 
