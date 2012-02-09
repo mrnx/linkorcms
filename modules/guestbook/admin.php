@@ -12,8 +12,6 @@ if(!$user->CheckAccess2('guestbook', 'guestbook')){
 	return;
 }
 
-include_once ($config['inc_dir'].'configuration/functions.php');
-
 function countmess( $where, $that, $value ){
 	System::database()->Select($where, "`$that`='$value'");
 	return System::database()->NumRows();
@@ -36,51 +34,47 @@ if($user->CheckAccess2('guestbook', 'guestbook_conf')){
 
 TAddToolBox($action);
 switch($action){
-	case 'main':
-		AdminGuestBookMain();
+	case 'main': AdminGuestBookMain();
 		break;
-	case 'edit':
-		AdminGuestBookMessageEditor();
+	case 'edit':AdminGuestBookMessageEditor();
 		break;
-	case 'save':
-		AdminGuestBookSave();
+	case 'save':AdminGuestBookSave();
 		break;
-	case 'delete':
-		AdminGuestBookDeleteMessage();
+	case 'delete':AdminGuestBookDeleteMessage();
 		break;
 	case 'addanswer':
-	case 'editanswer':
-		AdminGuestBookAnswerEditor();
+	case 'editanswer':AdminGuestBookAnswerEditor();
 		break;
-	case 'delanswer':
-		AdminGuestBookDeleteAnswer();
+	case 'delanswer':AdminGuestBookDeleteAnswer();
 		break;
-	case 'saveanswer':
-		AdminGuestBookAnswerSave();
-	case 'premoderation':
-		AdminGuestBookPremoderationMain();
+	case 'saveanswer':AdminGuestBookAnswerSave();
+	case 'premoderation':AdminGuestBookPremoderationMain();
 		break;
 	case 'prem_yes':
 	case 'prem_yes_all':
-	case 'prem_del_all':
-		AdminGuestBookPremoderationSave($action);
+	case 'prem_del_all': AdminGuestBookPremoderationSave($action);
 		break;
 	case 'config':
 		if(!$user->CheckAccess2('guestbook', 'guestbook_conf')){
 			AddTextBox('Ошибка', 'Доступ запрещён!');
 			return;
 		}
-		AdminConfigurationEdit('guestbook', 'gb', true, false, 'Конфигурация модуля гостевой');
+		System::admin()->AddCenterBox('Конфигурация модуля "Гостевая книга"');
+		if(isset($_GET['saveok'])){
+			System::admin()->Highlight('Настройки сохранены.');
+		}
+		System::admin()->ConfigGroups('gb');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=guestbook&a=configsave');
 		break;
 	case 'configsave':
 		if(!$user->CheckAccess2('guestbook', 'guestbook_conf')){
 			AddTextBox('Ошибка', 'Доступ запрещён!');
 			return;
 		}
-		AdminConfigurationSave('guestbook&a=config', 'gb', true);
+		System::admin()->SaveConfigs('gb');
+		GO(ADMIN_FILE.'?exe=guestbook&a=config&saveok');
 		break;
-	default:
-		AdminGuestBookMain();
+	default: AdminGuestBookMain();
 }
 
 // Сообщения
@@ -125,7 +119,7 @@ function AdminGuestBookMain(){
 
 		$mid = SafeDB($msg['id'], 11, int);
 		$func = '';
-		$func .= SpeedButton('Редактировать сообщение', ADMIN_FILE.'?exe=guestbook&a=edit&id='.$mid, 'images/admin/edit.png');
+		$func .= System::admin()->SpeedButton('Редактировать сообщение', ADMIN_FILE.'?exe=guestbook&a=edit&id='.$mid, 'images/admin/edit.png');
 		$func .= System::admin()->SpeedConfirm('Удалить сообщение', ADMIN_FILE.'?exe=guestbook&a=delete&id='.$mid, 'images/admin/delete.png', 'Удалить сообщение?');
 
 		if($msg['answers'] == ''){
@@ -140,6 +134,7 @@ function AdminGuestBookMain(){
 		}elseif(System::user()->CheckAccess2('guestbook', 'answer')){
 			$func2 = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=addanswer&id='.$mid.'">Ответить</a>';
 		}
+
 		$keys = array_keys($answers);
 		$answerstext = '';
 		if(count($answers) > 0){
@@ -159,7 +154,7 @@ function AdminGuestBookMain(){
 			<th>'.($editing ? $func : '&nbsp;').'</th>
 		</tr>';
 		$text .= '<tr><td colspan="5" style="text-align:left;padding:10px;" class="commtable_text">'.SafeDB($msg['message'], 0, str).$answerstext.'</td></tr>';
-		$text .= '<tr><th>Дата: '.TimeRender($msg['date']).'</th><th colspan="4" style="text-align:right;">'.$func2.'</th></tr>';
+		$text .= '<tr><th>'.TimeRender($msg['date']).'</th><th colspan="4" style="text-align:right;">'.$func2.'</th></tr>';
 		$text .= '</table>';
 	}
 	AddText($text);
@@ -170,19 +165,21 @@ function AdminGuestBookMain(){
 
 // Премодерация
 function AdminGuestBookPremoderationMain(){
-	global $db, $config, $user;
-	$premoderation = $user->CheckAccess2('guestbook', 'premoderation');
-	$premoderate = $db->Select('guestbook', "`premoderate`='0'");
-	if($db->NumRows() == 0){
+	global $config;
+	$premoderation = System::user()->CheckAccess2('guestbook', 'premoderation');
+	$premoderate = System::database()->Select('guestbook', "`premoderate`='0'");
+	if(System::database()->NumRows() == 0){
 		$text = '<center>В премодерации нет сообщений.</center>';
 		AddTextBox('Премодерация', $text);
 		return;
 	}
+
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 10, int);
 	}else{
 		$page = 1;
 	}
+
 	AddCenterBox('Премодерация');
 	SortArray($premoderate, 'date', true);
 	$num = $config['gb']['msgonpage'];
@@ -194,9 +191,9 @@ function AdminGuestBookPremoderationMain(){
 	}else{
 		$nav = false;
 	}
+
 	$text = '';
-	$countmess = countmess('guestbook', 'premoderate', 0);
-	$text = 'В премодерации '.$countmess.' сообщений.<br /><br />';
+	$back = SaveRefererUrl();
 	foreach($premoderate as $pre){
 		if($pre['url'] == ''){
 			$url = 'Нет';
@@ -209,66 +206,81 @@ function AdminGuestBookPremoderationMain(){
 			$name = PrintEmail($pre['name'], $pre['email']);
 		}
 		$mid = SafeDB($pre['id'], 11, int);
-		$del = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=delete&id='.$mid.'&ok=0"><img src="images/admin/delete.png" title="Удалить сообщение" /></a>';
+		$del = System::admin()->SpeedConfirm('Удалить сообщение', ADMIN_FILE.'?exe=guestbook&a=delete&id='.$mid.'&back='.$back, 'images/admin/delete.png', 'Удалить сообщение?');
+
 		$func2 = '';
-		$func2 = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=prem_yes&id='.$mid.'">Разрешить</a>';
-		$text .= '<table cellspacing="0" cellpadding="0" class="cfgtable" style="width:75%;">';
-		$text .= '<tr><td style="text-align:left;padding-left:10px;">Сообщение от '.$name.'</td><td>Сайт: '.$url.'</td><td>ICQ: '.SafeDB($pre['icq'], 15, str).'</td><td>IP: '.SafeDB($pre['user_ip'], 20, str).'</td><td> '.$del.' </td></tr>';
-		$text .= '<tr><td colspan="5" style="text-align:left;padding:10px;">'.SafeDB($pre['message'], 0, str).'</td></tr>';
-		$text .= '<tr><td>Дата: '.TimeRender($pre['date']).'</td><td colspan="4" style="text-align:right;">'.$func2.'</td></tr>';
+		$func2 = System::admin()->Link('Разрешить', ADMIN_FILE.'?exe=guestbook&a=prem_yes&id='.$mid.'&back='.$back);
+
+		$text .= '<table cellspacing="0" cellpadding="0" class="commtable" style="width:75%;">';
+		$text .= '<tr>
+			<th style="text-align: left; width: 180px;">'.$name.'</th>
+			<th style="width: 160px;">Сайт: '.$url.'</th>
+			<th style="width: 120px;">ICQ: '.SafeDB($pre['icq'], 15, str).'</th>
+			<th style="width: 120px;">IP: '.SafeDB($pre['user_ip'], 20, str).'</th>
+			<th> '.$del.' </th>
+		</tr>';
+		$text .= '<tr><td colspan="5" style="text-align:left;padding:10px;" class="commtable_text">'.SafeDB($pre['message'], 0, str).'</td></tr>';
+		$text .= '<tr><th>Дата: '.TimeRender($pre['date']).'</th><th colspan="4" style="text-align:right;">'.$func2.'</th></tr>';
 		$text .= '</table>';
 	}
-	$text_all_prem_del = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=prem_yes_all">Разрешить все</a> | <a href="'.ADMIN_FILE.'?exe=guestbook&a=prem_del_all">Удалить все</a>';
 	AddText($text);
-	AddText($text_all_prem_del);
 	if($nav){
 		AddNavigation();
 	}
+	AddText('<div style="text-align: center;">'.System::admin()->SpeedConfirm('Разрешить все', ADMIN_FILE.'?exe=guestbook&a=prem_yes_all&back='.$back, 'images/admin/accept.png', 'Разрешить все сообщения?', true, true).'&nbsp;'
+		.System::admin()->SpeedConfirm('Удалить все', ADMIN_FILE.'?exe=guestbook&a=prem_del_all&back='.$back, 'images/admin/delete.png', 'Удалить все сообщения?', true, true).'</div>');
 }
 
 function AdminGuestBookPremoderationSave( $action ){
-	global $db, $config, $user;
-	if(!$user->CheckAccess2('guestbook', 'premoderation')){
+	global $config;
+	if(!System::user()->CheckAccess2('guestbook', 'premoderation')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
 		return;
 	}
 	if($action == 'prem_yes'){
-		$premoderate = '1';
-		$db->Update('guestbook', "premoderate='$premoderate'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('guestbook', "`premoderate`='1'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}elseif($action == 'prem_yes_all'){
-		$premoderate = '1';
-		$db->Update('guestbook', "premoderate='$premoderate'");
+		System::database()->Update('guestbook', "`premoderate`='1'");
 	}elseif($action == 'prem_del_all'){
-		$db->Delete('guestbook', "`premoderate`='0'");
+		System::database()->Delete('guestbook', "`premoderate`='0'");
 	}
-	GO(ADMIN_FILE.'?exe=guestbook&a=premoderation');
+	if(isset($_GET['back'])){
+		GoRefererUrl($_GET['back']);
+	}else{
+		GO(ADMIN_FILE.'?exe=guestbook&a=premoderation');
+	}
 }
 
 function AdminGuestBookMessageEditor(){
-	global $db, $config, $site, $user;
-	if(!$user->CheckAccess2('guestbook', 'edit')){
+	global $config, $site;
+	if(!System::user()->CheckAccess2('guestbook', 'edit')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
 		return;
 	}
 	$id = SafeEnv($_GET['id'], 11, int);
-	$db->Select('guestbook', "`id`='".$id."'");
-	if($db->NumRows() > 0){
-		$msg = $db->FetchRow();
+	System::database()->Select('guestbook', "`id`='".$id."'");
+	if(System::database()->NumRows() > 0){
+		$msg = System::database()->FetchRow();
 		FormRow('Имя', $site->Edit('name', SafeDB($msg['name'], 50, str), false, 'maxlength="50"'));
-		FormRow('E-mail', $site->Edit('email', SafeDB($msg['email'], 50, str), false, 'maxlength="50"').'Скрыть'.$site->Check('hideemail', 'ok', $msg['hide_email']));
+		FormRow('E-mail', $site->Edit('email', SafeDB($msg['email'], 50, str), false, 'maxlength="50"').'Скрыть '.$site->Check('hideemail', 'ok', $msg['hide_email']));
 		FormRow('Сайт', $site->Edit('url', SafeDB($msg['url'], 250, str), false, 'maxlength="250"'));
 		FormRow('Номер ICQ', $site->Edit('icq', SafeDB($msg['icq'], 15, str), false, 'maxlength="15"'));
 		FormRow('Сообщение', $site->TextArea('message', SafeDB($msg['message'], 0, str), 'style="width:400px;height:200px;"'));
 		AddCenterBox('Редактирование записи');
-		AddForm('<form action="'.ADMIN_FILE.'?exe=guestbook&a=save&id='.$id.'&back='.SaveRefererUrl().'" method="POST">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
+		if(isset($_GET['back'])){
+			$back = '&back='.SafeDB($_GET['back'], 255, str);
+		}else{
+			$back = '';
+		}
+		AddForm('<form action="'.ADMIN_FILE.'?exe=guestbook&a=save&id='.$id.$back.'" method="POST">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
 	}else{
 		GO(ADMIN_FILE.'?exe=guestbook');
 	}
 }
 
 function AdminGuestBookSave(){
-	global $db, $config, $user;
-	if(!$user->CheckAccess2('guestbook', 'edit')){
+	global $config;
+	if(!System::user()->CheckAccess2('guestbook', 'edit')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
 		return;
 	}
@@ -283,22 +295,45 @@ function AdminGuestBookSave(){
 	$url = SafeEnv($_POST['url'], 50, str);
 	$icq = SafeEnv($_POST['icq'], 50, str);
 	$message = SafeEnv($_POST['message'], 0, str);
-	$db->Update('guestbook', "name='$name',email='$email',hide_email='$hideemail',url='$url',icq='$icq',message='$message'", "`id`='$id'");
-	//GO(ADMIN_FILE.'?exe=guestbook');
-	GoRefererUrl($_GET['back']);
-	AddTextBox('Сообщение', 'Изменения успешно сохранены.');
+	System::database()->Update('guestbook', "name='$name',email='$email',hide_email='$hideemail',url='$url',icq='$icq',message='$message'", "`id`='$id'");
+
+	if(isset($_GET['back'])){
+		GoRefererUrl($_GET['back']);
+	}else{
+		GO(ADMIN_FILE.'?exe=guestbook');
+	}
+}
+
+// Удаление сообщения
+function AdminGuestBookDeleteMessage(){
+	if(!System::user()->CheckAccess2('guestbook', 'edit')){
+		AddTextBox('Ошибка', System::config('general/admin_accd'));
+		return;
+	}
+	if(IsAjax() || isset($_GET['ok']) && $_GET['ok'] == '1'){
+		System::database()->Delete('guestbook', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		if(isset($_GET['back'])){
+			GoRefererUrl($_GET['back']);
+		}else{
+			GO(ADMIN_FILE.'?exe=guestbook');
+		}
+	}else{
+		System::admin()->AddCenterBox('Удаление сообщения');
+		System::admin()->HighlightConfirmNoAjax('Удалить сообщение?', ADMIN_FILE.'?exe=guestbook&a=delete&id='.SafeDB($_REQUEST['id'], 11, int).'&ok=1'.'&back='.SafeDB($_REQUEST['back'], 255, str));
+	}
 }
 
 function AdminGuestBookAnswerEditor(){
-	global $db, $config, $user, $site;
+	global $config, $user, $site;
 	if(!$user->CheckAccess2('guestbook', 'answer')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
 		return;
 	}
 	$id = SafeEnv($_GET['id'], 11, int);
-	$db->Select('guestbook', "`id`='".$id."'");
-	if($db->NumRows() > 0){
-		$msg = $db->FetchRow();
+	System::database()->Select('guestbook', "`id`='".$id."'");
+	if(System::database()->NumRows() > 0){
+		AddCenterBox('Ответ на сообщение');
+		$msg = System::database()->FetchRow();
 		if($msg['answers'] == ''){
 			$answers = array();
 		}else{
@@ -310,23 +345,27 @@ function AdminGuestBookAnswerEditor(){
 			$ans = '';
 		}
 		FormRow('Ответ', $site->TextArea('answer', htmlspecialchars($ans), 'style="width:400px;height:200px;"'));
-		AddCenterBox('Ответ на сообщение');
-		AddForm('<form action="'.ADMIN_FILE.'?exe=guestbook&a=saveanswer&id='.$id.'&back='.SaveRefererUrl().'" method="POST">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
+		if(isset($_GET['back'])){
+			$back = '&back='.SafeDB($_GET['back'], 255, str);
+		}else{
+			$back = '';
+		}
+		AddForm('<form action="'.ADMIN_FILE.'?exe=guestbook&a=saveanswer&id='.$id.$back.'" method="POST">', $site->Button('Отмена', 'onclick="history.go(-1);"').$site->Submit('Сохранить'));
 	}else{
 		GO(ADMIN_FILE.'?exe=guestbook');
 	}
 }
 
 function AdminGuestBookAnswerSave(){
-	global $db, $config, $user;
+	global $config, $user;
 	if(!$user->CheckAccess2('guestbook', 'answer')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
 		return;
 	}
 	$id = SafeEnv($_GET['id'], 11, int);
-	$db->Select('guestbook', "`id`='".$id."'");
-	if($db->NumRows() > 0){
-		$msg = $db->FetchRow();
+	System::database()->Select('guestbook', "`id`='".$id."'");
+	if(System::database()->NumRows() > 0){
+		$msg = System::database()->FetchRow();
 		if($msg['answers'] == ''){
 			$answers = array();
 		}else{
@@ -334,19 +373,21 @@ function AdminGuestBookAnswerSave(){
 		}
 		$answers[$user->Name()] = stripslashes(SafeEnv($_POST['answer'], 0, str));
 		$answers = serialize($answers);
-		$db->Update('guestbook', "answers='$answers'", "`id`='".$id."'");
+		System::database()->Update('guestbook', "answers='$answers'", "`id`='".$id."'");
 	}
-	//GO(ADMIN_FILE.'?exe=guestbook');
-	GoRefererUrl($_GET['back']);
-	AddTextBox('Сообщение', 'Изменения успешно сохранены.');
+	if(isset($_GET['back'])){
+		GoRefererUrl($_GET['back']);
+	}else{
+		GO(ADMIN_FILE.'?exe=guestbook');
+	}
 }
 
 function AdminGuestBookDeleteAnswer(){
-	global $db, $config, $user;
+	global $config, $user;
 	$id = SafeEnv($_GET['id'], 11, int);
-	$db->Select('guestbook', "`id`='".$id."'");
-	if($db->NumRows() > 0){
-		$msg = $db->FetchRow();
+	System::database()->Select('guestbook', "`id`='".$id."'");
+	if(System::database()->NumRows() > 0){
+		$msg = System::database()->FetchRow();
 		if($msg['answers'] == ''){
 			$answers = array();
 		}else{
@@ -356,19 +397,11 @@ function AdminGuestBookDeleteAnswer(){
 			unset($answers[$user->Name()]);
 		}
 		$answers = serialize($answers);
-		$db->Update('guestbook', "answers='$answers'", "`id`='".$id."'");
+		System::database()->Update('guestbook', "answers='$answers'", "`id`='".$id."'");
 	}
-	//GO(ADMIN_FILE.'?exe=guestbook');
-	GoBack();
-}
-
-function AdminGuestBookDeleteMessage(){
-	if(!System::user()->CheckAccess2('guestbook', 'edit')){
-		AddTextBox('Ошибка', System::config('general/admin_accd'));
-		return;
+	if(isset($_GET['back'])){
+		GoRefererUrl($_GET['back']);
+	}else{
+		GO(ADMIN_FILE.'?exe=guestbook');
 	}
-	System::database()->Delete('guestbook', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-
-	GoRefererUrl($_GET['back']);
-	AddTextBox('Сообщение', 'Сообщение удалено.');
 }

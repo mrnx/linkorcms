@@ -76,14 +76,14 @@ function IndexGBAddMessage( &$msg ){
 	}
 
 	// Функции для администратора
-
 	$id = SafeDB($msg['id'], 11, int);
 	$vars['access_answer'] = System::user()->CheckAccess2('guestbook', 'answer');
-	$vars['edit_answer_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=editanswer&amp;id='.$id;
-	$vars['delete_answer_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=delanswer&amp;id='.$id;
-	$vars['add_answer_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=addanswer&amp;id='.$id;
-	$vars['edit_message_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=edit&amp;id='.$id;
-	$vars['delete_message_url'] = ADMIN_FILE.'?exe=guestbook&amp;a=delete&amp;id='.$id.'&amp;ok=0';
+	$vars['edit_answer_url'] = ADMIN_FILE.'?exe=guestbook&a=editanswer&id='.$id.'&back='.SaveRefererUrl(); // Редактировать ответ
+	$vars['delete_answer_url'] = ADMIN_FILE.'?exe=guestbook&a=delanswer&id='.$id.'&back='.SaveRefererUrl(); // Удалить ответ
+	$vars['add_answer_url'] = ADMIN_FILE.'?exe=guestbook&a=addanswer&id='.$id.'&back='.SaveRefererUrl(); // Ответить
+	$vars['edit_message_url'] = ADMIN_FILE.'?exe=guestbook&a=edit&id='.$id.'&back='.SaveRefererUrl(); // Редактировать сообщение
+	$vars['delete_message_url'] = ADMIN_FILE.'?exe=guestbook&a=delete&id='.$id.'&ok=0'.'&back='.SaveRefererUrl(); // Удалить сообщение
+
 	if(System::user()->isAdmin()){
 		$func = '';
 		$msg_func = '';

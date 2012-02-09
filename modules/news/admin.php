@@ -61,14 +61,20 @@ switch($action){
 			AddTextBox('Ошибка', 'Доступ запрещён!');
 			return;
 		}
-		AdminConfigurationEdit('news', 'news', false, false, 'Конфигурация модуля "Новости"');
+		System::admin()->AddCenterBox('Конфигурация модуля "Новости"');
+		if(isset($_GET['saveok'])){
+			System::admin()->Highlight('Настройки сохранены.');
+		}
+		System::admin()->ConfigGroups('news');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=news&a=configsave');
 		break;
 	case 'configsave':
 		if(!$news_access_editconfig){
 			AddTextBox('Ошибка', 'Доступ запрещён!');
 			return;
 		}
-		AdminConfigurationSave('news&a=config', 'news', false);
+		System::admin()->SaveConfigs('news');
+		GO(ADMIN_FILE.'?exe=news&a=config&saveok');
 		break;
 }
 
@@ -430,15 +436,12 @@ function AdminNewsDelete(){
 		}
 		exit('OK');
 	}else{
+		System::admin()->AddCenterBox('Удаление новости');
 		System::database()->Select('news', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");
 		$news = System::database()->FetchRow();
 		$id = SafeDB($_REQUEST['id'], 11, int);
 		$back = SafeDB($_REQUEST['back'], 255, str);
-		System::admin()->AddCenterBox('Удаление новости');
-		$Text = 'Удалить новость "'.SafeDB($news['title'], 255, str).'"?';
-		$Text .= '<br /><br />'.System::admin()->SpeedButton('Отмена', 'javascript:history.go(-1)', 'images/admin/delete.png', false, true)
-			.'&nbsp;&nbsp;'.System::admin()->SpeedButton('Да', ADMIN_FILE.'?exe=news&a=delete&id='.$id.'&back='.$back.'&ok=1', 'images/admin/accept.png', false, true);
-		System::admin()->Highlight($Text);
+		System::admin()->HighlightConfirmNoAjax('Удалить новость "'.SafeDB($news['title'], 255, str).'"?', ADMIN_FILE.'?exe=news&a=delete&id='.$id.'&back='.$back.'&ok=1');
 	}
 }
 

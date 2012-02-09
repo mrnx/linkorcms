@@ -8,6 +8,7 @@ if(!defined('VALID_RUN')){
 define('CONF_GET_PREFIX', 'getconf_');
 define('CONF_SAVE_PREFIX', 'saveconf_');
 
+global $config, $a_plugins;
 $forms_plugins_dir = $config['plug_dir'].'forms_plugins/';
 $user_funcs = array();
 $user_funcs2 = array();
@@ -59,8 +60,7 @@ function FormsCheckType( $var, $typearr )
 }
 
 // Проверяем, является ли значение настройки именем функции плагина
-function FormsConfigCheck2Func( $lname, $fname, $method = 'load' )
-{
+function FormsConfigCheck2Func( $lname, $fname, $method = 'load' ){
 	global $a_plugins;
 	if($method == 'load'){
 		$p = CONF_GET_PREFIX;
@@ -75,8 +75,7 @@ function FormsConfigCheck2Func( $lname, $fname, $method = 'load' )
 }
 
 // Разбираем параметры элемента формы в массив
-function FormsParseParams( $kind )
-{
+function FormsParseParams( $kind ){
 	$result = array('cols'=>1, 'style'=>'', 'control'=>$kind[0], 'width'=>'', 'height'=>'');
 	if(count($kind) > 1){
 		$style = 'style="';

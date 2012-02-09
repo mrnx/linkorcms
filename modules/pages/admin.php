@@ -12,76 +12,63 @@ if(!$user->CheckAccess2('pages', 'pages')){
 	return;
 }
 
-$text = '';
-include_once ($config['inc_dir'].'configuration/functions.php');
-
 if(isset($_GET['a'])){
-	AdminPages($_GET['a']);
+	$action = $_GET['a'];
 }else{
-	AdminPages('main');
+	$action = 'main';
 }
 
-function AdminPages( $action ){
-	TAddToolLink('Страницы', 'main', 'pages');
-	TAddToolLink('Добавить страницу', 'editor', 'pages&a=editor');
-	TAddToolLink('Добавить ссылку', 'link', 'pages&a=link');
-	TAddToolLink('Добавить категорию', 'cat', 'pages&a=cat');
-	TAddToolLink('Настройки', 'config', 'pages&a=config');
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-		case 'ajaxtree':
-		case 'ajaxnode':
-			AdminPagesAjaxTree();
-			break;
-		case 'ajaxmove':
-			AdminPagesAjaxMove();
-			break;
-		case 'delete':
-			AdminPagesDelete();
-			break;
-		case 'editor':
-			if(isset($_POST['action']) && $_POST['action'] != 'preview'){
-				AdminPagesSave();
-			}else{
-				AdminPagesEditor();
-			}
-			break;
-		case 'link':
-			AdminPagesLinkEditor();
-			break;
-		case 'savelink':
-			AdminPagesLinkSave();
-			break;
-		case 'cat':
-			AdminPagesCatEditor();
-			break;
-		case 'savecat':
-			AdminPagesCatSave();
-			break;
-		case 'changestatus':
-			AdminPagesChangeStatus();
-			break;
-		case 'changemenu':
-			AdminPagesChangeMenu();
-			break;
-		case 'resetcounter':
-			AdminPagesResetCounter();
-			break;
-		case 'move':
-			AdminPagesMove();
-			break;
-		case 'config':
-			AdminConfigurationEdit('pages', 'pages', false, false, 'Конфигурация модуля "Страницы"');
-			return true;
-			break;
-		case 'configsave':
-			AdminConfigurationSave('pages&a=config', 'pages', false);
-			return true;
-			break;
-		default:
-			AdminPagesAjaxTree();
-	}
+TAddToolLink('Страницы', 'main', 'pages');
+TAddToolLink('Добавить страницу', 'editor', 'pages&a=editor');
+TAddToolLink('Добавить ссылку', 'link', 'pages&a=link');
+TAddToolLink('Добавить категорию', 'cat', 'pages&a=cat');
+TAddToolLink('Настройки', 'config', 'pages&a=config');
+TAddToolBox($action);
+switch($action){
+	case 'main':
+	case 'ajaxtree':
+	case 'ajaxnode': AdminPagesAjaxTree();
+		break;
+	case 'ajaxmove': AdminPagesAjaxMove();
+		break;
+	case 'delete': AdminPagesDelete();
+		break;
+	case 'editor':
+		if(isset($_POST['action']) && $_POST['action'] != 'preview'){
+			AdminPagesSave();
+		}else{
+			AdminPagesEditor();
+		}
+		break;
+	case 'link': AdminPagesLinkEditor();
+		break;
+	case 'savelink': AdminPagesLinkSave();
+		break;
+	case 'cat': AdminPagesCatEditor();
+		break;
+	case 'savecat': AdminPagesCatSave();
+		break;
+	case 'changestatus': AdminPagesChangeStatus();
+		break;
+	case 'changemenu': AdminPagesChangeMenu();
+		break;
+	case 'resetcounter': AdminPagesResetCounter();
+		break;
+	case 'move': AdminPagesMove();
+		break;
+	case 'config':
+		System::admin()->AddCenterBox('Конфигурация модуля "Страницы"');
+		if(isset($_GET['saveok'])){
+			System::admin()->Highlight('Настройки сохранены.');
+		}
+		System::admin()->ConfigGroups('pages');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=pages&a=configsave');
+		break;
+	case 'configsave':
+		System::admin()->SaveConfigs('pages');
+		GO(ADMIN_FILE.'?exe=pages&a=config&saveok');
+		break;
+	default:AdminPagesAjaxTree();
 }
 
 /**

@@ -209,6 +209,11 @@ class AdminPage extends PageTemplate{
 		$this->Highlight($Text);
 	}
 
+	public function HighlightConfirmNoAjax( $Text, $YesUrl, $CancelUrl = 'javascript:history.go(-1)' ){
+		$Text .= '<br /><br />'.$this->SpeedButton('Отмена', $CancelUrl, 'images/admin/delete.png', false, true).'&nbsp;&nbsp;'.$this->SpeedButton('Да', $YesUrl, 'images/admin/accept.png', false, true);
+		$this->Highlight($Text);
+	}
+
 	/**
 	 * Генерирует код красивой ссылки в виде кнопки
 	 *
@@ -474,6 +479,7 @@ class AdminPage extends PageTemplate{
 	}
 
 	public function SaveConfigs( $SaveGroups, $ConfigTable = 'config', $GroupsTable = 'config_groups' ){
+		include_once System::config('inc_dir').'forms.inc.php';
 		if(!is_array($SaveGroups)){
 			$SaveGroups = explode(',', $SaveGroups);
 		}

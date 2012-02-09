@@ -17,6 +17,124 @@ $rankedit = $user->CheckAccess2('user', 'ranks');
 $galeryedit = $user->CheckAccess2('user', 'avatars_gallery');
 $confedit = $user->CheckAccess2('user', 'config');
 
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+
+TAddToolLink('Главная', 'main', 'user');
+if($editing){
+	TAddToolLink('Добавить пользователя', 'add', 'user&a=add');
+}
+if($confedit){
+	TAddToolLink('Конфигурация модуля', 'config', 'user&a=config');
+}
+TAddToolBox($action);
+TAddToolLink('Ранги пользователей', 'ranks', 'user&a=ranks');
+if($rankedit){
+	TAddToolLink('Система пунктов', 'points', 'user&a=points');
+}
+TAddToolLink('Галерея аватар', 'avatars', 'user&a=avatars');
+TAddToolBox($action);
+
+switch($action){
+	case 'main':
+		AdminUserMain();
+		break;
+	case 'add':
+		if($editing){
+			AdminUserEditor('user&a=addsave', 'add', 0, false);
+			break;
+		}
+	case 'addsave':
+		if($editing){
+			AdminUserEditSave('user', 'addsave', 0, false);
+			break;
+		}
+	case 'edituser':
+		if($editing){
+			AdminUserEditor('user&a=editsave', 'edit', SafeEnv($_GET['id'], 11, int), false);
+			break;
+		}
+	case 'editsave':
+		if($editing){
+			AdminUserEditSave('user', 'update', SafeEnv($_GET['id'], 11, int), false);
+			break;
+		}
+	case 'deluser':
+		if($editing){
+			AdminUserDelUser();
+			break;
+		}
+	case 'ranks':
+		AdminUserRanks();
+		break;
+	case 'editrank':
+		if($rankedit){
+			AdminUserEditRank();
+			break;
+		}
+	case 'saverank':
+	case 'addrank':
+		if($rankedit){
+			AdminUserRankSave($action);
+			break;
+		}
+	case 'delrank':
+		if($rankedit){
+			AdminUserDeleteRank();
+			break;
+		}
+	case 'avatars':
+		AdminUserAvatarsGallery();
+		break;
+	case 'delavatar':
+		if($galeryedit){
+			AdminUserDeleteAvatar();
+			break;
+		}
+	case 'saveavatar':
+		if($galeryedit){
+			AdminUserSaveAvatar();
+			break;
+		}
+	case 'config':
+		if($confedit){
+			System::admin()->AddCenterBox('Конфигурация модуля "Пользователи"');
+			if(isset($_GET['saveok'])){
+				System::admin()->Highlight('Настройки сохранены.');
+			}
+			System::admin()->ConfigGroups('user');
+			System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=user&a=configsave');
+			break;
+		}
+	case 'configsave':
+		if($confedit){
+			System::admin()->SaveConfigs('user');
+			GO(ADMIN_FILE.'?exe=user&a=config&saveok');
+			break;
+		}
+	case 'points':
+		if($rankedit){
+			System::admin()->AddCenterBox('Система пунктов');
+			if(isset($_GET['saveok'])){
+				System::admin()->Highlight('Настройки сохранены.');
+			}
+			System::admin()->ConfigGroups('points');
+			System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=user&a=pointsave');
+			break;
+		}
+	case 'pointsave':
+		if($rankedit){
+			System::admin()->SaveConfigs('points');
+			GO(ADMIN_FILE.'?exe=user&a=points&saveok');
+			break;
+		}
+	default: System::admin()->HighlightError($config['general']['admin_accd']);
+}
+
+
 function AdminUserGetUsers( $where = "`type`='2'" ){
 	return System::database()->Select('users', $where);
 }
@@ -476,148 +594,4 @@ function AdminUserDeleteAvatar(){
 		$db->Update('users', "a_personal='0',avatar=''", "`a_personal`='1' and `avatar`='$avatar'");
 	}
 	GO(ADMIN_FILE.'?exe=user&a=avatars');
-}
-include_once ($config['inc_dir'].'configuration/functions.php');
-
-function AdminUser( $action ){
-	global $config, $editing, $rankedit, $galeryedit, $confedit;
-	TAddToolLink('Главная', 'main', 'user');
-	if($editing){
-		TAddToolLink('Добавить пользователя', 'add', 'user&a=add');
-	}
-	if($confedit){
-		TAddToolLink('Конфигурация модуля', 'config', 'user&a=config');
-	}
-	TAddToolBox($action);
-	TAddToolLink('Ранги пользователей', 'ranks', 'user&a=ranks');
-	if($rankedit){
-		TAddToolLink('Система пунктов', 'points', 'user&a=points');
-	}
-	TAddToolLink('Галерея аватар', 'avatars', 'user&a=avatars');
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminUserMain();
-			return true;
-			break;
-		case 'add':
-			if($editing){
-				AdminUserEditor('user&a=addsave', 'add', 0, false);
-				return true;
-			}
-			break;
-		case 'addsave':
-			if($editing){
-				AdminUserEditSave('user', 'addsave', 0, false);
-				return true;
-			}
-			break;
-		case 'edituser':
-			if($editing){
-				AdminUserEditor('user&a=editsave', 'edit', SafeEnv($_GET['id'], 11, int), false);
-				return true;
-			}
-			break;
-		case 'editsave':
-			if($editing){
-				AdminUserEditSave('user', 'update', SafeEnv($_GET['id'], 11, int), false);
-				return true;
-			}
-			break;
-		case 'deluser':
-			if($editing){
-				AdminUserDelUser();
-				return true;
-			}
-			break;
-		case 'ranks':
-			AdminUserRanks();
-			return true;
-			break;
-		case 'editrank':
-			if($rankedit){
-				AdminUserEditRank();
-				return true;
-			}
-			break;
-		case 'saverank':
-		case 'addrank':
-			if($rankedit){
-				AdminUserRankSave($action);
-				return true;
-			}
-			break;
-		case 'delrank':
-			if($rankedit){
-				AdminUserDeleteRank();
-				return true;
-			}
-			break;
-		case 'avatars':
-			AdminUserAvatarsGallery();
-			return true;
-			break;
-		case 'delavatar':
-			if($galeryedit){
-				AdminUserDeleteAvatar();
-				return true;
-			}
-			break;
-		case 'saveavatar':
-			if($galeryedit){
-				AdminUserSaveAvatar();
-				return true;
-			}
-			break;
-		case 'config':
-			if($confedit){
-				System::admin()->AddCenterBox('Конфигурация модуля "Пользователи"');
-				if(isset($_GET['saveok'])){
-					System::admin()->Highlight('Настройки сохранены.');
-				}
-				System::admin()->ConfigGroups('user');
-				System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=user&a=configsave');
-				return true;
-			}
-			break;
-		case 'configsave':
-			if($confedit){
-				System::admin()->SaveConfigs('user');
-				GO(ADMIN_FILE.'?exe=user&a=config&saveok');
-				return true;
-			}
-			break;
-		case 'points':
-			if($rankedit){
-				System::admin()->AddCenterBox('Система пунктов');
-				if(isset($_GET['saveok'])){
-					System::admin()->Highlight('Настройки сохранены.');
-				}
-				System::admin()->ConfigGroups('points');
-				System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=user&a=pointsave');
-				return true;
-			}
-			break;
-		case 'pointsave':
-			if($rankedit){
-				System::admin()->SaveConfigs('points');
-				GO(ADMIN_FILE.'?exe=user&a=points&saveok');
-				return true;
-			}
-			break;
-		default:
-			return false;
-	}
-	return false;
-}
-
-if(isset($_GET['a'])){
-	$a = $_GET['a'];
-}else{
-	$a = 'main';
-}
-
-if(!AdminUser($a)){
-	AddTextBox('Ошибка', $config['general']['admin_accd']);
-	return;
 }
