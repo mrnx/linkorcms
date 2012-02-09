@@ -10,52 +10,44 @@ if(!$user->isSuperUser()){
 	return;
 }
 
-function AdminAudit($action){
-	global $user;
-	if($user->CheckAccess2('audit', 'audit_conf')){
-		TAddToolLink('Аудит действий пользователей', 'audit', 'audit&a=audit');
-		TAddToolLink('Переходы с сайтов', 'referers', 'audit&a=referers');
-		TAddToolLink('Ключевые слова', 'keywords', 'audit&a=keywords');
-	}
-	TAddToolBox($action);
-
-	TAddSubTitle('Аудит');
-	switch($action){
-		case 'main':
-			AdminAuditMain();
-			break;
-		case 'clear':
-			AdminAuditClear();
-			break;
-		case 'referers':
-			AdminAuditReferers();
-			break;
-		case 'clear_referers':
-			AdminAuditClearReferers();
-			break;
-		case 'keywords':
-			AdminAuditKeywords();
-			break;
-		default:
-			AdminAuditMain();
-	}
-}
-
 if(isset($_GET['a'])){
-	AdminAudit($_GET['a']);
+	$action = $_GET['a'];
 }else{
-	AdminAudit('referers');
+	$action = 'main';
 }
 
-/**
- * Главная страница Аудита. Показ лога действий администраторов.
- * @return void
- */
-function AdminAuditMain()
-{
-	global $db, $config;
-	AddCenterBox('Аудит действий пользователей');
-	$query = $db->Select('audit', '');
+if($user->CheckAccess2('audit', 'audit_conf')){
+	TAddToolLink('Аудит', 'audit', 'audit&a=audit');
+	TAddToolLink('Переходы с сайтов', 'referers', 'audit&a=referers');
+	TAddToolLink('Ключевые слова', 'keywords', 'audit&a=keywords');
+}
+TAddToolBox($action);
+
+TAddSubTitle('Аудит');
+switch($action){
+	case 'main':
+		AdminAuditMain();
+		break;
+	case 'clear':
+		AdminAuditClear();
+		break;
+	case 'referers':
+		AdminAuditReferers();
+		break;
+	case 'clear_referers':
+		AdminAuditClearReferers();
+		break;
+	case 'keywords':
+		AdminAuditKeywords();
+		break;
+	default:
+		AdminAuditMain();
+}
+
+// Главная страница Аудита. Показ лога действий администраторов.
+function AdminAuditMain(){
+	AddCenterBox('Аудит действий администраторов');
+	$query = System::database()->Select('audit', '');
 	$count = count($query);
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 10, int);
@@ -72,61 +64,41 @@ function AdminAuditMain()
 	}else{
 		$nav = false;
 	}
-	if($config['db_type'] != 'FilesDB'){
-		$text = '<center><br />Аудит поддерживается только в FilesDB.<br /><br /></center>';
-		AddText($text);
+	if(System::database()->Name != 'FilesDB'){
+		System::admin()->HighlightError('Аудит поддерживается только в FilesDB.');
 	}elseif($count == 0){
-		$text = '<center><br />Пользователи не произвели никаких действий.<br /><br /></center>';
-		AddText($text);
+		System::admin()->Highlight('Администраторы не произвели никаких действий.');
 	}elseif($count >= 1){
 		$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 		$text .= '<tr><th>Действие</th><th>Дата</th><th>Пользователь</th><th>IP</th></tr>';
-		AddText($text);
 		foreach($query as $q){
 			$user = GetUserInfo(SafeDB($q['user'], 11, int));
 			$date = TimeRender(SafeDB($q['date'], 11, int));
 			$action = SafeDB($q['action'], 255, str);
 			$ip = SafeDB($q['ip'], 255, str);
-			$text = '<tr>
+			$text .= '<tr>
 			<td>'.$action.'</td>
 			<td>'.$date.'</td>
 			<td><a href="'.ADMIN_FILE.'?exe=admins&a=editadmin&id='.SafeDB($user['id'], 11, int).'">'.SafeDB($user['name'], 50, str).'</td>
 			<td>'.$ip.'</td>
 			</tr>';
-			AddText($text);
 		}
-		$text = '</table>';
-		AddText($text);
-		$text = '<a href="'.ADMIN_FILE.'?exe=audit&a=clear">Очистить  лог</a>';
+		$text .= '</table>';
+		$text .= System::admin()->SpeedConfirm('Очистить  лог', ADMIN_FILE.'?exe=audit&a=clear', '', 'Очистить лог действий администраторов?', true, true);
 		AddText($text);
 	}
 }
 
-/**
- * Очистка лога действий адмнистраторов
- * @return void
- */
-function AdminAuditClear()
-{
-	global $db, $config;
-	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
-		$db->Delete('audit', '');
-		GO(ADMIN_FILE.'?exe=audit');
-	}else{
-		$text = 'Вы действительно хотите очистить лог действий пользователей?<br />'.'<a href="'.ADMIN_FILE.'?exe=audit&a=clear&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Подтверждение удаления", $text);
-	}
+// Очистка лога действий адмнистраторов
+function AdminAuditClear(){
+	System::database()->Delete('audit', '');
+	GO(ADMIN_FILE.'?exe=audit');
 }
 
-/**
- * Список рефералов
- * @return void
- */
-function AdminAuditReferers()
-{
-	global $db, $config;
-	AddCenterBox('Переходы с сайтов (Рефералы)');
-	$query = $db->Select('referers', '');
+// Список рефералов
+function AdminAuditReferers(){
+	System::admin()->AddCenterBox('Переходы с сайтов (Рефералы)');
+	$query = System::database()->Select('referers', '');
 	$allcount = 0;
 	$count = count($query);
 	if(isset($_GET['page'])){
@@ -145,35 +117,33 @@ function AdminAuditReferers()
 		$nav = false;
 	}
 	if($count == 0){
-		$text = '<center><br />Рефералов не было обнаружено.<br /><br /></center>';
-		AddText($text);
+		System::admin()->Highlight('Рефералов не было обнаружено.');
 	}elseif($count >= 1){
 		$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 		$text .= '<tr><th>Реферал</th><th>Переходов</th></tr>';
-		AddText($text);
 		foreach($query as $q){
 			$referer = $q['referer'];
 			$str = KeyWordsToStr($q['referer']);
 			$count = SafeDB($q['count'], 11, int);
 			$allcount += $count;
-			$text = '<tr>
+			$text .= '<tr>
 			<td><a href="'.$referer.'" target="_blank">'.$str.'</a></td>
 			<td>'.$count.'</td>
 			</tr>';
-			AddText($text);
 		}
-		$text = '</table>';
-		AddText($text);
-		$text = '<a href="'.ADMIN_FILE.'?exe=audit&a=clear_referers">Очистить  лог</a>';
-		AddText($text);
-		$text = '<BR>Переходов на этой странице: <B>'.$allcount.'</B>';
+		$text .= '</table>';
+		$text .= 'Всего переходов на этой странице: <b>'.$allcount.'</b>.&nbsp;'
+			.System::admin()->SpeedConfirm('Очистить  лог', ADMIN_FILE.'?exe=audit&a=clear_referers', '', 'Очистить лог рефералов?', true, true);
 		AddText($text);
 	}
-
 }
 
-function AdminAuditKeywords()
-{
+function AdminAuditClearReferers(){
+	System::database()->Delete('referers', '');
+	GO(ADMIN_FILE.'?exe=audit&a=referers');
+}
+
+function AdminAuditKeywords(){
 	global $db, $config;
 	AddCenterBox('Ключевые слова (Рефералы)');
 	$query = $db->Select('referers', '');
@@ -249,21 +219,7 @@ function AdminAuditKeywords()
 	}
 }
 
-function AdminAuditClearReferers()
-{
-	global $db, $config;
-	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
-		$db->Delete('referers', '');
-		GO(ADMIN_FILE.'?exe=audit&a=referers');
-	}else{
-		$text = 'Вы действительно хотите очистить лог рефералов?<br />'.'<a href="'.ADMIN_FILE.'?exe=audit&a=clear_referers&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Подтверждение удаления", $text);
-	}
-}
-
-function KeyWordsToStr($Referer = '')
-{
-
+function KeyWordsToStr($Referer = ''){
 	$KeyWords = $Referer;
 	if(!empty($Referer)){
 		$qwery = parse_url($Referer);
@@ -336,10 +292,8 @@ function KeyWordsToStr($Referer = '')
 	return $KeyWords;
 }
 
-function Main_Audit_Encodestr($str, $type = 'w')
-{
+function Main_Audit_Encodestr($str, $type = 'w'){
 	static $conv = '';
-
 	if(!is_array($conv)){
 		$conv = array();
 		for($x = 128; $x <= 143; $x++){
@@ -355,16 +309,16 @@ function Main_Audit_Encodestr($str, $type = 'w')
 		$conv['utf'][] = chr(209).chr(145);
 		$conv['win'][] = chr(184);
 	}
-	if($type == 'w')
+	if($type == 'w'){
 		return str_replace($conv['utf'], $conv['win'], $str);
-	elseif($type == 'u')
+	}elseif($type == 'u'){
 		return iconv("WINDOWS-1251", "UTF-8", $str);
-	else
+	}else{
 		return $str;
+	}
 }
 
-function AdminAuditRustrToLower($s)
-{
+function AdminAuditRustrToLower($s){
 	$from = array("А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "A", "B", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "J");
 	$to = array("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я", "a", "b", "c", "d", "e", "f", "g", "h", "i", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "j");
 	return str_replace($from, $to, $s);
@@ -378,7 +332,6 @@ function AdminAuditRustrToLower($s)
  *
  */
 class AdminAudit_Lingua_Stem_Ru {
-
 	public $VERSION = "0.02";
 	public $Stem_Caching = 0;
 	public $Stem_Cache = array();
@@ -392,20 +345,17 @@ class AdminAudit_Lingua_Stem_Ru {
 	public $RVRE = '/^(.*?[аеиоуыэюя])(.*)$/';
 	public $DERIVATIONAL = '/[^аеиоуыэюя][аеиоуыэюя]+[^аеиоуыэюя]+[аеиоуыэюя].*(?<=о)сть?$/';
 
-	public function s(&$s, $re, $to)
-	{
+	public function s(&$s, $re, $to){
 		$orig = $s;
 		$s = preg_replace($re, $to, $s);
 		return $orig !== $s;
 	}
 
-	public function m($s, $re)
-	{
+	public function m($s, $re){
 		return preg_match($re, $s);
 	}
 
-	public function stem_word($word)
-	{
+	public function stem_word($word){
 		$word = strtolower($word);
 		$word = strtr($word, 'ё', 'е');
 		# Check against cache of stemmed words
@@ -448,8 +398,7 @@ class AdminAudit_Lingua_Stem_Ru {
 		return $stem;
 	}
 
-	public function stem_caching($parm_ref)
-	{
+	public function stem_caching($parm_ref){
 		$caching_level = @$parm_ref['-level'];
 		if($caching_level){
 			if(!$this->m($caching_level, '/^[012]$/')){
@@ -460,10 +409,7 @@ class AdminAudit_Lingua_Stem_Ru {
 		return $this->Stem_Caching;
 	}
 
-	public function clear_stem_cache()
-	{
+	public function clear_stem_cache(){
 		$this->Stem_Cache = array();
 	}
 }
-
-?>

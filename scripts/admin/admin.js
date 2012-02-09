@@ -61,30 +61,7 @@
 					url: Url,
 					dataType: "json",
 					success: function(data){
-						// Загружаем СSS
-						ajaxcssjs.loadCSS(data.css, function(){
-							// Загружаем JS
-							ajaxcssjs.loadJS(data.js, function(){
-								if(data.show_sidebar){
-									$('#sidebar').html(data.sidebar);
-									slf.SideBarShow();
-								}else{
-									slf.SideBarHide();
-								}
-								$('#main-content').html(data.content);
-								if(data.errors != ''){
-									$('#errors').html(data.errors).show();
-								}else{
-									$('#errors').html('').hide();
-								}
-								$("#info").html(data.info);
-								eval(data.js_inline);
-								document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
-								slf.SetLoc(data.uri);
-								slf.LiveUpdate();
-								slf.HideSplashScreen();
-							});
-						});
+						slf.SetPageData(data);
 					}
 				});
 			}else{
@@ -95,6 +72,58 @@
 				event.stopPropagation();
 			}
 			return true;
+		},
+
+		/**
+		 * Загрузка страницы POST запросом
+		 * @param Url
+		 * @param PostData
+		 * @param Message
+		 */
+		LoadPagePost: function( Url, PostData, Message ){
+			if(PostData == undefined){
+				PostData = {};
+			}
+			slf = this;
+			slf.ShowSplashScreen(Message);
+			$.ajax({
+				type: "POST",
+				url: Url,
+				dataType: "json",
+				data: PostData,
+				success: function(data){
+					slf.SetPageData(data);
+				}
+			});
+			return true;
+		},
+
+		SetPageData: function( data ){
+			slf = this;
+			// Загружаем СSS
+			ajaxcssjs.loadCSS(data.css, function(){
+				// Загружаем JS
+				ajaxcssjs.loadJS(data.js, function(){
+					if(data.show_sidebar){
+						$('#sidebar').html(data.sidebar);
+						slf.SideBarShow();
+					}else{
+						slf.SideBarHide();
+					}
+					$('#main-content').html(data.content);
+					if(data.errors != ''){
+						$('#errors').html(data.errors).show();
+					}else{
+						$('#errors').html('').hide();
+					}
+					$("#info").html(data.info);
+					eval(data.js_inline);
+					document.getElementsByTagName('title')[0].innerHTML = data.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
+					slf.SetLoc(data.uri);
+					slf.LiveUpdate();
+					slf.HideSplashScreen();
+				});
+			});
 		},
 
 		/**

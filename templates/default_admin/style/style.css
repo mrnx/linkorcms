@@ -407,39 +407,60 @@ a.nav_item:hover {
 
 /*  лассы стандартные которые могут использоватьс€ в модул€х админ панели */
 
-.commtable { /* “аблица комментари€ */
-	border: 1px #BCD6E9 solid;
-	border-bottom: none;
-	border-right: none;
-	margin: 10px 0px 10px 0px;
+.commtable_header{
+	width: 100%;
+	margin: 10px 0;
+	border-collapse: collapse;
+	border: 1px #CCCCCC solid;
 }
-
-.commth { /* ячейки заголовков таблицы комментари€ */
-	color: #000080;
-	background-color: #E1E1E1;
-	border-bottom: 1px #ABC5D8 solid;
-	border-right: 1px #ABC5D8 solid;
-	height: 16px;
-	padding-left: 3px;
-	padding-right: 3px;
-}
-
-.commtd { /* ячейки дл€ обычных €чеек таблицы комментари€*/
-	padding: 1px;
-	border: 1px #ABC5D8 solid;
-	border-top: none;
-	border-left: none;
-	background-color: #F5F5F5;
+.commtable_header th{
+	padding: 5px;
+	color: #000;
+	background: #DCDCDC url(../img/table_th.png) repeat-x;
+	border: 1px #CCCCCC solid;
+	text-shadow: 0px 1px 0px #fff;
 	text-align: center;
+	font-weight: normal;
 }
 
-.commtext { /* ячейка с текстом комментари€*/
-	padding: 2px;
-	padding-left: 5px;
-	border: 1px #ABC5D8 solid;
-	border-top: none;
-	border-left: none;
-	background-color: #F5F5F5;
+.commtable { /* “аблица комментари€ */
+	width: 100%;
+	margin: 10px 0;
+	border-collapse: collapse;
+	border: 1px #CCCCCC solid;
+}
+
+.commtable_selected {
+	border: 2px #f88 solid;
+}
+
+.commtable th { /* ячейки заголовков таблицы комментари€ */
+	padding: 2px 5px;
+	color: #000;
+	background: #DCDCDC url(../img/table_th.png) repeat-x;
+	border: 1px #CCCCCC solid;
+	text-shadow: 0px 1px 0px #fff;
+	text-align: center;
+	font-weight: normal;
+}
+
+.commtable td { /* ячейки дл€ обычных €чеек таблицы комментари€*/
+	padding: 10px 5px;
+	color: #000;
+	background: #DCDCDC url(../img/table_th.png) repeat-x;
+	border: 1px #CCCCCC solid;
+	text-shadow: 0px 1px 0px #fff;
+	text-align: center;
+	font-weight: normal;
+}
+
+.commtable td.commtable_text { /* ячейка с текстом комментари€*/
+	padding: 4px;
+	text-align: left;
+	vertical-align: top;
+	border-bottom: 1px #CCCCCC solid;
+	background: none;
+	background-color: #FFF;
 }
 
 

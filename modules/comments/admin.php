@@ -9,31 +9,70 @@ if(!defined('VALID_RUN')){
 
 TAddSubTitle('Модерация комментариев');
 
-function AdminConfigMarkPosts( &$posts, $table )
-{
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+switch($action){
+	case 'main': AdminCommentsMain();
+		break;
+	case 'edit': AdminCommentsEdit();
+		break;
+	case 'save': AdminCommentsSave();
+		break;
+	case 'delete': AdminDownloadsDeleteComment();
+		break;
+}
+
+
+function AdminConfigMarkPosts( &$posts, $table ){
 	foreach($posts as $id=>$post){
 		$posts[$id]['_table'] = $table;
 	}
 }
 
-function AdminCommentsMain()
-{
-	global $config, $db, $site;
-	AddCenterBox('Глобальная модерация комментариев');
+function AdminCommentsMain(){
+	System::admin()->AddCenterBox('Глобальная модерация комментариев');
 
-	$commentsOnPage = 50;
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 10, int);
 	}else{
 		$page = 1;
 	}
 
+	System::admin()->AddJS('
+		UpdateSelectComment = function(){
+			$(".comment_check").each(function(){
+				$("#comment"+$(this).val()).removeClass("commtable_selected");
+			});
+			$(".comment_check:checked").each(function(){
+				$("#comment"+$(this).val()).addClass("commtable_selected");
+			});
+		};
+		SelectAllComments = function(){
+			$(".comment_check").each(function(){
+				$(this).attr("checked", true);
+			});
+			UpdateSelectComment();
+		};
+		DeleteComments = function(){
+			var del = "";
+			$(".comment_check:checked").each(function(){
+				del += "#"+$(this).val();
+			});
+			Admin.LoadPagePost("'.ADMIN_FILE.'?exe=comments&a=delete&page='.$page.'", {delcomments: del}, "Удаление...");
+		};
+	');
+
+	$commentsOnPage = 50;
+
 	// Выбираем комментарии из всех таблиц
 	$where = '';
 	$posts = array();
-	$comments_tables = $db->Select('comments');
+	$comments_tables = System::database()->Select('comments');
 	foreach($comments_tables as $table){
-		$temp_posts = $db->Select($table['table'], $where);
+		$temp_posts = System::database()->Select($table['table'], $where);
 		AdminConfigMarkPosts($temp_posts, $table['table']);
 		$posts = array_merge($posts, $temp_posts);
 	}
@@ -55,11 +94,21 @@ function AdminCommentsMain()
 
 	// Шапка
 	if(count($posts) == 0){
-		$text = '<center>- На сайте нет комментариев -</center><br />';
+		System::admin()->Highlight('На сайте нет комментариев.');
+		return;
 	}else{
-		$text = '<form action="'.ADMIN_FILE.'?exe=comments&a=delete&page='.$page.'" method="post">';
+		$text = '';
 	}
 
+	$text .= '<table cellspacing="0" cellpadding="0" width="90%" align="center" class="commtable_header">
+	<tr>
+	<th style="width: 160px;">Автор</th>
+	<th style="width: 260px;">E-mail</th>
+	<th style="width: 260px;">Сайт</th>
+	<th style="width: 260px;">Добавлено</th>
+	<th style="width: 70px;">IP</th>
+	<th>Функции</th>
+	</tr></table>';
 
 	// Выводим комментарии
 	foreach($posts as $post){
@@ -115,39 +164,25 @@ function AdminCommentsMain()
 			$user_homepage = '&nbsp;';
 		}
 		if($ruser){
-			$user_name = '<a href="'.Ufu("index.php?name=user&op=userinfo&user=$user_id", 'user/{user}/info/').'">'.$user_name.'</a>';// it is very smart! :)
+			$user_name = '<a href="'.Ufu("index.php?name=user&op=userinfo&user=$user_id", 'user/{user}/info/').'" target="_blank">'.$user_name.'</a>';
 		}
 		$text .= '
-		<table cellspacing="0" cellpadding="0" width="90%" align="center" class="commtable">
+		<table cellspacing="0" cellpadding="0" width="90%" align="center" class="commtable" id="comment'.$post_id.'--'.$post['_table'].'--'.$object_id.'">
 			<tr>
-				<th class="commth"><b>Автор:</b></th>
-				<th class="commth">E-mail:</th>
-				<th class="commth">Сайт:</th>
-				<th class="commth">Добавлено:</th>
-				<th class="commth">ip:</th>
-				<th colspan="2" class="commth">Функции</th>
+				<th style="width: 160px;"><b>'.$user_name.'</b></th>
+				<th style="width: 260px;">'.$user_email.'</th>
+				<th style="width: 260px;">'.$user_homepage.'</th>
+				<th style="width: 260px;">'.$post_date.'</th>
+				<th style="width: 70px;">'.$user_ip.'</th>
+				<th>'.SpeedButton('Редактировать комментарий', $edit, 'images/admin/edit.png').'</th>
+				<th>'.System::admin()->Check('delcomments[]', $post_id.'--'.$post['_table'].'--'.$object_id, false, 'class="comment_check" onchange="UpdateSelectComment();"').'</th>
 			</tr>
 			<tr>
-				<th class="commth"><b>'.$user_name.'</b></th>
-				<th class="commth">'.$user_email.'</th>
-				<th class="commth">'.$user_homepage.'</th>
-				<th class="commth">'.$post_date.'</th>
-				<th class="commth">'.$user_ip.'</th>
-				<th class="commth">'
-					.SpeedButton('Редактировать', $edit, 'images/admin/edit.png')
-				.'</th>
-				<th class="commth">'.$site->Check('delcomments[]', $post_id.'::'.$post['_table'].'::'.$object_id).'</th>
-			</tr>
-			<tr>
-				<td valign="top" class="commtd" width="140">'
-					.$avatar.$rank_image.'<br />'
-					.$rank_name
-				.'</td>
-				<td colspan="6" class="commtext" valign="top">'.$post_message.'</td>
+				<td valign="top" width="140">'.$avatar.$rank_image.'<br>'.$rank_name.'</td>
+				<td colspan="6" class="commtable_text">'.$post_message.'</td>
 			</tr>
 		</table>';
 	}
-	// ---
 
 	// Подвал
 	AddText($text);
@@ -156,16 +191,14 @@ function AdminCommentsMain()
 	}
 	$text = '';
 	if(count($posts) > 0){
-		$text .= '<p><center>'.$site->Submit('Удалить выделенные').'</senter></p><br /><br />';
+		$text .= '<div style="text-align: right;">'.System::admin()->SpeedConfirmJs('Выделить все', 'SelectAllComments();', '', '', true).'&nbsp;'
+			.System::admin()->SpeedConfirmJs('Удалить выделенные', 'DeleteComments();', 'images/admin/delete.png', 'Удалить выделенные комментарии?', true).'</div>';
 	}
-	$text .= '</form>';
 	AddText($text);
 }
 
 // Редактирование комментария
-function AdminCommentsEdit()
-{
-	global $config, $db, $site;
+function AdminCommentsEdit(){
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 10, int);
 	}else{
@@ -174,8 +207,8 @@ function AdminCommentsEdit()
 	$id = SafeEnv($_GET['id'], 11, int);
 	$table = SafeEnv($_GET['table'], 255, str);
 
-	$db->Select($table, "`id`='$id'");
-	$post = $db->FetchRow();
+	System::database()->Select($table, "`id`='$id'");
+	$post = System::database()->FetchRow();
 
 	$user_name = SafeDB($post['user_name'], 255, str);
 	$user_homepage = SafeDB($post['user_homepage'], 255, str);
@@ -186,25 +219,23 @@ function AdminCommentsEdit()
 	$post_message = SafeDB($post['post_message'], 0, str);
 
 	if($post['user_id'] == '0'){
-		FormRow('Имя', $site->Edit('user_name', $user_name, false, 'style="width:400px;"'));
-		FormRow('E-mail', $site->Edit('user_email', $user_email, false, 'style="width:400px;"'));
-		FormRow('Скрыть e-mail', $site->Check('user_hideemail', '1', $user_hideemail));
-		FormRow('Сайт', $site->Edit('user_homepage', $user_homepage, false, 'style="width:400px;"'));
+		FormRow('Имя', System::admin()->Edit('user_name', $user_name, false, 'style="width:400px;"'));
+		FormRow('E-mail', System::admin()->Edit('user_email', $user_email, false, 'style="width:400px;"'));
+		FormRow('Скрыть e-mail', System::admin()->Check('user_hideemail', '1', $user_hideemail));
+		FormRow('Сайт', System::admin()->Edit('user_homepage', $user_homepage, false, 'style="width:400px;"'));
 	}
-	FormRow('Текст', $site->TextArea('post_message', $post_message, 'style="width:400px;height:200px;"'));
+	FormRow('Текст', System::admin()->TextArea('post_message', $post_message, 'style="width:400px;height:200px;"'));
 	$action = ADMIN_FILE.'?exe=comments&a=save&id='.$id.'&table='.$table.'&page='.$page;
 	AddCenterBox('Редактирование комментария');
 	AddForm(
 		'<form action="'.$action.'" method="post">',
-		$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit('Сохранить')
+		System::admin()->Button('Отмена', 'onclick="history.go(-1)"').System::admin()->Submit('Сохранить')
 	);
 
 }
 
 // Сохранение комментария
-function AdminCommentsSave()
-{
-	global $config, $db, $site;
+function AdminCommentsSave(){
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 10, int);
 	}else{
@@ -229,13 +260,11 @@ function AdminCommentsSave()
 
 		$set .= ",`user_name`='$user_name',`user_email`='$user_email',`user_hideemail`='$user_hideemail',`user_homepage`='$user_homepage'";
 	}
-	$db->Update($table, $set, "`id`='$id'");
+	System::database()->Update($table, $set, "`id`='$id'");
 	GO(ADMIN_FILE.'?exe=comments&page='.$page);
 }
 
-function AdminDownloadsDeleteComment()
-{
-	global $config, $db, $site, $user;
+function AdminDownloadsDeleteComment(){
 	if(!isset($_POST['delcomments'])){
 		GO(ADMIN_FILE.'?exe=comments');
 	}
@@ -244,78 +273,33 @@ function AdminDownloadsDeleteComment()
 	}else{
 		$page = 1;
 	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
 
-		$com_tables = $db->Select('comments');
-		foreach($com_tables as $table){
-			$comments_tables[$table['table']] = $table;
-		}
-		unset($com_tables);
+	$com_tables = System::database()->Select('comments');
+	foreach($com_tables as $table){
+		$comments_tables[$table['table']] = $table;
+	}
 
-		$posts_tables = array();
-		$del_posts = explode(',', $_POST['delcomments']);
-		foreach($del_posts as $post){
-			$a = explode('::', $post);
+	$posts_tables = array();
+	$del_posts = explode('#', $_POST['delcomments']);
+	foreach($del_posts as $post){
+		if($post != ''){
+			$a = explode('--', $post);
 			$posts_tables[$a[1]][] = array($a[0],$a[2]);
- 		}
+		}
+    }
 
-		//Удаляем комментарии для каждой таблицы отдельно
- 		foreach($posts_tables as $post_table=>$posts_id){
-			$where = '';
-			foreach($posts_id as $p){
-				$post_id = SafeEnv($p[0], 11, int);
-				$obj_id = SafeEnv($p[1], 11, int);
-				$where .= "`id`='$post_id' or ";
-				$t = $comments_tables[$post_table];
-				CalcCounter(
-					$t['objects_table'],
-					"`{$t['id_coll']}`='$obj_id'",
-					$t['counter_coll'],
-					-1
-				);
-			}
-			$where = substr($where, 0, strlen($where) - 4);
-			$db->Delete($post_table, $where);
- 		}
-		GO(ADMIN_FILE.'?exe=comments&page='.$page);
-	}else{
-		$cmcnt = count($_POST['delcomments']);
-		$hid = implode(',', $_POST['delcomments']);
-		$text = 'Вы действительно хотите удалить выделенные ('.$cmcnt.') комментарии?<br />'
-		.$site->FormOpen(ADMIN_FILE.'?exe=comments&a=delete&page='.$page.'&ok=1', 'post')
-			.$site->Hidden('delcomments', $hid)
-			.$site->Submit('Да').'&nbsp;&nbsp;&nbsp;'
-			.$site->Button('Нет', 'onclick="history.go(-1)"')
-		.$site->FormClose();
-		AddTextBox("Внимание", $text);
-	}
+	// Удаляем комментарии для каждой таблицы отдельно
+    foreach($posts_tables as $post_table=>$posts_id){
+		$where = '';
+		foreach($posts_id as $p){
+			$post_id = SafeEnv($p[0], 11, int);
+			$obj_id = SafeEnv($p[1], 11, int);
+			$where .= "`id`='$post_id' or ";
+			$t = $comments_tables[$post_table];
+			CalcCounter($t['objects_table'], "`{$t['id_coll']}`='$obj_id'", $t['counter_coll'], -1);
+		}
+		$where = substr($where, 0, strlen($where) - 4);
+		System::database()->Delete($post_table, $where);
+    }
+	GO(ADMIN_FILE.'?exe=comments&page='.$page);
 }
-
-function AdminComments( $action )
-{
-	switch ($action){
-		case 'main':
-			AdminCommentsMain();
-			break;
-		case 'edit':
-			AdminCommentsEdit();
-			break;
-		case 'save':
-			AdminCommentsSave();
-			break;
-		case 'delete':
-			AdminDownloadsDeleteComment();
-			break;
-		default:
-			AdminCommentsMain();
-			break;
-	}
-}
-
-if(isset($_GET['a'])){
-	AdminComments($_GET['a']);
-}else{
-	AdminComments('main');
-}
-
-?>

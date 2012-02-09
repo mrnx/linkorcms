@@ -12,5 +12,3 @@ $module['cache'] = array(
 	'copyright' => 'LinkorCMS Development Group',
 	'system' => '1'
 );
-
-?>

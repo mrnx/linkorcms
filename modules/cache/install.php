@@ -13,5 +13,3 @@ if(!defined('VALID_RUN')){
 }
 
 $db->Insert("modules","'','Êýø','cache','1','0','','','1','1','15','1',''");
-
-?>

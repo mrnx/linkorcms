@@ -12,5 +12,3 @@ if(!defined('VALID_RUN')){
 }
 
 $db->Delete('modules', "`folder`='cache'");
-
-?>
