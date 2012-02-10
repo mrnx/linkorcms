@@ -7,27 +7,61 @@ if(!defined('VALID_RUN')){
 
 TAddSubTitle('Обратная связь');
 
-function AdminFeedBackDepartments()
-{
-	global $config, $db;
-	$db->Select('feedback', '');
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+
+TAddToolLink('Департаменты', 'main', 'feedback');
+TAddToolLink('Добавить департамент', 'add', 'feedback&a=add');
+TAddToolLink('Настройки', 'config', 'feedback&a=config');
+TAddToolBox($action);
+switch($action){
+	case 'main':
+		AdminFeedBackDepartments();
+		break;
+	case 'add':
+	case 'edit':
+		AdminFeedBackEditor();
+		break;
+	case 'save':
+		AdminFeedBackSave();
+		break;
+	case 'changestatus':
+		AdminFeedBackChangeStatus();
+		break;
+	case 'delete':
+		AdminFeedBackDelete();
+		break;
+	case 'config':
+		System::admin()->AddCenterBox('Конфигурация модуля "Обратная связь"');
+		if(isset($_GET['saveok'])){
+			System::admin()->Highlight('Настройки сохранены.');
+		}
+		System::admin()->ConfigGroups('feedback');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=feedback&a=configsave');
+		break;
+	case 'configsave':
+		System::admin()->SaveConfigs('feedback');
+		GO(ADMIN_FILE.'?exe=feedback&a=config&saveok');
+		break;
+	default:
+		AdminFeedBackDepartments();
+}
+
+function AdminFeedBackDepartments(){
+	System::database()->Select('feedback', '');
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
 	$text .= '<tr><th>Название</th><th>E-mail</th><th>Статус</th><th>Функции</th></tr>';
-	while($row = $db->FetchRow()){
+	while($row = System::database()->FetchRow()){
 		$fid = SafeDB($row['id'], 11, int);
-		switch($row['active']){
-			case '1':
-				$st = '<a href="'.ADMIN_FILE.'?exe=feedback&a=changestatus&id='.$fid.'" title="Выключить"><font color="#008000">Вкл.</font></a>';
-				break;
-			case '0':
-				$st = '<a href="'.ADMIN_FILE.'?exe=feedback&a=changestatus&id='.$fid.'" title="Включить"><font color="#FF0000">Выкл.</font></a>';
-				break;
-		}
-		$func = '';
-		$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=feedback&a=edit&id='.$fid, 'images/admin/edit.png');
-		$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=feedback&a=delete&id='.$fid.'&ok=0', 'images/admin/delete.png');
+		$st = System::admin()->SpeedStatus('Вкл.', 'Выкл.', ADMIN_FILE.'?exe=feedback&a=changestatus&id='.$fid, $row['active'] == '1');
+		$func = System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=feedback&a=edit&id='.$fid, 'images/admin/edit.png')
+			.System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=feedback&a=delete&id='.$fid, 'images/admin/delete.png', 'Удалить департамент?');
 
-		$text .= '<tr><td><b><a href="'.ADMIN_FILE.'?exe=feedback&a=edit&id='.$fid.'" title="Редактировать">'.SafeEnv($row['name'], 255, str).'</b></td>
+		$text .= '<tr>
+		<td><b>'.System::admin()->Link(SafeEnv($row['name'], 255, str), ADMIN_FILE.'?exe=feedback&a=edit&id='.$fid, 'Редактировать').'</b></td>
 		<td>'.PrintEmail($row['email'], $row['name']).'</td>
 		<td>'.$st.'</td>
 		<td>'.$func.'</td>
@@ -37,9 +71,8 @@ function AdminFeedBackDepartments()
 	AddTextBox('Департаменты', $text);
 }
 
-function AdminFeedBackEditor()
-{
-	global $config, $db, $site;
+function AdminFeedBackEditor(){
+	global $site;
 	$name = '';
 	$email = '';
 	$active = array(false, false);
@@ -49,8 +82,8 @@ function AdminFeedBackEditor()
 		$bbb = 'Добавить';
 	}elseif(isset($_GET['id'])){
 		$id = SafeEnv($_GET['id'], 11, int);
-		$db->Select('feedback', "`id`='".$id."'");
-		$fb = $db->FetchRow();
+		System::database()->Select('feedback', "`id`='".$id."'");
+		$fb = System::database()->FetchRow();
 		$name = SafeDB($fb['name'], 255, str);
 		$email = SafeDB($fb['email'], 50, str);
 		$active[$fb['active']] = true;
@@ -65,97 +98,43 @@ function AdminFeedBackEditor()
 	AddForm('<form action="'.ADMIN_FILE.'?exe=feedback&a=save'.(isset($id) ? '&id='.$id : '').'" method="post">', $site->Submit($bbb));
 }
 
-function AdminFeedBackSave()
-{
-	global $db, $config;
+function AdminFeedBackSave(){
 	$name = SafeEnv($_POST['name'], 255, str);
 	$email = SafeEnv($_POST['email'], 50, str);
 	$active = EnToInt($_POST['enabled']);
 	if(!isset($_GET['id'])){
 		$vals = Values('', $name, $email, $active);
-		$db->Insert('feedback', $vals);
+		System::database()->Insert('feedback', $vals);
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
 		$set = "name='$name',email='$email',active='$active'";
-		$db->Update('feedback', $set, "`id`='".$id."'");
+		System::database()->Update('feedback', $set, "`id`='".$id."'");
 	}
 	GO(ADMIN_FILE.'?exe=feedback');
 }
 
-function AdminFeedBackChangeStatus()
-{
-	global $config, $db;
-	$db->Select('feedback', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	if($db->NumRows() > 0){
-		$r = $db->FetchRow();
+function AdminFeedBackChangeStatus(){
+	System::database()->Select('feedback', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	if(System::database()->NumRows() > 0){
+		$r = System::database()->FetchRow();
 		if($r['active'] == 1){
 			$en = '0';
 		}else{
 			$en = '1';
 		}
-		$db->Update('feedback', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('feedback', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO(ADMIN_FILE.'?exe=feedback');
+	if(IsAjax()){
+		exit("OK");
+	}else{
+		GO(ADMIN_FILE.'?exe=feedback');
+	}
 }
 
-function AdminFeedBackDelete()
-{
-	global $config, $db;
+function AdminFeedBackDelete(){
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=feedback');
 	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$db->Delete('feedback', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO(ADMIN_FILE.'?exe=feedback');
-	}else{
-		$r = $db->Select('feedback', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить департамент "'.SafeDB($r[0]['name'], 255, str).'"<br />'
-			.'<a href="'.ADMIN_FILE.'?exe=feedback&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
-	}
+	System::database()->Delete('feedback', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	GO(ADMIN_FILE.'?exe=feedback');
 }
-include_once ($config['inc_dir'].'configuration/functions.php');
-
-function AdminFeedBack( $action )
-{
-
-	TAddToolLink('Департаменты', 'main', 'feedback');
-	TAddToolLink('Добавить департамент', 'add', 'feedback&a=add');
-	TAddToolLink('Настройки', 'config', 'feedback&a=config');
-	TAddToolBox($action);
-
-	switch($action){
-		case 'main':
-			AdminFeedBackDepartments();
-			break;
-		case 'add':
-		case 'edit':
-			AdminFeedBackEditor();
-			break;
-		case 'save':
-			AdminFeedBackSave();
-			break;
-		case 'changestatus':
-			AdminFeedBackChangeStatus();
-			break;
-		case 'delete':
-			AdminFeedBackDelete();
-			break;
-		case 'config':
-			AdminConfigurationEdit('feedback', 'feedback', true, false, 'Конфигурация модуля "Обратная связь"');
-			break;
-		case 'configsave':
-			AdminConfigurationSave('feedback&a=config', 'feedback', true);
-			break;
-		default:
-			AdminFeedBackDepartments();
-	}
-}
-
-if(isset($_GET['a'])){
-	AdminFeedBack($_GET['a']);
-}else{
-	AdminFeedBack('main');
-}
-
-?>
