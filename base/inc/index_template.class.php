@@ -224,5 +224,3 @@ class Page extends PageTemplate{
 		return $r;
 	}
 }
-
-?>

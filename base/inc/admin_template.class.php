@@ -199,6 +199,19 @@ class AdminPage extends PageTemplate{
 	}
 
 	/**
+	 * Выводит сообщение "Доступ запрещён"
+	 * @param bool $exit Завершить работу скрипта
+	 */
+	public function AccessDenied( $exit = true ){
+		$this->AddCenterBox('Ошибка');
+		$this->HighlightError('Доступ запрещён!');
+		if($exit){
+			$this->TEcho();
+			exit();
+		}
+	}
+
+	/**
 	 * Предупреждение с двумя кнопками "Да" и "Отмена"
 	 * @param $Text
 	 * @param $YesUrl

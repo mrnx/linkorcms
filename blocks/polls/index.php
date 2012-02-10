@@ -78,7 +78,7 @@ if($viewresult){
 	$tempvars['content'] = 'block/content/poll.html';
 	$vars['form_action'] = Ufu('index.php?name=polls&op=voice&poll_id='.$pid, 'polls/{poll_id}/voice/');
 	$vars['poll_title'] = SafeDB($poll['question'], 255, str);
-	$site->AddBlock('poll_block_variants', true, true, 'variant');
+	$childs['poll_block_variants'] = $site->CreateBlock(true, true, 'variant');
 	$variants_vars = array();
 	for($i = 0; $i < $c; $i++){
 		if($answers[$i][0] != ''){
@@ -89,7 +89,7 @@ if($viewresult){
 			}else{
 				$variants_vars['control'] = $site->Radio('voice[]', $i);
 			}
-			$site->AddSubBlock('poll_block_variants', true, $variants_vars);
+			$childs['poll_block_variants']['sub'][] = $site->CreateSubBlock(true, $variants_vars);
 		}
 	}
 	$vars['lnum_voices'] = 'Ответов';
@@ -102,5 +102,3 @@ if($viewresult){
 	$vars['lothers'] = 'Другие опросы';
 	$vars['others_url'] = Ufu('index.php?name=polls', '{name}/');
 }
-
-?>

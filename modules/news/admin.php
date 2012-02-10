@@ -8,8 +8,7 @@ if(!defined('VALID_RUN')){
 TAddSubTitle('Новости');
 
 if(!System::user()->CheckAccess2('news', 'news')){
-	AddTextBox('Ошибка', 'Доступ запрещён');
-	return;
+	System::admin()->AccessDenied();
 }
 $news_access_editnews = System::user()->CheckAccess2('news', 'news_edit');
 $news_access_edittopics = System::user()->CheckAccess2('news', 'edit_topics');
@@ -58,8 +57,7 @@ switch($action){
 		break;
 	case 'config':
 		if(!$news_access_editconfig){
-			AddTextBox('Ошибка', 'Доступ запрещён!');
-			return;
+			System::admin()->AccessDenied();
 		}
 		System::admin()->AddCenterBox('Конфигурация модуля "Новости"');
 		if(isset($_GET['saveok'])){
@@ -70,8 +68,7 @@ switch($action){
 		break;
 	case 'configsave':
 		if(!$news_access_editconfig){
-			AddTextBox('Ошибка', 'Доступ запрещён!');
-			return;
+			System::admin()->AccessDenied();
 		}
 		System::admin()->SaveConfigs('news');
 		GO(ADMIN_FILE.'?exe=news&a=config&saveok');

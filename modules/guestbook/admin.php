@@ -129,10 +129,10 @@ function AdminGuestBookMain(){
 		}
 		$func2 = '';
 		if(key_exists(System::user()->Name(), $answers)){
-			$func2 = (System::user()->CheckAccess2('guestbook', 'answer') ? '<a href="'.ADMIN_FILE.'?exe=guestbook&a=editanswer&id='.$mid.'">Редактировать ответ</a> :: ' : '')
-				.'<a href="'.ADMIN_FILE.'?exe=guestbook&a=delanswer&id='.$mid.'">Удалить ответ</a>';
+			$func2 = (System::user()->CheckAccess2('guestbook', 'answer') ? System::admin()->Link('Редактировать ответ', ADMIN_FILE.'?exe=guestbook&a=editanswer&id='.$mid).' :: ' : '')
+				.System::admin()->Link('Удалить ответ', ADMIN_FILE.'?exe=guestbook&a=delanswer&id='.$mid);
 		}elseif(System::user()->CheckAccess2('guestbook', 'answer')){
-			$func2 = '<a href="'.ADMIN_FILE.'?exe=guestbook&a=addanswer&id='.$mid.'">Ответить</a>';
+			$func2 = System::admin()->Link('Ответить', ADMIN_FILE.'?exe=guestbook&a=addanswer&id='.$mid);
 		}
 
 		$keys = array_keys($answers);

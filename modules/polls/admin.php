@@ -10,33 +10,79 @@ if(!defined('VALID_RUN')){
 TAddSubTitle('Опросы');
 
 if(!$user->CheckAccess2('polls', 'polls')){
-	AddTextBox('Ошибка', $config['general']['admin_accd']);
-	return;
+	System::admin()->AccessDenied();
 }
 
 //Разграничения доступов
 $editpolls = $user->CheckAccess2('polls', 'edit');
 $editconf = $user->CheckAccess2('polls', 'config');
 
-function AdminPollsMainFunc()
-{
-	global $db, $config, $editpolls, $editcomments;
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+
+// Меню
+if($editconf || $editpolls){
+	TAddToolLink('Опросы', 'main', 'polls');
+}
+if($editpolls){
+	TAddToolLink('Добавить опрос', 'editor', 'polls&a=editor');
+}
+if($editconf){
+	TAddToolLink('Конфигурация', 'config', 'polls&a=config');
+}
+TAddToolBox($action);
+//
+
+switch($action){
+	case 'main': AdminPollsMainFunc();
+		break;
+	case 'editor': AdminPollsEditor();
+		break;
+	case 'save': AdminPollsSave();
+		break;
+	case 'delete': AdminPollsDelete();
+		break;
+	case 'changestatus': AdminPollsChangeStatus();
+		break;
+	case 'config':
+		if(!$editconf){
+			System::admin()->AccessDenied();
+		}
+		System::admin()->AddCenterBox('Конфигурация модуля "Опросы"');
+		if(isset($_GET['saveok'])){
+			System::admin()->Highlight('Настройки сохранены.');
+		}
+		System::admin()->ConfigGroups('polls');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=polls&a=configsave');
+		break;
+	case 'configsave':
+		if(!$editconf){
+			System::admin()->AccessDenied();
+		}
+		System::admin()->SaveConfigs('polls');
+		GO(ADMIN_FILE.'?exe=polls&a=config&saveok');
+		break;
+	default: AdminPollsMainFunc();
+}
+
+function AdminPollsMainFunc(){
+	global $editpolls, $editcomments;
 	$time = time();
-	$polls = $db->Select('polls', '');
+	$polls = System::database()->Select('polls', '');
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable"><tr>';
-	$text .= '<th>Опрос</th><th>Всего проголосовало</th><th>Комментарии</th><th>Активен</th><th>Статус</th><th>Функции</th></tr>';
+	$text .= '<th>Опрос</th><th>Всего проголосовало</th><th>Комментарии</th><th>Доступ</th><th>Статус</th><th>Функции</th></tr>';
 	foreach($polls as $poll){
 		$pid = SafeDB($poll['id'], 11, int);
-		switch($poll['active']){
-			case '1':
-				$active = '<font color="#008000">Вкл.</font></a>';
-				break;
-			case '0':
-				$active = '<font color="#FF0000">Выкл.</font>';
-				break;
+		if($poll['active'] == '1'){
+			$active = '<font color="#008000">Вкл.</font></a>';
+		}else{
+			$active = '<font color="#FF0000">Выкл.</font>';
 		}
 		if($editpolls){
-			$active = '<a href="'.ADMIN_FILE.'?exe=polls&a=changestatus&id='.$pid.'">'.$active.'</a>';
+			$active = System::admin()->SpeedStatus('Вкл.', 'Выкл.', ADMIN_FILE.'?exe=polls&a=changestatus&id='.$pid, $poll['active'] == '1');
 		}
 		$answers = unserialize($poll['answers']);
 		$c = count($answers);
@@ -47,13 +93,13 @@ function AdminPollsMainFunc()
 
 		if($editpolls){
 			$func = '';
-			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=polls&a=editor&id='.$pid, 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=polls&a=delete&id='.$pid.'&ok=0', 'images/admin/delete.png');
+			$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=polls&a=editor&id='.$pid, 'images/admin/edit.png');
+			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=polls&a=delete&id='.$pid, 'images/admin/delete.png', 'Удалить опрос?');
 		}else{
 			$func = '-';
 		}
 		$text .= '<tr>
-		<td><a href="'.ADMIN_FILE.'?exe=polls&a=editor&id='.$pid.'"><b>'.SafeDB($poll['question'], 255, str).'</b></a></td>
+		<td><b>'.System::admin()->Link(SafeDB($poll['question'], 255, str), ADMIN_FILE.'?exe=polls&a=editor&id='.$pid).'</b></td>
 		<td>'.$num_voices.'</td>
 		<td>'.SafeDB($poll['com_counter'], 11, int).'</td>
 		<td>'.ViewLevelToStr($poll['view']).'</td>
@@ -65,20 +111,18 @@ function AdminPollsMainFunc()
 	AddTextBox('Опросы', $text);
 }
 
-function AdminPollsEditor()
-{
-	global $db, $site, $config, $editpolls;
+function AdminPollsEditor(){
+	global $site, $config, $editpolls;
 	if(!$editpolls){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		System::admin()->AccessDenied();
 	}
 	$view = array(1=>false, 2=>false, 3=>false, 4=>false);
 	if(isset($_GET['id'])){ //Редактирование
 		$title = 'Редактирование опроса';
 		$btitle = 'Сохранить';
 		$id = SafeEnv($_GET['id'], 11, int);
-		$db->Select('polls', "`id`='$id'");
-		$p = $db->FetchRow();
+		System::database()->Select('polls', "`id`='$id'");
+		$p = System::database()->FetchRow();
 		$poll = SafeDB($p['question'], 255, str);
 		$desc = SafeDB($p['description'], 255, str);
 		$showinblock = SafeDB($p['showinblock'], 1, int);
@@ -110,17 +154,17 @@ function AdminPollsEditor()
 	FormRow('Описание', $site->Edit('desc', $desc, false, 'maxlength="250" style="width:400px;"'));
 	FormRow('Показывать в блоке', $site->Select('showinblock', GetEnData($showinblock, 'Да', 'Нет')));
 	FormRow('Мультиответы', $site->Select('multianswers', GetEnData($multianswers, 'Да', 'Нет')));
-	$anstext = '';
+	$anwers_form = '';
 	for($i = 0, $c = count($answers); $i < $c; $i++){
-		$anstext .= '<tr>'
-			.'<td style="width:400px;">'.$site->Edit('answer[]', SafeDB($answers[$i][0], 255, str), false, 'style="width:100%;"').'</td>'
-			.'<td>'.$site->Edit('color[]', SafeDB($answers[$i][1], 255, str), false, 'style="width:60px;"').'</td>'
-			.'<td>'.$site->Edit('voices[]', SafeDB(strval($answers[$i][2]), 11, int), false, 'style="width:44px;text-align:right;"').'</td>'
+		$anwers_form .= '<tr>'
+			.'<td>'.($i+1).'.&nbsp;'.$site->Edit('answer[]', SafeDB($answers[$i][0], 255, str), false, 'style="width:90%;"').'</td>'
+			.'<td>'.$site->Edit('color[]', SafeDB($answers[$i][1], 255, str), false, 'style="width:80px;"').'</td>'
+			.'<td>'.$site->Edit('voices[]', SafeDB(strval($answers[$i][2]), 11, int), false, 'style="width:50px; text-align:right;"').'</td>'
 			.'</tr>';
 	}
 	FormRow('Ответы', '<table cellspacing="0" cellpadding="0" class="cfgtable">'
-		.'<tr><th>Ответ</th><th>Цвет</th><th>Ответы</th></tr>'
-		.$anstext
+		.'<tr><th style="width:400px;">Ответ</th><th style="width:100px;">Цвет</th><th style="width:100px;">Ответы</th></tr>'
+		.$anwers_form
 		.'</table>'
 	);
 	FormRow('Разрешить комментарии', $site->Select('allow_comments', GetEnData($allow_comments, 'Да', 'Нет')));
@@ -130,12 +174,10 @@ function AdminPollsEditor()
 	AddForm('<form action="'.ADMIN_FILE.'?exe=polls&a=save'.$uid.'" method="post">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($btitle));
 }
 
-function AdminPollsSave()
-{
-	global $db, $editpolls;
+function AdminPollsSave(){
+	global $editpolls;
 	if(!$editpolls){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		System::admin()->AccessDenied();
 	}
 	$poll = SafeEnv($_POST['poll'], 255, str);
 	$desc = SafeEnv($_POST['desc'], 255, str);
@@ -157,108 +199,47 @@ function AdminPollsSave()
 	if(isset($_GET['id'])){ //Редактирование
 		$set = "question='$poll',description='$desc',multianswers='$multianswers',answers='$answers',showinblock='$showinblock',allow_comments='$allow_comments',view='$view',active='$active'";
 		$poll_id = SafeEnv($_GET['id'], 11, int);
-		$db->Update('polls', $set, "`id`='$poll_id'");
+		System::database()->Update('polls', $set, "`id`='$poll_id'");
 	}else{
 		$vals = Values('', $poll, $desc, time(), $multianswers, $answers, $showinblock, $allow_comments, '0', $view, $active);
-		$db->Insert('polls', $vals);
+		System::database()->Insert('polls', $vals);
 	}
-	global $config;
 	GO(ADMIN_FILE.'?exe=polls');
 }
 
-function AdminPollsDelete()
-{
-	global $config, $db, $editpolls;
+// Удаление опроса
+function AdminPollsDelete(){
+	global $editpolls;
 	if(!$editpolls){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		System::admin()->AccessDenied();
 	}
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=polls');
-		exit();
 	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$id = SafeEnv($_GET['id'], 11, int);
-		$db->Delete('polls', "`id`='$id'");
-		$db->Delete('polls_comments', "`object_id`='$id'");
-		GO(ADMIN_FILE.'?exe=polls');
-		exit();
-	}else{
-		$r = $db->Select('polls', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить опрос "'.SafeDB($r[0]['question'], 255, str).'" ?<br />'
-		.'<a href="'.ADMIN_FILE.'?exe=polls&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a>'
-		.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
-	}
+	$id = SafeEnv($_GET['id'], 11, int);
+	System::database()->Delete('polls', "`id`='$id'");
+	System::database()->Delete('polls_comments', "`object_id`='$id'");
+	GO(ADMIN_FILE.'?exe=polls');
 }
 
-function AdminPollsChangeStatus()
-{
-	global $config, $db, $editpolls;
+// Изменение статуса
+function AdminPollsChangeStatus(){
+	global $editpolls;
 	if(!$editpolls){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		System::admin()->AccessDenied();
 	}
-	$db->Select('polls', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	$r = $db->FetchRow();
-	if($r['active'] == 1){
+	$id = SafeEnv($_GET['id'], 11, int);
+	System::database()->Select('polls', "`id`='$id'");
+	$r = System::database()->FetchRow();
+	if($r['active'] == '1'){
 		$en = '0';
 	}else{
 		$en = '1';
 	}
-	$db->Update('polls', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	GO(ADMIN_FILE.'?exe=polls');
-}
-if(isset($_GET['a'])){
-	$action = $_GET['a'];
-}else{
-	$action = 'main';
-}
-
-include_once ($config['inc_dir'].'configuration/functions.php');
-
-function AdminPolls()
-{
-	global $action, $editpolls, $editconf;
-
-	if($editconf || $editpolls){
-		TAddToolLink('Опросы', 'main', 'polls');
-	}
-	if($editpolls){
-		TAddToolLink('Добавить опрос', 'editor', 'polls&a=editor');
-	}
-	if($editconf){
-		TAddToolLink('Конфигурация', 'config', 'polls&a=config');
-	}
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminPollsMainFunc();
-			break;
-		case 'editor':
-			AdminPollsEditor();
-			break;
-		case 'save':
-			AdminPollsSave();
-			break;
-		case 'delete':
-			AdminPollsDelete();
-			break;
-		case 'changestatus':
-			AdminPollsChangeStatus();
-			break;
-		///////////////// Настройки
-		case 'config':
-			AdminConfigurationEdit('polls', 'polls', true, false, 'Конфигурация модуля "Опросы"');
-			break;
-		case 'configsave':
-			AdminConfigurationSave('polls&a=config', 'polls', true, false);
-			break;
-		default:
-			AdminPollsMainFunc();
+	System::database()->Update('polls', "active='$en'", "`id`='$id'");
+	if(IsAjax()){
+		exit("OK");
+	}else{
+		GO(ADMIN_FILE.'?exe=polls');
 	}
 }
-
-AdminPolls();
-
-?>

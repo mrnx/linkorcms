@@ -38,10 +38,8 @@ switch($op){
 		HackOff();
 }
 
-function IndexPollsViewPolls()
-{
+function IndexPollsViewPolls(){
 	global $db, $site, $config, $user;
-
 	$where = "`active`='1'";
 	$ex_where = GetWhereByAccess('view');
 	if($ex_where != ''){
@@ -78,8 +76,7 @@ function IndexPollsViewPolls()
 	}
 }
 
-function IndexPollsViewPoll()
-{
+function IndexPollsViewPoll(){
 	global $db, $site, $user, $op, $config;
 
 	$id = SafeEnv($_GET['poll_id'], 11, int);
@@ -126,16 +123,11 @@ function IndexPollsViewPoll()
 		$c = count($answers);
 		for($i = 0; $i < $c; $i++){
 			if($answers[$i][0] != ''){
-				$svars = array();
-				if($answers[$i][1] != ''){
-					$ans = '<font color="'.SafeDB($answers[$i][1], 255, str).'">'.SafeDB($answers[$i][0], 255, str).'<font>';
-				}else{
-					$ans = SafeDB($answers[$i][0], 255, str);
-				}
-				$svars['value'] = (round($per_c * $answers[$i][2]));
-				$svars['num_voices'] = SafeDB($answers[$i][2], 11, int);
-				$svars['answertext'] = $ans;
-				$site->AddSubBlock('poll_result_rows', true, $svars);
+				$title = SafeDB($answers[$i][0], 255, str);
+				$color = SafeDB($answers[$i][1], 255, str);
+				$value = (round($per_c * $answers[$i][2]));
+				$num_voices2 = SafeDB($answers[$i][2], 11, int);
+				$site->AddSubBlock('poll_result_rows', true, array('answertext'=>$title, 'value'=>$value, 'num_voices'=>$num_voices2, 'color'=>$color));
 			}
 		}
 	}else{
@@ -145,17 +137,14 @@ function IndexPollsViewPoll()
 		$site->AddBlock('poll_variants', true, true, 'variant');
 		for($i = 0; $i < $c; $i++){
 			if($answers[$i][0] != ''){
-				if($answers[$i][1] != ''){
-					$ans = '<font color="'.SafeDB($answers[$i][1], 255, str).'">'.SafeDB($answers[$i][0], 255, str).'<font>';
-				}else{
-					$ans = SafeDB($answers[$i][0], 255, str);
-				}
+				$color = SafeDB($answers[$i][1], 255, str);
+				$title = SafeDB($answers[$i][0], 255, str);
 				if($poll['multianswers'] == '1'){
 					$control = $site->Check('voice[]', $i);
 				}else{
 					$control = $site->Radio('voice[]', $i);
 				}
-				$site->AddSubBlock('poll_variants', true, array('title'=>$ans, 'control'=>$control));
+				$site->AddSubBlock('poll_variants', true, array('title'=>$title, 'control'=>$control, 'color'=>$color));
 			}
 		}
 		$vars['poll_showresults'] = ($config['polls']['show_results'] == '1' || $user->isAdmin());
@@ -190,8 +179,7 @@ function IndexPollsViewPoll()
 	$posts->RenderForm(false, 'poll_comments_form');
 }
 
-function IndexPollsVoice()
-{
+function IndexPollsVoice(){
 	global $db, $user, $site, $config;
 	if(!isset($_GET['poll_id'])){
 		GoBack();
@@ -262,8 +250,7 @@ function IndexPollsVoice()
 	}
 }
 
-function IndexPollsAddPost()
-{
+function IndexPollsAddPost(){
 	global $db, $config, $site;
 	$get_id        = 'poll_id'; // Имя параметра в get для получения id объекта
 	$table         = 'polls_comments'; // Таблица комментариев
@@ -295,8 +282,7 @@ function IndexPollsAddPost()
 	}
 }
 
-function IndexPollsEditPost( $back_id = null )
-{
+function IndexPollsEditPost( $back_id = null ){
 	global $site, $config;
 	$get_id = 'poll_id';       // Имя параметра в get для получения id объекта
 	$table = 'polls_comments'; // Таблица комментариев
@@ -312,8 +298,7 @@ function IndexPollsEditPost( $back_id = null )
 	$posts->RenderForm(true, 'post_form');
 }
 
-function IndexPollsEditPostSave()
-{
+function IndexPollsEditPostSave(){
 	global $config;
 	$get_id = 'poll_id';       // Имя параметра в get для получения id объекта
 	$table = 'polls_comments'; // Таблица комментариев
@@ -328,8 +313,7 @@ function IndexPollsEditPostSave()
 	}
 }
 
-function IndexPollsDeletePost()
-{
+function IndexPollsDeletePost(){
 	global $config, $db;
 	$get_id = 'poll_id'; // Имя параметра в get для получения id объекта
 	$table = 'polls_comments'; // Таблица комментариев
@@ -356,5 +340,3 @@ function IndexPollsDeletePost()
 		GoRefererUrl($back_id);
 	}
 }
-
-?>
