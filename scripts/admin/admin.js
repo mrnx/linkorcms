@@ -268,19 +268,23 @@
 			 * @param AjaxQueryUrl
 			 * @param Object
 			 */
-			Status: function( EnabledTitle, DisabledTitle, EnabledImage, DisabledImage, AjaxQueryUrl, LinkObject ){
-				var img = $(LinkObject).find("img:first").get(0),
-						src,
-						title;
+			Status: function( EnabledTitle, DisabledTitle, EnabledImage, DisabledImage, ShowText, ShowImage, AjaxQueryUrl, LinkObject ){
+				var src, title;
+				var status = $(LinkObject).attr('status') == '1';
+				if(ShowImage){
+					var img = $(LinkObject).find("img:first").get(0);
+				}
+				if(ShowText){
+					var cap = $(LinkObject).find("span.status_button_title").get(0);
+				}
 
-				if($(img).attr("src") == EnabledImage){
+				if(status){
 					src = DisabledImage;
 					title = DisabledTitle;
 				}else{
 					src = EnabledImage;
 					title = EnabledTitle;
 				}
-
 				Admin.ShowSplashScreen();
 				$.ajax({
 					url: AjaxQueryUrl,
@@ -289,9 +293,11 @@
 						if(img){
 							$(img).attr("src", src);
 							$(img).attr("title", title);
-						}else{
-							$(LinkObject).text(title);
 						}
+						if(cap){
+							$(cap).html(title);
+						}
+						$(LinkObject).attr('status', (status ? '0' : '1'));
 						Admin.HideSplashScreen();
 					},
 					cache: false

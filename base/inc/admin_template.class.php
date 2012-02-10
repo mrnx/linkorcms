@@ -326,15 +326,28 @@ class AdminPage extends PageTemplate{
 	 * @param  $DisabledImage
 	 * @return string
 	 */
-	public function SpeedStatus( $EnabledTitle, $DisabledTitle, $AjaxUrl, $Status, $EnabledImage = 'images/bullet_green.png', $DisabledImage = 'images/bullet_red.png' ){
+	public function SpeedStatus( $EnabledTitle, $DisabledTitle, $AjaxUrl, $Status, $EnabledImage = '', $DisabledImage = '', $ShowText = false, $ShowImage = true ){
+		if($EnabledImage == '') $EnabledImage = 'images/bullet_green.png';
+		if($DisabledImage == '') $DisabledImage = 'images/bullet_red.png';
 		$EnabledTitle = htmlspecialchars($EnabledTitle, ENT_QUOTES);
 		$DisabledTitle = htmlspecialchars($DisabledTitle, ENT_QUOTES);
-
-		$ImgSrc = ($Status ? $EnabledImage : $DisabledImage);
 		$Title = ($Status ? $EnabledTitle : $DisabledTitle);
-		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', '$AjaxUrl', this); event.cancelBubble = true; event.stopPropagation(); return false;";
-		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();">'
-			.($ImgSrc != '' ? '<img src="'.$ImgSrc.'" alt="'.$Title.'" />' : $Title).'</a>';
+		if($ShowImage){
+			$ImgSrc = ($Status ? $EnabledImage : $DisabledImage);
+			$text = '<img src="'.$ImgSrc.'" alt="'.$Title.'" />';
+			if($ShowText){
+				$text .= '&nbsp;<span class="status_button_title">'.$Title.'</span>';
+				$Title = '';
+			}
+		}else{
+			$text = $Title;
+		}
+
+		if($ShowText) $ShowText = 'true'; else $ShowText = 'false';
+		if($ShowImage) $ShowImage = 'true'; else $ShowImage = 'false';
+		if($Status) $Status = '1'; else $Status = '0';
+		$OnClick = "Admin.Buttons.Status('$EnabledTitle', '$DisabledTitle', '$EnabledImage', '$DisabledImage', $ShowText, $ShowImage, '$AjaxUrl', this); event.cancelBubble = true; event.stopPropagation(); return false;";
+		$s = '<a title="'.$Title.'" href="#" class="button" onclick="'.$OnClick.'" onmousedown="event.cancelBubble = true; event.stopPropagation();" status="'.$Status.'">'.$text.'</a>';
 		return $s;
 	}
 
