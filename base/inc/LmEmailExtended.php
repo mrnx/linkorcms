@@ -124,8 +124,7 @@ class LmEmailExtended{
 	 * @param <type> $Address
 	 * @param <type> $Name
 	 */
-	public function SetTo( $Address, $NameUtf8 = '' )
-	{
+	public function SetTo( $Address, $NameUtf8 = '' ){
 		$this->ToAddress = array();
 		$this->ToAddress[] = array( $Address, $NameUtf8 );
 	}

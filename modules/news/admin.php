@@ -145,11 +145,7 @@ function AdminNewsMain(){
 		$id = SafeDB($news['id'], 11, int);
 		$aed = System::user()->CheckAccess2('news', 'news_edit');
 
-		$status = System::admin()->SpeedStatus(
-			'Выключить', 'Включить',
-			ADMIN_FILE.'?exe=news&a=changestatus&id='.$id, $news['enabled'],
-			'images/bullet_green.png', 'images/bullet_red.png'
-		);
+		$status = System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=news&a=changestatus&id='.$id, $news['enabled'], 'images/bullet_green.png', 'images/bullet_red.png');
 		$view = ViewLevelToStr(SafeDB($news['view'], 1, int));
 
 		$allowComments = SafeDB($news['allow_comments'], 1, bool);
@@ -293,7 +289,7 @@ function AdminNewsEditor(){
 	FormTextRow('Короткая новость (HTML)', System::admin()->HtmlEditor('shorttext', $stext, 600, 200));
 	FormTextRow('Полная новость (HTML)', System::admin()->HtmlEditor('continuation', $ctext, 600, 400));
 
-	FormRow('Преобразовать текст в HTML', System::admin()->Select('auto_br', GetEnData($auto_br, 'Да', 'Нет')));
+	FormRow('', 'Преобразовать текст в HTML: '.System::admin()->Select('auto_br', GetEnData($auto_br, 'Да', 'Нет')));
 
 	FormRow('Дата и время публикации',
 	        System::admin()->Edit('public_date', $public_date, false, 'id="datepicker" style="width:120px;"')
