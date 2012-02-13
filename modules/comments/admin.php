@@ -102,7 +102,7 @@ function AdminCommentsMain(){
 
 	$text .= '<table cellspacing="0" cellpadding="0" width="90%" align="center" class="commtable_header">
 	<tr>
-	<th style="width: 160px;">Автор</th>
+	<th style="width: 160px;">Пользователь</th>
 	<th style="width: 260px;">E-mail</th>
 	<th style="width: 260px;">Сайт</th>
 	<th style="width: 260px;">Добавлено</th>

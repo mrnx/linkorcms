@@ -9,9 +9,51 @@ TAddSubTitle('Web-формы');
 
 include_once ($config['inc_dir'].'forms.inc.php');
 
+if(isset($_GET['a'])){
+	$action = $_GET['a'];
+}else{
+	$action = 'main';
+}
+
+TAddToolLink('Web-формы', 'main', 'forms');
+TAddToolLink('Добавить форму', 'add', 'forms&a=add');
+TAddToolBox($action);
+switch($action){
+	case 'main': AdminFormsMain();
+		break;
+	case 'add':
+	case 'edit': AdminFormsEditor();
+		break;
+	case 'del': AdminFormsDelete();
+		break;
+	case 'editsave': AdminFormsSave();
+		break;
+	case 'addsave': AdminFormsSave();
+		break;
+	case 'fields': AdminFormsFields();
+		break;
+	case 'addfield': AdminFormsFieldSave();
+		break;
+	case 'editfield': AdminFormsEditFields();
+		break;
+	case 'delfield': AdminFormsDelField();
+		break;
+	case 'changestatus': AdminFormsChangeStatus();
+		break;
+	case 'posts': AdminFormsViewPosts(false);
+		break;
+	case 'newposts': AdminFormsViewPosts(true);
+		break;
+	case 'delpost': AdminFormsDeletePost();
+		break;
+	case 'checkall': AdminFormsCheckAll();
+		break;
+	default: AdminFormsMain();
+}
+
+
 // Список форм
-function AdminFormsMain()
-{
+function AdminFormsMain(){
 	global $db, $config;
 	$forms = $db->Select('forms', '');
 	SortArray($forms, 'new_answ', true);
@@ -61,8 +103,7 @@ function AdminFormsMain()
 }
 
 // Редактор форм - добавление новой формы - редактирование формы
-function AdminFormsEditor()
-{
+function AdminFormsEditor(){
 	global $config, $db, $site, $user, $tree;
 	if(!$user->CheckAccess2('downloads', 'edit_files')){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
@@ -115,8 +156,7 @@ function AdminFormsEditor()
 }
 
 // Сохранение формы
-function AdminFormsSave()
-{
+function AdminFormsSave(){
 	global $config, $db, $user;
 	$hname = SafeEnv($_POST['hname'], 255, str);
 	$name = SafeEnv($_POST['name'], 255, str);
@@ -140,8 +180,7 @@ function AdminFormsSave()
 }
 
 // Редактор полей формы
-function AdminFormsFieldEditor( $action )
-{
+function AdminFormsFieldEditor( $action ){
 	global $site, $cl_plugins, $cs_plugins, $config, $db;
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=forms');
@@ -235,8 +274,7 @@ function AdminFormsFieldEditor( $action )
 	AddForm($site->FormOpen(ADMIN_FILE.'?exe=forms&a=addfield&id='.$id.($edit ? '&index='.$index : '')), ($edit ? $site->Button('Отмена', 'onclick="history.go(-1);"') : '').$site->Submit($cp));
 }
 
-function AdminFormsFields()
-{
+function AdminFormsFields(){
 	global $db, $config, $site;
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=forms');
@@ -267,8 +305,7 @@ function AdminFormsFields()
 	AdminFormsFieldEditor('add');
 }
 
-function AdminFormsFieldSave()
-{
+function AdminFormsFieldSave(){
 	global $db, $config;
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=forms');
@@ -335,14 +372,12 @@ function AdminFormsFieldSave()
 	GO(ADMIN_FILE.'?exe=forms&a=fields&id='.$id);
 }
 
-function AdminFormsEditFields()
-{
+function AdminFormsEditFields(){
 	AddCenterBox('Редактирование поля');
 	AdminFormsFieldEditor('edit');
 }
 
-function AdminFormsDelField()
-{
+function AdminFormsDelField(){
 	global $db, $config;
 	if(!isset($_GET['id']) || !isset($_GET['index'])){
 		return;
@@ -371,8 +406,7 @@ function AdminFormsDelField()
 	}
 }
 
-function AdminFormsDelete()
-{
+function AdminFormsDelete(){
 	global $config, $db;
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=forms');
@@ -389,8 +423,7 @@ function AdminFormsDelete()
 	}
 }
 
-function AdminFormsChangeStatus()
-{
+function AdminFormsChangeStatus(){
 	global $config, $db;
 	$db->Select('forms', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	if($db->NumRows() > 0){
@@ -405,8 +438,7 @@ function AdminFormsChangeStatus()
 	GO(ADMIN_FILE.'?exe=forms');
 }
 
-function AdminFormsViewPosts( $new )
-{
+function AdminFormsViewPosts( $new ){
 	global $db, $config;
 	if(!isset($_GET['id'])){
 		return;
@@ -452,8 +484,7 @@ function AdminFormsViewPosts( $new )
 	AddTextBox('Новые поcты формы "'.$box_title.'"', $text);
 }
 
-function AdminFormsDeletePost()
-{
+function AdminFormsDeletePost(){
 	global $config, $db;
 	if(!isset($_GET['pid']) || !isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=forms');
@@ -485,8 +516,7 @@ function AdminFormsDeletePost()
 	}
 }
 
-function AdminFormsCheckAll()
-{
+function AdminFormsCheckAll(){
 	global $db, $config;
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=forms');
@@ -496,66 +526,3 @@ function AdminFormsCheckAll()
 	$db->Update('forms', "new_answ='0'", "`id`='$form_id'");
 	GO(ADMIN_FILE.'?exe=forms');
 }
-
-function AdminForms( $action )
-{
-	global $user;
-	TAddToolLink('Web-формы', 'main', 'forms');
-	TAddToolLink('Добавить форму', 'add', 'forms&a=add');
-	TAddToolBox($action);
-	switch($action){
-		case 'main':
-			AdminFormsMain();
-			break;
-		case 'add':
-		case 'edit':
-			AdminFormsEditor();
-			break;
-		case 'del':
-			AdminFormsDelete();
-			break;
-		case 'editsave':
-			AdminFormsSave();
-			break;
-		case 'addsave':
-			AdminFormsSave();
-			break;
-		case 'fields':
-			AdminFormsFields();
-			break;
-		case 'addfield':
-			AdminFormsFieldSave();
-			break;
-		case 'editfield':
-			AdminFormsEditFields();
-			break;
-		case 'delfield':
-			AdminFormsDelField();
-			break;
-		case 'changestatus':
-			AdminFormsChangeStatus();
-			break;
-		case 'posts':
-			AdminFormsViewPosts(false);
-			break;
-		case 'newposts':
-			AdminFormsViewPosts(true);
-			break;
-		case 'delpost':
-			AdminFormsDeletePost();
-			break;
-		case 'checkall':
-			AdminFormsCheckAll();
-			break;
-		default:
-			AdminFormsMain();
-	}
-}
-
-if(isset($_GET['a'])){
-	AdminForms($_GET['a']);
-}else{
-	AdminForms('main');
-}
-
-?>

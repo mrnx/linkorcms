@@ -275,7 +275,7 @@ function AdminPhpTesterSnippets( $type ){
 
 		$table->AddRow(
 			$id,
-			'<b><a href="'.$editlink.'">'.SafeDB($snip['title'], 255, str).'</a></b>',
+			'<b>'.System::admin()->Link(SafeDB($snip['title'], 255, str), $editlink).'</b>',
 			$func
 		);
 	}

@@ -166,11 +166,12 @@ function AdminGuestBookMain(){
 // Премодерация
 function AdminGuestBookPremoderationMain(){
 	global $config;
+	System::admin()->AddCenterBox('Премодерация');
+
 	$premoderation = System::user()->CheckAccess2('guestbook', 'premoderation');
 	$premoderate = System::database()->Select('guestbook', "`premoderate`='0'");
 	if(System::database()->NumRows() == 0){
-		$text = '<center>В премодерации нет сообщений.</center>';
-		AddTextBox('Премодерация', $text);
+		System::admin()->Highlight('В премодерации нет сообщений.');
 		return;
 	}
 
@@ -180,7 +181,6 @@ function AdminGuestBookPremoderationMain(){
 		$page = 1;
 	}
 
-	AddCenterBox('Премодерация');
 	SortArray($premoderate, 'date', true);
 	$num = $config['gb']['msgonpage'];
 	if(count($premoderate) > $num){

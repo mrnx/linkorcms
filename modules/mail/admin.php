@@ -121,7 +121,7 @@ function AdminMailEditTopic(){
 		$cap = 'Сохранить изменения';
 		unset($topic);
 	}
-	FormRow('Заголовок', $site->Edit('title', $title, false, 'maxlength="250" style="width:200px;"'), 140);
+	FormRow('Заголовок', $site->Edit('title', $title, false, 'maxlength="250" style="width:400px;"'), 140);
 	FormTextRow('Описание', $site->HtmlEditor('description', $description, 600, 200));
 	FormRow('Активна', $site->Select('active', GetEnData($active[1])));
 	FormRow('Включить', $site->Select('status', GetEnData($status[1])));
