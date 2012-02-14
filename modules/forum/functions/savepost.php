@@ -1,9 +1,9 @@
 <?php
 
 function IndexForumSavePost() {
-	global $db, $site, $user,$config, $lang;
+	global $db, $site, $user,$config, $forum_lang;
 	if(!$user->Auth) {
-		$site->AddTextBox($lang['forum'], '<center>'.$lang['error_auth'].'</center>');
+		$site->AddTextBox($forum_lang['forum'], '<center>'.$forum_lang['error_auth'].'</center>');
 		return;
 	}
 	$post_id = SafeEnv($_GET['post'],11,int);
@@ -31,13 +31,13 @@ function IndexForumSavePost() {
 				Forum_Cache_ClearAllCacheForum();
 				GO(Ufu('index.php?name=forum&op=showtopic&topic='.$topic_id.'&page='.$page.'#'.$post_id, 'forum/topic{topic}-{page}.html#'.$post_id));
 			}else{
-				$site->AddTextBox($lang['forum'], '<center>'.$lang['no_right_comment_edit'].'</center>');
+				$site->AddTextBox($forum_lang['forum'], '<center>'.$forum_lang['no_right_comment_edit'].'</center>');
 				return;
 			}
 		}else{
-			$site->AddTextBox($lang['topic_basket_current_post'], '<center>'.$lang['topic_basket_post'].'.<br><input type="button" value="'.$lang['back'].'"onclick="history.back();"></center>');
+			$site->AddTextBox($forum_lang['topic_basket_current_post'], '<center>'.$forum_lang['topic_basket_post'].'.<br><input type="button" value="'.$forum_lang['back'].'"onclick="history.back();"></center>');
 		}
 	}else{
-		$site->AddTextBox($lang['post_basket'], '<center>'.$lang['post_basket_no_edit'].'.<br><input type="button" value="'.$lang['back'].'"onclick="history.back();"></center>');
+		$site->AddTextBox($forum_lang['post_basket'], '<center>'.$forum_lang['post_basket_no_edit'].'.<br><input type="button" value="'.$forum_lang['back'].'"onclick="history.back();"></center>');
 	}
 }

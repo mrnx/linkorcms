@@ -44,5 +44,5 @@ if(!isset($config['forum']['cache'])) {
 	$config['forum']['update_cache_in_add'] = true;
 }
 
-$site->Title = $lang['forum'];
+$site->Title = $forum_lang['forum'];
 $forum_navigation = '';

@@ -22,12 +22,12 @@ function EchoForum( $var ){
 }
 
 function IndexForumPrintErrors( $errors ){
-	global $lang;
-	$text = $lang['error_comment_add'].'.<br /><ul>';
+	global $forum_lang;
+	$text = $forum_lang['error_comment_add'].'.<br /><ul>';
 	foreach($errors as $error){
 		$text .= '<li>'.$error;
 	}
-	$text .= '</ul><center><a href="javascript:history.back()">'.$lang['back'].'</a></center>';
+	$text .= '</ul><center><a href="javascript:history.back()">'.$forum_lang['back'].'</a></center>';
 	return $text;
 }
 
@@ -87,8 +87,8 @@ function ForumAdminDeleteForum( $forum_id, $delete = true ){
 }
 
 function No_link_guest( &$text ){
-	global $lang;
-	$replace = '<p class="notice">'.$lang['for_auth_user'].'</p>';
+	global $forum_lang;
+	$replace = '<p class="notice">'.$forum_lang['for_auth_user'].'</p>';
 	$text = preg_replace("!<a[^>]*(http|www)(.*)</a>!siU", $replace, $text);
 	$text = eregi_replace('(http|www)([[:alnum:]/\n+-=%&:_.~?]+[#[:alnum:]+]*)', $replace, $text);
 	return $text;

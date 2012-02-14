@@ -4,7 +4,7 @@
 *  Просмотр темы форума или отдельного поста
 */
 function IndexForumShowTopic( $one_post = false ){
-	global $db, $config, $site, $user, $lang, $topic_show_title;
+	global $db, $config, $site, $user, $forum_lang, $topic_show_title;
 
 	$topic_id = SafeEnv($_GET['topic'], 11, int);
 
@@ -71,7 +71,7 @@ function IndexForumShowTopic( $one_post = false ){
 					$basket = Forum_Basket_RenderBasket($topics, 'forum_basket_topics');
 					if(isset($basket[$topic['id']])){
 						$text = Forum_Basket_RenderBasketComAdmin($topic['id'], $topic['title'], $basket, true, true);
-						$site->AddTextBox($lang['topic_basket_red'], $text);
+						$site->AddTextBox($forum_lang['topic_basket_red'], $text);
 					}
 				}
 			}
@@ -107,7 +107,7 @@ function IndexForumShowTopic( $one_post = false ){
 					$right = $rang['right'];
 					$is_message_add	= $rang['rang_message'];
 					Navigation_Patch($forum['id'], true);
-					$site->Title .= $lang['site_slas'].$parent['title'].$lang['site_slas']. $forum['title'] .$lang['site_slas'].$topic['title'];
+					$site->Title .= $forum_lang['site_slas'].$parent['title'].$forum_lang['site_slas']. $forum['title'] .$forum_lang['site_slas'].$topic['title'];
 
 					// Бокс с названием темы и количеством просматривающих пользователей
 					$site->AddTextBox('', '<b>'.SafeDB($topic['title'], 255, str).'</b>'.$topic2['read']);
@@ -180,19 +180,19 @@ function IndexForumShowTopic( $one_post = false ){
 					$site->Blocks['is_marker']['vars'] = $vars_marker;
 
 					if(isset($topic2['users'])){
-						Forum_Online_Render_Online($topic2['users'], $lang['current_online']);
+						Forum_Online_Render_Online($topic2['users'], $forum_lang['current_online']);
 					}
 				}else {
-					$site->AddTextBox($lang['error'], $lang['error_access_category']);
+					$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 				}
 			}else {
-				$site->AddTextBox($lang['error'], $lang['error_access_category']);
+				$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 			}
 		}else {
-			$site->AddTextBox($lang['topic_basket'], $lang['topic_basket_current'].'<br><input type="button" value="'.$lang['back'].'"onclick="history.back();"></center>');
+			$site->AddTextBox($forum_lang['topic_basket'], $forum_lang['topic_basket_current'].'<br><input type="button" value="'.$forum_lang['back'].'"onclick="history.back();"></center>');
 		}
 	}else{
-		$site->AddTextBox($lang['error'], '<center><input type="button" value="'.$lang['back'].'"onclick="history.back();"></center>');
+		$site->AddTextBox($forum_lang['error'], '<center><input type="button" value="'.$forum_lang['back'].'"onclick="history.back();"></center>');
 	}
 
 	// Права на форуме
@@ -207,7 +207,7 @@ function IndexForumShowTopic( $one_post = false ){
 		$forum_id = 0;
 	}
 	// Быстрый переход по форумам
-	$site->AddTextBox('', '<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox($forum_id).'</span>');
+	$site->AddTextBox('', '<span style="float:right;">'.$forum_lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox($forum_id).'</span>');
 
 	// Кэшируем страницу
 	if($config['forum']['cache']) {

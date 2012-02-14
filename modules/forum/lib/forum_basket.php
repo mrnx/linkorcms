@@ -143,7 +143,7 @@ function Forum_Basket_RenderBasket($coms = array(),$table= 'forum_basket_post'){
 
 
 function Forum_Basket_RenderBasketComAdmin($id = 0,$text= '', $basket = array() , $full = true, $next = true) {
-	global $user, $config, $lang;
+	global $user, $config, $forum_lang;
 	static $num_del = 0;
 	$out_text =$text;
 	if($config['forum']['basket'] == true) {
@@ -157,18 +157,18 @@ function Forum_Basket_RenderBasketComAdmin($id = 0,$text= '', $basket = array() 
 		$del_time = '';
 		if(isset($basket[$id])) {
 			$ainfo = GetUserInfo($basket[$id]['user']);
-			$del_admin = $lang['deleted'].':<A HREF="index.php?name=user&op=userinfo&user='.$basket[$id]['user'].'"> '.$ainfo['name'].'</A>';
-			$del_time =$lang['basket_delete_forever'].' '.TimeRender($basket[$id]['date']+(86400*$config['forum']['clear_basket_day']), false, false);
+			$del_admin = $forum_lang['deleted'].':<A HREF="index.php?name=user&op=userinfo&user='.$basket[$id]['user'].'"> '.$ainfo['name'].'</A>';
+			$del_time =$forum_lang['basket_delete_forever'].' '.TimeRender($basket[$id]['date']+(86400*$config['forum']['clear_basket_day']), false, false);
 			if(trim($basket[$id]['reason'])<>'') {
 				$com_admin = $basket[$id]['reason'];
-				$com_admin = '<FONT  COLOR="#FF0000">'.$lang['reason'].'</FONT>:<BR>'.BbCodePrepare($com_admin);
+				$com_admin = '<FONT  COLOR="#FF0000">'.$forum_lang['reason'].'</FONT>:<BR>'.BbCodePrepare($com_admin);
 			}
 			$num_del++;
-			$out_text=($full?$lang['basket_removed_in_basket_message']:$lang['basket_removed_in_basket_message_smile']).
+			$out_text=($full?$forum_lang['basket_removed_in_basket_message']:$forum_lang['basket_removed_in_basket_message_smile']).
 			($full?'<BR>'.$del_admin.'<BR>'.$del_time.'.<BR>'.$com_admin.'<HR>'.
 			($next?'<a href="#" onclick="ShowHide(\'delete_com'.$num_del.'\'); return false;">'.
-			$lang['basket_see'] .'</a>&nbsp;|&nbsp;<a href="index.php?name=forum&op=restore_basket&'.
-			$basket['table'].'='.$id.'">'.$lang['restore'].'</a><div  align="left" id="delete_com'.
+			$forum_lang['basket_see'] .'</a>&nbsp;|&nbsp;<a href="index.php?name=forum&op=restore_basket&'.
+			$basket['table'].'='.$id.'">'.$forum_lang['restore'].'</a><div  align="left" id="delete_com'.
 			$num_del.'" style="visibility: hidden; display: none; "><BR>'.$deltext .'</div>':''):'');
 		}
 	}

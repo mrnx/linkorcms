@@ -2,7 +2,7 @@
 
 // ƒобавление новой темы пользователем
 function IndexForumAddTopic(){
-	global $user, $db, $site, $config, $lang;
+	global $user, $db, $site, $config, $forum_lang;
 
 	if(isset($_GET['forum']) && isset($_POST['topic_title']) && isset($_POST['text'])) {
 
@@ -24,13 +24,13 @@ function IndexForumAddTopic(){
 			$rang = Rang_UserStatus($forum);
 			if($rang['rang_access']){
 				$uniq_code = '';//GenRandomString(12, '1234567890');
-				
+
 				$topic_title = SafeEnv($_POST['topic_title'], 255, str);
 				$time = time();
 				if(strlen($topic_title) == 0) {
 					$topic_error = array();
-					$topic_error[] = $lang['no_title_topic'];
-					$site->AddTextBox($lang['error'], IndexForumPrintErrors($topic_error));
+					$topic_error[] = $forum_lang['no_title_topic'];
+					$site->AddTextBox($forum_lang['error'], IndexForumPrintErrors($topic_error));
 					return;
 				}
 				$topic_values = Values('', $forum_id, $topic_title, '1', '0', '0', $time, $user->Get('u_id'), $user->Get('u_name'), $time, '0', '', $uniq_code, 0, 0, 0);
@@ -41,7 +41,7 @@ function IndexForumAddTopic(){
 
 				$result = Forum_Add_AddPost2($topic_id);
 				if(is_array($result)){
-					$site->AddTextBox($lang['error'], IndexForumPrintErrors($result));
+					$site->AddTextBox($forum_lang['error'], IndexForumPrintErrors($result));
 					ForumAdminDeleteTopic($topic_id);
 				}else{
 					$user->ChargePoints($config['points']['forum_post']);
@@ -57,12 +57,12 @@ function IndexForumAddTopic(){
 					GO(Ufu('index.php?name=forum&op=showforum&forum='.$forum_id, GetSiteUrl().'forum/{forum}/'));
 				}
 			}else{
-				$site->AddTextBox($lang['error'], $lang['error_access_category']);
+				$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 			}
 		}else{
-			$site->AddTextBox($lang['error'], $lang['error_access_category']);
+			$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 		}
 	}else{
-		$site->AddTextBox($lang['error'], $lang['error_data']);
+		$site->AddTextBox($forum_lang['error'], $forum_lang['error_data']);
 	}
 }

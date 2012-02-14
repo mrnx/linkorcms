@@ -69,21 +69,21 @@ function Forum_Subscription_Get_User( $topic = 0, $full = true, $ignore_user_id 
 }
 
 function Forum_Subscription_Send_Email($users, $topic_id, $name, $title) {
-	global $config, $lang;
+	global $config, $forum_lang;
 	$link = $config['general']['site_url'].'/index.php?name=forum&op=showtopic&topic='.$topic_id.'&view=lastpost';
 	$link_delete = $config['general']['site_url'].'index.php?name=forum&op=subscription&a=delete&topic='.$topic_id;
-	$Text = $lang['hello'];
-	$Text .= $name.$lang['add_message'].$title.$lang['last_subscription'];
+	$Text = $forum_lang['hello'];
+	$Text .= $name.$forum_lang['add_message'].$title.$forum_lang['last_subscription'];
 	$Text .= "\r\n";
-	$Text .= $lang['view_message'];
+	$Text .= $forum_lang['view_message'];
 	$Text .= $link."\r\n";
-	$Text .= $lang['delete_subscription'];
+	$Text .= $forum_lang['delete_subscription'];
 	$Text .= $link_delete."\r\n";
-	$Text .= $lang['auto_message'];
-	$robot = $lang['robot'];
+	$Text .= $forum_lang['auto_message'];
+	$robot = $forum_lang['robot'];
 	$robot_email = 'noreply@'.getenv("HTTP_HOST");
 	foreach($users as $c_user){
-		SendMail($c_user['name'],$c_user['email'],$lang['new_message'].$title,$Text, false, $robot, $robot_email);
+		SendMail($c_user['name'],$c_user['email'],$forum_lang['new_message'].$title,$Text, false, $robot, $robot_email);
 	}
 }
 

@@ -4,7 +4,7 @@
  * Восстановить помеченое и вернуть статистику для удалённых постов
  */
 function IndexForumRestoreBasketPost( $id = 0, $go_back = true ){
-	global $db, $lang;
+	global $db, $forum_lang;
 	$mdb = $db->Select('forum_posts', "`id`='$id' and `delete`='1'");
 	if(count($mdb) > 0){
 		$post = $mdb[0];

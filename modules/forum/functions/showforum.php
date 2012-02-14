@@ -3,7 +3,7 @@
 ForumLoadFunction('main');
 
 function IndexForumShowForum(){
-	global $db, $config, $site, $user, $lang, $forum_lib_dir, $read_data, $forums2,  $topics, $statistics;
+	global $db, $config, $site, $user, $forum_lang, $forum_lib_dir, $read_data, $forums2,  $topics, $statistics;
 	$forums2 = array();
 	$topics = array();
 	$read_data = array();
@@ -17,7 +17,7 @@ function IndexForumShowForum(){
 	$topics_on_page = $config['forum']['topics_on_page'];
 
 	$statistics = ForumStatistics::Instance();
-	$statistics->Initialize($lang['statistics_cat']);
+	$statistics->Initialize($forum_lang['statistics_cat']);
 
 	if($user->isAdmin() && $config['forum']['basket']){
 		$your_where = '';
@@ -108,7 +108,7 @@ function IndexForumShowForum(){
 							$is_theme_add = $rang['is_theme_add'];
 							$parent = IndexForumDataFilter($parent);
 							Navigation_Patch($forum['id']);
-							$site->Title = $site->Title.$lang['site_slas'].$parent['title'].$lang['site_slas'].$forum['title'];
+							$site->Title = $site->Title.$forum_lang['site_slas'].$parent['title'].$forum_lang['site_slas'].$forum['title'];
 							$is_forum_member = $user->AccessIsResolved(2);
 							if(!$is_theme_add || !$user->Get('u_add_forum')){
 								$is_forum_member = false;
@@ -208,9 +208,9 @@ function IndexForumShowForum(){
 							$site->AddBlock('is_forum_member', $is_forum_member, false, 'mark');
 							$site->AddBlock('old', true, false, 'mark');
 
-							$vars_is_forum_member['url'] = '<a href="'.Ufu('index.php?name=forum&op=markread&forum='.$forum['id'], 'forum/markread/{forum}/').'">'.$lang['mark_all_read'].'</a>';
-							$vars_is_forum_member['viewnoreadurl'] = '<a href="'.Ufu('index.php?name=forum&op=viewnoread&forum='.$forum['id'], 'forum/viewnoread/{forum}/').'">'.$lang['viewnoread'].'</a>';
-							$vars_old['lasttopics'] = '<a href="'.Ufu('index.php?name=forum&op=lasttopics&forum='.$forum['id'], 'forum/lasttopics/{forum}/').'">'.$lang['lasttopics'].'</a>';
+							$vars_is_forum_member['url'] = '<a href="'.Ufu('index.php?name=forum&op=markread&forum='.$forum['id'], 'forum/markread/{forum}/').'">'.$forum_lang['mark_all_read'].'</a>';
+							$vars_is_forum_member['viewnoreadurl'] = '<a href="'.Ufu('index.php?name=forum&op=viewnoread&forum='.$forum['id'], 'forum/viewnoread/{forum}/').'">'.$forum_lang['viewnoread'].'</a>';
+							$vars_old['lasttopics'] = '<a href="'.Ufu('index.php?name=forum&op=lasttopics&forum='.$forum['id'], 'forum/lasttopics/{forum}/').'">'.$forum_lang['lasttopics'].'</a>';
 
 							$site->Blocks['is_forum_member']['vars'] = $vars_is_forum_member;
 							$site->Blocks['old']['vars'] = $vars_old;
@@ -248,25 +248,25 @@ function IndexForumShowForum(){
 									ForumSmile();
 								}
 							}else{
-								$site->AddTextBox($lang['error'], $lang['error_access_category']);
+								$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 							}
 						}else{
-							$site->AddTextBox($lang['error'], $lang['error_access_category']);
+							$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 						}
 					}else{
-						$site->AddTextBox($lang['error'], $lang['error_access_category']);
+						$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 					}
 				}else{
-					$site->AddTextBox($lang['error'], $lang['error_access_category']);
+					$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 				}
 			}else{
-				$site->AddTextBox($lang['error'], $lang['error_no_forum'] );
+				$site->AddTextBox($forum_lang['error'], $forum_lang['error_no_forum'] );
 			}
 		}else{
-			$site->AddTextBox($lang['error'], $lang['error_no_forum'] );
+			$site->AddTextBox($forum_lang['error'], $forum_lang['error_no_forum'] );
 		}
 	}else{
-		$site->AddTextBox($lang['error'], $lang['error_no_forum'] );
+		$site->AddTextBox($forum_lang['error'], $forum_lang['error_no_forum'] );
 	}
 
 	if(isset($_GET['forum'])) {
@@ -278,10 +278,10 @@ function IndexForumShowForum(){
 	// Пользователи онлайн
 	if(isset($online_user)){
 		if(isset($online_user['reg'])){
-			Forum_Online_Render_Online($online_user, $lang['current_category'], 'forum_topics_online');
+			Forum_Online_Render_Online($online_user, $forum_lang['current_category'], 'forum_topics_online');
 		}
 	}
-	   
+
 	// Права на форуме
 	if(isset($right)){
 		$site->AddBlock('topic_right', true, true, 'topic', 'module/forum_right.html');
@@ -294,7 +294,7 @@ function IndexForumShowForum(){
 	$statistics->Render('forum_topics_statistics');
 
 	// Быстрый переход по форумам
-	$site->AddTextBox('', '<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox($cat).'</span>');
+	$site->AddTextBox('', '<span style="float:right;">'.$forum_lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox($cat).'</span>');
 
 	// Кэширование страницы
 	if($config['forum']['cache']){

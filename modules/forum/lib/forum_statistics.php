@@ -74,7 +74,7 @@ class ForumStatistics{
 	}
 
 	public function Render($block='forum_statistics'){
-		global $site, $lang;
+		global $site, $forum_lang;
 		$site->AddBlock($block, true, false, $block, 'module/forum_statistics.html');
 		$site->AddBlock('statistics', true, false, 'stat');
 
@@ -86,11 +86,11 @@ class ForumStatistics{
 		$vars['reply_count'] = $this->reply_count;
 		$vars['hits'] = $this->hits;
 
-		$vars['lang_topic_authors_count'] = $lang['author_topics'];
-		$vars['lang_topics_count'] = $lang['topics'];
-		$vars['lang_reply_count'] = $lang['reply'];
-		$vars['lang_hits'] = $lang['hits'];
-		$vars['lang_active_topic_authors'] = $lang['active_author_topics'];
+		$vars['lang_topic_authors_count'] = $forum_lang['author_topics'];
+		$vars['lang_topics_count'] = $forum_lang['topics'];
+		$vars['lang_reply_count'] = $forum_lang['reply'];
+		$vars['lang_hits'] = $forum_lang['hits'];
+		$vars['lang_active_topic_authors'] = $forum_lang['active_author_topics'];
 
 		$site->Blocks['statistics']['vars'] = $vars;
 	}

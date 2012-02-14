@@ -296,8 +296,7 @@ class Tree{
 			$db->Update($this->Table, $this->FileCounterKey."='$counter_val'", "`".$this->IdKey."`='$id'");
 
 			// Очищаем кеш
-			$cache = LmFileCache::Instance();
-			$cache->Delete('tree', $this->Table);
+			LmFileCache::Instance()->Delete('tree', $this->Table);
 		}
 	}
 
@@ -341,8 +340,7 @@ class Tree{
 			$db->Update($this->Table, $this->CatCounterKey."='$counter_val'", "`".$this->IdKey."`='$id'");
 
 			// Очищаем кеш
-			$cache = LmFileCache::Instance();
-			$cache->Delete('tree', $this->Table);
+			LmFileCache::Instance()->Delete('tree', $this->Table);
 		}
 	}
 

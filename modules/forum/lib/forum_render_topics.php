@@ -3,7 +3,7 @@
 # LinkorCMS Development Group
 # www.linkorcms.ru
 # Лицензия LinkorCMS 1.2.
-# темы 
+# темы
 
 /**
  *
@@ -13,7 +13,7 @@
  * @param <type> $out_topics
  */
 function Forum_Render_FilterTopics( &$forum, &$alltopics, &$statistics, &$out_topics ){
-	global $db, $config, $site, $user, $lang;
+	global $db, $config, $site, $user, $forum_lang;
 	$ig = true;
 	$topics_stick = array();
 	$out_topics2 = array();
@@ -62,7 +62,7 @@ function Forum_Render_Topics(&$forum, &$topics, &$read_data,
 		$rang='' , &$online_user=null)
 {
 
-	global $db, $config, $site, $user, $lang;
+	global $db, $config, $site, $user, $forum_lang;
 	$basket = Forum_Basket_RenderBasket($topics, 'forum_basket_topics');
 
 	$site->AddBlock('no_topics', count($topics) == 0);
@@ -82,7 +82,7 @@ function Forum_Render_Topics(&$forum, &$topics, &$read_data,
 	$site->AddBlock('topics', true, true, 'topic');
 
 	if(is_array($topics) && count($topics) > 0){
-		
+
 		foreach($topics as $topic){
 			$topic = Forum_Topic_DataFilter($topic, false);
 
@@ -116,7 +116,7 @@ function Forum_Render_Topics(&$forum, &$topics, &$read_data,
 			if($rang['close_topic'] == 1){
 				$topic['close'] = $rang['close_topic'] == 0;
 				$topic['begin'] = $rang['close_topic'] == 1;
-				$topic['status'] = (!$topic['close'] ? $lang['topic_close'] : '');
+				$topic['status'] = (!$topic['close'] ? $forum_lang['topic_close'] : '');
 			}
 			if(!isset($topic['read'])){
 				$topic['read']  = ' ';

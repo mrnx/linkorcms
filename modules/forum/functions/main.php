@@ -70,7 +70,7 @@ function IndexForumStats($id){
 
 // Главная страница форума, список форумов в категории
 function IndexForumMain(){
-	global $site, $user, $lang, $config, $db, $forums2, $topics, $read_data, $statistics;
+	global $site, $user, $forum_lang, $config, $db, $forums2, $topics, $read_data, $statistics;
 	$forums2 = array();
 	$topics = array();
 	$read_data = array();
@@ -83,7 +83,7 @@ function IndexForumMain(){
 		$cat = false;
 		$e_where = '';
 	}
-	$s_title = (!$cat ? $lang['statistics'] : $lang['statistics_cat']);
+	$s_title = (!$cat ? $forum_lang['statistics'] : $forum_lang['statistics_cat']);
 	$statistics->Initialize($s_title);
 	if($cat){
 		$statistics->_current = $pid;
@@ -132,9 +132,9 @@ function IndexForumMain(){
 		$site->AddBlock('is_forum_member', $is_forum_member, false, 'mark');
 		$site->AddBlock('old', true, false, 'mark');
 
-		$vars_is_forum_member['url'] = '<a href="'.Ufu('index.php?name=forum&op=markread', 'forum/markread/').'">'.$lang['mark_all_read'].'</a>';
-		$vars_is_forum_member['viewnoreadurl'] = '<a href="'.Ufu('index.php?name=forum&op=viewnoread', 'forum/viewnoread/').'">'.$lang['viewnoread'].'</a>';
-		$vars_old['lasttopics'] = '<a href="'.Ufu('index.php?name=forum&op=lasttopics', 'forum/lasttopics/').'">'.$lang['lasttopics'].'</a>';
+		$vars_is_forum_member['url'] = '<a href="'.Ufu('index.php?name=forum&op=markread', 'forum/markread/').'">'.$forum_lang['mark_all_read'].'</a>';
+		$vars_is_forum_member['viewnoreadurl'] = '<a href="'.Ufu('index.php?name=forum&op=viewnoread', 'forum/viewnoread/').'">'.$forum_lang['viewnoread'].'</a>';
+		$vars_old['lasttopics'] = '<a href="'.Ufu('index.php?name=forum&op=lasttopics', 'forum/lasttopics/').'">'.$forum_lang['lasttopics'].'</a>';
 
 		$site->Blocks['is_forum_member']['vars'] = $vars_is_forum_member;
 		$site->Blocks['old']['vars'] = $vars_old;
@@ -237,7 +237,7 @@ function IndexForumMain(){
 			}
 		}
 	}else{
-		$site->AddTextBox($lang['forum'], $lang['no_category'] );
+		$site->AddTextBox($forum_lang['forum'], $forum_lang['no_category'] );
 	}
 
 	if(isset($_GET['cat'])){
@@ -246,12 +246,12 @@ function IndexForumMain(){
 		$cat = 0;
 	}
 	if(isset($c_u['users'])){
-		Forum_Online_Render_Online($c_u['users'], ($cat_id == -1?$lang['all_online']:$lang['current_category'])) ;
+		Forum_Online_Render_Online($c_u['users'], ($cat_id == -1?$forum_lang['all_online']:$forum_lang['current_category'])) ;
 	}
 	$statistics->Render();
 	if(isset($_GET['cat'])){
 		$quick_transition= Navigation_GetForumCategoryComboBox($cat);
-		$site->AddTextBox('', '<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. $quick_transition.'</span>');
+		$site->AddTextBox('', '<span style="float:right;">'.$forum_lang['quick_transition'].':&nbsp;'. $quick_transition.'</span>');
 	}
 	if($config['forum']['cache']){
 		if(!$user->Auth){

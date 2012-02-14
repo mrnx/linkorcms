@@ -2,7 +2,7 @@
 
 // Удаление сообщения
 function IndexForumDeletePost(){
-	global $db, $site, $user, $config, $lang;
+	global $db, $site, $user, $config, $forum_lang;
 	if(isset($_GET['ok'])){
 		if(isset($_GET['page'])){
 			$page = SafeEnv($_GET['page'], 11, int);
@@ -65,9 +65,9 @@ function IndexForumDeletePost(){
 		Forum_Cache_ClearAllCacheForum();
 		GO(Ufu('index.php?name=forum&op=showtopic&topic='.$topic_id.'&page='.$page, 'forum/topic{topic}-{page}.html'));
 	}else {
-		$text = '<br />'.$lang['delete_post'].'?<br /><br />'
+		$text = '<br />'.$forum_lang['delete_post'].'?<br /><br />'
 				.' <a href="javascript:history.go(-1)">Нет</a>';
-		$site->AddTextBox($lang['forum'], '<center>'.$text.'</center>');
+		$site->AddTextBox($forum_lang['forum'], '<center>'.$text.'</center>');
 		$site->AddTemplatedBox('', 'module/forum_delete_post.html');
 		$site->AddBlock('delete_form', true, false, 'form');
 		$vars = array();

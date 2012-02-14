@@ -24,6 +24,7 @@ TAddToolLink('Добавить ссылку', 'link', 'pages&a=link');
 TAddToolLink('Добавить категорию', 'cat', 'pages&a=cat');
 TAddToolLink('Настройки', 'config', 'pages&a=config');
 TAddToolBox($action);
+
 switch($action){
 	case 'main':
 	case 'ajaxtree':
@@ -158,8 +159,8 @@ function AdminPagesAjaxTree(){
 		$func .= System::admin()->SpeedButton('Добавить дочернюю ссылку', ADMIN_FILE.'?exe=pages&a=link&parent='.$id, 'images/admin/link_add.png');
 		$func .= System::admin()->SpeedButton('Добавить дочернюю категорию', ADMIN_FILE.'?exe=pages&a=cat&parent='.$id, 'images/admin/folder_add.png');
 		$func .= '&nbsp;';
-		$func .= System::admin()->SpeedStatus('Скрыть из меню', 'Показать в меню', ADMIN_FILE.'?exe=pages&a=changemenu&id='.$id.'&ajax', $page['showinmenu'] == '1', 'images/menu_enabled.png', 'images/menu_disabled.png');
-		$func .= System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=pages&a=changestatus&id='.$id.'&ajax', $page['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
+		$func .= System::admin()->SpeedStatus('Скрыть из меню', 'Показать в меню', ADMIN_FILE.'?exe=pages&a=changemenu&id='.$id, $page['showinmenu'] == '1', 'images/menu_enabled.png', 'images/menu_disabled.png');
+		$func .= System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=pages&a=changestatus&id='.$id, $page['enabled'] == '1', 'images/bullet_green.png', 'images/bullet_red.png');
 		$func .= '&nbsp;';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
 
@@ -668,11 +669,11 @@ function AdminPagesChangeStatus(){
 	}
 	System::database()->Update('pages', "enabled='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	AdminPagesClearCache();
-	if(!isset($_GET['ajax'])){
-		GO(ADMIN_FILE.'?exe=pages');
-	}else{
+	if(IsAjax()){
 		echo 'OK';
 		exit;
+	}else{
+		GO(ADMIN_FILE.'?exe=pages');
 	}
 }
 
@@ -691,11 +692,11 @@ function AdminPagesChangeMenu(){
 	}
 	$db->Update('pages', "showinmenu='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	AdminPagesClearCache();
-	if(!isset($_GET['ajax'])){
-		GO(ADMIN_FILE.'?exe=pages');
-	}else{
+	if(IsAjax()){
 		echo 'OK';
 		exit;
+	}else{
+		GO(ADMIN_FILE.'?exe=pages');
 	}
 }
 
@@ -725,62 +726,7 @@ function AdminPagesDelete(){
  * @return void
  */
 function AdminPagesResetCounter(){
-	global $config, $db;
-	$db->Update('pages', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	GO(ADMIN_FILE.'?exe=pages');
-}
-
-function AdminPagesBSort( $a, $b ){
-	if($a['order'] == $b['order'])
-		return 0;
-	return ($a['order'] < $b['order']) ? -1 : 1;
-}
-
-/**
- * Перемещение страницы вверх или вниз
- * @return void
- */
-function AdminPagesMove(){
-	global $config, $db;
-	$move = SafeEnv($_GET['to'], 4, str); // up, down
-	$id = SafeEnv($_GET['id'], 11, int);
-	$db->Select('pages', "`id`='$id'");
-	if($db->NumRows() > 0){
-		$page = $db->FetchRow();
-		$pid = SafeDB($page['parent'], 11, int);
-		$pages = $db->Select('pages', "`parent`='$pid'");
-		usort($pages, 'AdminPagesBSort');
-		$c = count($pages);
-		//Исходный индекс
-		$cur_pos = 0;
-		for($i = 0; $i < $c; $i++){
-			$pages[$i]['order'] = $i;
-			if($pages[$i]['id'] == $id){
-				$cur_pos = $i;
-			}
-		}
-		//Индекс перемещения
-		$rep_pos = $cur_pos;
-		if($move == 'up'){
-			$rep_pos = $cur_pos - 1;
-		}elseif($move == 'down'){
-			$rep_pos = $cur_pos + 1;
-		}else{
-			$rep_pos = $cur_pos;
-		}
-		if($rep_pos < 0 || $rep_pos >= $c){
-			$rep_pos = $cur_pos;
-		}
-		$temp = intval($pages[$cur_pos]['order']);
-		$pages[$cur_pos]['order'] = intval($pages[$rep_pos]['order']);
-		$pages[$rep_pos]['order'] = intval($temp);
-		for($i = 0; $i < $c; $i++){
-			$order = $pages[$i]['order'];
-			$id = $pages[$i]['id'];
-			$db->Update('pages', "`order`='$order'", "`id`='$id'");
-		}
-	}
-	AdminPagesClearCache();
+	System::database()->Update('pages', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	GO(ADMIN_FILE.'?exe=pages');
 }
 
@@ -825,7 +771,6 @@ function AdminPagesAjaxMove(){
 	foreach($indexes as $id=>$order){
 		System::database()->Update('pages', "`order`='$order'", "`id`='$id'");
 	}
+	AdminPagesClearCache();
 	exit;
 }
-
-?>

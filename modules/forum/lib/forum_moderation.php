@@ -124,7 +124,7 @@ function Moderation_Do_UnStick() {
 }
 
 function Moderation_Do_MoveTopic(){
-	global $site, $db, $lang;
+	global $site, $db, $forum_lang;
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'],1,int)=='1'){
 		$forum = $_POST['forum'];
 		$mdb = $db->Select('forums', "`id`='$forum'");
@@ -151,16 +151,16 @@ function Moderation_Do_MoveTopic(){
 			}
 			Forum_Cache_ClearAllCacheForum();
 		}else{
-			return $site->AddTextBox($lang['error'],$lang['error_no_forum'].'<BR><a href="javascript:history.go(-1)">'.$site->Button('Назад').'</a>');
+			return $site->AddTextBox($forum_lang['error'],$forum_lang['error_no_forum'].'<BR><a href="javascript:history.go(-1)">'.$site->Button('Назад').'</a>');
 		}
 	}else{
-		return $lang['select_category'].'<BR><center>'.Navigation_GetForumCategoryComboBox(0, false, true, false).'</center>';
+		return $forum_lang['select_category'].'<BR><center>'.Navigation_GetForumCategoryComboBox(0, false, true, false).'</center>';
 
 	}
 }
 
 function Moderation_Do_MergeTopic(){
-	global $site, $db, $lang;
+	global $site, $db, $forum_lang;
 	if(isset($_GET['ok']) && SafeEnv($_GET['ok'],1,int)=='1') {
 		$dest_topic =  $_POST['dest_topic'];
 		$all_topics = explode(',',$_POST['topics']);
@@ -193,13 +193,13 @@ function Moderation_Do_MergeTopic(){
 		foreach( $e_t as $topic) {
 			$site->DataAdd($data, $topic['id'], $topic['title'], false);
 		}
-		return $lang['merge_dest_topic'].'<BR>'.$site->Select('dest_topic', $data).'<BR><BR>';
+		return $forum_lang['merge_dest_topic'].'<BR>'.$site->Select('dest_topic', $data).'<BR><BR>';
 	}
 }
 
 
 function Moderation_GetDo($do, $begin = false) {
-	global $lang;
+	global $forum_lang;
 	global $config, $site;
 	switch($do) {
 		case 'deletetopic':
@@ -215,17 +215,17 @@ function Moderation_GetDo($do, $begin = false) {
 					$site->Blocks['delete_form']['vars'] = $vars;
 				}
 			}
-			return $lang['delete_topics'];
+			return $forum_lang['delete_topics'];
 		case 'open':  if($begin) Moderation_Do_Open();
-			return $lang['open_topics'];
+			return $forum_lang['open_topics'];
 		case 'close':  if($begin) Moderation_Do_Close();
-			return $lang['close_topics'];
+			return $forum_lang['close_topics'];
 		case 'stick':  if($begin) Moderation_Do_Stick();
-			return $lang['important_topics'];
+			return $forum_lang['important_topics'];
 		case 'unstick':  if($begin) Moderation_Do_UnStick();
-			return $lang['remove_important_topics'];
-		case 'movetopic':    return   Moderation_Do_MoveTopic().$lang['move_topics'];
-		case 'mergetopic':  return Moderation_Do_MergeTopic().$lang['merge_topics'];
+			return $forum_lang['remove_important_topics'];
+		case 'movetopic':    return   Moderation_Do_MoveTopic().$forum_lang['move_topics'];
+		case 'mergetopic':  return Moderation_Do_MergeTopic().$forum_lang['merge_topics'];
 	}
 }
 
@@ -336,7 +336,7 @@ function Moderation_Do_MergePosts() {
 
 
 function Moderation_GetPostsDo( $do ) {
-	global $site, $config, $lang;
+	global $site, $config, $forum_lang;
 	switch($do){
 		case 'deleteposts': Moderation_Do_DeletePosts();
 			break;

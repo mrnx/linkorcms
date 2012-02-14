@@ -1,7 +1,7 @@
 <?php
 
 function IndexForumViewNoRead(){
-	global $db, $config, $site, $user, $lang, $forum_lib_dir;
+	global $db, $config, $site, $user, $forum_lang, $forum_lib_dir;
 	if(isset($_GET['page'])) {
 		$page = SafeEnv($_GET['page'], 11, int);
 	}else {
@@ -14,7 +14,7 @@ function IndexForumViewNoRead(){
 		include_once($forum_lib_dir.'forum_render_topics.php');
 
 		$statistics = ForumStatistics::Instance();
-		$statistics->Initialize($lang['statistics_cat']);
+		$statistics->Initialize($forum_lang['statistics_cat']);
 
 		if(isset($_GET['forum'])){
 			$gforum = SafeEnv($_GET['forum'], 11, int);
@@ -84,14 +84,14 @@ function IndexForumViewNoRead(){
 			$mtitle['title'] = SafeDB($mtitle['title'], 255, str);
 			$mtitle0['id'] = SafeDB($mtitle0['id'], 11, int);
 			$mtitle0['title'] = SafeDB($mtitle0['title'], 255, str);
-			Navigation_AppLink($lang['forum'], Ufu('index.php?name=forum', 'forum/'));
+			Navigation_AppLink($forum_lang['forum'], Ufu('index.php?name=forum', 'forum/'));
 			if($mtitle0['id']>0){
 				Navigation_AppLink($mtitle0['title'], Ufu('index.php?name=forum&op=showforum&forum='.$mtitle0['id'], 'forum/{forum}/'));
 			}
 			if($mtitle['id']>0){
 				Navigation_AppLink($mtitle['title'], Ufu('index.php?name=forum&op=showforum&forum='.$mtitle['id'], 'forum/{forum}/'));
 			}
-			Navigation_AppLink($lang['viewnoreadtitle'].'&nbsp;['.count($topics).']', Ufu('index.php?name=forum&op=viewnoread'.($mtitle['id']>0 ? '&forum='.$mtitle['id'] : ''), 'forum/viewnoread/'.($mtitle['id']>0 ? $mtitle['id'].'/' : '')));
+			Navigation_AppLink($forum_lang['viewnoreadtitle'].'&nbsp;['.count($topics).']', Ufu('index.php?name=forum&op=viewnoread'.($mtitle['id']>0 ? '&forum='.$mtitle['id'] : ''), 'forum/viewnoread/'.($mtitle['id']>0 ? $mtitle['id'].'/' : '')));
 			Navigation_ShowNavMenu();
 
 			// Постраничная навигация
@@ -104,15 +104,15 @@ function IndexForumViewNoRead(){
 			$site->AddBlock('topic_right', false, true, 'topic');
 			Navigation_ShowNavMenu();
 		}else {
-			$site->AddTextBox($lang['error'], $lang['error_no_forum'] );
+			$site->AddTextBox($forum_lang['error'], $forum_lang['error_no_forum'] );
 		}
 		$statistics->Render('forum_topics_statistics');
 		$c_u = Online_GetCountUser(-1);
 		$online_user = $c_u['users'];
-		Forum_Online_Render_Online($online_user, $lang['all_online'], 'forum_topics_online');
-		$site->AddTextBox('', '<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox(0).'</span>');
+		Forum_Online_Render_Online($online_user, $forum_lang['all_online'], 'forum_topics_online');
+		$site->AddTextBox('', '<span style="float:right;">'.$forum_lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox(0).'</span>');
 		$site->AddBlock('old', false, false, 'mark');
 	}else{ // Пользователь не авторизован
-		$site->AddTextBox($lang['error'], $lang['error_auth']);
+		$site->AddTextBox($forum_lang['error'], $forum_lang['error_auth']);
 	}
 }

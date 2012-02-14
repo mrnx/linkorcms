@@ -16,335 +16,231 @@ if(!$user->CheckAccess2('forum', 'forum')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);
 	return;
 }
-global $admin_forum_url,$config;
+global $admin_forum_url, $config;
 $admin_forum_url = ADMIN_FILE.'?exe=forum';
 
 
 include_once('forum_init.php');
 include_once($forum_lib_dir.'forum_init_admin.php');
-include_once($config['inc_dir'].'configuration/functions.php');
-
-function AdminForum( $action ){
-	global $config;
-	TAddSubTitle('Форум');
-
-	if(!$config['forum']['basket'] and $config['forum']['del_auto_time']){
-		Forum_Basket_RestoreBasketAll();
-	}
-
-	TAddToolLink('Список форумов', 'main', 'forum');
-	TAddToolLink('Добавить форум', 'forum_editor', 'forum&a=forum_editor');
-	TAddToolLink('Настройки', 'config', 'forum&a=config');
-	TAddToolBox($action);
-
-	if($config['forum']['basket']){
-		System::admin()->SideBarAddMenuItem('Удаляемые темы', 'forum&a=forum_basket_topics');
-		System::admin()->SideBarAddMenuItem('Удаляемые сообщения', 'forum&a=forum_basket_posts');
-		System::admin()->SideBarAddMenuBlock('Корзина');
-	}
-
-	switch($action) {
-		case 'main':
-			AdminForumMain();
-			break;
-		case 'changestatus':
-			AdminForumChangeStatus();
-			break;
-		case 'cat_editor':
-		case 'forum_editor':
-			AdminForumCatEditor($action);
-			break;
-		case 'cat_save':
-			AdminForumCatSave();
-			break;
-		case 'move':
-			AdminForumMove();
-			break;
-		case 'delete':
-			AdminForumDelete();
-			break;
-
-			// Настройки //////////////////////////////
-		case 'config':
-			AdminConfigurationEdit('forum', 'forum', false, false, 'Конфигурация Форума');
-			return true;
-			break;
-		case 'configsave':
-			AdminConfigurationSave('forum&a=config', 'forum', false);
-			return true;
-			break;
-			////////////////////////////////////////////
-
-			// Корзина ////////////////////////////////////
-		case 'forum_basket_posts':
-		case 'forum_basket_topics':
-		case 'forum_basket':
-			TAddSubTitle('Форум > Корзина');
-			switch($action) {
-				////////////////// Корзина
-				case 'forum_basket_posts':
-					AdminForumBasket();
-					break;
-				case 'forum_basket_topics':
-					AdminForumBasket('forum_basket_topics');
-					break;
-				default:
-					AdminForumBasket();
-			}
-
-			return true;
-			break;
-		case 'basket_restore':
-			AdminForumBasketRestore();
-			break;
-			////////////////////////////////////////////
-		case 'get_update':
-			if (file_exists(MOD_DIR.'update.php')) {
-				include_once(MOD_DIR.'update.php');
-				Forum_Update(false);
-				return true;
-			}
-
-		case 'update':
-			if (file_exists(MOD_DIR.'update.php')) {
-				include_once(MOD_DIR.'update.php');
-				Forum_Update();
-				return true;
-			}
-			else {
-				global $site, $lang;
-				AddTextBox($lang['error'] , $lang['error_file_exists'].' <B>'.MOD_DIR.'update.php'.'</B> ');
-
-			}
-			break;
-		default:
-			AdminForumMain();
-	}
-}
 
 if(isset($_GET['a'])) {
-	AdminForum($_GET['a']);
+	$action = $_GET['a'];
 }else {
-	AdminForum('main');
+	$action = 'main';
 }
 
+TAddSubTitle('Форум');
 
-
-function AdminForumGetOrder( $parent_id ) {
-	global $db;
-	$db->Select('forums', "`parent_id`='$parent_id'");
-	return $db->NumRows();
+if(!$config['forum']['basket'] && $config['forum']['del_auto_time']){
+	Forum_Basket_RestoreBasketAll();
 }
 
-function AdminForumRender2( $forum, $all_forums, $forums_all_id = array() ) {
-	global $config, $lang;
-	$text = '';
-	//генерируем move menu
-	if(isset($all_forums[$forum['parent_id']])) {
-		$max_place = count($all_forums[$forum['parent_id']]) - 1;
-	}else {
-		$max_place = 0;
-	}
-	$move_menu = '';
-	if($max_place == 0){
-		$move_menu .= ' - ';
-	}else{
-		$order = SafeDB($forum['order'], 11, int);
-		if($order >= 0 && $order < $max_place){ // Первый элемент
-			$move_menu .= SpeedButton('Вниз', ADMIN_FILE.'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
-		}
-		if($order <= $max_place && $order > 0){
-			$move_menu .= SpeedButton('Вверх', ADMIN_FILE.'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
-		}
-	}
-	// Кто видит
-	$vi = ViewLevelToStr(SafeDB($forum['view'], 1, int));
-	// Статус
-	switch($forum['status']) {
-		case '1':
-			$st = '<a href="'.ADMIN_FILE.'?exe=forum&a=changestatus&id='.SafeDB($forum['id'], 11, int).'" title="Выключить"><font color="#008000">Вкл.</font></a>';
-			break;
-		case '0':
-			$st = '<a href="'.ADMIN_FILE.'?exe=forum&a=changestatus&id='.SafeDB($forum['id'], 11, int).'" title="Включить"><font color="#FF0000">Выкл.</font></a>';
-			break;
-	}
-	$font_start = '';
-	$font_end ='';
+TAddToolLink('Список форумов', 'main', 'forum');
+TAddToolLink('Добавить категорию', 'forum_editor', 'forum&a=forum_editor');
+TAddToolLink('Настройки', 'config', 'forum&a=config');
+TAddToolBox($action);
+if($config['forum']['basket']){
+	System::admin()->SideBarAddMenuItem('Удаляемые темы', 'exe=forum&a=forum_basket_topics');
+	System::admin()->SideBarAddMenuItem('Удаляемые сообщения', 'exe=forum&a=forum_basket_posts');
+	System::admin()->SideBarAddMenuBlock('Корзина');
+}
 
-	// Func меню
-	if($forum['parent_id'] == '0') {
-		$editlink = ADMIN_FILE.'?exe=forum&a=cat_editor&id='.SafeDB($forum['id'], 11, int);
-		$font_start = '<FONT SIZE="2" COLOR="#3300FF">';
-		$font_end = '</FONT>';
-	}else {
-		$editlink = ADMIN_FILE.'?exe=forum&a=forum_editor&id='.SafeDB($forum['id'], 11, int);
-	}
-	$discussion = $forum['close_topic'] == 1?$lang['close_for_discussion_admin']:$lang['on_for_discussion'];
-	if(isset($forums_all_id[$forum['parent_id']])) {
-		if($forums_all_id[$forum['parent_id']]['close_topic'] == 1 and $forum['close_topic'] == 0)
-		$discussion =  $lang['close_for_discussion_admin_parent'];
-	}
+switch($action) {
+	case 'main':
+	case 'ajaxtree':
+		AdminForumMain();
+		break;
+	case 'changestatus':
+		AdminForumChangeStatus();
+		break;
+	case 'forum_editor':
+		AdminForumEditor();
+		break;
+	case 'forum_save':
+		AdminForumSave();
+		break;
+	case 'delete':
+		AdminForumDelete();
+		break;
+	case 'move':
+		AdminForumMove();
+		break;
+	// Настройки //////////////////////////////
+	case 'config':
+		System::admin()->AddCenterBox('Конфигурация модуля "Форум"');
+		if(CheckGet('saveok')){
+			System::admin()->Highlight('Настройки сохранены.');
+		}
+		System::admin()->ConfigGroups('forum');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=forum&a=configsave');
+		break;
+	case 'configsave':
+		System::admin()->SaveConfigs('forum');
+		GO(ADMIN_FILE.'?exe=forum&a=config&saveok');
+		break;
+	////////////////////////////////////////////
+	// Корзина ////////////////////////////////////
+	case 'forum_basket_posts':
+	case 'forum_basket_topics':
+	case 'forum_basket':
+		TAddSubTitle('Форум > Корзина');
+		switch($action) {
+			////////////////// Корзина
+			case 'forum_basket_posts':
+				AdminForumBasket();
+				break;
+			case 'forum_basket_topics':
+				AdminForumBasket('forum_basket_topics');
+				break;
+			default:
+				AdminForumBasket();
+		}
+		return true;
+		break;
+	case 'basket_restore':
+		AdminForumBasketRestore();
+		break;
+	////////////////////////////////////////////
+	case 'get_update':
+		if (file_exists(MOD_DIR.'update.php')) {
+			include_once(MOD_DIR.'update.php');
+			Forum_Update(false);
+			return true;
+		}
+	case 'update':
+		if (file_exists(MOD_DIR.'update.php')) {
+			include_once(MOD_DIR.'update.php');
+			Forum_Update();
+			return true;
+		}else{
+			AddTextBox($forum_lang['error'] , $forum_lang['error_file_exists'].' <b>'.MOD_DIR.'update.php'.'</b> ');
+		}
+		break;
+	default:
+		AdminForumMain();
+}
+
+function AdminForumGetOrder( $parent_id ){
+	System::database()->Select('forums', "`parent_id`='$parent_id'");
+	return System::database()->NumRows();
+}
+
+function AdminForumGetElement( &$forum, &$forums, $level = 1 ){
+	global $forum_lang;
+	$id = SafeDB($forum['id'], 11, int);
+	$editlink = ADMIN_FILE.'?exe=forum&a=forum_editor&id='.$id;
 	$func = '';
-	$func .= SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-	$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=forum&a=delete&id='.SafeDB($forum['id'], 11, int).'&ok=0', 'images/admin/delete.png');
-
-	$levs = '<table cellspacing="0" cellpadding="0" border="0" align="left"><tr>';
-	$levs .= str_repeat('<td style="border:none;">&nbsp;-&nbsp;</td>', ($forum['parent_id'] == '0' ? 0 : 1));
-	$levs .= '<td align="left" style="text-align:left;padding-left:10px;border:none;"><b><a href="'.$editlink.'">'.$font_start.SafeDB($forum['title'], 255, str).$font_end.'</a></b></td>';
-	$levs .= '</tr></table>';
-	$text .= '<tr><td>'.$move_menu.'</td><td>'.$levs.'</td><td>'.$vi.'</td><td>'.$st.'</td><td>'.$discussion.'</td><td>'.$func.'</td></tr>';
-	return $text;
-}
-
-
-function AdminForumRender( $forum, $all_forums, $forums_all_id = array(), $is_sub_parent=false, $levs_sub=1){
-	global $admin_forum_url,$config, $lang;
-	$text = '';
-	//генерируем move menu
-	if(isset($all_forums[$forum['parent_id']])){
-		$max_place = count($all_forums[$forum['parent_id']]) - 1;
+	$func .= System::admin()->SpeedButton('Добавить форум', ADMIN_FILE.'?exe=forum&a=forum_editor&parent='.$id, 'images/admin/folder_add.png');
+	$func .= '&nbsp;';
+	$func .= System::admin()->SpeedStatus('Выключить', 'Включить', ADMIN_FILE.'?exe=forum&a=changestatus&id='.$id, $forum['status'] == '1');
+	$func .= '&nbsp;';
+	$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
+	$func .= System::admin()->SpeedConfirmJs(
+		'Удалить',
+		'$(\'#tree_container\').treeview(\'deleteNode\', '.$id.');',
+		'images/admin/delete.png',
+		'Все дочерние форумы, темы и сообщения так-же будут удалены. Уверены что хотите удалить?'
+	);
+	$view = ViewLevelToStr(SafeDB($forum['view'], 1, int));
+	$description = SafeDB($forum['description'], 255, str);
+	if(trim($description) == '') $description = 'Нет описания.';
+	$topics = SafeDB($forum['topics'], 11, int);
+	$posts = SafeDB($forum['posts'], 11, int);
+	$discussion = $forum['close_topic'] == 1 ? $forum_lang['close_for_discussion_admin'] : $forum_lang['on_for_discussion'];
+	$info = "$description<br>
+		<b>Тем</b>: $topics<br>
+		<b>Ответов</b>: $posts<br>
+		<b>Видят</b>: $view<br>
+		<b>Обсуждение</b>: $discussion
+		";
+	if($level == 1){
+		$title = System::admin()->Link(SafeDB($forum['title'], 255, str), $editlink, '', true, 'style="color: #3300FF; font-weight: bold;"');
+	}elseif($level == 2){
+		$title = System::admin()->Link(SafeDB($forum['title'], 255, str), $editlink, '', true, 'style="color: #0080FF; font-weight: bold;"');
 	}else{
-		$max_place = 0;
+		$title = '<b>'.System::admin()->Link(SafeDB($forum['title'], 255, str), $editlink).'</b>';
 	}
-	$move_menu = '';
-	if($max_place > 0){
-		$order = SafeDB($forum['order'], 11, int);
-		if($order > 0 && $order < $max_place){
-			$move_menu .= SpeedButton('Вверх', ADMIN_FILE.'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
-			$move_menu .= SpeedButton('Вниз', ADMIN_FILE.'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
-		}elseif($order == 0){
-			$move_menu .= SpeedButton('Вниз', ADMIN_FILE.'?exe=forum&a=move&to=down&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/down.png');
-		}elseif($order >= $max_place){
-			$move_menu .= SpeedButton('Вверх', ADMIN_FILE.'?exe=forum&a=move&to=up&id='.SafeDB($forum['id'], 11, int).'&pid='.SafeDB($forum['parent_id'], 11, int), 'images/admin/up.png');
-		}
+	$element = array(
+		'id'=>$id,
+		'icon'=>'images/logo16.png',
+		'title'=>$title,
+		'info'=>$info,
+		'func'=>$func,
+		'isnode'=>isset($forums[$id]),
+	);
+	if($forum['parent_id']==0){
+		$element['opened'] = true;
+		$element['childs'] = array();
 	}else{
-		$move_menu = '&nbsp;-&nbsp;';
+		$element['child_url'] = 'admin.php?exe=forum&a=ajaxtree&parent='.$id;
 	}
-	// Кто видит
-	$vi = ViewLevelToStr(SafeDB($forum['view'], 1, int));
-	// Статус
-	switch($forum['status']){
-		case '1':
-			$st = '<a href="'.$admin_forum_url.'&a=changestatus&id='.SafeDB($forum['id'], 11, int).'" title="Выключить"><font color="#008000">Вкл.</font></a>';
-			break;
-		case '0':
-			$st = '<a href="'.$admin_forum_url.'&a=changestatus&id='.SafeDB($forum['id'], 11, int).'" title="Включить"><font color="#FF0000">Выкл.</font></a>';
-			break;
-	}
-	$font_start = '';
-	$font_end ='';
-
-	// Func меню
-	if($forum['parent_id'] == '0'){
-		$editlink = $admin_forum_url.'&a=forum_editor&id='.SafeDB($forum['id'], 11, int);
-		$font_start = '<FONT SIZE="2" COLOR="#3300FF">';
-		$font_end = '</FONT>';
-	} elseif ($is_sub_parent){
-		$font_start = '<FONT SIZE="2" COLOR="#0080FF"><B>';
-		$font_end = '</B></FONT>';
-		$editlink = $admin_forum_url.'&a=forum_editor&id='.SafeDB($forum['id'], 11, int);
-	} else {
-		$editlink = $admin_forum_url.'&a=forum_editor&id='.SafeDB($forum['id'], 11, int);
-	}
-
-	$discussion = $forum['close_topic'] == 1?$lang['close_for_discussion_admin']:$lang['on_for_discussion'];
-
-	if(isset($forums_all_id[$forum['parent_id']])){
-		if($forums_all_id[$forum['parent_id']]['close_topic'] == 1 and $forum['close_topic'] == 0)
-		$discussion =  $lang['close_for_discussion_admin_parent'];
-	}
-
-	$func = '';
-	$func .= SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
-	$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=forum&a=delete&id='.SafeDB($forum['id'], 11, int).'&ok=0', 'images/admin/delete.png');
-
-	$levs = '<table cellspacing="0" cellpadding="0" border="0" align="left"><tr>';
-	$levs .= str_repeat('<td style="border:none;">&nbsp;-&nbsp;</td>', ($forum['parent_id'] == '0' ? 0 : $levs_sub));
-	$levs .= '<td align="left" style="text-align:left;padding-left:10px;border:none;"><b><a href="'.$editlink.'">'.$font_start.SafeDB($forum['title'], 255, str).$font_end.'</a></b></td>';
-	$levs .= '</tr></table>';
-
-	$text .= '<tr><td>'.$move_menu.'</td><td>'.$levs.'</td><td>'.$vi.'</td><td>'.$st.'</td><td>'.$discussion.'</td><td>'.$func.'</td></tr>';
-	return $text;
+	return $element;
 }
-
-function AdminSubForums($forums,$forums_all_id, $sub_forum, $id, $text='',$levels){
-	foreach($sub_forum[$id] as $forum1){
-		$text .= AdminForumRender($forum1, $forums, $forums_all_id, false, $levels);
-		if(isset($sub_forum[$forum1['id']])) {
-			foreach($sub_forum[$forum1['id']] as $forum2){
-				$text .= AdminForumRender($forum2, $forums, $forums_all_id, false, $levels+3);
-				if(isset($sub_forum[$forum2['id']])) {
-					$text .= AdminSubForums($forums,$forums_all_id, $sub_forum, $forum2['id'],'', $levels+6);
-				}
-			}
-		}
-	}
-	return $text;
-}
-
 
 function AdminForumMain(){
-	global $admin_forum_url,$db, $config;
-	/* @var $db Database_FilesDB */
-	$result = $db->Select('forums');
+	UseScript('jquery_ui_treeview');
+	if(CheckGet('parent')){ // Запрос дочернего дерева
+		$parent = SafeEnv($_GET['parent'], 11, int);
+		$default_level = 0;
+	}else{
+		$parent = 0;
+		$default_level = 1;
+	}
+	$forumsdb = System::database()->Select('forums');
+	SortArray($forumsdb, 'order');
 	$forums = array();
-	foreach($result as $forum){
-		$forums_all_id[$forum['id']] = $forum;
-		if($forum['parent_id']>0)
-		$sub_forum[$forum['parent_id']][] = $forum;
+	foreach($forumsdb as $f){
+		$forums[$f['parent_id']][] = $f;
 	}
-	foreach($result as $forum){
-		$forums[$forum['parent_id']][] = $forum;
-	}
-	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
-	$text .= '<tr><th style="width:80px;">Сортировка</th><th>Форум</th><th>Доступ</th><th>Статус</th><th>Обсуждение</th><th>Функции</th></tr>';
-	if(isset($forums['0'])){
-		SortArray($forums['0'], 'order');
-		foreach($forums['0'] as $category){
-			// Выводим ячейку с категорией
-			$text .= AdminForumRender($category, $forums);
-			if(isset($forums[$category['id']])){
-				SortArray($forums[$category['id']], 'order');
-				foreach($forums[$category['id']] as $forum){
-					// Выводим описание форума
-					$text .= AdminForumRender($forum, $forums, $forums_all_id, isset($sub_forum[$forum['id']]));
-					if(isset($forums[$forum['id']])){
-						SortArray($forums[$forum['id']], 'order');
-						$text .= AdminSubForums($forums,$forums_all_id, $forums, $forum['id'],'', 3);
-					}
+	$elements = array();
+	if(isset($forums[$parent])){
+		foreach($forums[$parent] as $forum){
+			$element = AdminForumGetElement($forum, $forums, $default_level);
+			if($parent == 0 && isset($forums[$forum['id']])){
+				foreach($forums[$forum['id']] as $forum){
+					$element['childs'][] = AdminForumGetElement($forum, $forums, 2);
 				}
 			}
+			$elements[] = $element;
 		}
 	}
-	$text .= '</table>';
-	AddTextBox('Управление форумами', $text);
+	if($parent == 0){
+		$delete_url = ADMIN_FILE.'?exe=forum&a=delete';
+		$move_url = ADMIN_FILE.'?exe=forum&a=move';
+		AddTextBox('Управление форумами',
+			'<div id="tree_container"></div><script>$("#tree_container").treeview({move: "'.$move_url.'", del: "'.$delete_url.'", tree: '.JsonEncode($elements).'});</script>');
+	}else{
+		echo JsonEncode($elements);
+		exit;
+	}
 }
 
+function AdminForumEditor() {
+	global $site, $forum_lib_dir;
 
-
-function AdminForumCatEditor( $action ) {
-	global $admin_forum_url,$config, $db, $site,$forum_lib_dir;
-	/* @var $db Database_FilesDB */
 	$f_title = '';
 	$f_desc = '';
-	$f_parent = 0;
+	if(CheckGet('parent')){
+		$f_parent = SafeDB($_GET['parent'], 11, int);
+	}else{
+		$f_parent = 0;
+	}
 	$f_view = array(false, false, false, false, false);
 	$f_status = array(false, false);
 
 	$f_admin_theme_add = array(false, false);
 	$f_new_message_email = array(false, true);
 	$f_no_link_guest = array(false, false);
-	$rang_access=0;
-	$rang_add_theme=0;
-	$rang_message=0;
-	$close_topic= array(false, false);
-
+	$rang_access = 0;
+	$rang_add_theme = 0;
+	$rang_message = 0;
+	$close_topic = array(false, false);
 
 	if(isset($_GET['id'])) {
 		// Редактирование
 		$id = SafeDB($_GET['id'], 11, int);
-		$db->Select('forums', "`id`='$id'");
-		$forum = $db->FetchRow();
+		System::database()->Select('forums', "`id`='$id'");
+		$forum = System::database()->FetchRow();
 		$f_title = SafeDB($forum['title'], 255, str);
 		$f_desc = SafeDB($forum['description'], 0, str);
 		$f_parent = SafeDB($forum['parent_id'], 11, int);
@@ -361,12 +257,11 @@ function AdminForumCatEditor( $action ) {
 		$f_status[(int)$forum['status']] = true;
 		$id_param = '&id='.$id;
 		$b_cap = 'Сохранить';
-		if($action != 'forum_editor') {
+		if($f_parent == 0) {
 			$c_cap = 'Редактирование категории';
 		}else {
 			$c_cap = 'Редактирование Форума';
 		}
-		unset($forum);
 	}else {
 		// Добавление
 		$f_title = '';
@@ -380,20 +275,20 @@ function AdminForumCatEditor( $action ) {
 
 		$id_param = '';
 		$b_cap = 'Добавить';
-		if($action != 'forum_editor') {
+		if($f_parent == 0) {
 			$c_cap = 'Добавить категорию';
 		}else {
 			$c_cap = 'Добавить форум';
 		}
 	}
-	FormRow('Название', $site->Edit('title', htmlspecialchars($f_title), false, 'style="width:250px;" maxlength="255"'));
-	if($action == 'forum_editor'){
+	FormRow('Название', $site->Edit('title', htmlspecialchars($f_title), false, 'style="width:400px;" maxlength="255"'));
+	if($f_parent != 0){
 		$where = '';
 		if(isset($_GET['id'])) {
 			$where = "  `id`<>'".SafeDB($_GET['id'], 11, int)."'";
 		}
 
-		$forums = $db->Select('forums', $where );
+		$forums = System::database()->Select('forums', $where );
 		$cat = false;
 		if(count($forums)==0) {
 			$cat = false;
@@ -418,36 +313,32 @@ function AdminForumCatEditor( $action ) {
 			$site->DataAdd($data, 0, $tree->TopCatName, true);
 		}
 		FormRow('Родительский раздел', $site->Select('sub_id', $data));
-		FormTextRow('Описание', $site->HtmlEditor('desc', $f_desc, 500, 150));
+		FormTextRow('Описание', $site->HtmlEditor('desc', $f_desc, 600, 200));
 	}
 
-	if($action == 'forum_editor') {
+	if($f_parent != 0) {
 		System::admin()->FormTitleRow('Настройки форума');
 		$endata = array();
 		$site->DataAdd($endata, '1', 'Да', $f_admin_theme_add[1]);
 		$site->DataAdd($endata, '0', 'Нет', $f_admin_theme_add[0]);
-		FormRow('Только администраторы<br />могут создавать новые темы', $site->Select('admin_theme_add', $endata));
+		FormRow('', 'Только администраторы могут создавать новые темы: '.$site->Select('admin_theme_add', $endata));
 		$endata = array();
 		$site->DataAdd($endata, '1', 'Да', $f_no_link_guest[1]);
 		$site->DataAdd($endata, '0', 'Нет', $f_no_link_guest[0]);
-		FormRow('Скрывать ссылки от гостей', $site->Select('no_link_guest', $endata));
+		FormRow('', 'Скрывать ссылки от гостей: '.$site->Select('no_link_guest', $endata));
 		$endata = array();
 		$site->DataAdd($endata, '1', 'Да', $f_new_message_email[1]);
 		$site->DataAdd($endata, '0', 'Нет', $f_new_message_email[0]);
-		FormRow('Разрешить подписку<br /><small>Подписка на уведомление о новых<BR> сообщениях в теме</small>', $site->Select('new_message_email', $endata));
+		FormRow('', 'Разрешить подписку на уведомление о новых сообщениях в теме: '.$site->Select('new_message_email', $endata));
 		$endata = array();
 		$site->DataAdd($endata, '1', 'Да', $close_topic[1]);
 		$site->DataAdd($endata, '0', 'Нет', $close_topic[0]);
-		FormRow('Закрыть для обсуждения.<br /><small>Будет доступен только просмотр</small>', $site->Select('close_topic', $endata));
-
-		//FormRow('<CENTER><B>Ранг:</B></CENTER>',' &nbsp;');
+		FormRow('', 'Закрыть для обсуждения (будет доступен только просмотр): '.$site->Select('close_topic', $endata));
 		System::admin()->FormTitleRow('Настройка прав доступа по рангам пользователей');
-		FormRow('Доступ по рангу пользователей:<BR>с меньшим рангом доступ<BR> будет закрыт',ForumAdminGetUsersTypesComboBox('rang_access',$rang_access));
-		FormRow('Создание тем:<BR>с меньшим рангом темы создавать<BR> будет запрещено',ForumAdminGetUsersTypesComboBox('rang_add_theme',$rang_add_theme));
-		FormRow('Создание сообщений в теме:<BR>с меньшим рангом сообщения <BR> создавать будет запрещено',ForumAdminGetUsersTypesComboBox('rang_message',$rang_message));
+		FormRow('Доступ по рангу пользователей (с меньшим рангом доступ будет закрыт)',ForumAdminGetUsersTypesComboBox('rang_access',$rang_access));
+		FormRow('Создание тем (с меньшим рангом темы создавать будет запрещено)',ForumAdminGetUsersTypesComboBox('rang_add_theme',$rang_add_theme));
+		FormRow('Создание сообщений в теме (с меньшим рангом сообщения создавать будет запрещено)',ForumAdminGetUsersTypesComboBox('rang_message',$rang_message));
 	}
-
-
 
 	System::admin()->FormTitleRow('Параметры видимости');
 	$visdata = array();
@@ -462,16 +353,14 @@ function AdminForumCatEditor( $action ) {
 	$site->DataAdd($endata, '0', 'Нет', $f_status[0]);
 	FormRow('Включить', $site->Select('status', $endata));
 	AddCenterBox($c_cap);
-	AddForm($site->FormOpen($admin_forum_url.'&a=cat_save'.$id_param), $site->Submit($b_cap));
+
+	AddForm($site->FormOpen(ADMIN_FILE.'?exe=forum&a=forum_save'.$id_param), $site->Submit($b_cap));
 }
 
-function AdminForumCatSave() {
-	global $admin_forum_url,$db, $config,$admin_forum_url;
-	/* @var $db Database_FilesDB */
+function AdminForumSave(){
 	$f_title = SafeDB($_POST['title'], 255, str);
 	$f_view = ViewLevelToInt($_POST['view']);
 	$f_status = SafeEnv($_POST['status'], 1, int);
-
 	$f_admin_theme_add= 0;
 	$f_new_message_email = 0;
 	$f_no_link_guest= 0;
@@ -479,24 +368,16 @@ function AdminForumCatSave() {
 	$rang_message=0;
 	$close_topic=0;
 	$rang_add_theme=0;
-
-	if(isset($_POST['admin_theme_add']))
-	$f_admin_theme_add= SafeEnv($_POST['admin_theme_add'], 1, int);
-	if(isset($_POST['new_message_email']))
-	$f_new_message_email = SafeEnv($_POST['new_message_email'], 1, int);
-	if(isset($_POST['no_link_guest']))
-	$f_no_link_guest= SafeEnv($_POST['no_link_guest'], 1, int);
-	if(isset($_POST['rang_access']))
-	$rang_access=SafeEnv($_POST['rang_access'], 11, int);
-	if(isset($_POST['rang_message']))
-	$rang_message=SafeEnv($_POST['rang_message'], 11, int);
-	if(isset($_POST['rang_add_theme']))
-	$rang_add_theme=SafeEnv($_POST['rang_add_theme'], 11, int);
-	if(isset($_POST['close_topic']))
-	$close_topic= SafeEnv($_POST['close_topic'], 1, int);
+	if(isset($_POST['admin_theme_add'])) $f_admin_theme_add= SafeEnv($_POST['admin_theme_add'], 1, int);
+	if(isset($_POST['new_message_email'])) $f_new_message_email = SafeEnv($_POST['new_message_email'], 1, int);
+	if(isset($_POST['no_link_guest'])) $f_no_link_guest= SafeEnv($_POST['no_link_guest'], 1, int);
+	if(isset($_POST['rang_access'])) $rang_access=SafeEnv($_POST['rang_access'], 11, int);
+	if(isset($_POST['rang_message'])) $rang_message=SafeEnv($_POST['rang_message'], 11, int);
+	if(isset($_POST['rang_add_theme'])) $rang_add_theme=SafeEnv($_POST['rang_add_theme'], 11, int);
+	if(isset($_POST['close_topic'])) $close_topic= SafeEnv($_POST['close_topic'], 1, int);
 	if(isset($_POST['desc'])) {
 		$f_desc = SafeEnv($_POST['desc'], 0, str);
-	}else {
+	}else{
 		$f_desc = '';
 	}
 	if(isset($_POST['parent_id'])) {
@@ -514,105 +395,89 @@ function AdminForumCatSave() {
 		// Редактирование
 		$id = SafeEnv($_GET['id'], 11, int);
 		$set = "`parent_id`='$f_parent',`title`='$f_title',`description`='$f_desc',`view`='$f_view',`status`='$f_status',`admin_theme_add`='$f_admin_theme_add',`no_link_guest`='$f_no_link_guest',`new_message_email`='$f_new_message_email',`rang_access`='$rang_access',`rang_message`='$rang_message',`rang_add_theme`='$rang_add_theme',`close_topic`='$close_topic'";
-		$db->Update('forums', $set, "`id`='$id'");
+		System::database()->Update('forums', $set, "`id`='$id'");
 		if($f_parent == 0){
-			$db->Update('forums',"`parent_id`='$id''", "`parent_id`='".$id."'");
+			System::database()->Update('forums',"`parent_id`='$id''", "`parent_id`='".$id."'");
 		}
 	}else {
 		// Добавление
 		$order = AdminForumGetOrder('0');
 		$values = "'','$f_parent','$f_title','$f_desc','0','0','0','0','','','0','$order','$f_status','$f_view','$f_admin_theme_add','$f_no_link_guest','$f_new_message_email', '$rang_access', '$rang_message', '$rang_add_theme','$close_topic'";
-		$db->Insert('forums', $values);
-	}
-	Forum_Cache_ClearAllCacheForum();
-	GO($admin_forum_url);
-}
-
-
-function AdminForumMove() {
-	global $config, $db;
-	$move = SafeEnv($_GET['to'], 4, str); // up, down
-	$id = SafeEnv($_GET['id'], 11, int);
-	$db->Select('forums', "`id`='$id'");
-	if($db->NumRows() > 0) {
-		$forum = $db->FetchRow();
-		$pid = SafeDB($forum['parent_id'], 11, int);
-		$forums = $db->Select('forums', "`parent_id`='$pid'");
-		SortArray($forums, 'order');
-		$c = count($forums);
-		//Исходный индекс
-		$cur_pos = 0;
-		for($i = 0; $i < $c; $i++) {
-			$forums[$i]['order'] = $i;
-			if($forums[$i]['id'] == $id) {
-				$cur_pos = $i;
-			}
-		}
-		//Индекс перемещения
-		$rep_pos = $cur_pos;
-		if($move == 'up') {
-			$rep_pos = $cur_pos - 1;
-		}elseif($move == 'down') {
-			$rep_pos = $cur_pos + 1;
-		}else {
-			$rep_pos = $cur_pos;
-		}
-		if($rep_pos < 0 || $rep_pos >= $c) {
-			$rep_pos = $cur_pos;
-		}
-		$temp = intval($forums[$cur_pos]['order']);
-		$forums[$cur_pos]['order'] = intval($forums[$rep_pos]['order']);
-		$forums[$rep_pos]['order'] = intval($temp);
-		for($i = 0; $i < $c; $i++) {
-			$order = $forums[$i]['order'];
-			$id = $forums[$i]['id'];
-			$db->Update('forums', "`order`='$order'", "`id`='$id'");
-		}
+		System::database()->Insert('forums', $values);
 	}
 	Forum_Cache_ClearAllCacheForum();
 	GO(ADMIN_FILE.'?exe=forum');
 }
 
-function AdminForumDelete() {
-	global $config, $db;
-	if(!isset($_GET['id'])) {
-		GO(ADMIN_FILE.'?exe=forum');
-	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1') {
-		ForumAdminDeleteForum(SafeEnv($_GET['id'], 11, int));
-		Forum_Cache_ClearAllCacheForum();
-		GO(ADMIN_FILE.'?exe=forum');
-	}else {
-		/* @var $db Database_FilesDB */
-		$db->Select('forums', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$r = $db->FetchRow();
-		if($r['parent_id'] == -1) {
-			$f = 'категорию';
-		}else {
-			$f = 'форум';
-		}
-		$text = 'Вы действительно хотите удалить '.$f.' "'.SafeDB($r['title'], 255, str).'"? Все дочерние форумы и темы будут удалены.<br />'.'<a href="'.ADMIN_FILE.'?exe=forum&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание!", $text);
-	}
-}
-
-function AdminForumChangeStatus() {
-	global $config, $db;
-	$db->Select('forums', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	$r = $db->FetchRow();
+function AdminForumChangeStatus(){
+	System::database()->Select('forums', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	$r = System::database()->FetchRow();
 	if($r['status'] == 1) {
 		$en = '0';
 	}else {
 		$en = '1';
 	}
-	$db->Update('forums', "status='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	System::database()->Update('forums', "status='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	Forum_Cache_ClearAllCacheForum();
+	if(IsAjax()){
+		exit("OK");
+	}
 	GO(ADMIN_FILE.'?exe=forum');
+}
+
+function AdminForumDelete(){
+	if(!isset($_POST['id'])){
+		exit("ERROR");
+	}
+	ForumAdminDeleteForum(SafeEnv($_POST['id'], 11, int));
+	Forum_Cache_ClearAllCacheForum();
+	exit("OK");
+}
+
+function AdminForumMove(){
+	$itemId = SafeEnv($_POST['item_id'], 11, int);
+	$parentId = SafeEnv($_POST['target_id'], 11, int);
+	$position = SafeEnv($_POST['item_new_position'], 11, int);
+
+	// Перемещаемый элемент
+	System::database()->Select('forums',"`id`='$itemId'");
+	if(System::database()->NumRows() == 0){
+		// Error
+		exit("ERROR");
+	}
+	$item = System::database()->FetchRow();
+	// Изменяем его родителя, если нужно
+	if($item['parent_id'] != $parentId){
+		System::database()->Update('forums', "`parent_id`='$parentId'", "`id`='$itemId'");
+	}
+	// Обноеление индексов элементов
+	$indexes = array(); // соотвествие индексов и id элементов
+	$items = System::database()->Select('forums', "`parent_id`='$parentId'");
+	if($position == -1){
+		$position = count($items);
+	}
+	SortArray($items, 'order');
+	$i = 0;
+	foreach($items as $p){
+		if($p['id'] == $itemId){
+			$indexes[$p['id']] = $position;
+		}else{
+			if($i == $position) $i++;
+			$indexes[$p['id']] = $i;
+			$i++;
+		}
+	}
+	// Обновляем индексы
+	foreach($indexes as $id=>$order){
+		System::database()->Update('forums', "`order`='$order'", "`id`='$id'");
+	}
+	Forum_Cache_ClearAllCacheForum();
+	exit("OK");
 }
 
 /******************Корзина*****************/
 function AdminForumBasket( $table = 'forum_basket_post' ){
-	global $db, $config, $site;
+	global $config, $site;
 
 	if(isset($_GET['page'])) {
 		$page = SafeEnv($_GET['page'],10,int);
@@ -628,7 +493,7 @@ function AdminForumBasket( $table = 'forum_basket_post' ){
 		$caption =  'Удаляемые Темы';
 	}
 
-	$result = $db->Select($table);
+	$result = System::database()->Select($table);
 
 	if(count($result)>20){
 		$navigator = new Navigation($page);
@@ -651,7 +516,7 @@ function AdminForumBasket( $table = 'forum_basket_post' ){
 				$where .= "`id`='".$mpost['obj_id']."' or ";
 			}
 			$where = substr($where, 0, strlen($where) - 3);
-			$result_posts = $db->Select('forum_posts', $where);
+			$result_posts = System::database()->Select('forum_posts', $where);
 			if(count($result_posts)>0){
 				foreach($result_posts as $mpost){
 					$mposts[$mpost['id']] = $mpost['object'];
@@ -677,7 +542,7 @@ function AdminForumBasket( $table = 'forum_basket_post' ){
 				$where .= "`id`='".$mpost['obj_id']."' or ";
 			}
 			$where = substr($where, 0, strlen($where) - 3);
-			$result_topics = $db->Select('forum_topics', $where);
+			$result_topics = System::database()->Select('forum_topics', $where);
 			if(count($result_topics)>0) {
 				foreach($result_topics as $mtopic){
 					$mtopics[$mtopic['id']] = $mtopic['title'];

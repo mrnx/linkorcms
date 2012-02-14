@@ -5,7 +5,8 @@ if(!defined('VALID_RUN')){
 	exit();
 }
 
-include ($config['inc_dir'].'tree.class.php'); 
+global $config;
+include ($config['inc_dir'].'tree.class.php');
 
 class ForumTree extends Tree
 {

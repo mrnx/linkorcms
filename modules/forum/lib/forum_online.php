@@ -86,9 +86,9 @@ function Online_GetOnlineUser(&$u, &$online) {
 # id - раздел , форум, топик
 # root - корень форума, раздела	?
 # only_topic - только те кто в теме ?
-# only_int_all - только число тех кто на всём форуме 
+# only_int_all - только число тех кто на всём форуме
 function Online_GetCountUser($id, $root = true, $only_topic = false, $only_int_all = false) {
-	global $user, $db, $lang;
+	global $user, $db, $forum_lang;
 	static $online = array();
 	static $topics = array();
 	static $all = 0;
@@ -198,7 +198,7 @@ function Online_GetCountUser($id, $root = true, $only_topic = false, $only_int_a
 			}
 			if($count>0 and $id>-1){
 				$results['users']['count'] = $count;
-				$results['count'] ='<FONT SIZE="1"> ('.$lang['online'].': '.$count.')</FONT>';
+				$results['count'] ='<FONT SIZE="1"> ('.$forum_lang['online'].': '.$count.')</FONT>';
 				return  $results;
 			}
 
@@ -265,14 +265,14 @@ function Online_GetCountUser($id, $root = true, $only_topic = false, $only_int_a
 
 	if($count > 0 and $id > -1){
 		$results['users']['count'] = $count;
-		$results['count'] ='<font size="1"> ('.$lang['online'].': '.$count.')</font>';
+		$results['count'] ='<font size="1"> ('.$forum_lang['online'].': '.$count.')</font>';
 		return  $results;
 	}else{
 		if($id == -1){
 			if($all == 0) $all = 1;
 			$results['users']['reg'] = Forum_Online_Get_User($all_forum);
 			$results['users']['count'] = $all;
-			$results['count'] = '<font size="1"> ('.$lang['online'].': '.$all.')</font>';
+			$results['count'] = '<font size="1"> ('.$forum_lang['online'].': '.$all.')</font>';
 			return  $results;
 		}
 	}
@@ -283,7 +283,7 @@ function Online_GetCountUser($id, $root = true, $only_topic = false, $only_int_a
  * Врзвращает имя пользователя по его id(кешируется)
  */
 function Forum_Online_Get_User_Info( $user_id ) {
-	global $db,  $lang;
+	global $db,  $forum_lang;
 	static $users = null;
 	if($users == null){
 		$cache = LmFileCache::Instance();
@@ -301,7 +301,7 @@ function Forum_Online_Get_User_Info( $user_id ) {
 	if(isset($users[$user_id])){
 		return $users[$user_id];
 	}else{
-		return $lang['guest'];
+		return $forum_lang['guest'];
 	}
 }
 
@@ -337,7 +337,7 @@ function Forum_Online_Get_User( &$users, $full = true ){
 }
 
 function  Forum_Online_Render_Online($users = array(), $title='', $block='forum_online') {
-	global $site, $lang;
+	global $site, $forum_lang;
 	if(count($users)>0){
 		$site->AddBlock($block, true, false, $block, 'module/forum_online.html');
 		$site->AddBlock('gen_online', true, false, 'users');
@@ -357,7 +357,7 @@ function  Forum_Online_Render_Online($users = array(), $title='', $block='forum_
 			$site->AddSubBlock('onlines', true, $vars_online);
 			if($i>250) break;
 		}
-		if($title<>$lang['all_online']){
+		if($title<>$forum_lang['all_online']){
 			$c_u = Online_GetCountUser(-1, true, false, true);
 			$vars_online['url'] = '<BR>всего на форуме: '.$c_u['users']['count'] ;
 			$site->AddSubBlock('onlines', true, $vars_online);

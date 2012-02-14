@@ -8,8 +8,8 @@
 $forum_navigation = '';
 
 function Navigation_AppLink($title, $url) {
-	global $forum_navigation, $lang;
-	$forum_navigation .= ($forum_navigation != '' ? $lang['site_slas'] : '').'<b><a href="'.$url.'">'.$title.'</a></b>';
+	global $forum_navigation, $forum_lang;
+	$forum_navigation .= ($forum_navigation != '' ? $forum_lang['site_slas'] : '').'<b><a href="'.$url.'">'.$title.'</a></b>';
 }
 
 function Navigation_ShowNavMenu() {
@@ -46,14 +46,14 @@ function Navigation_GetForumCategoryComboBox( $cat, $form =true, $count = true, 
 }
 
 function Navigation_Patch( $cat, $view_end_url = false){
-	global  $site, $config, $forum_lib_dir, $lang;
+	global  $site, $config, $forum_lib_dir, $forum_lang;
 	$all_table = Forum_Cache_AllDataTableForum();
 	$table = ForumGetViewAccessTable($all_table);
 	include_once($forum_lib_dir.'tree_f.class.php');
 	$tree = new ForumTree($table ,  'id',  'parent_id', 'title', 'topics', 'posts');
 	$tree->moduleName = 'forum';
 	$tree->TopCatName = 'Форум';
-	$tree->Slach = $lang['site_slas'];
+	$tree->Slach = $forum_lang['site_slas'];
 	$nav_url = 'index.php?name=forum';
 	$tree->ShowPath($cat, $view_end_url);
 }

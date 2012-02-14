@@ -1,7 +1,7 @@
 <?php
 
 function IndexForumLastTopics(){
-	global $db, $config, $site, $user, $lang, $forum_lib_dir;
+	global $db, $config, $site, $user, $forum_lang, $forum_lib_dir;
 
 	include_once($forum_lib_dir.'forum_render_topics.php');
 	include_once($forum_lib_dir.'forum_last_topics.php');
@@ -20,19 +20,19 @@ function IndexForumLastTopics(){
 		$gforum = SafeEnv($_GET['forum'], 11, int);
 	}
 
-	$str_time = $lang['za'].' '.$lang['day'][1];
+	$str_time = $forum_lang['za'].' '.$forum_lang['day'][1];
 	$day = 1;
 	if(isset($_GET['day'])){
 		$wtime = Forum_Last_Inttotime(SafeEnv($_GET['day'], 3, int));
 		$str_time = SafeEnv($_GET['day'], 3, str);
 		$url_time = $str_time;
 		if(strlen($str_time) > 1){
-			$str_time = $lang['za'].$str_time.' '.$lang['day'][$str_time[strlen($str_time)-1]];
+			$str_time = $forum_lang['za'].$str_time.' '.$forum_lang['day'][$str_time[strlen($str_time)-1]];
 		}else{
 			if($str_time == ''){
 				$str_time = 1;
 			}
-			$str_time = $lang['za'].$str_time.' '.$lang['day'][$str_time];
+			$str_time = $forum_lang['za'].$str_time.' '.$forum_lang['day'][$str_time];
 		}
 	}else{
 		$wtime = Forum_Last_Inttotime();
@@ -48,8 +48,8 @@ function IndexForumLastTopics(){
 	);
 
 	$statistics = ForumStatistics::Instance();
-	$statistics->Initialize($lang['statistics_cat']);
-	
+	$statistics->Initialize($forum_lang['statistics_cat']);
+
 	$your_where = "`delete`='0'";
 	if($user->isAdmin() || $config['forum']['basket'] == false){
 		$your_where = '';
@@ -100,7 +100,7 @@ function IndexForumLastTopics(){
 			}
 		}
 
-		$site->Title .= $lang['site_slas'].$lang['lasttopicstitle'].$str_time;
+		$site->Title .= $forum_lang['site_slas'].$forum_lang['lasttopicstitle'].$str_time;
 		$topics = array();
 		$topics_stick = array();
 		$allnoreadtopics = array();
@@ -112,8 +112,8 @@ function IndexForumLastTopics(){
 		}
 
 		// Хлебные крошки
-		Navigation_AppLink($lang['forum'], Ufu('index.php?name=forum', 'forum/'));
-		Navigation_AppLink($lang['lasttopicstitle'].$str_time.'&nbsp;['.count($topics).']' ,  $forum_url);
+		Navigation_AppLink($forum_lang['forum'], Ufu('index.php?name=forum', 'forum/'));
+		Navigation_AppLink($forum_lang['lasttopicstitle'].$str_time.'&nbsp;['.count($topics).']' ,  $forum_url);
 		Navigation_ShowNavMenu();
 
 		$navigation = new Navigation($page);
@@ -124,12 +124,12 @@ function IndexForumLastTopics(){
 		$site->AddBlock('topic_form', false, false, 'form');
 		$site->AddBlock('topic_right', false, false, 'topic');
 	}else{
-		$site->AddTextBox($lang['error'], $lang['error_no_forum']);
+		$site->AddTextBox($forum_lang['error'], $forum_lang['error_no_forum']);
 	}
-	$site->AddTextBox('', Forum_Last_Combo($gforum).'<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox(0).'</span>');
+	$site->AddTextBox('', Forum_Last_Combo($gforum).'<span style="float:right;">'.$forum_lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox(0).'</span>');
 	$statistics->Render('forum_topics_statistics');
 	$c_u = Online_GetCountUser(-1);
 	$online_user = $c_u['users'];
-	Forum_Online_Render_Online($online_user, $lang['all_online'], 'forum_topics_online');
+	Forum_Online_Render_Online($online_user, $forum_lang['all_online'], 'forum_topics_online');
 	$site->AddBlock('old', false, false, 'mark');
 }

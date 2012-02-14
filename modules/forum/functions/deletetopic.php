@@ -2,7 +2,7 @@
 
 // Удаление темы
 function IndexForumDeleteTopic(){
-	global $db, $site,  $user, $config, $lang;
+	global $db, $site,  $user, $config, $forum_lang;
 	if(isset($_GET['ok'])){
 		$topic_id = SafeEnv($_GET['topic'], 11, int);
 		$db->Select('forum_topics',"`id`='$topic_id'");
@@ -49,7 +49,7 @@ function IndexForumDeleteTopic(){
 		$db->Select('forum_topics', "`id`='".SafeEnv($_GET['topic'], 11, int)."'");
 		$topic = $db->FetchRow();
 		$text = 'Удалить тему "'.SafeDB($topic['title'], 255, str).'"?';
-		$site->AddTextBox($lang['forum'], '<center>'.$text.'</center>');
+		$site->AddTextBox($forum_lang['forum'], '<center>'.$text.'</center>');
 		$site->AddTemplatedBox('', 'module/forum_delete_post.html');
 		$site->AddBlock('delete_form', true, false, 'form');
 		$vars = array();

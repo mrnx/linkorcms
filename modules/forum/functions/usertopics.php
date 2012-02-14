@@ -1,7 +1,7 @@
 <?php
 
 function IndexForumUserTopics(){
-	global $db, $config, $site, $user, $lang, $forum_lib_dir;
+	global $db, $config, $site, $user, $forum_lang, $forum_lib_dir;
 	if(isset($_GET['user'])){
 		include_once($forum_lib_dir.'forum_render_topics.php');
 		$user_id = SafeEnv($_GET['user'], 11, int);
@@ -63,7 +63,7 @@ function IndexForumUserTopics(){
 			}
 
 			$statistics = ForumStatistics::Instance();
-			$statistics->Initialize($lang['statistics_cat']);
+			$statistics->Initialize($forum_lang['statistics_cat']);
 
 			$count_topics = count($topics);
 			if(count($topics) > 0){
@@ -71,14 +71,14 @@ function IndexForumUserTopics(){
 			}
 
 			$starter_name = Forum_Online_Get_User_Info($user_id);
-			if($starter_name == $lang['guest']){
+			if($starter_name == $forum_lang['guest']){
 				if(isset($topics[0])){
 					$starter_name = $topics[0]['starter_name'];
 				}
 			}
 
-			Navigation_AppLink($lang['forum'], Ufu('index.php?name=forum', 'forum/'));
-			Navigation_AppLink($lang['usertopics']. $starter_name. '&nbsp;['.$count_topics.']', Ufu('index.php?name=forum&op=usertopics&user='.$user_id, 'forum/usertopics/{user}/'));
+			Navigation_AppLink($forum_lang['forum'], Ufu('index.php?name=forum', 'forum/'));
+			Navigation_AppLink($forum_lang['usertopics']. $starter_name. '&nbsp;['.$count_topics.']', Ufu('index.php?name=forum&op=usertopics&user='.$user_id, 'forum/usertopics/{user}/'));
 			Navigation_ShowNavMenu();
 
 			$navigation->GenNavigationMenu($topics, $topics_on_page, $forum_nav_url);
@@ -89,16 +89,16 @@ function IndexForumUserTopics(){
 			$site->AddBlock('topic_right', false, true, 'topic');
 			Navigation_ShowNavMenu();
 		}else{
-			$site->AddTextBox($lang['error'], $lang['error_no_forum']);
+			$site->AddTextBox($forum_lang['error'], $forum_lang['error_no_forum']);
 		}
 
 		$cat = 0;
 		$statistics->Render();
 		$c_u = Online_GetCountUser(-1);
 		$online_user = $c_u['users'];
-		Forum_Online_Render_Online($online_user, $lang['all_online']) ;
+		Forum_Online_Render_Online($online_user, $forum_lang['all_online']) ;
 
-		$site->AddTextBox('', '<span style="float:right;">'.$lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox($cat).'</span>');
+		$site->AddTextBox('', '<span style="float:right;">'.$forum_lang['quick_transition'].':&nbsp;'. Navigation_GetForumCategoryComboBox($cat).'</span>');
 		$site->AddBlock('old', false, false, 'mark');
 
 		if($config['forum']['cache']){
@@ -107,7 +107,7 @@ function IndexForumUserTopics(){
 			}
 		}
 	}else{
-		$site->AddTextBox($lang['error'], $lang['error_no_forum']);
+		$site->AddTextBox($forum_lang['error'], $forum_lang['error_no_forum']);
 	}
 }
 

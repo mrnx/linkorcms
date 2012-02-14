@@ -2,7 +2,7 @@
 
 // Добавление сообщения
 function IndexForumAddPost(){
-	global $db, $config, $user, $site, $lang;
+	global $db, $config, $user, $site, $forum_lang;
 
 	$topic_id = SafeEnv($_GET['topic'], 11, int);
 	$forum_id = SafeEnv($_GET['forum'], 11, int);
@@ -15,7 +15,7 @@ function IndexForumAddPost(){
 		if($rang['rang_access']){
 			$result = Forum_Add_AddPost2();
 			if(is_array($result)){
-				$site->AddTextBox($lang['forum'], IndexForumPrintErrors($result));
+				$site->AddTextBox($forum_lang['forum'], IndexForumPrintErrors($result));
 			}else{
 				$user->ChargePoints($config['points']['forum_post']);
 				$db->Select('forum_topics', "`id`='$topic_id'");
@@ -41,9 +41,9 @@ function IndexForumAddPost(){
 				GO(Ufu('index.php?name=forum&op=showtopic&topic='.$topic_id.'&view=lastpost#last', GetSiteUrl().'forum/topic{topic}-new.html#last'));
 			}
 		}else{
-			$site->AddTextBox($lang['error'], $lang['error_access_category']);
+			$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 		}
 	}else{
-		$site->AddTextBox($lang['error'], $lang['error_access_category']);
+		$site->AddTextBox($forum_lang['error'], $forum_lang['error_access_category']);
 	}
 }

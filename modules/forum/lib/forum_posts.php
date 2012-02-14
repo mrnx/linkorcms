@@ -22,7 +22,7 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 		$page = 0, $EnNav = false, $com_on_page = 10, $nav_url = '',
 		$no_link_guest = false, $your_where = '', $parent_forum_id = '',
 		$parent_parent_forum_id = '' , $topic_close = false , $one_post=''){
-	global $site, $db, $config, $user, $lang;
+	global $site, $db, $config, $user, $forum_lang;
 
 	$cache_name = 'IndexForumRenderPosts_page'.$page.'_';
 	$site->AddBlock($blockname, true, true, 'post');
@@ -87,7 +87,7 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 			}
 			if($uid != 0){
 				$userinfo = GetUserInfo($uid);
-				$vars['usertopics'] = '<a href="'.Ufu('index.php?name=forum&op=usertopics&user='.$uid, 'forum/usertopics/{user}/').'">'.$lang['allusertopics'].'</a>' ;
+				$vars['usertopics'] = '<a href="'.Ufu('index.php?name=forum&op=usertopics&user='.$uid, 'forum/usertopics/{user}/').'">'.$forum_lang['allusertopics'].'</a>' ;
 				$vars['public'] = $comment['public'];
 				if($userinfo['rank_name']<>'') {
 					$vars['author_name'] = $userinfo['name'];
@@ -104,7 +104,7 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 				$vars['homepage'] = $userinfo['url'];
 				$vars['icq'] = $userinfo['icq'];
 				if($userinfo['online']) {
-					$vars['status'] = $lang['user_online'];
+					$vars['status'] = $forum_lang['user_online'];
 				}else {
 					$vars['status'] = '';
 				}
@@ -145,7 +145,7 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 			}else {
 				$vars['homepage'] = '&nbsp;';
 			}
-			$vars['public'] = $lang['added'].TimeRender($vars['public']);
+			$vars['public'] = $forum_lang['added'].TimeRender($vars['public']);
 			$vars['ip'] = SafeDB($comment['user_ip'], 19, str);
 			$vars['topic_id'] = $topic_id;
 			$vars['id'] = SafeDB($comment['id'], 11, int);
@@ -198,7 +198,7 @@ function Posts_RenderPosts( $topic_id, $blockname, $lastpost = false,
 function Posts_RenderPostForm($edit = false, $forum = 0, $topic = 0, $id = 0,
 		$value = '', $text_title='', $loadform = true, $close = false)
 {
-	global $site, $db, $config, $user, $lang;
+	global $site, $db, $config, $user, $forum_lang;
 	if($edit){
 		$site->AddTemplatedBox('', 'module/forum_edit_post.html');
 	}else{
@@ -219,11 +219,11 @@ function Posts_RenderPostForm($edit = false, $forum = 0, $topic = 0, $id = 0,
 			$vars['text_title'] = $text_title;
 			$vars['edit_title'] = $text_title<>'';
 			$vars['topic'] = $topic;
-			$vars['title'] = $lang['edit_post'];
+			$vars['title'] = $forum_lang['edit_post'];
 			$vars['url'] = Ufu("index.php?name=forum&op=savepost&topic=$topic&post=$id&page=$page", 'forum/savepost/topic{topic}/post{post}-{page}/');
 			$vars['edit'] = true;
-			$vars['lsubmit'] = $lang['save'];
-			$vars['lsubmit_title'] = $lang['save_edit'];
+			$vars['lsubmit'] = $forum_lang['save'];
+			$vars['lsubmit_title'] = $forum_lang['save_edit'];
 			$vars['visibility'] = 'visible';
 		}else{
 			$vars['post'] = 0;
@@ -231,11 +231,11 @@ function Posts_RenderPostForm($edit = false, $forum = 0, $topic = 0, $id = 0,
 			$vars['forum'] = $forum;
 			$vars['edit_title'] = $text_title<>'';
 			$vars['text_value'] = '';
-			$vars['title'] = $lang['add_post'];
+			$vars['title'] = $forum_lang['add_post'];
 			$vars['url'] = Ufu("index.php?name=forum&op=addpost&topic=$topic&forum=$forum", 'forum/addpost/{forum}/topic{topic}/');
 			$vars['edit'] = false;
-			$vars['lsubmit'] = $lang['add'];
-			$vars['lsubmit_title'] = $lang['add_post'];
+			$vars['lsubmit'] = $forum_lang['add'];
+			$vars['lsubmit_title'] = $forum_lang['add_post'];
 			$vars['visibility'] = 'hidden';
 		}
 		$vars['add'] = !$vars['edit'];

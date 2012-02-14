@@ -6,7 +6,7 @@
 # Темы форума
 
 function Forum_Topic_DataFilter( &$topic, $root = true ){
-	global  $lang, $config;
+	global  $forum_lang, $config;
 
 	$topic2 = array();
 	$topic2['id'] = SafeDB($topic['id'], 11, int);
@@ -35,8 +35,8 @@ function Forum_Topic_DataFilter( &$topic, $root = true ){
 	$topic2['users'] = $c['users'];
 	$topic2['close'] = SafeDB($topic['close_topics'], 1, int)==0;
 	$topic2['begin'] = !$topic2['close'];
-	$topic2['status'] = (!$topic2['close']?$lang['topic_close']:'');
-	$topic2['stick'] = ($topic['stick'] == 1?$lang['it_is_ important']:'');
+	$topic2['status'] = (!$topic2['close']?$forum_lang['topic_close']:'');
+	$topic2['stick'] = ($topic['stick'] == 1?$forum_lang['it_is_ important']:'');
 	$topic2['delete'] = SafeDB($topic['delete'], 1, int);
 	$topic2['nodelete'] = (SafeDB($topic['delete'], 1, int)?false:true);
 	$topic2['category'] = $topic['forum_id'];
@@ -50,7 +50,7 @@ function Forum_Topic_DataFilter( &$topic, $root = true ){
 		$forum_nav_url_u ='forum/topic{topic}-';
 
 		$page = ceil(($topic2['posts']+1)/$config['forum']['posts_on_page']);
-		$str = $lang['pages'];
+		$str = $forum_lang['pages'];
 		for($i=0, $page; $i<$page; $i++){
 			$str .= '<a href="'.Ufu($forum_nav_url.'&page='.($i+1), $forum_nav_url_u.($i+1).'.html').'"><font size="1">'.($i+1).' </font></a>';
 			if($i > 5 && $page > 10){

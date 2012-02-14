@@ -11,15 +11,15 @@
 # return array
 
 function Rang_UserStatus( $forum = null ) {
-	global $user, $lang;
+	global $user, $forum_lang;
 
 	// Доступ по рангу
 	$rang = array();
 	$rang['rang_access'] = Rang_GetUsersRang($forum['rang_access']);
-	
+
 	// Создание сообщений по рангу
 	$rang['rang_message'] = Rang_GetUsersRang($forum['rang_message']);
-	
+
 	// Создание тем по рангу
 	$rang['rang_add_theme'] = Rang_GetUsersRang($forum['rang_add_theme']);
 	$rang['no_link_guest'] = ($forum['no_link_guest']==1 && !$user->Auth);
@@ -32,27 +32,27 @@ function Rang_UserStatus( $forum = null ) {
 		$rang['is_theme_add'] = false;
 		$rang['rang_add_theme'] = false;
 		$rang['rang_message'] = false;
-		$remark = $lang['topic_close_for_discussion'];
+		$remark = $forum_lang['topic_close_for_discussion'];
 	}else{
 		if(!$user->Get('u_add_forum')){
-			$remark = $lang['error_blocking'];
+			$remark = $forum_lang['error_blocking'];
 		}
 	}
 
 	if($forum['admin_theme_add'] == 1 && $forum['close_topic'] == 0){
-		$remark .= $lang['create_new_topics_admin'];
+		$remark .= $forum_lang['create_new_topics_admin'];
 	}
 
 
 	if($rang['is_theme_add'] && $user->Auth && $user->Get('u_add_forum')){
-		$rang['right'] .= $lang['create_new_topics'].'<br />';
+		$rang['right'] .= $forum_lang['create_new_topics'].'<br />';
 	}else{
-		$rang['right'] .= $lang['no_create_new_topics'].'<br />';
+		$rang['right'] .= $forum_lang['no_create_new_topics'].'<br />';
 	}
 	if($user->Auth and $rang['rang_message'] && $user->Auth && $user->Get('u_add_forum')){
-		$rang['right'] .= $lang['create_new_message_in_topics'].'<br />'.$remark;
+		$rang['right'] .= $forum_lang['create_new_message_in_topics'].'<br />'.$remark;
 	}else{
-		$rang['right'] .= $lang['no_create_new_message_in_topics'].'<br />'.$remark;
+		$rang['right'] .= $forum_lang['no_create_new_message_in_topics'].'<br />'.$remark;
 	}
 
 	return $rang;
@@ -60,7 +60,7 @@ function Rang_UserStatus( $forum = null ) {
 
 # Статус
 function Rang_RangUserTopic($rang, $topic) {
-	global $user, $lang;
+	global $user, $forum_lang;
 	$rang2=array();
 
 	$rang2['is_theme_add'] = $topic['close_topics']==1;
@@ -69,16 +69,16 @@ function Rang_RangUserTopic($rang, $topic) {
 		$rang2['is_theme_add'] = false;
 		$rang2['rang_add_theme'] = false;
 		$rang2['rang_message'] = false;
-		$remark = '&nbsp;'.$lang['topic_close_for_discussion'];
+		$remark = '&nbsp;'.$forum_lang['topic_close_for_discussion'];
 		$rang2['right'] = '';
 		if($topic['close_topics'] == 0){
 			$rang2['right'] .= (
 				($rang2['is_theme_add'] && $user->Auth && $user->Get('u_add_forum'))
-				? $lang['create_new_message_in_topics']
-					: $lang['no_create_new_message_in_topics'])
+				? $forum_lang['create_new_message_in_topics']
+					: $forum_lang['no_create_new_message_in_topics'])
 			.'<BR>';
 		}
-		$rang2['right'].=(($user->Auth and $rang2['rang_message'])?$lang['create_new_message_in_topics']:$lang['no_create_new_message_current_topic']).'<BR>'.$remark;
+		$rang2['right'].=(($user->Auth and $rang2['rang_message'])?$forum_lang['create_new_message_in_topics']:$forum_lang['no_create_new_message_current_topic']).'<BR>'.$remark;
 		return $rang2;
 	}
 	else {
@@ -89,10 +89,10 @@ function Rang_RangUserTopic($rang, $topic) {
 
 # Комбобокс  "ранг пользователей"
 function ForumAdminGetUsersTypesComboBox($group='',$rank=0) {
-    global $config, $db, $site, $lang;
+    global $config, $db, $site, $forum_lang;
 	$mdb = $db->Select('userranks');
 	SortArray($mdb, 'min', false);
-	$types = array(array('id' => '0', 'title' => $lang['all_rang'], 'select' => false));
+	$types = array(array('id' => '0', 'title' => $forum_lang['all_rang'], 'select' => false));
 	foreach ($mdb as $type) {
 		if ($type['id'] > 0)
 			$types[$type['id']] = array('id' => $type['id'], 'title' => $type['title'], 'select' => ($rank == $type['id'] ? true : false));

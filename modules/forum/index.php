@@ -160,7 +160,7 @@ switch($op){
 }
 
 function IndexForumDataFilter( &$forum, $root= true , $get_online = true ){
-	global  $lang, $config;
+	global  $forum_lang, $config;
 	$forum2 = array();
 	$forum2['id'] = SafeDB($forum['id'], 11, int);
 	$forum2['parent_id'] = SafeDB($forum['parent_id'], 11, int);
@@ -202,7 +202,7 @@ function IndexForumDataFilter( &$forum, $root= true , $get_online = true ){
 
 	if($forum2['topics'] > $config['forum']['topics_on_page']){
 		$forum2['pages'] = true;
-		$forum2['pages'] = $lang['pages'];
+		$forum2['pages'] = $forum_lang['pages'];
 		$page = ceil($forum2['topics']/ $config['forum']['topics_on_page']);
 		$str ='';
 		for ($i = 0; $i<$page; $i++){
@@ -217,7 +217,7 @@ function IndexForumDataFilter( &$forum, $root= true , $get_online = true ){
 	}
 
 	if($forum2['close_topic']==1) {
-		$forum2['description'] .= ''.$lang['close_for_discussion'];
+		$forum2['description'] .= ''.$forum_lang['close_for_discussion'];
 	}
 
 	$forum2['url'] = Ufu('index.php?name=forum&op=showforum&forum='.$forum2['id'], 'forum/{forum}/');
@@ -226,26 +226,26 @@ function IndexForumDataFilter( &$forum, $root= true , $get_online = true ){
 }
 
 function IndexForumCatOpen( &$category ) {
-	global $site, $lang;
+	global $site, $forum_lang;
 	$category['is_cat_open'] = true;
 	$category['is_cat'] = false;
 	$category['is_forum'] = false;
 	$category['is_cat_close'] = false;
 	if($category['close_topic']==1) {
-		$category['title'].='&nbsp;'.$lang['close_for_discussion'];
+		$category['title'].='&nbsp;'.$forum_lang['close_for_discussion'];
 	}
 	$site->AddSubBlock('forums', true, $category);
 }
 
 function IndexForumCatClose( &$category ){
-	global $site, $lang;
+	global $site, $forum_lang;
 	$category['is_cat_close'] = true;
 	$category['is_cat'] = false;
 	$category['is_forum'] = false;
 	$category['is_cat_open'] = false;
 	$category['close'] = $category['close_topic']==0;
 	$category['begin'] = !$category['close'];
-	$category['status'] = (!$category['close']?$lang['category_locked']:'');
+	$category['status'] = (!$category['close']?$forum_lang['category_locked']:'');
 	if(!isset(	 $category['count_read']))
 		$category['count_read']  = ' ';
 	if(!isset(	 $category['users']))
@@ -254,7 +254,7 @@ function IndexForumCatClose( &$category ){
 }
 
 function IndexForumRender( &$forum, $read = false, $pod_forums=array() ){
-	global $site, $lang;
+	global $site, $forum_lang;
 	if($forum['parent_id'] == '0'){
 		$forum['is_cat'] = true;
 		$forum['is_forum'] = false;
@@ -268,7 +268,7 @@ function IndexForumRender( &$forum, $read = false, $pod_forums=array() ){
 	$forum['off'] = $read;
 	$forum['close'] = $forum['close_topic'] == 0;
 	$forum['begin'] = !$forum['close'];
-	$forum['status'] = (!$forum['close'] ? $lang['category_locked'] : '');
+	$forum['status'] = (!$forum['close'] ? $forum_lang['category_locked'] : '');
 	if(!isset($forum['count_read'])){
 		$forum['count_read']  = ' ';
 	}
