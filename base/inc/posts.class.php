@@ -44,12 +44,6 @@ class Posts{
 	public $DeletePageUrl = '';
 
 	/**
-	 * Адрес текущей страницы для постраничной навигации.
-	 * @var str
-	 */
-	public $NavigationUrl = '';
-
-	/**
 	 * Адрес страницы сохранения/добавления комментария.
 	 * @var str
 	 */
@@ -91,6 +85,18 @@ class Posts{
 	 * @var bool
 	 */
 	public $EnNavigation = true;
+
+	/**
+	 * Адрес текущей страницы для постраничной навигации.
+	 * @var str
+	 */
+	public $NavigationUrl = '';
+
+	/**
+	 * Анкхор для ссылок навигации по страницам. Например #comments.
+	 * @var string
+	 */
+	public $NavigationAnchor = '';
 
 	/**
 	 * Количество сообщений первого уровня на страницу.
@@ -249,8 +255,9 @@ class Posts{
 			}
 			$vars['no_answers'] = !$vars['answers'];
 
-			$vars['edit_url'] = $this->EditPageUrl.'&post_id='.$post_id;
-			$vars['delete_url'] = $this->DeletePageUrl.'&post_id='.$post_id;
+			$back = SaveRefererUrl();
+			$vars['edit_url'] = $this->EditPageUrl.'&post_id='.$post_id.'&back='.$back;
+			$vars['delete_url'] = $this->DeletePageUrl.'&post_id='.$post_id.'&back='.$back;
 
 			$vars['parent_post_url'] = $_SERVER['REQUEST_URI'].'#post_'.SafeDB($post['post_parent_id'], 11, int);
 			$vars['post_url'] = $_SERVER['REQUEST_URI'].'#post_'.$post_id;
@@ -322,18 +329,19 @@ class Posts{
 		}
 
 		// Инициализируем навигацию
-		$comm_nav_obj = new Navigation($Page, $NavigationBlockName);
-		$comm_nav_obj->FrendlyUrl = System::config('general/ufu');
+		$nav = new Navigation($Page, $NavigationBlockName);
+		$nav->FrendlyUrl = System::config('general/ufu');
+		$nav->Anchor = $this->NavigationAnchor;
 		if(!isset($this->PostsTree[0])){
-			$comm_nav_obj->DisableNavigation();
+			$nav_obj->DisableNavigation();
 		}else{
 			if(!$this->EnNavigation){
-				$comm_nav_obj->DisableNavigation();
+				$nav->DisableNavigation();
 			}else{
 				if($LastPage){
 					$Page = ceil(count($this->PostsTree[0]) / $this->MessagesOnPage);
 				}
-				$comm_nav_obj->GenNavigationMenu($this->PostsTree[0], $this->MessagesOnPage, $this->NavigationUrl, $Page);
+				$nav->GenNavigationMenu($this->PostsTree[0], $this->MessagesOnPage, $this->NavigationUrl, $Page);
 			}
 			$this->RenderPost($ObjectId, $this->PostsTree[0], $PostsBlockName, 0);
 		}
@@ -358,7 +366,6 @@ class Posts{
 		}else{
 			System::site()->AddBlock($PostFormBlockName, true, false, 'form', $this->PostFormTemplate);
 		}
-
 		if($Edit && isset($_GET['post_id'])){
 			$post_id = SafeEnv($_GET['post_id'], 11, int);
 		}elseif($Edit && !isset($_GET['post_id'])){
@@ -369,7 +376,6 @@ class Posts{
 			$this->Alert($PostFormBlockName, 'Обсуждение закрыто');
 			return;
 		}
-
 		if(!$Edit && !System::user()->Auth && !$this->GuestPost){ // Гость
 			$this->Alert($PostFormBlockName, 'Гости не могут добавлять комментарии, войдите или зарегистрируйтесь.');
 			return;
@@ -379,13 +385,15 @@ class Posts{
 		System::site()->SetVar('template', 'lang_posts_useremail', 'E-mail');
 		System::site()->SetVar('template', 'lang_posts_hideemail', 'Скрыть E-mail');
 		System::site()->SetVar('template', 'lang_posts_userhomepage', 'Сайт');
-
 		System::site()->SetVar('template', 'lang_posts_posttitle', 'Заголовок');
 		System::site()->SetVar('template', 'lang_posts_postmessage', 'Сообщение');
-
 		System::site()->SetVar('template', 'lang_posts_cancel', 'Отмена');
 		System::site()->SetVar('template', 'lang_posts_canceltitle', 'Вернуться к теме без сохранения изменений');
 
+		$back = '';
+		if(!$Edit){
+			$back = '&back='.SaveRefererUrl();
+		}
 		$vars = array();
 		if($Edit){
 			System::database()->Select($this->PostsTable, "`id`='$post_id'");
@@ -400,31 +408,21 @@ class Posts{
 				$this->Alert($PostFormBlockName, 'У вас не достаточно прав!');
 				return;
 			}
-
 			$vars['form_title'] = 'Редактирование сообщения';
-			$vars['form_action'] = $this->PostFormAction."&amp;post_id={$post_id}";
-
+			$vars['form_action'] = $this->PostFormAction."&post_id={$post_id}".$back;
 			$vars['post_message'] = htmlspecialchars($post['post_message']);
-
 			$vars['edit'] = true;
-
 			System::site()->SetVar('template','lang_posts_submit', 'Сохранить');
 			System::site()->SetVar('template','lang_posts_submittitle', 'Сохранить изменения и вернуться');
-
 			$vars['visibility'] = 'visible';
-
 		}else{
 			$vars['form_title'] = 'Добавить комментарий';
-			$vars['form_action'] = $this->PostFormAction;
-
+			$vars['form_action'] = $this->PostFormAction.$back;
 			$vars['post_title'] = '';
 			$vars['post_message'] = '';
-
 			$vars['edit'] = false;
-
 			System::site()->SetVar('template','lang_posts_submit', 'Добавить');
 			System::site()->SetVar('template','lang_posts_submittitle', 'Добавить новое сообщение');
-
 			$vars['visibility'] = 'hidden';
 		}
 
@@ -439,7 +437,7 @@ class Posts{
 		System::site()->Blocks[$PostFormBlockName]['vars'] = $vars;
 
 		// JavaScript
-		include_once('scripts/bbcode_editor/script.php');
+		UseScript('bbcode_editor');
 
 		// Смайлики для формы
 		$smilies = System::database()->Select('smilies', "`enabled`='1'");
@@ -652,4 +650,3 @@ class Posts{
 		return $text;
 	}
 }
-
