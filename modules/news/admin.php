@@ -399,7 +399,7 @@ function AdminNewsSave(){
 	$bcache->Delete('block', 'news4');
 
 	if(isset($_REQUEST['back'])){
-		GoRefererUrl(SafeDB($_REQUEST['back'], 255, str));
+		GoRefererUrl($_REQUEST['back']);
 	}else{
 		GO(ADMIN_FILE.'?exe=news');
 	}
@@ -407,7 +407,10 @@ function AdminNewsSave(){
 
 function AdminNewsDelete(){
 	global $news_access_editnews;
-	if(!isset($_REQUEST['id']) || !$news_access_editnews){
+	if(!$news_access_editnews){
+		System::admin()->AccessDenied();
+	}
+	if(!isset($_REQUEST['id'])){
 		exit('ERROR');
 	}
 	if(IsAjax() || isset($_GET['ok']) && $_GET['ok'] == '1'){
@@ -427,7 +430,7 @@ function AdminNewsDelete(){
 		if(isset($_GET['back'])){
 			GoRefererUrl($_GET['back']);
 		}
-		exit('OK');
+		GO(ADMIN_FILE.'?exe=news');
 	}else{
 		System::admin()->AddCenterBox('Удаление новости');
 		System::database()->Select('news', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");

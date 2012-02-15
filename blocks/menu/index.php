@@ -35,12 +35,7 @@ if($bcache->HasCache('block', $bcache_name)){
 }
 
 // Выборка
-$where = "`enabled`='1'";
-$w2 = GetWhereByAccess('view');
-if($w2 != ''){
-	$where .= ' and ('.$w2.')';
-}
-$pages = $db->Select('pages', $where);
+$pages = $db->Select('pages', GetWhereByAccess('view', "`enabled`='1'"));
 SortArray($pages, 'order');
 $catsPid = array();
 $catsId = array();

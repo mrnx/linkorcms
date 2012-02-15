@@ -23,11 +23,7 @@ if($bcache->HasCache('block', $bcache_name)){
 	}else{
 		$where = "`enabled`='1'";
 	}
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$news = $db->Select('news', $where);
+	$news = $db->Select('news', GetWhereByAccess('view', $where));
 	$count = count($news);
 	SortArray($news, 'date', true);
 	if($count > $max_news){

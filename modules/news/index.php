@@ -141,7 +141,7 @@ function IndexNewsAdd( &$news, $topic, $readfull=false ){
 
 
 function IndexNewsMain(){
-	global $db, $config, $site;
+	global $config, $site;
 
 	$site->AddBlock('news',true,true);
 
@@ -159,12 +159,7 @@ function IndexNewsMain(){
 		$topic = false;
 	}
 
-	$where = "`enabled`='1'".($topic !== false ? " and `topic_id`='$topic'" : "");
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$news = $db->Select('news', $where);
+	$news = System::database()->Select('news', GetWhereByAccess('view', "`enabled`='1'".($topic !== false ? " and `topic_id`='$topic'" : "")));
 	SortArray($news, 'date', true);
 
 	// Постраничная навигация
@@ -191,10 +186,9 @@ function IndexNewsMain(){
 
 
 function GetTopics(){
-	global $db, $config;
-	$db->Select('news_topics','');
+	System::database()->Select('news_topics','');
 	$rs = array();
-	while($topic = $db->FetchRow()){
+	while($topic = System::database()->FetchRow()){
 		$rs[SafeDB($topic['id'], 11, int)] = $topic;
 	}
 	return $rs;
@@ -242,12 +236,7 @@ function IndexNewsReadFull(){
 	if(isset($_GET['news'])){
 		$topics = GetTopics();
 		$news_id = SafeEnv($_GET['news'],11,int);
-		$where = "`id`='".$news_id."'";
-		$ex_where = GetWhereByAccess('view');
-		if($ex_where != ''){
-			$where .= ' and ('.$ex_where.')';
-		}
-		$db->Select('news', $where);
+		$db->Select('news', GetWhereByAccess('view', "`id`='$news_id'"));
 		if($db->NumRows() > 0){
 			$news = $db->FetchRow();
 		}
@@ -301,8 +290,6 @@ function IndexNewsAddPost(){
 	include_once($config['inc_dir'].'posts.class.php');
 	$posts = new Posts($table, $alloy_comments);
 	if($posts->SavePost($id, false)){
-		$db->Select($object_table, "`id`='$id'");
-		$obj = $db->FetchRow();
 		$counter = $obj[$counter_field] + 1;
 		$db->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
 		// Генерируем обратную ссылку
@@ -342,6 +329,7 @@ function IndexNewsEditPostSave(){
 	include_once($config['inc_dir'].'posts.class.php');
 	$posts = new Posts($table);
 	if($posts->SavePost(SafeEnv($_GET[$get_id], 11, int), true)){
+		$post_id = SafeDB($_GET['post_id'], 11, int);
 		GoRefererUrl($_GET['back']);
 	}else{
 		$site->AddTextBox('Ошибка', $posts->PrintErrors());

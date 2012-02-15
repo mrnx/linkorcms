@@ -7,12 +7,7 @@ if(!defined('VALID_RUN')){
 
 global $search_results, $searchstr, $db;
 
-$where = "`enabled`='1'";
-$ex_where = GetWhereByAccess('view');
-if($ex_where != ''){
-	$where .= ' and ('.$ex_where.')';
-}
-$news_array = $db->Select('news', $where);
+$news_array = System::database()->Select('news', GetWhereByAccess('view', "`enabled`='1'"));
 
 foreach($news_array as $news){
 	$result = array();

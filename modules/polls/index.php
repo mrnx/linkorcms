@@ -39,13 +39,8 @@ switch($op){
 }
 
 function IndexPollsViewPolls(){
-	global $db, $site, $config, $user;
-	$where = "`active`='1'";
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$polls = $db->Select('polls', $where);
+	global $site, $config, $user;
+	$polls = System::database()->Select('polls', GetWhereByAccess('view', "`active`='1'"));
 
 	$time = time();
 	if(count($polls) > 0){
@@ -80,12 +75,7 @@ function IndexPollsViewPoll(){
 	global $db, $site, $user, $op, $config;
 
 	$id = SafeEnv($_GET['poll_id'], 11, int);
-	$where = "`id`='$id' and `active`='1'";
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$db->Select('polls', $where);
+	System::database()->Select('polls', GetWhereByAccess('view', "`id`='$id' and `active`='1'"));
 	if($db->NumRows() == 0){
 		HackOff();
 	}
@@ -180,7 +170,7 @@ function IndexPollsViewPoll(){
 }
 
 function IndexPollsVoice(){
-	global $db, $user, $site, $config;
+	global $user, $site, $config;
 	if(!isset($_GET['poll_id'])){
 		GoBack();
 	}
@@ -189,17 +179,12 @@ function IndexPollsVoice(){
 	}else{
 		$pid = SafeEnv($_GET['poll_id'], 11, int);
 
-		$where = "`id`='$pid' and `active`='1'";
-		$ex_where = GetWhereByAccess('view');
-		if($ex_where != ''){
-			$where .= ' and ('.$ex_where.')';
-		}
-		$db->Select('polls', $where);
+		System::database()->Select('polls', GetWhereByAccess('view', "`id`='$pid' and `active`='1'"));
 
-		if($db->NumRows() == 0){
+		if(System::database()->NumRows() == 0){
 			GoBack();
 		}
-		$poll = $db->FetchRow();
+		$poll = System::database()->FetchRow();
 		$answers = unserialize($poll['answers']);
 		$multianswers = SafeDB($poll['multianswers'], 1, int);
 		$voice = SafeEnv($_POST['voice'], 11, int);
@@ -213,13 +198,13 @@ function IndexPollsVoice(){
 		}else{
 			$uid = -1;
 		}
-		$db->Select('polls_voices', "`poll_id`='$pid' and (`user_ip`='$ip' or `user_id`='$uid')");
-		if($db->NumRows() == 0){
+		System::database()->Select('polls_voices', "`poll_id`='$pid' and (`user_ip`='$ip' or `user_id`='$uid')");
+		if(System::database()->NumRows() == 0){
 			if(!$multianswers){
 				if(isset($answers[$voice])){
 					$answers[$voice][2] = $answers[$voice][2] + 1;
 					$answers = serialize($answers);
-					$db->Update('polls', "answers='$answers'", "`id`='$pid'");
+					System::database()->Update('polls', "answers='$answers'", "`id`='$pid'");
 				}else{
 					GoBack();
 				}
@@ -233,7 +218,7 @@ function IndexPollsVoice(){
 					}
 				}
 				$answers = serialize($answers);
-				$db->Update('polls', "answers='$answers'", "`id`='$pid'");
+				System::database()->Update('polls', "answers='$answers'", "`id`='$pid'");
 			}
 			$voice = serialize($voice);
 			if($user->Auth){
@@ -241,7 +226,7 @@ function IndexPollsVoice(){
 			}else{
 				$user_id = 0;
 			}
-			$db->Insert('polls_voices', "'','$pid','".getip()."','$voice','$user_id'");
+			System::database()->Insert('polls_voices', "'','$pid','".getip()."','$voice','$user_id'");
 			$user->ChargePoints($config['points']['polls_answer']);
 			GoBack();
 		}else{

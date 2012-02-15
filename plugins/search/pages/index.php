@@ -5,14 +5,9 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-global $search_results, $searchstr, $db;
+global $search_results, $searchstr;
 
-$where = "`enabled`='1' and `type`='page'";
-$ex_where = GetWhereByAccess('view');
-if($ex_where != ''){
-	$where .= ' and ('.$ex_where.')';
-}
-$objects = $db->Select('pages', $where);
+$objects = System::database()->Select('pages', GetWhereByAccess('view', "`enabled`='1' and `type`='page'"));
 
 foreach($objects as $object){
 	$result = array();
@@ -41,5 +36,3 @@ foreach($objects as $object){
 		$search_results[] = $result;
 	}
 }
-
-?>

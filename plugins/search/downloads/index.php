@@ -7,12 +7,7 @@ if(!defined('VALID_RUN')){
 
 global $search_results, $searchstr, $db;
 
-$where = "`active`='1'";
-$ex_where = GetWhereByAccess('view');
-if($ex_where != ''){
-	$where .= ' and ('.$ex_where.')';
-}
-$objects = $db->Select('downloads', "`active`='1'");
+$objects = System::database()->Select('downloads', GetWhereByAccess('view', "`active`='1'"));
 
 foreach($objects as $object){
 	$result = array();

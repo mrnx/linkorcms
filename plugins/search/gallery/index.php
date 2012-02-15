@@ -7,12 +7,7 @@ if(!defined('VALID_RUN')){
 
 global $search_results, $searchstr, $db;
 
-$where = "`show`='1'";
-$ex_where = GetWhereByAccess('view');
-if($ex_where != ''){
-	$where .= ' and ('.$ex_where.')';
-}
-$objects = $db->Select('gallery', $where);
+$objects = System::database()->Select('gallery', GetWhereByAccess('view', "`show`='1'"));
 
 foreach($objects as $object){
 	$result = array();

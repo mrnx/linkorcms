@@ -54,10 +54,8 @@ switch($op){
 
 function IndexGalleryGetNumItems()
 {
-	global $db;
-	$ex_where = GetWhereByAccess('view');
-	$db->Select('gallery', '`show`=\'1\''.($ex_where != '' ? ' and '.$ex_where : ''));
-	return $db->NumRows().'.</center>';
+	System::database()->Select('gallery', GetWhereByAccess('view', "`show`='1'"));
+	return System::database()->NumRows().'.</center>';
 }
 
 function RenderThumb( $title, $filename, $description, $comments, $link )
@@ -121,12 +119,7 @@ function IndexGalleryShow( $cat )
 	}else{
 		$page = 1;
 	}
-	$where = "`cat_id`='$cat' and `show`='1'";
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$images = $db->Select('gallery', $where);
+	$images = $db->Select('gallery', GetWhereByAccess('view', "`cat_id`='$cat' and `show`='1'"));
 	//SortArray($images, 'public', true);
 
 	// Постраничная навигация
@@ -164,12 +157,7 @@ function IndexGalleryView()
 
 	$cat = SafeEnv($_GET['cat'], 11, int);
 
-	$where = "`cat_id`='$cat' and `show`='1'";
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$db_images = $db->Select('gallery', $where);
+	$db_images = $db->Select('gallery', GetWhereByAccess('view', "`cat_id`='$cat' and `show`='1'"));
 	if($db->NumRows() == 0){
 		GO(GetSiteUrl().Ufu('index.php?name=gallery', '{name}/'));
 	}

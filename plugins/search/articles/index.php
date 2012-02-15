@@ -5,14 +5,9 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-global $search_results, $searchstr, $db;
+global $search_results, $searchstr;
 
-$where = "`active`='1'";
-$ex_where = GetWhereByAccess('view');
-if($ex_where != ''){
-	$where .= ' and ('.$ex_where.')';
-}
-$objects = $db->Select('articles', $where);
+$objects = System::database()->Select('articles', GetWhereByAccess('view', "`active`='1'"));
 
 foreach($objects as $object){
 	$result = array();

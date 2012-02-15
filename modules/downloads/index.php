@@ -106,16 +106,12 @@ function filetypecheck( $filename )
 	return $dtype;
 }
 
-function IndexDownloadsGetNumItems()
-{
-	global $db;
-	$ex_where = GetWhereByAccess('view');
-	$db->Select('downloads', "`active`='1'".($ex_where != '' ? ' and '.$ex_where : ''));
-	return $db->NumRows().'.</center>';
+function IndexDownloadsGetNumItems(){
+	System::database()->Select('downloads', GetWhereByAccess('view', "`active`='1'"));
+	return System::database()->NumRows().'.</center>';
 }
 
-function IndexDownloadsFunc($id)
-{
+function IndexDownloadsFunc($id){
 	global $config;
 	return
 	'&nbsp'
@@ -148,7 +144,7 @@ function AddDownload(&$down)
 	}else{
 		$vars['comments'] = ' - ';
 	}
-	
+
 	$vars['author'] = SafeDB($down['author'], 200, str);
 	$vars['homepage'] = SafeDB($down['author_site'], 250, str);
 	$vars['homepage_url'] = UrlRender(SafeDB($down['author_site'], 250, str));
@@ -217,7 +213,7 @@ function AddDetailDownload(&$down)
 	$vars['votes'] = $site->Select('vote', $vdata);
 	$vars['addvotesubm'] = $site->Submit('Оценить файл');
 	$vars['allow_votes'] = SafeDB($down['allow_votes'], 1, bool);
-	
+
 
 	if($down['image'] != ''){
 		$vars['image'] = RealPath2($config['downloads']['images_dir'].SafeDB($down['image'], 255, str));
@@ -274,12 +270,7 @@ function IndexDownloadsMain()
 		$tree->Catalog($cat,'IndexDownloadsGetNumItems');
 	}
 	if($cat != 0 || $config['downloads']['show_last'] == '1'){
-		$where = ($cat != 0 ? "`category`='$cat' and " : '')."`active`='1'";
-		$ex_where = GetWhereByAccess('view');
-		if($ex_where != ''){
-			$where .= ' and ('.$ex_where.')';
-		}
-		$downs = $db->Select('downloads', $where);
+		$downs = System::database()->Select('downloads', GetWhereByAccess('view', ($cat != 0 ? "`category`='$cat' and " : '')."`active`='1'"));
 		SortArray($downs, 'public', true);
 
 		// Постраничная навигация
@@ -309,12 +300,7 @@ function IndexDownloadsFull()
 	}else{
 		GO(GetSiteUrl().Ufu('index.php?name=downloads', '{name}/'));
 	}
-	$where = "`id`='$id' and `active`='1'";
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$db->Select('downloads', $where);
+	System::database()->Select('downloads', GetWhereByAccess('view', "`id`='$id' and `active`='1'"));
 	if($db->NumRows() == 0){
 		GO(GetSiteUrl().Ufu('index.php?name=downloads', '{name}/'));
 	}
@@ -348,12 +334,7 @@ function IndexDownloadsFile()
 {
 	global $config, $db, $site, $user;
 	$file = SafeEnv($_GET['file'],11,int);
-	$where = "`id`='$file' and `active`='1'";
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$db->Select('downloads', $where);
+	System::database()->Select('downloads', GetWhereByAccess('view', "`id`='$file' and `active`='1'"));
 	if($db->NumRows() > 0){
 		$sfile = $db->FetchRow();
 		$counter = SafeDB($sfile['hits'],11,int)+1;
@@ -374,12 +355,7 @@ function IndexDownloadsAddVote()
 	$vote = SafeEnv($_POST['vote'], 1, int);
 	$db->Delete('downloads_rating', "`time`<'$time'");
 	$site->OtherMeta .= '<meta http-equiv="REFRESH" content="3; URL='.HistoryGetUrl(1).'">';
-	$where = "`id`='$file' and `active`='1'";
-	$ex_where = GetWhereByAccess('view');
-	if($ex_where != ''){
-		$where .= ' and ('.$ex_where.')';
-	}
-	$db->Select('downloads', $where);
+	$db->Select('downloads', GetWhereByAccess('view', "`id`='$file' and `active`='1'"));
 	if($db->NumRows() > 0){
 		$dfile = $db->FetchRow();
 		if($dfile['allow_votes']=='1'){ // оценки разрешены
