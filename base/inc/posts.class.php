@@ -333,7 +333,7 @@ class Posts{
 		$nav->FrendlyUrl = System::config('general/ufu');
 		$nav->Anchor = $this->NavigationAnchor;
 		if(!isset($this->PostsTree[0])){
-			$nav_obj->DisableNavigation();
+			$nav->DisableNavigation();
 		}else{
 			if(!$this->EnNavigation){
 				$nav->DisableNavigation();

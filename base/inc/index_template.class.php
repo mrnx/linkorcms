@@ -113,13 +113,8 @@ class Page extends PageTemplate{
 	}
 
 	public function ViewBlocks(){
-		global $site, $db, $user; // הכÿ סמגלוסעטלמסעט
-		$where = "`enabled`='1'";
-		$w2 = GetWhereByAccess('view');
-		if($w2 != ''){
-			$where .= ' and ('.$w2.')';
-		}
-		$blocks = System::database()->Select('blocks', $where);
+		global $site, $db, $user; // הכÿ סמגלוסעטלמסעט, ֵֽ ׃ְִֻßׂÜ
+		$blocks = System::database()->Select('blocks', GetWhereByAccess('view', "`enabled`='1'"));
 		SortArray($blocks, 'place');
 		foreach($blocks as $block){
 			$block_config = $block['config'];
