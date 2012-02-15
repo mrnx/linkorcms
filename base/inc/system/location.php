@@ -89,13 +89,14 @@ function SaveRefererUrl( $Url = '' ){
 
 /**
  * Выполняет перенаправление по сохраненному в сессии адресу
- * @param $id
+ * @param $id Идентификатор ссылки
+ * @param $anchor Добавление якоря к ссылке. Пример: #post244
  */
-function GoRefererUrl( $id ){
+function GoRefererUrl( $id, $anchor = '' ){
 	if(isset($_SESSION['saved_urls'][$id])){
 		$url = $_SESSION['saved_urls'][$id];
 		unset($_SESSION['saved_urls'][$id]);
-		GO($url);
+		GO($url.$anchor);
 	}else{
 		GO(HistoryGetUrl(2));
 	}
