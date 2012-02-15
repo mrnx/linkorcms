@@ -6,8 +6,7 @@ if(!defined('VALID_RUN')){
 }
 
 if(!$user->CheckAccess2('articles', 'articles')){
-	AddTextBox('Ошибка', $config['general']['admin_accd']);
-	return;
+	System::admin()->AccessDenied();
 }
 
 TAddSubTitle('Архив статей');
@@ -28,8 +27,6 @@ $editarticles = $user->CheckAccess2('articles', 'edit_articles');
 $editcats = $user->CheckAccess2('articles', 'edit_cats');
 $editconf = $user->CheckAccess2('articles', 'config');
 
-include_once ($config['inc_dir'].'configuration/functions.php');
-
 if(isset($_GET['a'])){
 	$action = $_GET['a'];
 }else{
@@ -38,10 +35,8 @@ if(isset($_GET['a'])){
 
 TAddToolLink('Статьи', 'main', 'articles');
 if($editarticles) TAddToolLink('Добавить статью', 'editor', 'articles&a=editor');
-TAddToolBox($action);
 if($editcats) TAddToolLink('Категории', 'cats', 'articles&a=cats');
 if($editcats) TAddToolLink('Добавить категорию', 'cateditor', 'articles&a=cateditor');
-TAddToolBox($action);
 if($editconf) TAddToolLink('Настройки модуля', 'config', 'articles&a=config');
 TAddToolBox($action);
 
@@ -121,23 +116,27 @@ switch($action){
 	// Настройки
 	case 'config':
 		if(!$editconf){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-		}else{
-			AdminConfigurationEdit('articles', 'articles', false, false, 'Конфигурация модуля "Архив статей"');
+			System::admin()->AccessDenied();
 		}
+		System::admin()->AddCenterBox('Конфигурация модуля "Архив статей"');
+		if(CheckGet('saveok')){
+			System::admin()->Highlight('Настройки сохранены.');
+		}
+		System::admin()->ConfigGroups('articles');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=articles&a=configsave');
 		break;
 	case 'configsave':
 		if(!$editconf){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-		}else{
-			AdminConfigurationSave('articles&a=config', 'articles', false, false);
+			System::admin()->AccessDenied();
 		}
+		System::admin()->SaveConfigs('articles');
+		GO(ADMIN_FILE.'?exe=articles&a=config&saveok');
 		break;
 }
 
 // Главная - список статей
 function AdminArticlesMain(){
-	global $config, $db, $tree, $site, $user, $editarticles;
+	global $config, $tree, $site, $editarticles;
 
 	// Фильтр, дает возможность показывать статьи определенной категории.
 	if(isset($_GET['cat']) && $_GET['cat'] > -1){
@@ -160,54 +159,54 @@ function AdminArticlesMain(){
 	AddCenterBox('Статьи');
 
 	// Форма фильтра по категориям
-	$text = '';
-	$text = '<form name="categories" method="get">'
-	.'<table cellspacing="0" cellpadding="0" border="0" width="100%" align="center">'
-	.'<tr><td align="center" class="contenttd">Выберите категорию: '.$site->Hidden('exe', 'articles').$site->Select('cat', $data).$site->Submit('Показать').'</td></tr>'
-	.'</table></form>';
+	System::admin()->AddJS('
+	ArticlesSelectCat = function(){
+		Admin.LoadPage("'.ADMIN_FILE.'?exe=articles&cat="+$("#article-cat").val());
+	}
+	');
+	$text = '<div style="text-align: center; margin-bottom: 10px;">Категория: '.$site->Select('cat', $data, false, 'id="article-cat" onchange="ArticlesSelectCat();"').'</div>';
 	AddText($text);
 
 	// Берем статьи из БД и включаем постраничную навигацию если нужно.
-	$r = $db->Select('articles', $where);
+	$r = System::database()->Select('articles', $where);
 	SortArray($r, 'public', true); // Сортируем по дате добавления
 	if(count($r) > $config['articles']['articles_on_page']){
 		$navigator = new Navigation($page);
 		$navigator->GenNavigationMenu($r, $config['articles']['articles_on_page'], ADMIN_FILE.'?exe=articles'.($cat > 0 ? '&cat='.$cat : ''));
-		AddNavigation();
+		//AddNavigation();
 		$nav = true;
 	}else{
 		$nav = false;
-		AddText('<br />');
 	}
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
-	$text .= '<tr><th>Название</th><th>Прочитано</th><th>Комментарии</th><th>Оценка</th><th>Просматривают</th><th>Статус</th><th>Функции</th></tr>';
+	$text .= '<tr><th>Название</th><th>Прочитано</th><th>Оценка</th><th>Просматривают</th><th>Статус</th><th>Функции</th></tr>';
 
-
+	$back = SaveRefererUrl();
 	foreach($r as $art){
-		switch($art['active']){
-			case '1':
-				$st = '<font color="#008000">Вкл.</font></a>';
-				break;
-			case '0':
-				$st = '<font color="#FF0000">Выкл.</font>';
-				break;
-		}
+		$id = SafeDB($art['id'], 11, int);
+		$st = System::admin()->SpeedStatus('Включена', 'Отключена', ADMIN_FILE.'?exe=articles&a=changestatus&id='.$id, $art['active'] == '1');
 		if($editarticles){
-			$st = '<a href="'.ADMIN_FILE.'?exe=articles&a=changestatus&id='.SafeDB($art['id'], 11, int).'">'.$st.'</a>';
 			$func = '';
-			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=articles&a=editor&id='.SafeDB($art['id'], 11, int), 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=articles&a=delete&id='.SafeDB($art['id'], 11, int).'&ok=0', 'images/admin/delete.png');
+			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=articles&a=editor&id='.$id.'&back='.$back, 'images/admin/edit.png');
+			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=articles&a=delete&id='.$id.'&ok=1&back='.$back, 'images/admin/delete.png', 'Удалить статью?');
 		}else{
 			$func = '-';
 		}
 		$vi = ViewLevelToStr(SafeDB($art['view'], 1, int));
 
-		$rating = '<img src="'.GetRatingImage(SafeDB($art['num_votes'], 11, int), SafeDB($art['all_votes'], 11, int)).'" border="0" />/ (всего '.SafeDB($art['num_votes'], 11, int).')'.($editarticles ? ' / <a href="'.ADMIN_FILE.'?exe=articles&a=resetrating&id='.SafeDB($art['id'], 11, int).'" title="Обнулить счётчик оценок">Сброс</a>' : '');
+		$hits = SafeDB($art['hits'], 11, int);
+		if($editarticles){
+			$hits .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик просмотров', ADMIN_FILE.'?exe=articles&a=resethits&id='.SafeDB($art['id'], 11, int), 'images/admin/arrow_in.png', 'Сбросить счётчик просмотров?');
+		}
+
+		$rating = '<img src="'.GetRatingImage(SafeDB($art['num_votes'], 11, int), SafeDB($art['all_votes'], 11, int)).'" border="0" />';
+		if($editarticles){
+			$rating .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик оценок ('.SafeDB($art['num_votes'], 11, int).' голосов)', ADMIN_FILE.'?exe=articles&a=resetrating&id='.SafeDB($art['id'], 11, int), 'images/admin/arrow_in.png', 'Сбросить оценки?');
+		}
 
 		$text .= '<tr>
-		<td><b><a href="'.ADMIN_FILE.'?exe=articles&a=editor&id='.SafeDB($art['id'], 11, int).'">'.SafeDB($art['title'], 255, str).'</a></b></td>
-		<td>'.SafeDB($art['hits'], 11, int).($editarticles ? ' / <a href="'.ADMIN_FILE.'?exe=articles&a=resethits&id='.SafeDB($art['id'], 11, int).'" title="Сбросить счётчик">Сброс</a>' : '').'</td>
-		<td>'.SafeDB($art['comments_counter'], 11, int) .'</td>
+		<td><b>'.System::admin()->Link(SafeDB($art['title'], 255, str), ADMIN_FILE.'?exe=articles&a=editor&id='.$id).'</b></td>
+		<td>'.$hits.'</td>
 		<td>'.$rating.'</td>
 		<td>'.$vi.'</td>
 		<td>'.$st.'</td>
@@ -224,10 +223,9 @@ function AdminArticlesMain(){
 
 // Редактор статей - добавление, редактирование
 function AdminArticlesEditor(){
-	global $tree, $site, $config, $db, $user, $editarticles;
+	global $tree, $site, $editarticles;
 	if(!$editarticles){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		System::admin()->AccessDenied();
 	}
 	$site->AddJS('
 	function PreviewOpen(){
@@ -258,8 +256,8 @@ function AdminArticlesEditor(){
 		$cap = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, str);
-		$db->Select('articles', "`id`='$id'");
-		$par = $db->FetchRow();
+		System::database()->Select('articles', "`id`='$id'");
+		$par = System::database()->FetchRow();
 		$cat_id = SafeDB($par['cat_id'], 11, int);
 		$author = SafeDB($par['author'], 200, str);
 		$email = SafeDB($par['email'], 50, str);
@@ -302,13 +300,13 @@ function AdminArticlesEditor(){
 	FormRow('[seo] Ключевые слова', $site->Edit('seo_keywords', $seo_keywords, false, 'style="width:400px;"'));
 	FormRow('[seo] Описание', $site->Edit('seo_description', $seo_description, false, 'style="width:400px;"'));
 	//
-	AdminImageControl('Изображение', 'Загрузить изображение', $image, $config['articles']['images_dir']);
+	AdminImageControl('Изображение', 'Загрузить изображение', $image, System::config('articles/images_dir'));
 
 	FormTextRow('Короткая статья (HTML)', $site->HtmlEditor('description', $description, 600, 200));
-	FormRow('Преобразовать текст в HTML', $site->Select('auto_br_desc', GetEnData($auto_br_desc, 'Да', 'Нет')));
+	FormRow('', 'Преобразовать текст в HTML: '.$site->Select('auto_br_desc', GetEnData($auto_br_desc, 'Да', 'Нет')));
 
 	FormTextRow('Полная статья (HTML)', $site->HtmlEditor('article', $article, 600, 400));
-	FormRow('Преобразовать текст в HTML', $site->Select('auto_br_article', GetEnData($auto_br_article, 'Да', 'Нет')));
+	FormRow('', 'Преобразовать текст в HTML: '.$site->Select('auto_br_article', GetEnData($auto_br_article, 'Да', 'Нет')));
 
 	FormRow('Автор', $site->Edit('author', $author, false, 'style="width:400px;" maxlength="50"'));
 	FormRow('E-mail автора', $site->Edit('email', $email, false, 'style="width:400px;" maxlength="50"'));
@@ -318,12 +316,17 @@ function AdminArticlesEditor(){
 	FormRow('Кто видит', $site->Select('view', GetUserTypesFormData($view)));
 	FormRow('Активна', $site->Select('active', GetEnData($active, 'Да', 'Нет')));
 	AddCenterBox($top);
-	AddForm('<form name="edit_form" action="'.ADMIN_FILE.'?exe=articles&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Button('Предпросмотр', 'onclick="PreviewOpen();"').$site->Submit($cap));
+	$back = '';
+	if(isset($_REQUEST['back'])){
+		$back = '&back='.SafeDB($_REQUEST['back'], 255, str);
+	}
+	AddForm('<form name="edit_form" action="'.ADMIN_FILE.'?exe=articles&a='.$action.$back.'" method="post" enctype="multipart/form-data">',
+		$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Button('Предпросмотр', 'onclick="PreviewOpen();"').$site->Submit($cap));
 }
 
 // Сохранение статьи или изменений
 function AdminArticlesSaveArticle( $action ){
-	global $config, $db, $tree, $user, $editarticles;
+	global $config, $tree, $editarticles;
 	if(!$editarticles){
 		AddTextBox('Ошибка', $config['general']['admin_accd']);
 		return;
@@ -358,14 +361,14 @@ function AdminArticlesSaveArticle( $action ){
 	//
 	if('add' == $action){
 		$values = Values('', $cat_id, time(), $author, $email, $www, $title, $description, $article, $image, 0, $allow_comments, 0, $allow_votes, 0, 0, $active, $view, $auto_br_desc, $auto_br_article, $seo_title, $seo_keywords, $seo_description);
-		$db->Insert('articles', $values);
+		System::database()->Insert('articles', $values);
 		if($active){
 			$tree->CalcFileCounter($cat_id, true);
 		}
 	}elseif('save' == $action){
 		$set = "cat_id='$cat_id',author='$author',email='$email',www='$www',title='$title',description='$description',article='$article',image='$image',allow_comments='$allow_comments',allow_votes='$allow_votes',view='$view',active='$active',auto_br_desc='$auto_br_desc',auto_br_article='$auto_br_article',seo_title='$seo_title',seo_keywords='$seo_keywords',seo_description='$seo_description'";
 		$id = SafeEnv($_GET['id'], 11, int);
-		$r = $db->Select('articles', "`id`='$id'");
+		$r = System::database()->Select('articles', "`id`='$id'");
 		if($r[0]['cat_id'] != $cat_id && $r[0]['active'] == '1'){ // Если переместили в другой раздел
 			$tree->CalcFileCounter($r[0]['cat_id'], false);
 			$tree->CalcFileCounter($cat_id, true);
@@ -377,26 +380,33 @@ function AdminArticlesSaveArticle( $action ){
 				$tree->CalcFileCounter($cat_id, true);
 			}
 		}
-		$db->Update('articles', $set, "`id`='$id'");
+		System::database()->Update('articles', $set, "`id`='$id'");
 	}
-	//GO(ADMIN_FILE.'?exe=articles');
-	GoRefererUrl($_GET['back']);
-	AddTextBox('Сообщение', 'Изменения успешно сохранены.');
+	if(isset($_REQUEST['back'])){
+		GoRefererUrl($_REQUEST['back']);
+	}else{
+		GO(ADMIN_FILE.'?exe=articles');
+	}
 }
 
 // Смена статуса статьи
 function AdminArticlesChangeStatus(){
-	global $config, $db, $tree, $user, $editarticles;
+	global $tree, $editarticles;
 	if(!$editarticles){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		if(IsAjax()){
+			exit("ERROR");
+		}
+		System::admin()->AccessDenied();
 	}
 	if(!isset($_GET['id'])){
+		if(IsAjax()){
+			exit("ERROR");
+		}
 		GO(ADMIN_FILE.'?exe=articles');
 	}
-	$db->Select('articles', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	if($db->NumRows() > 0){
-		$r = $db->FetchRow();
+	System::database()->Select('articles', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	if(System::database()->NumRows() > 0){
+		$r = System::database()->FetchRow();
 		if($r['active'] == 1){
 			$en = '0';
 			$tree->CalcFileCounter($r['cat_id'], false);
@@ -404,63 +414,63 @@ function AdminArticlesChangeStatus(){
 			$en = '1';
 			$tree->CalcFileCounter($r['cat_id'], true);
 		}
-		$db->Update('articles', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('articles', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	}
+	if(IsAjax()){
+		exit("OK");
 	}
 	GO(ADMIN_FILE.'?exe=articles');
 }
 
 // Удаление статьи
 function AdminArticlesDelete(){
-	global $config, $db, $tree, $user, $editarticles;
+	global $tree, $editarticles;
 	if(!$editarticles){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		System::admin()->AccessDenied();
 	}
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=articles');
 	}
-	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
+	if(IsAjax() || isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$id = SafeEnv($_GET['id'], 11, int);
-		$r = $db->Select('articles', "`id`='".$id."'");
+		$r = System::database()->Select('articles', "`id`='".$id."'");
 		$tree->CalcFileCounter($r[0]['cat_id'], false);
-		$db->Delete('articles', "`id`='$id'");
-		$db->Delete('articles_comments', "`object_id`='$id'");
-		GoRefererUrl($_GET['back']);
-		AddTextBox('Сообщение', 'Статья удалена.'); // В случае, если не будет произведено перенаправление
+		System::database()->Delete('articles', "`id`='$id'");
+		System::database()->Delete('articles_comments', "`object_id`='$id'");
+		if(isset($_REQUEST['back'])){
+			GoRefererUrl($_REQUEST['back']);
+		}else{
+			GO(ADMIN_FILE.'?exe=articles');
+		}
 	}else{
-		$r = $db->Select('articles', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Удалить статью "'.$r[0]['title'].'"<br />'.'<a href="'.ADMIN_FILE.'?exe=articles&a=delete&id='.SafeEnv($_GET['id'], 11, int).'&back='.SaveRefererUrl().'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox('Внимание', $text);
+		System::admin()->AddCenterBox('Удаление статьи');
+		System::database()->Select('articles', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");
+		$article = System::database()->FetchRow();
+		$id = SafeDB($_REQUEST['id'], 11, int);
+		$back = SafeDB($_REQUEST['back'], 255, str);
+		System::admin()->HighlightConfirmNoAjax('Удалить статью "'.SafeDB($article['title'], 255, str).'"?', ADMIN_FILE.'?exe=articles&a=delete&id='.$id.'&ok=1&back='.$back);
 	}
 }
 
 // Сброс счетчика просмотров статьи
 function AdminArticlesResetHits(){
-	global $config, $db, $user, $editarticles;
+	global $editarticles;
 	if(!$editarticles){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		System::admin()->AccessDenied();
 	}
 	if(isset($_GET['id'])){
-		$db->Update('articles', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('articles', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
 	GO(ADMIN_FILE.'?exe=articles');
 }
 
 // Сброс оценок статьи
 function AdminArticlesResetRating(){
-	global $config, $db, $user, $editarticles;
+	global $editarticles;
 	if(!$editarticles){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+		System::admin()->AccessDenied();
 	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$db->Update('articles', "num_votes='0',all_votes='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO(ADMIN_FILE.'?exe=articles');
-	}else{
-		$r = $db->Select('articles', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите сбросить оценки для статьи "'.$r[0]['title'].'"<br />'.'<a href="'.ADMIN_FILE.'?exe=articles&a=resetrating&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание", $text);
-	}
+	System::database()->Update('articles', "num_votes='0',all_votes='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	GO(ADMIN_FILE.'?exe=articles');
 }
 
