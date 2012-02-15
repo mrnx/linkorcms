@@ -56,23 +56,30 @@ abstract class System{
 	}
 
 	static private function configs( $globalVarName, $Path, $SetValue = null ){
-		$Path = explode('/', $Path);
-		if(isset($Path[1])){
+		static $Cache = array();
+		if(!isset($SetValue) && isset($Cache[$Path])){
+			return $Cache[$Path];
+		}
+		$Paths = explode('/', $Path);
+		if(isset($Paths[1])){
 			if(isset($SetValue)){
-				$old_value = $GLOBALS[$globalVarName][$Path[0]][$Path[1]];
-				$GLOBALS[$globalVarName][$Path[0]][$Path[1]] = $SetValue;
-				ConfigSetValue($Path[0], $Path[1], $SetValue);
+				$old_value = $GLOBALS[$globalVarName][$Paths[0]][$Paths[1]];
+				$GLOBALS[$globalVarName][$Paths[0]][$Paths[1]] = $SetValue;
+				ConfigSetValue($Paths[0], $Paths[1], $SetValue);
+				if(isset($Cache[$Path])) $Cache[$Path] = $SetValue;
 				return $old_value;
 			}else{
-				if(isset($GLOBALS[$globalVarName][$Path[0]][$Path[1]])){
-					return $GLOBALS[$globalVarName][$Path[0]][$Path[1]];
+				if(isset($GLOBALS[$globalVarName][$Paths[0]][$Paths[1]])){
+					$Cache[$Path] = $GLOBALS[$globalVarName][$Paths[0]][$Paths[1]];
+					return $GLOBALS[$globalVarName][$Paths[0]][$Paths[1]];
 				}else{
 					return false;
 				}
 			}
 		}else{
-			if(isset($GLOBALS[$globalVarName][$Path[0]])){
-				return $GLOBALS[$globalVarName][$Path[0]];
+			if(isset($GLOBALS[$globalVarName][$Path])){
+				$Cache[$Path] = $GLOBALS[$globalVarName][$Path];
+				return $GLOBALS[$globalVarName][$Path];
 			}else{
 				return false;
 			}
