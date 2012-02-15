@@ -68,13 +68,13 @@ function ViewLevelToStr( $Level, $Admins='', $Members='', $Guests='', $All='' ){
  * Создаст запрос базы данных чтобы получить только те объекты (данные),
  * которые пользователь с данным доступом может видеть
  * @param $ParamName Имя параметра с уровнем доступа объекта в базе данных
+ * @param $ExWhere Дополнительные условия
  * @param null $UserAccess Уровень доступа пользлвателя
  * @return string
  */
-function GetWhereByAccess( $ParamName, $UserAccess=null ){
+function GetWhereByAccess( $ParamName, $ExWhere = '', $UserAccess=null ){
 	if($UserAccess == null){
-		global $user;
-		$UserAccess = $user->AccessLevel();
+		$UserAccess = System::user()->AccessLevel();
 	}
 	$where = "`$ParamName`='4'";
 	if($UserAccess == ACCESS_ADMIN){ // Администратор
@@ -84,5 +84,13 @@ function GetWhereByAccess( $ParamName, $UserAccess=null ){
 	}else{ // Гость
 		$where .= " or `$ParamName`='3'";
 	}
-	return $where;
+	if($ExWhere != '' && $where != ''){
+		return '('.$ExWhere.') and ('.$where.')';
+	}elseif($ExWhere != '' && $where == ''){
+		return $ExWhere;
+	}elseif($ExWhere == '' && $where != ''){
+		return $where;
+	}else{
+		return '';
+	}
 }
