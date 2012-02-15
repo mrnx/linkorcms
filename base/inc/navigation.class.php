@@ -10,6 +10,11 @@ class Navigation{
 	public $template_block;
 	public $FrendlyUrl = false;
 	public $Starkyt = null;
+	/**
+	 * Анкхор для ссылок. Начинается с #.
+	 * @var string
+	 */
+	public $Anchor = '';
 
 	/**
 	 * Конструктор
@@ -31,9 +36,9 @@ class Navigation{
 
 	private function GetUrl( $Link, $Page ){
 		if($this->FrendlyUrl){
-			return str_replace('{'.$this->param_name.'}', $Page, $Link);
+			return str_replace('{'.$this->param_name.'}', $Page, $Link).$this->Anchor;
 		}else{
-			return $Link.'&'.$this->param_name.'='.$Page;
+			return $Link.'&'.$this->param_name.'='.$Page.$this->Anchor;
 		}
 	}
 
@@ -173,6 +178,9 @@ class Navigation{
 		}else{
 			$pages[0] = $Items;
 		}
+		$pages_count = count($pages);
+		if($Page > $pages_count) $Page = $pages_count;
+		if($Page < 0) $Page = 0;
 		$Items = $pages[$Page - 1];
 		$this->GenNavigationMenu2($ItemsCount, $ItemsOnPage, $Link, $Page);
 	}
