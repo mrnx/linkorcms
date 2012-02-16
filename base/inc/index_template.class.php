@@ -170,7 +170,11 @@ class Page extends PageTemplate{
 		//Добавляем информацию к странице
 		$this->SetVar('template', 'showinfo', System::config('general/show_script_time'));
 		$this->SetVar('template', 'info', '');
-		$this->SetVar('template', 'errors_text', implode(System::$Errors));
+		if(System::config('debug/php_errors')){
+			$this->SetVar('template', 'errors_text', implode("<br>\n", System::$Errors));
+		}else{
+			$this->SetVar('template', 'errors_text', '');
+		}
 		$this->EchoAll();
 	}
 

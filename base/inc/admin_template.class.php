@@ -774,7 +774,11 @@ class AdminPage extends PageTemplate{
 				$response['js'][] = $filename;
 			}
 			$response['js_inline'] = $this->TextJavaScript."\n".$this->OnLoadJavaScript;
-			$response['errors'] = implode("<br>\n", System::$Errors);
+			if(System::config('debug/php_errors')){
+				$response['errors'] = implode("<br>\n", System::$Errors);
+			}else{
+				$response['errors'] = '';
+			}
 			$response['info'] = $this->GetPageInfo($start);
 			$response['title'] = $this->GenerateTitle();
 			$response['uri'] = GetPageUri();
@@ -784,7 +788,11 @@ class AdminPage extends PageTemplate{
 			$this->BlockTemplate->vars['content_block'] = $this->content_block;
 			$this->BlockTemplate->vars['tool_menu_block'] = $this->tool_menu_block;
 			$this->BlockTemplate->vars['showinfo'] = System::config('general/show_script_time');
-			$this->BlockTemplate->vars['errors_text'] = implode("<br>\n", System::$Errors);
+			if(System::config('debug/php_errors')){
+				$$this->BlockTemplate->vars['errors_text'] = implode("<br>\n", System::$Errors);
+			}else{
+				$this->BlockTemplate->vars['errors_text'] = '';
+			}
 			$this->EchoAll();
 		}
 	}

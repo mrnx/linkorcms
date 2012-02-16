@@ -142,14 +142,12 @@ foreach($plugins as $plugin){
 }
 
 // Обработка ошибок
-@ini_set('display_errors', System::config('debug/php_errors')); // Не влияет на error_handler, выводит фатальные ошибки, если включено
-@ini_set('error_log', dirname(__FILE__).'/'.$config['log_dir'].'errors.log'); // Записывает все ошибки включая фатальные
-@ini_set('log_errors', System::config('debug/log_errors'));
 set_error_handler('ErrorHandler'); // Обработчик ошибок, все ошибки кроме фатальных
 
 // Логи
 $SiteLog = new Logi($config['log_dir'].'site.log'); // Лог для отладочных сообщений
 $ErrorsLog = new Logi($config['log_dir'].'errors.log'); // Лог для вывода ошибок
+@ini_set('error_log', dirname(__FILE__).'/'.$config['log_dir'].'errors.log'); // Лог ошибок PHP
 
 // Сессии
 $user = new User();
@@ -187,6 +185,10 @@ if(is_file('config/db_config.php')){ // Система установлена
 		// Загрузка конфигурации сайта
 		LoadSiteConfig($config);
 		LoadSiteConfig($plug_config, 'plugins_config', 'plugins_config_groups');
+
+		// Настройки вывода ошибок
+		@ini_set('display_errors', System::config('debug/php_errors')); // Не влияет на error_handler, выводит фатальные ошибки, если включено
+		@ini_set('log_errors', System::config('debug/log_errors')); // Включает запись ошибок в лог файл, записывает все ошибки включая фатальные
 
 		// Автообновление
 		include('config/autoupdate.php');
