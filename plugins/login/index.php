@@ -18,7 +18,7 @@ if($_GET['a'] == 'login'){
 	$r = $user->Login(SafeEnv($_POST['login'], 30, str), SafeEnv($_POST['pass'], 32, str), isset($_POST['remember']));
 	if($r === true){
 		if(strpos($_SERVER['HTTP_REFERER'], 'index.php?name=user&op=registration') === false &&
-			strpos($_SERVER['HTTP_REFERER'], 'user/registration.html') === false){
+			strpos($_SERVER['HTTP_REFERER'], 'user/registration/') === false){
 			GoBack();
 		}else{ // Логин сразу после регистрации
 			GO(Ufu('index.php'));
@@ -33,5 +33,3 @@ if($_GET['a'] == 'login'){
 	$user->UnLogin(false);
 	GoBack();
 }
-
-?>

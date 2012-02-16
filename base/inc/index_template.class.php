@@ -14,7 +14,7 @@ class Page extends PageTemplate{
 
 	public function InitPage(){
 		$this->InitPageTemplate();
-		$this->SetGZipCompressionEnabled(System::config('general/gzip_status') == '1');
+		$this->SetGZipCompressionEnabled(System::config('general/gzip_status'));
 
 		$TemplateDir = System::config('tpl_dir').System::config('general/site_template').'/';
 		$DefaultTemplateDir = System::config('tpl_dir').System::config('general/default_template').'/';
@@ -113,7 +113,7 @@ class Page extends PageTemplate{
 	}
 
 	public function ViewBlocks(){
-		global $site, $db, $user; // הכÿ סמגלוסעטלמסעט, ֵֽ ׃ְִֻßׂÜ
+		global $config, $site, $db, $user; // הכÿ סמגלוסעטלמסעט, ֵֽ ׃ְִֻßׂÜ
 		$blocks = System::database()->Select('blocks', GetWhereByAccess('view', "`enabled`='1'"));
 		SortArray($blocks, 'place');
 		foreach($blocks as $block){

@@ -711,7 +711,7 @@ function AdminUserEditor($save_link, $a = 'adduser', $id = 0, $isadmin = false){
 		$city = '';
 		$url = '';
 		$icq = '';
-		$gmt = '';
+		$gmt = $config['general']['default_timeone'];
 		$about = '';
 		$avatar = '';
 		$apersonal = '0';
@@ -898,7 +898,7 @@ function AdminUserEditSave($back_link, $a = 'insert', $id = 0, $isadmin = false)
 	if(isset($_POST['gmt'])){
 		$gmt = SafeEnv($_POST['gmt'], 255, str);
 	} else{
-		$gmt = 'Europe/Moscow';
+		$gmt = $config['general']['default_timeone'];
 	}
 	// О себе
 	if(isset($_POST['about'])){

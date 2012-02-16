@@ -173,7 +173,7 @@ function AdminBlocksMain(){
 }
 
 function AdminBlocksEdit( $a ){
-	global $config, $site;
+	global $config, $site, $db, $user; // дл€ совместимости со тарыми верси€ми блоков Ќ≈ ”ƒјЋя“№
 	$text = '';
 	$title = '';
 	$showin = array();
@@ -318,11 +318,24 @@ function AdminBlocksSave( $a ){
 		$id = 0;
 	}
 	$place = GetPlace(SafeEnv($_POST['position'][0], 1, str), $id);
+	if($id != 0){
+		$block = System::database()->Select('blocks', "`id`='$id'");
+		$block_pos = SafeEnv($block[0]['position'], 1, str);
+	}
 	$vals = Values('', SafeEnv($_POST['title'], 255, str), SafeEnv($_POST['type'], 255, str), $place, '', '1', $block_config, SafeEnv($_POST['template'], 255, str), SafeEnv($_POST['position'][0], 1, str), $b_v, $b_en, $showin, $extra_uri);
 	if($a == 'newsave'){
 		System::database()->Insert('blocks', $vals);
 	}elseif($a == 'update'){
 		System::database()->Update('blocks', $vals, "`id`='".$id."'", true);
+		if($block_pos != $_POST['position'][0]){ // ѕересчитываем все place в предыдущем position
+			$blocks = System::database()->Select('blocks', "`position`='".$block_pos."'");
+			if(count($blocks) > 0){
+				usort($blocks, 'AdminBlocksSort');
+				foreach($blocks as $i=>$b){
+					System::database()->Update('blocks', "`place`='$i'", "`id`='".SafeEnv($b['id'], 11, int)."'");
+				}
+			}
+		}
 	}
 	GO(ADMIN_FILE.'?exe=blocks');
 }

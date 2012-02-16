@@ -15,7 +15,7 @@ if(isset($_GET['op'])){
 
 switch($op){
 	case 'registration':
-		if(isset($_POST['condition']) || $config['user']['view_conditions'] == 'off'){
+		if(isset($_POST['condition']) || ($config['user']['view_conditions'] == 'off' && !isset($_POST['usersave']))){
 			IndexUserRegistration();
 		}elseif(isset($_POST['usersave'])){
 			IndexUserRegistrationOk();
@@ -97,7 +97,7 @@ function AcceptPost(&$login,&$email,&$hideemail,&$nikname,&$realname,&$age,&$hom
 	if(isset($_POST['gmt'])){
 		$gmt = SafeEnv($_POST['gmt'], 255, str);
 	}else{
-		$gmt = 'Europe/Moscow';
+		$gmt = $config['general']['default_timeone'];
 	}
 	if(isset($_POST['about'])){
 		$about = substr($_POST['about'],0,$config['user']['about_max_length']);
@@ -190,7 +190,7 @@ function IndexUserRegistration($acceptPost=false, $edit=false){
 		$city = '';
 		$avatar = 'noavatar.gif';
 		$apersonal = '0';
-		$gmt = '0';
+		$gmt = $config['general']['default_timeone'];
 		$about = '';
 		$snews = false;
 	}
@@ -438,7 +438,7 @@ function IndexUserRegistrationOk(){
 	if(isset($_POST['gmt'])){
 		$gmt = SafeEnv($_POST['gmt'], 255, str);
 	}else{
-		$gmt = 'Europe/Moscow';
+		$gmt = $config['general']['default_timeone'];
 	}
 	# О себе
 	if(isset($_POST['about'])){

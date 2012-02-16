@@ -72,7 +72,7 @@ function DeleteAllUserComments( $UserId ){
 		}
 		//теперь нужно обойти все объекты уменьшая счетчик
 		foreach($objects as $obj){
-			$id_coll = SafeEnv($table['id_coll'], 11, int);
+			$id_coll = SafeEnv($table['id_coll'], 255, str);
 			CalcCounter(
 				$table['objects_table'],
 				"`$id_coll`='{$obj}'",

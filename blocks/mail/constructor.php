@@ -20,5 +20,3 @@ while($topic = $db->FetchRow()){
 
 FormRow('Тема рассылки', $site->Select('topic', $topicdata, false, ''));
 $title = 'Конфигурация блока рассылки';
-
-?>

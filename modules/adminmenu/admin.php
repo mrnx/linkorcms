@@ -284,5 +284,3 @@ function AdminAdminMenuChangeStatus(){
 	echo 'OK';
 	exit;
 }
-
-?>
