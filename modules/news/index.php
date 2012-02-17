@@ -24,14 +24,33 @@ switch($op){
 		break;
 	case 'topics': IndexNewsTopics();
 		break;
-	case 'addpost': IndexNewsAddPost();
+	// Комментарии
+	case 'addpost':
+		$id = intval(SafeEnv($_GET['news'], 11, int));
+		$topic = SafeDB($_GET['topic'], 11, int);
+		CommentsAddPost(
+			$id,
+			'news_comments',
+			'news',
+			'comments_counter',
+			'allow_comments',
+			"index.php?name=news&op=readfull&news=$id&topic=$topic",
+			'news/{topic}/{news}/'
+		);
 		break;
-	case 'editpost': IndexNewsEditPost();
+	case 'savepost':
+		if(CommentsEditPostSave(SafeEnv($_GET['news'], 11, int), 'news_comments')){
+			break;
+		}
+	case 'editpost':
+		CommentsEditPost('news_comments', "index.php?name=news&op=savepost&news=".SafeDB($_GET['news'], 11, int).'&back='.SafeDB($_GET['back'], 255, str));
 		break;
-	case 'savepost': IndexNewsEditPostSave();
+	case 'deletepost':
+		$id = intval(SafeEnv($_GET['news'], 11, int));
+		$delete_url = 'index.php?name=news&op=deletepost&news='.$id.'&back='.SafeDB($_GET['back'], 255, str);
+		CommentsDeletePost($id, 'news_comments', 'news', 'comments_counter', $delete_url);
 		break;
-	case 'deletepost': IndexNewsDeletePost();
-		break;
+	// //
 	default: IndexNewsMain();
 }
 
@@ -264,6 +283,7 @@ function IndexNewsReadFull(){
 			$posts->PostFormAction = "index.php?name=news&op=addpost&news=$news_id&topic=$topic_id&page=$page";
 
 			$posts->NavigationUrl = Ufu("index.php?name=news&op=readfull&news=$news_id&topic=$topic_id", 'news/{topic}/{news}/page{page}/', true);
+			$posts->NavigationAnchor = '#comments';
 			$posts->RenderPosts($news_id, 'news_comments', 'comments_navigation', false, $page);
 			$posts->RenderForm(false, 'news_comments_form');
 		}else{
@@ -271,96 +291,5 @@ function IndexNewsReadFull(){
 		}
 	}else{
 		$site->AddTextBox('Ошибка','<center><input type="button" value="Назад" onclick="history.back();"></center>');
-	}
-}
-
-function IndexNewsAddPost(){
-	global $db, $config, $site;
-	$get_id        = 'news';             // Имя параметра в get для получения id объекта
-	$table         = 'news_comments';    // Таблица комментариев
-	$object_table  = 'news';             // Таблица объектов
-	$counter_field = 'comments_counter'; // Поле счетчик комментариев в таблице объекта
-	$alloy_field   = 'allow_comments';   // Поле разрешить комментирии для этого объекта
-
-	$id = SafeEnv($_GET[$get_id],11,int);
-	$db->Select($object_table, "`id`='$id'");
-	$obj = $db->FetchRow();
-	$alloy_comments = $obj[$alloy_field] == '1';
-	// Добавляем комментарий
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table, $alloy_comments);
-	if($posts->SavePost($id, false)){
-		$counter = $obj[$counter_field] + 1;
-		$db->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
-		// Генерируем обратную ссылку
-		$parent = explode('_', $_POST['parent_id'], 2);
-		$parent_id = SafeEnv($parent[1], 11, int);
-		$page = ($parent_id != 0 && $_GET['page'] != 0 ? "&page={$_GET['page']}" : '');
-		$parent = ($parent_id != 0 ? "#post_$parent_id" : '#post_'.$db->GetLastId());
-		$topic = SafeDB($_GET['topic'], 11, int);
-		GO(GetSiteUrl().Ufu("index.php?name=news&op=readfull&news=$id$page&topic=$topic$parent", 'news/{topic}/{news}/'.($page != '' ? 'page{page}/' : '')));
-		// --------------------------
-	}else{
-		$site->AddTextBox('Ошибка', $posts->PrintErrors());
-	}
-}
-
-function IndexNewsEditPost( $back_id = null ){
-	global $site, $config;
-	$get_id = 'news';             // Имя параметра в get для получения id объекта
-	$table = 'news_comments'; // Таблица комментариев
-	if($back_id == null){
-		$back_id = SaveRefererUrl();
-	}
-	$action_url = 'index.php?name=news&op=savepost&news='.SafeEnv($_GET[$get_id],11,int)."&back=$back_id";
-
-	$site->AddTemplatedBox('','edit_comment.html');
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	$posts->PostFormAction = $action_url;
-	$posts->RenderForm(true, 'post_form');
-}
-
-function IndexNewsEditPostSave(){
-	global $config;
-	$get_id = 'news';          // Имя параметра в get для получения id объекта
-	$table  = 'news_comments'; // Таблица комментариев
-
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	if($posts->SavePost(SafeEnv($_GET[$get_id], 11, int), true)){
-		$post_id = SafeDB($_GET['post_id'], 11, int);
-		GoRefererUrl($_GET['back']);
-	}else{
-		$site->AddTextBox('Ошибка', $posts->PrintErrors());
-		IndexNewsEditPost($_GET['back']);
-	}
-}
-
-function IndexNewsDeletePost(){
-	global $config, $db;
-	$get_id = 'news'; // Имя параметра в get для получения id объекта
-	$table = 'news_comments'; // Таблица комментариев
-	$object_table = 'news'; // Таблица объектов
-	$counter_field = 'comments_counter'; // Поле счетчик комментариев в таблице объекта
-
-	if(!isset($_GET['back'])){
-		$back_id = SaveRefererUrl();
-	}else{
-		$back_id = $_GET['back'];
-	}
-	$id = SafeEnv($_GET[$get_id], 11, int);
-	$delete_url = "index.php?name=news&op=deletepost&news=$id&back=$back_id";
-
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	$posts->DeletePageUrl = $delete_url;
-	$deleted_posts_count = $posts->DeletePost();
-	if($deleted_posts_count > 0){
-		$db->Select($object_table, "`id`='$id'");
-		$obj = $db->FetchRow();
-		$counter = $obj[$counter_field] - $deleted_posts_count;
-		$db->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
-		GoRefererUrl($back_id);
 	}
 }

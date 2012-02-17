@@ -40,9 +40,9 @@ TAddToolLink('Добавить категорию', 'forum_editor', 'forum&a=forum_editor');
 TAddToolLink('Настройки', 'config', 'forum&a=config');
 TAddToolBox($action);
 if($config['forum']['basket']){
-	System::admin()->SideBarAddMenuItem('Удаляемые темы', 'exe=forum&a=forum_basket_topics');
-	System::admin()->SideBarAddMenuItem('Удаляемые сообщения', 'exe=forum&a=forum_basket_posts');
-	System::admin()->SideBarAddMenuBlock('Корзина');
+	System::admin()->SideBarAddMenuItem('Удаляемые темы', 'exe=forum&a=forum_basket_topics', 'forum_basket_topics');
+	System::admin()->SideBarAddMenuItem('Удаляемые сообщения', 'exe=forum&a=forum_basket_posts', 'forum_basket_posts');
+	System::admin()->SideBarAddMenuBlock('Корзина', $action);
 }
 
 switch($action) {

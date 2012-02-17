@@ -64,9 +64,7 @@ function HistoryGetUrl( $BackSteps ){
 
 /**
  * Сохраняет адрес в сессии и возвращает идентификатор
- * @param string $Url
- *
- * @internal param $ <type> $Url
+ * @param string $Url Свой URL
  * @return String <type>
  */
 function SaveRefererUrl( $Url = '' ){

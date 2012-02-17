@@ -30,21 +30,37 @@ switch($op){
 	case 'addvote': IndexDownloadsAddVote();
 	break;
 	// Комментарии
-	case 'addpost': IndexDownloadsAddPost();
+	case 'addpost':
+		$id = intval(SafeEnv($_GET['file'], 11, int));
+		$cat = SafeDB($_GET['cat'], 11, int);
+		CommentsAddPost(
+			$id,
+			'downloads_comments',
+			'downloads',
+			'comments_counter',
+			'allow_comments',
+			"index.php?name=downloads&op=full&file=$id&cat=$cat",
+			'downloads/{cat}/{file}/'
+		);
 		break;
-	case 'editpost': IndexDownloadsEditPost();
+	case 'savepost':
+		if(CommentsEditPostSave(SafeEnv($_GET['file'], 11, int), 'downloads_comments')){
+			break;
+		}
+	case 'editpost':
+		CommentsEditPost('downloads_comments', "index.php?name=downloads&op=savepost&file=".SafeDB($_GET['file'], 11, int).'&back='.SafeDB($_GET['back'], 255, str));
 		break;
-	case 'savepost': IndexDownloadsEditPostSave();
-		break;
-	case 'deletepost': IndexDownloadsDeletePost();
+	case 'deletepost':
+		$id = SafeEnv($_GET['file'], 11, int);
+		$delete_url = "index.php?name=downloads&op=deletepost&file=$id&back=".SafeDB($_GET['back'], 255, str);
+		CommentsDeletePost($id, 'downloads_comments', 'downloads', 'comments_counter', $delete_url);
 		break;
 	// //
 	default:
 		HackOff();
 }
 
-function filetypecheck( $filename )
-{
+function filetypecheck( $filename ){
 	$ext = substr(GetFileExt($filename), 1);
 	if($ext == 'rar'){ $dtype = 'Архив RAR'; }
 	if($ext == 'zip'){ $dtype = 'Архив ZIP'; }
@@ -112,23 +128,19 @@ function IndexDownloadsGetNumItems(){
 }
 
 function IndexDownloadsFunc($id){
-	global $config;
-	return
-	'&nbsp'
-	.'<a href="'.ADMIN_FILE.'?exe=downloads&a=editor&id='.$id.'" class="admin_edit_link"><img src="images/admin/edit.png" title="Редактировать"></a>'
-	.'<a href="'.ADMIN_FILE.'?exe=downloads&a=deletefile&id='.$id.'&ok=0" class="admin_edit_link"><img src="images/admin/delete.png" title="Удалить"></a>';
+	$back = SaveRefererUrl();
+	return'&nbsp'
+	.'<a href="'.ADMIN_FILE.'?exe=downloads&a=editor&id='.$id.'&back='.$back.'" class="admin_edit_link"><img src="images/admin/edit.png" title="Редактировать"></a>'
+	.'<a href="'.ADMIN_FILE.'?exe=downloads&a=deletefile&id='.$id.'&ok=0&back='.$back.'" class="admin_edit_link"><img src="images/admin/delete.png" title="Удалить"></a>';
 }
 
-function AddDownload(&$down)
-{
-	global $site, $config, $user;
-
+function AddDownload(&$down){
 	$id = SafeDB($down['id'], 11, int);
 	$cat_id = SafeDB($down['category'], 11, int);
 	$func = IndexDownloadsFunc($id);
 
 	$vars = array();
-	$vars['file_title'] = SafeDB($down['title'], 255, str).($user->isAdmin() ? $func : '');
+	$vars['file_title'] = SafeDB($down['title'], 255, str).(System::user()->isAdmin() ? $func : '');
 	$vars['url'] = Ufu("index.php?name=downloads&op=full&file=$id&cat=$cat_id", 'downloads/{cat}/{file}/');
 
 	if($down['image'] != ''){
@@ -160,12 +172,11 @@ function AddDownload(&$down)
 	$vars['num_votes'] = SafeDB($down['votes_amount'], 11, int);
 
 	$vars['rating'] = GetRatingImage(SafeDB($down['votes_amount'], 11, int), SafeDB($down['votes'], 11, int));
-	$site->AddSubBlock('download', true, $vars);
+	System::site()->AddSubBlock('download', true, $vars);
 }
 
-function AddDetailDownload(&$down)
-{
-	global $site, $config, $tree, $user;
+function AddDetailDownload(&$down){
+	global $config, $tree;
 
 	$id = SafeDB($down['id'], 11, int);
 	$cat_id = SafeDB($down['category'], 11, int);
@@ -177,7 +188,7 @@ function AddDetailDownload(&$down)
 	$vars['category'] = '<a href="'.$vars['category_url'].'">'.$vars['category_title'].'</a>';
 
 	$vars['file_link'] = "index.php?name=downloads&op=download&file=$id"; // Если сделать ЧПУ ссылку, то появляется проблема с относительным адресом файла
-	if($user->AccessIsResolved($down['view'])){
+	if(System::user()->AccessIsResolved($down['view'])){
 		$vars['access'] = true;
 		$url = '<a href="'.$vars['file_link'].'" target="_blank">Скачать файл</a>';
 	}else{
@@ -187,7 +198,7 @@ function AddDetailDownload(&$down)
 	$vars['not_access'] = !$vars['access'];
 	$vars['url'] = $url;
 
-	$vars['file_title'] = SafeDB($down['title'], 255, str).($user->isAdmin() ? $func : '');
+	$vars['file_title'] = SafeDB($down['title'], 255, str).(System::user()->isAdmin() ? $func : '');
 	$vars['description'] = SafeDB($down['description'], 0, str, false, false);
 
 	$vars['author'] = SafeDB($down['author'], 200, str);
@@ -203,15 +214,15 @@ function AddDetailDownload(&$down)
 	$vars['filetype'] = filetypecheck(SafeDB($down['url'], 250, str));
 
 	$vars['addvote_url'] = "index.php?name=downloads&op=addvote&file=$id";
-	$site->DataAdd($vdata, '0', 'Ваша оценка');
-	$site->DataAdd($vdata, '1', 'Очень плохо');
-	$site->DataAdd($vdata, '2', 'Плохо');
-	$site->DataAdd($vdata, '3', 'Средне');
-	$site->DataAdd($vdata, '4', 'Хорошо');
-	$site->DataAdd($vdata, '5', 'Отлично');
+	System::site()->DataAdd($vdata, '0', 'Ваша оценка');
+	System::site()->DataAdd($vdata, '1', 'Очень плохо');
+	System::site()->DataAdd($vdata, '2', 'Плохо');
+	System::site()->DataAdd($vdata, '3', 'Средне');
+	System::site()->DataAdd($vdata, '4', 'Хорошо');
+	System::site()->DataAdd($vdata, '5', 'Отлично');
 
-	$vars['votes'] = $site->Select('vote', $vdata);
-	$vars['addvotesubm'] = $site->Submit('Оценить файл');
+	$vars['votes'] = System::site()->Select('vote', $vdata);
+	$vars['addvotesubm'] = System::site()->Submit('Оценить файл');
 	$vars['allow_votes'] = SafeDB($down['allow_votes'], 1, bool);
 
 
@@ -242,13 +253,12 @@ function AddDetailDownload(&$down)
 		$vars['comments'] = SafeDB($down['comments_counter'], 11, int);
 	}
 
-	$site->AddBlock('download',true,false,'dl');
-	$site->Blocks['download']['vars'] = $vars;
+	System::site()->AddBlock('download',true,false,'dl');
+	System::site()->Blocks['download']['vars'] = $vars;
 }
 
-function IndexDownloadsMain()
-{
-	global $tree, $site, $db, $config;
+function IndexDownloadsMain(){
+	global $tree, $config;
 
 	if(isset($_GET['cat'])){
 		$cat = SafeEnv($_GET['cat'],11,int);
@@ -257,7 +267,7 @@ function IndexDownloadsMain()
 	}
 
 	if($cat != 0){
-		$site->SetTitle('Файлы в категории '.SafeDB($tree->IdCats[$cat]['title'], 255, str));
+		System::site()->SetTitle('Файлы в категории '.SafeDB($tree->IdCats[$cat]['title'], 255, str));
 	}
 
 	if(isset($_GET['page'])){
@@ -280,36 +290,35 @@ function IndexDownloadsMain()
 		$navigation->FrendlyUrl = $config['general']['ufu'];
 		$navigation->GenNavigationMenu($downs, $num, $nav_link);
 
-		if($db->NumRows() > 0){
-			$site->AddTemplatedBox('','module/download.html');
-			$site->AddBlock('download', true, true, 'dl');
+		if(System::database()->NumRows() > 0){
+			System::site()->AddTemplatedBox('','module/download.html');
+			System::site()->AddBlock('download', true, true, 'dl');
 			foreach($downs as $down){
 				AddDownload($down);
 			}
 		}elseif(!isset($tree->Cats[$cat]) && count($tree->Cats) > 0){
-			$site->AddTextBox('','<center>В этой категории пока нет файлов.</center>');
+			System::site()->AddTextBox('','<center>В этой категории пока нет файлов.</center>');
 		}
 	}
 }
 
-function IndexDownloadsFull()
-{
-	global $db, $config, $site, $tree, $user;
+function IndexDownloadsFull(){
+	global $config, $tree;
 	if(isset($_GET['file'])){
 		$id = SafeEnv($_GET['file'],11,int);
 	}else{
 		GO(GetSiteUrl().Ufu('index.php?name=downloads', '{name}/'));
 	}
 	System::database()->Select('downloads', GetWhereByAccess('view', "`id`='$id' and `active`='1'"));
-	if($db->NumRows() == 0){
+	if(System::database()->NumRows() == 0){
 		GO(GetSiteUrl().Ufu('index.php?name=downloads', '{name}/'));
 	}
-	$file = $db->FetchRow();
+	$file = System::database()->FetchRow();
 	$cat = SafeDB($file['category'], 11, int);
 	$tree->ShowPath($cat, true, SafeDB($file['title'],255,str));
-	$site->SetTitle('Скачать '.SafeDB($file['title'], 255, str));
+	System::site()->SetTitle('Скачать '.SafeDB($file['title'], 255, str));
 
-	$site->AddTemplatedBox('','module/download_full.html');
+	System::site()->AddTemplatedBox('','module/download_full.html');
 	AddDetailDownload($file);
 
 	// Выводим комментарии
@@ -320,165 +329,63 @@ function IndexDownloadsFull()
 	}
 	include_once($config['inc_dir'].'posts.class.php');
 	$posts = new Posts('downloads_comments', $file['allow_comments'] == '1');
-	$posts->EditPageUrl = "index.php?name=downloads&op=editpost&file=$id";
-	$posts->DeletePageUrl = "index.php?name=downloads&op=deletepost&file=$id";
-	$posts->PostFormAction = "index.php?name=downloads&op=addpost&file=$id&page=$page&cat=$cat";
+	$posts->EditPageUrl = "index.php?name=downloads&op=editpost&file=$id"; // Форма редактирования поста
+	$posts->DeletePageUrl = "index.php?name=downloads&op=deletepost&file=$id"; // Удаление поста
+	$posts->PostFormAction = "index.php?name=downloads&op=addpost&file=$id&cat=$cat&page=$page"; // Добавление поста (сохранение)
 
 	$posts->NavigationUrl = Ufu("index.php?name=downloads&op=full&file=$id&cat=$cat", 'downloads/{cat}/{file}/page{page}/', true);
-
+	$posts->NavigationAnchor = '#comments';
 	$posts->RenderPosts($id, 'download_comments', 'comments_navigation', false, $page);
 	$posts->RenderForm(false, 'download_comments_form');
 }
 
-function IndexDownloadsFile()
-{
-	global $config, $db, $site, $user;
+function IndexDownloadsFile(){
+	global $config;
 	$file = SafeEnv($_GET['file'],11,int);
 	System::database()->Select('downloads', GetWhereByAccess('view', "`id`='$file' and `active`='1'"));
-	if($db->NumRows() > 0){
-		$sfile = $db->FetchRow();
+	if(System::database()->NumRows() > 0){
+		$sfile = System::database()->FetchRow();
 		$counter = SafeDB($sfile['hits'],11,int)+1;
-		$db->Update('downloads',"hits='$counter'","`id`='$file'");
-		$user->ChargePoints($config['points']['download_download']);
+		System::database()->Update('downloads',"hits='$counter'","`id`='$file'");
+		System::user()->ChargePoints($config['points']['download_download']);
 		GO(SafeDB($sfile['url'],250,str));
 	}else{
-		$site->AddTextBox('Ошибка','<center>Файл, который вы пытаетесь скачать, не найден, возможно, он был удален из архива.</center>');
+		System::site()->AddTextBox('Ошибка','<center>Файл, который вы пытаетесь скачать, не найден, возможно, он был удален из архива.</center>');
 	}
 }
 
-function IndexDownloadsAddVote()
-{
-	global $db, $config, $site, $user;
+function IndexDownloadsAddVote(){
+	global $config;
 	$ip = getip();
 	$time = time() - 86400; //1 день
 	$file = SafeEnv($_GET['file'], 11, int);
 	$vote = SafeEnv($_POST['vote'], 1, int);
-	$db->Delete('downloads_rating', "`time`<'$time'");
-	$site->OtherMeta .= '<meta http-equiv="REFRESH" content="3; URL='.HistoryGetUrl(1).'">';
-	$db->Select('downloads', GetWhereByAccess('view', "`id`='$file' and `active`='1'"));
-	if($db->NumRows() > 0){
-		$dfile = $db->FetchRow();
+	System::database()->Delete('downloads_rating', "`time`<'$time'");
+	System::site()->OtherMeta .= '<meta http-equiv="REFRESH" content="3; URL='.HistoryGetUrl(1).'">';
+	System::database()->Select('downloads', GetWhereByAccess('view', "`id`='$file' and `active`='1'"));
+	if(System::database()->NumRows() > 0){
+		$dfile = System::database()->FetchRow();
 		if($dfile['allow_votes']=='1'){ // оценки разрешены
-			$db->Select('downloads_rating',"`ip`='$ip' and `downid`='$file'");
-			if($db->NumRows()>0){
-				$site->AddTextBox('','<center>Вы уже голосовали за этот файл.<br /><br /><a href="javascript:history.go(-1)">Назад</a></center>');
+			System::database()->Select('downloads_rating',"`ip`='$ip' and `downid`='$file'");
+			if(System::database()->NumRows()>0){
+				System::site()->AddTextBox('','<center>Вы уже голосовали за этот файл.<br /><br /><a href="javascript:history.go(-1)">Назад</a></center>');
 			}else{
 				if($vote==0){
-					$site->AddTextBox('','<center>Вы не выбрали оценку.<br /><br /><a href="javascript:history.go(-1)">Назад</a></center>');
+					System::site()->AddTextBox('','<center>Вы не выбрали оценку.<br /><br /><a href="javascript:history.go(-1)">Назад</a></center>');
 				}else{
-					$user->ChargePoints($config['points']['download_rating']);
+					System::user()->ChargePoints($config['points']['download_rating']);
 					$time = time();
-					$db->Insert('downloads_rating',"'','$file','$ip','$time'");
+					System::database()->Insert('downloads_rating',"'','$file','$ip','$time'");
 					$vote = SafeDB($dfile['votes'],11,int)+$vote;
 					$numvotes = SafeDB($dfile['votes_amount'],11,int)+1;
-					$db->Update('downloads',"votes_amount='$numvotes',votes='$vote'","`id`='$file'");
-					$site->AddTextBox('','<center>Спасибо за вашу оценку.<br><br><a href="javascript:history.go(-1)">Назад</a></center>');
+					System::database()->Update('downloads',"votes_amount='$numvotes',votes='$vote'","`id`='$file'");
+					System::site()->AddTextBox('','<center>Спасибо за вашу оценку.<br><br><a href="javascript:history.go(-1)">Назад</a></center>');
 				}
 			}
-		}else{
-			//Оценка запрещена
-			$site->AddTextBox('','<center>Извините, оценка этого файла запрещена.<br><br><a href="javascript:history.go(-1)">Назад</a></center>');
+		}else{ // Оценка запрещена
+			System::site()->AddTextBox('','<center>Извините, оценка этого файла запрещена.<br><br><a href="javascript:history.go(-1)">Назад</a></center>');
 		}
-	}else{
-		//Файл не существует
-		$site->AddTextBox('','<center>Произошла ошибка. Файл, который вы пытаетесь оценить, не найден в нашем файловом архиве. Возможно он был удален.<br><br><a href="javascript:history.go(-1)">Назад</a></center>');
+	}else{ // Файл не существует
+		System::site()->AddTextBox('','<center>Произошла ошибка. Файл, который вы пытаетесь оценить, не найден в нашем файловом архиве. Возможно он был удален.<br><br><a href="javascript:history.go(-1)">Назад</a></center>');
 	}
 }
-
-function IndexDownloadsAddPost()
-{
-	global $db, $config, $site;
-	$get_id        = 'file'; // Имя параметра в get для получения id объекта
-	$table         = 'downloads_comments'; // Таблица комментариев
-	$object_table  = 'downloads'; // Таблица объектов
-	$counter_field = 'comments_counter'; // Поле счетчик комментариев в таблице объекта
-	$alloy_field   = 'allow_comments' ; // Поле разрешить комментирии для этого объекта
-
-	$id = SafeEnv($_GET[$get_id], 11, int);
-	$db->Select($object_table, "`id`='$id'");
-	$obj = $db->FetchRow();
-	$alloy_comments = $obj[$alloy_field] == '1';
-	// Добавляем комментарий
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table, $alloy_comments);
-	if($posts->SavePost($id, false)){
-		$db->Select($object_table, "`id`='$id'");
-		$obj = $db->FetchRow();
-		$counter = $obj[$counter_field] + 1;
-		$db->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
-		// Генерируем обратную ссылку
-		$parent = explode('_', $_POST['parent_id'], 2);
-		$parent_id = SafeEnv($parent[1], 11, int);
-		$page = ($parent_id != 0 && $_GET['page'] != 0 ? "&page={$_GET['page']}" : '');
-		$parent = ($parent_id != 0 ? "#post_$parent_id" : '#post_'.$db->GetLastId());
-		$cat = SafeDB($_GET['cat'], 11, int);
-		GO(GetSiteUrl().Ufu("index.php?name=downloads&op=full&file=$id$page&cat=$cat$parent", 'downloads/{cat}/{file}/'.($page != '' ? 'page{page}/' : '')));
-		// --------------------------
-	}else{
-		$site->AddTextBox('Ошибка', $posts->PrintErrors());
-	}
-}
-
-function IndexDownloadsEditPost( $back_id = null )
-{
-	global $site, $config;
-	$get_id = 'file';              // Имя параметра в get для получения id объекта
-	$table = 'downloads_comments'; // Таблица комментариев
-	if($back_id == null){
-		$back_id = SaveRefererUrl();
-	}
-	$action_url = 'index.php?name=downloads&op=savepost&file='.SafeEnv($_GET[$get_id],11,int)."&back=$back_id";
-
-	$site->AddTemplatedBox('','edit_comment.html');
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	$posts->PostFormAction = $action_url;
-	$posts->RenderForm(true, 'post_form');
-}
-
-function IndexDownloadsEditPostSave()
-{
-	global $config;
-	$get_id = 'file';              // Имя параметра в get для получения id объекта
-	$table = 'downloads_comments'; // Таблица комментариев
-
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	if($posts->SavePost(SafeEnv($_GET[$get_id], 11, int), true)){
-		GoRefererUrl($_GET['back']);
-	}else{
-		$site->AddTextBox('Ошибка', $posts->PrintErrors());
-		IndexDownloadsEditPost($_GET['back']);
-	}
-}
-
-function IndexDownloadsDeletePost()
-{
-	global $config, $db;
-	$get_id = 'file'; // Имя параметра в get для получения id объекта
-	$table = 'downloads_comments'; // Таблица комментариев
-	$object_table = 'downloads'; // Таблица объектов
-	$counter_field = 'comments_counter'; // Поле счетчик комментариев в таблице объекта
-
-	if(!isset($_GET['back'])){
-		$back_id = SaveRefererUrl();
-	}else{
-		$back_id = $_GET['back'];
-	}
-	$id = SafeEnv($_GET[$get_id], 11, int);
-	$delete_url = "index.php?name=downloads&op=deletepost&file=$id&back=$back_id";
-
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	$posts->DeletePageUrl = $delete_url;
-	$deleted_posts_count = $posts->DeletePost();
-	if($deleted_posts_count > 0){
-		$db->Select($object_table, "`id`='$id'");
-		$obj = $db->FetchRow();
-		$counter = $obj[$counter_field] - $deleted_posts_count;
-		$db->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
-		GoRefererUrl($back_id);
-	}
-}
-
-?>

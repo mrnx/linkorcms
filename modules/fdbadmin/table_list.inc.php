@@ -5,8 +5,6 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-AddCenterBox('Обзор таблиц');
-
 $tables = System::database()->GetTableInfo();
 
 // Получаем имеющиеся бекапы
@@ -88,4 +86,5 @@ $top_text .= '<strong>Таблиц</strong>: '.System::database()->NumRows().'<br>';
 $top_text .= '<strong>Всего записей</strong>: '.$totalrows.'<br>';
 $top_text .= '<strong>Общий размер</strong>: '.FormatFileSize($totalsize).'<br>';
 
+AddCenterBox('Обзор таблиц ('.System::database()->NumRows().')');
 AddText($text);

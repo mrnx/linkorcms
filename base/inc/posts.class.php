@@ -314,14 +314,14 @@ class Posts{
 		$posts = System::database()->Select($this->PostsTable, $where);
 
 		// Сортировка
-		SortArray($posts, 'post_date', $this->DecreaseSort);
+		SortArray($posts, 'post_date', !$this->DecreaseSort);
 		$this->PostsTree = array();
 		foreach($posts as $post){
 			$this->PostsTree[$post['post_parent_id']][] = $post;
 		}
 
 		if($Page == 0){ // Страница по умолчанию
-			if($this->DecreaseSort){
+			if(!$this->DecreaseSort){
 				$Page = 1;
 			}else{
 				$LastPage = true;

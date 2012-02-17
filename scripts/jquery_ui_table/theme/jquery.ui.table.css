@@ -83,11 +83,11 @@
 }
 
 .ui-table-row{
-	background-color: #FFF;
+	background-color: #F0F0FF;
 }
 
 .ui-table-row-even{
-	background-color: #F5F5FF;
+	background-color: #FDFDFF;
 }
 .ui-table-row-hover{
 	background-color: #DDEAF7;

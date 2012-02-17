@@ -173,42 +173,34 @@ function AdminArticlesMain(){
 	if(count($r) > $config['articles']['articles_on_page']){
 		$navigator = new Navigation($page);
 		$navigator->GenNavigationMenu($r, $config['articles']['articles_on_page'], ADMIN_FILE.'?exe=articles'.($cat > 0 ? '&cat='.$cat : ''));
-		//AddNavigation();
 		$nav = true;
 	}else{
 		$nav = false;
 	}
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
-	$text .= '<tr><th>Название</th><th>Прочитано</th><th>Оценка</th><th>Просматривают</th><th>Статус</th><th>Функции</th></tr>';
+	$text .= '<tr><th>Название</th><th>Прочитано</th><th>Оценки</th><th>Просматривают</th><th>Статус</th><th>Функции</th></tr>';
 
 	$back = SaveRefererUrl();
 	foreach($r as $art){
 		$id = SafeDB($art['id'], 11, int);
-		$st = System::admin()->SpeedStatus('Включена', 'Отключена', ADMIN_FILE.'?exe=articles&a=changestatus&id='.$id, $art['active'] == '1');
-		if($editarticles){
-			$func = '';
-			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=articles&a=editor&id='.$id.'&back='.$back, 'images/admin/edit.png');
-			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=articles&a=delete&id='.$id.'&ok=1&back='.$back, 'images/admin/delete.png', 'Удалить статью?');
-		}else{
-			$func = '-';
-		}
-		$vi = ViewLevelToStr(SafeDB($art['view'], 1, int));
-
+		$title = SafeDB($art['title'], 255, str);
 		$hits = SafeDB($art['hits'], 11, int);
-		if($editarticles){
-			$hits .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик просмотров', ADMIN_FILE.'?exe=articles&a=resethits&id='.SafeDB($art['id'], 11, int), 'images/admin/arrow_in.png', 'Сбросить счётчик просмотров?');
-		}
-
 		$rating = '<img src="'.GetRatingImage(SafeDB($art['num_votes'], 11, int), SafeDB($art['all_votes'], 11, int)).'" border="0" />';
+		$st = ($art['active'] == '1' ? 'Вкл.' : 'Выкл.');
+		$func = '-';
 		if($editarticles){
-			$rating .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик оценок ('.SafeDB($art['num_votes'], 11, int).' голосов)', ADMIN_FILE.'?exe=articles&a=resetrating&id='.SafeDB($art['id'], 11, int), 'images/admin/arrow_in.png', 'Сбросить оценки?');
+			$title = '<b>'.System::admin()->Link($title, ADMIN_FILE.'?exe=articles&a=editor&id='.$id.'&back='.$back).'</b>';
+			$hits .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик просмотров', ADMIN_FILE.'?exe=articles&a=resethits&id='.$id, 'images/admin/arrow_in.png', 'Сбросить счётчик просмотров?');
+			$rating .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик оценок ('.SafeDB($art['num_votes'], 11, int).' голосов)', ADMIN_FILE.'?exe=articles&a=resetrating&id='.$id, 'images/admin/arrow_in.png', 'Сбросить оценки?');
+			$st = System::admin()->SpeedStatus('Включена', 'Отключена', ADMIN_FILE.'?exe=articles&a=changestatus&id='.$id, $art['active'] == '1');
+			$func = System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=articles&a=editor&id='.$id.'&back='.$back, 'images/admin/edit.png');
+			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=articles&a=delete&id='.$id.'&ok=1&back='.$back, 'images/admin/delete.png', 'Удалить статью?');
 		}
-
 		$text .= '<tr>
-		<td><b>'.System::admin()->Link(SafeDB($art['title'], 255, str), ADMIN_FILE.'?exe=articles&a=editor&id='.$id).'</b></td>
+		<td>'.$title.'</td>
 		<td>'.$hits.'</td>
-		<td>'.$rating.'</td>
-		<td>'.$vi.'</td>
+		<td>'.($art['allow_votes'] == '1' ? $rating : 'Запрещены').'</td>
+		<td>'.ViewLevelToStr(SafeDB($art['view'], 1, int)).'</td>
 		<td>'.$st.'</td>
 		<td>'.$func.'</td>
 		</tr>';
@@ -316,11 +308,10 @@ function AdminArticlesEditor(){
 	FormRow('Кто видит', $site->Select('view', GetUserTypesFormData($view)));
 	FormRow('Активна', $site->Select('active', GetEnData($active, 'Да', 'Нет')));
 	AddCenterBox($top);
-	$back = '';
-	if(isset($_REQUEST['back'])){
-		$back = '&back='.SafeDB($_REQUEST['back'], 255, str);
+	if(!isset($_REQUEST['back'])){
+		$_REQUEST['back'] = SaveRefererUrl(ADMIN_FILE.'?exe=articles');
 	}
-	AddForm('<form name="edit_form" action="'.ADMIN_FILE.'?exe=articles&a='.$action.$back.'" method="post" enctype="multipart/form-data">',
+	AddForm('<form name="edit_form" action="'.ADMIN_FILE.'?exe=articles&a='.$action.'&back='.SafeDB($_REQUEST['back'], 255, str).'" method="post" enctype="multipart/form-data">',
 		$site->Button('Отмена', 'onclick="history.go(-1)"').$site->Button('Предпросмотр', 'onclick="PreviewOpen();"').$site->Submit($cap));
 }
 
@@ -344,10 +335,6 @@ function AdminArticlesSaveArticle( $action ){
 	// Загружаем изображение
 	$Error = false;
 	$image = LoadImage('up_image', $config['articles']['images_dir'], $config['articles']['images_dir'].'thumbs/', $config['articles']['thumb_max_width'], $config['articles']['thumb_max_height'], $_POST['image'], $Error);
-	if($Error){
-		AddTextBox('Ошибка', '<center>Неправильный формат файла. Можно загружать только изображения формата GIF, JPEG или PNG.</center>');
-		return;
-	}
 	$auto_br_desc = EnToInt($_POST['auto_br_desc']);
 	$auto_br_article = EnToInt($_POST['auto_br_article']);
 	$allow_comments = EnToInt($_POST['allow_comments']);
@@ -382,11 +369,11 @@ function AdminArticlesSaveArticle( $action ){
 		}
 		System::database()->Update('articles', $set, "`id`='$id'");
 	}
-	if(isset($_REQUEST['back'])){
-		GoRefererUrl($_REQUEST['back']);
-	}else{
-		GO(ADMIN_FILE.'?exe=articles');
+	if($Error){
+		AddTextBox('Ошибка', '<center>Неправильный формат файла. Можно загружать только изображения формата GIF, JPEG или PNG. Остальные изменения сохранены.</center><br /><a href="'.GetRefererUrl($_REQUEST['back']).'" class="button">Далее</a>');
+		return;
 	}
+	GoRefererUrl($_REQUEST['back']);
 }
 
 // Смена статуса статьи
@@ -425,23 +412,14 @@ function AdminArticlesChangeStatus(){
 // Удаление статьи
 function AdminArticlesDelete(){
 	global $tree, $editarticles;
-	if(!$editarticles){
-		System::admin()->AccessDenied();
-	}
-	if(!isset($_GET['id'])){
-		GO(ADMIN_FILE.'?exe=articles');
-	}
+	if(!$editarticles) System::admin()->AccessDenied();
 	if(IsAjax() || isset($_GET['ok']) && $_GET['ok'] == '1'){
 		$id = SafeEnv($_GET['id'], 11, int);
 		$r = System::database()->Select('articles', "`id`='".$id."'");
 		$tree->CalcFileCounter($r[0]['cat_id'], false);
 		System::database()->Delete('articles', "`id`='$id'");
 		System::database()->Delete('articles_comments', "`object_id`='$id'");
-		if(isset($_REQUEST['back'])){
-			GoRefererUrl($_REQUEST['back']);
-		}else{
-			GO(ADMIN_FILE.'?exe=articles');
-		}
+		GoRefererUrl($_REQUEST['back']);
 	}else{
 		System::admin()->AddCenterBox('Удаление статьи');
 		System::database()->Select('articles', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");
@@ -455,9 +433,7 @@ function AdminArticlesDelete(){
 // Сброс счетчика просмотров статьи
 function AdminArticlesResetHits(){
 	global $editarticles;
-	if(!$editarticles){
-		System::admin()->AccessDenied();
-	}
+	if(!$editarticles) System::admin()->AccessDenied();
 	if(isset($_GET['id'])){
 		System::database()->Update('articles', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
@@ -467,9 +443,7 @@ function AdminArticlesResetHits(){
 // Сброс оценок статьи
 function AdminArticlesResetRating(){
 	global $editarticles;
-	if(!$editarticles){
-		System::admin()->AccessDenied();
-	}
+	if(!$editarticles) System::admin()->AccessDenied();
 	System::database()->Update('articles', "num_votes='0',all_votes='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	GO(ADMIN_FILE.'?exe=articles');
 }

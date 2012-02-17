@@ -41,15 +41,32 @@ switch($op){
 		IndexArticlesAddVote();
 		break;
 	// Комментарии
-	case 'addpost': IndexArticlesAddPost();
+	case 'addpost':
+		$id = intval(SafeEnv($_GET['art'], 11, int));
+		$cat = SafeDB($_GET['cat'], 11, int);
+		CommentsAddPost(
+			$id,
+			'articles_comments',
+			'articles',
+			'comments_counter',
+			'allow_comments',
+			"index.php?name=articles&op=read&art=$id&cat=$cat",
+			'downloads/{cat}/{art}/'
+		);
 		break;
-	case 'editpost': IndexArticlesEditPost();
+	case 'savepost':
+		if(CommentsEditPostSave(SafeEnv($_GET['art'], 11, int), 'articles_comments')){
+			break;
+		}
+	case 'editpost':
+		CommentsEditPost('articles_comments', "index.php?name=articles&op=savepost&art=".SafeDB($_GET['art'], 11, int).'&back='.SafeDB($_GET['back'], 255, str));
 		break;
-	case 'savepost': IndexArticlesEditPostSave();
+	case 'deletepost':
+		$id = SafeEnv($_GET['art'], 11, int);
+		$delete_url = "index.php?name=articles&op=deletepost&art=$id&back=".SafeDB($_GET['back'], 255, str);
+		CommentsDeletePost($id, 'articles_comments', 'articles', 'comments_counter', $delete_url);
 		break;
-	case 'deletepost': IndexArticlesDeletePost();
-		break;
-	//
+	// //
 	default:
 		HackOff();
 }
@@ -61,8 +78,7 @@ function IndexArticlesGetNumItems(){
 
 function IndexArticlesFunc( $id ){
 	$back = SaveRefererUrl();
-	return
-	'&nbsp'
+	return '&nbsp'
 	.'<a href="'.ADMIN_FILE.'?exe=articles&a=editor&id='.$id.'&back='.$back.'" class="admin_edit_link"><img src="images/admin/edit.png" title="Редактировать"></a>'
 	.'<a href="'.ADMIN_FILE.'?exe=articles&a=delete&id='.$id.'&ok=0&back='.$back.'" class="admin_edit_link"><img src="images/admin/delete.png" title="Удалить"></a>';
 }
@@ -240,84 +256,6 @@ function IndexArticlesRead(){
 	$posts->NavigationAnchor = '#comments';
 	$posts->RenderPosts($id, 'article_comments', 'comments_navigation', false, $page);
 	$posts->RenderForm(false, 'article_comments_form');
-}
-
-function IndexArticlesAddPost(){
-	$get_id        = 'art'; // Имя параметра в get для получения id объекта
-	$table         = 'articles_comments'; // Таблица комментариев
-	$object_table  = 'articles'; // Таблица объектов
-	$counter_field = 'comments_counter'; // Поле счетчик комментариев в таблице объекта
-	$alloy_field   = 'allow_comments';     // Поле разрешить комментирии для этого объекта
-	$id = SafeEnv($_GET[$get_id], 11, int);
-	$cat = SafeDB($_GET['cat'], 11, int);
-	$back_url = GetSiteUrl().Ufu("index.php?name=articles&op=read&art=$id&cat=$cat", 'articles/{cat}/{art}/');
-	// -----------------------------------------------------
-	System::database()->Select($object_table, "`id`='$id'");
-	$obj = System::database()->FetchRow();
-	$alloy_comments = $obj[$alloy_field] == '1';
-	$posts = new Posts($table, $alloy_comments);
-	if($posts->SavePost(SafeEnv($_GET[$get_id], 11, int), false)){
-		$post_id = System::database()->GetLastId();
-		// Увеличиваем счетчик комментариев объекта
-		$counter = $obj[$counter_field] + 1;
-		System::database()->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
-		// Генерируем обратную ссылку
-		$parent_id = explode('_', $_POST['parent_id'], 2);
-		$parent_id = SafeDB($parent_id[1], 11, int);
-		$post_anchor = ($parent_id != 0 ? "#post_$parent_id" : '#post_'.$post_id);
-		GO($back_url.$post_anchor);
-	}else{
-		System::site()->AddTextBox('Ошибка', $posts->PrintErrors());
-	}
-}
-
-function IndexArticlesEditPost(){
-	$table = 'articles_comments'; // Таблица комментариев
-	$id = '&art='.SafeDB($_GET['art'], 11, int);
-	$back = '&back='.SafeDB($_GET['back'], 255, str);
-	$action = "index.php?name=articles&op=savepost$id$back";
-	// -----------------------------------------------------
-	System::site()->AddTemplatedBox('','edit_comment.html');
-	$posts = new Posts($table);
-	$posts->PostFormAction = $action;
-	$posts->RenderForm(true, 'post_form');
-}
-
-function IndexArticlesEditPostSave(){
-	$get_id = 'art';             // Имя параметра в get для получения id объекта
-	$table = 'articles_comments'; // Таблица комментариев
-	// -----------------------------------------------------
-	$posts = new Posts($table);
-	if($posts->SavePost(SafeEnv($_GET[$get_id], 11, int), true)){
-		$post_anchor = "#post_".SafeDB($_GET['post_id'], 11, int);
-		GoRefererUrl($_REQUEST['back'], $post_anchor);
-	}else{
-		$site->AddTextBox('Ошибка', $posts->PrintErrors());
-		IndexArticlesEditPost();
-	}
-}
-
-function IndexArticlesDeletePost(){
-	$get_id = 'art'; // Имя параметра в get для получения id объекта
-	$table = 'articles_comments'; // Таблица комментариев
-	$object_table = 'articles'; // Таблица объектов
-	$counter_field = 'comments_counter'; // Поле счетчик комментариев в таблице объекта
-	$id = SafeDB($_GET[$get_id], 11, int);
-	$back = '&back='.SafeDB($_GET['back'], 255, str);
-	$delete_url = "index.php?name=articles&op=deletepost&art=$id$back"; // Ссылка страницы удаления
-	$anchor = "#comments"; // Дополнительный анкор при возврате
-	// -----------------------------------------------------
-	$posts = new Posts($table);
-	$posts->DeletePageUrl = $delete_url;
-	$deleted_posts_count = $posts->DeletePost();
-	if($deleted_posts_count > 0){
-		$id = SafeEnv($_GET[$get_id], 11, int);
-		System::database()->Select($object_table, "`id`='$id'");
-		$obj = System::database()->FetchRow();
-		$counter = $obj[$counter_field] - $deleted_posts_count;
-		System::database()->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
-		GoRefererUrl($_REQUEST['back'], $anchor);
-	}
 }
 
 function IndexArticlesAddVote(){

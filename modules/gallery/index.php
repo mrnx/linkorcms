@@ -39,27 +39,33 @@ switch($op){
 		IndexGalleryView();
 		break;
 	// Комментарии
-	case 'addpost': IndexGalleryAddPost();
+	case 'addpost':
+		$id = intval(SafeEnv($_GET['img'], 11, int));
+		$cat = SafeDB($_GET['cat'], 11, int);
+		CommentsAddPost($id, 'gallery_comments', 'gallery', 'com_counter', 'allow_comments', "index.php?name=gallery&op=view&img=$id&cat=$cat", 'gallery/{cat}/{img}/');
 		break;
-	case 'editpost': IndexGalleryEditPost();
+	case 'savepost':
+		if(CommentsEditPostSave(SafeEnv($_GET['img'], 11, int), 'gallery_comments')){
+			break;
+		}
+	case 'editpost':
+		CommentsEditPost('gallery_comments', "index.php?name=gallery&op=savepost&img=".SafeDB($_GET['img'], 11, int).'&back='.SafeDB($_GET['back'], 255, str));
 		break;
-	case 'savepost': IndexGalleryEditPostSave();
-		break;
-	case 'deletepost': IndexGalleryDeletePost();
+	case 'deletepost':
+		$id = SafeEnv($_GET['img'], 11, int);
+		CommentsDeletePost($id, 'gallery_comments', 'gallery', 'com_counter', "index.php?name=gallery&op=deletepost&img=$id&back=".SafeDB($_GET['back'], 255, str));
 		break;
 	// //
 	default:
 		HackOff();
 }
 
-function IndexGalleryGetNumItems()
-{
+function IndexGalleryGetNumItems(){
 	System::database()->Select('gallery', GetWhereByAccess('view', "`show`='1'"));
 	return System::database()->NumRows().'.</center>';
 }
 
-function RenderThumb( $title, $filename, $description, $comments, $link )
-{
+function RenderThumb( $title, $filename, $description, $comments, $link ){
 	global $site, $ThumbsDir, $GalleryDir;
 	$vars = array();
 	$vars['title'] = $title;
@@ -78,8 +84,7 @@ function RenderThumb( $title, $filename, $description, $comments, $link )
 	$site->AddTableCell('gallery_images', true, $vars);
 }
 
-function RenderImageView( &$img, &$db_images, &$index )
-{
+function RenderImageView( &$img, &$db_images, &$index ){
 	global $site, $GalleryDir;
 
 	$vars = array();
@@ -106,8 +111,7 @@ function RenderImageView( &$img, &$db_images, &$index )
 	$site->Blocks['gallery_image']['vars'] = $vars;
 }
 
-function IndexGalleryShow( $cat )
-{
+function IndexGalleryShow( $cat ){
 	global $db, $config, $site, $tree;
 	if($cat != 0){
 		$site->SetTitle('Изображения в категории '.SafeDB($tree->IdCats[$cat]['title'], 255, str));
@@ -146,8 +150,7 @@ function IndexGalleryShow( $cat )
 	}
 }
 
-function IndexGalleryView()
-{
+function IndexGalleryView(){
 	global $db, $config, $site, $tree, $user;
 	if(isset($_GET['img'])){
 		$id = SafeEnv($_GET['img'],11,int);
@@ -195,101 +198,3 @@ function IndexGalleryView()
 	$posts->RenderPosts($id, 'gallery_comments', 'comments_navigation', false, $page);
 	$posts->RenderForm(false, 'gallery_comments_form');
 }
-
-function IndexGalleryAddPost()
-{
-	global $db, $config, $site;
-	$get_id        = 'img'; // Имя параметра в get для получения id объекта
-	$table         = 'gallery_comments'; // Таблица комментариев
-	$object_table  = 'gallery'; // Таблица объектов
-	$counter_field = 'com_counter'; // Поле счетчик комментариев в таблице объекта
-	$alloy_field   = 'allow_comments';     // Поле разрешить комментирии для этого объекта
-
-	$id = SafeEnv($_GET[$get_id], 11, int);
-	$db->Select($object_table, "`id`='$id'");
-	$obj = $db->FetchRow();
-	$alloy_comments = $obj[$alloy_field] == '1';
-	// Добавляем комментарий
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table, $alloy_comments);
-	if($posts->SavePost($id, false)){
-		$db->Select($object_table, "`id`='$id'");
-		$obj = $db->FetchRow();
-		$counter = $obj[$counter_field] + 1;
-		$db->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
-		// Генерируем обратную ссылку
-		$parent = explode('_', $_POST['parent_id'], 2);
-		$parent_id = SafeEnv($parent[1], 11, int);
-		$page = ($parent_id != 0 && $_GET['page'] != 0 ? "&page={$_GET['page']}" : '');
-		$parent = ($parent_id != 0 ? "#post_$parent_id" : '#post_'.$db->GetLastId());
-		$cat = SafeDB($_GET['cat'], 11, int);
-		GO(GetSiteUrl().Ufu("index.php?name=gallery&op=view&img=$id$page&cat=$cat$parent", 'gallery/{cat}/{img}/'.($page != '' ? 'page{page}/' : '')));
-		// --------------------------
-	}else{
-		$site->AddTextBox('Ошибка', $posts->PrintErrors());
-	}
-}
-
-function IndexGalleryEditPost( $back_id = null )
-{
-	global $site, $config;
-	$get_id = 'img';             // Имя параметра в get для получения id объекта
-	$table = 'gallery_comments'; // Таблица комментариев
-	if($back_id == null){
-		$back_id = SaveRefererUrl();
-	}
-	$action_url = 'index.php?name=gallery&op=savepost&img='.SafeEnv($_GET[$get_id],11,int)."&back=$back_id";
-
-	$site->AddTemplatedBox('','edit_comment.html');
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	$posts->PostFormAction = $action_url;
-	$posts->RenderForm(true, 'post_form');
-}
-
-function IndexGalleryEditPostSave()
-{
-	global $config;
-	$get_id = 'img';             // Имя параметра в get для получения id объекта
-	$table = 'gallery_comments'; // Таблица комментариев
-
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	if($posts->SavePost(SafeEnv($_GET[$get_id], 11, int), true)){
-		GoRefererUrl($_GET['back']);
-	}else{
-		$site->AddTextBox('Ошибка', $posts->PrintErrors());
-		IndexGalleryEditPost($_GET['back']);
-	}
-}
-
-function IndexGalleryDeletePost()
-{
-	global $config, $db;
-	$get_id = 'img'; // Имя параметра в get для получения id объекта
-	$table = 'gallery_comments'; // Таблица комментариев
-	$object_table = 'gallery'; // Таблица объектов
-	$counter_field = 'com_counter'; // Поле счетчик комментариев в таблице объекта
-
-	if(!isset($_GET['back'])){
-		$back_id = SaveRefererUrl();
-	}else{
-		$back_id = $_GET['back'];
-	}
-	$id = SafeEnv($_GET[$get_id], 11, int);
-	$delete_url = "index.php?name=gallery&op=deletepost&img=$id&back=$back_id";
-
-	include_once($config['inc_dir'].'posts.class.php');
-	$posts = new Posts($table);
-	$posts->DeletePageUrl = $delete_url;
-	$deleted_posts_count = $posts->DeletePost();
-	if($deleted_posts_count > 0){
-		$db->Select($object_table, "`id`='$id'");
-		$obj = $db->FetchRow();
-		$counter = $obj[$counter_field] - $deleted_posts_count;
-		$db->Update($object_table, "`$counter_field`='$counter'", "`id`='$id'");
-		GoRefererUrl($back_id);
-	}
-}
-
-?>

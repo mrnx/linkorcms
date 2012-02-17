@@ -202,19 +202,7 @@ function Moderation_GetDo($do, $begin = false) {
 	global $forum_lang;
 	global $config, $site;
 	switch($do) {
-		case 'deletetopic':
-			if($begin) {
-				Moderation_Do_Delete_Topic();
-			}
-			else {
-				if( $config['forum']['basket'] == true ) {
-					$site->AddTemplatedBox('', 'module/forum_delete.html');
-					$site->AddBlock('delete_form', true, false, 'form');
-					$vars = array();
-					$vars['basket'] = $config['forum']['basket'] == true ;
-					$site->Blocks['delete_form']['vars'] = $vars;
-				}
-			}
+		case 'deletetopic': if($begin) Moderation_Do_Delete_Topic();
 			return $forum_lang['delete_topics'];
 		case 'open':  if($begin) Moderation_Do_Open();
 			return $forum_lang['open_topics'];

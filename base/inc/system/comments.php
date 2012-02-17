@@ -100,3 +100,65 @@ function CalcCounter( $ObjTable, $WhereObj, $ObjCounterColl, $CalcVal ){
 		$db->Update($ObjTable, "$ObjCounterColl='$counterVal'", $WhereObj);
 	}
 }
+
+function CommentsAddPost( $ObjectId, $CommentsTable, $ObjectsTable, $CounterField, $AlloyField, $BackUrl, $BackUrlUfu, $PageParam = 'page' ){
+	$parent_id = explode('_', $_POST['parent_id'], 2);
+	if($parent_id[1] == 0){
+		if(System::config('comments/decreasesort')){
+			$sp = true;
+			$_GET[$PageParam] = 0;
+		}else{
+			$sp = false;
+		}
+	}else{
+		$sp = true;
+	}
+	$back_url = GetSiteUrl().Ufu($BackUrl.($sp ? "&$PageParam=".$_GET[$PageParam] : ''), $BackUrlUfu.($sp ? $PageParam.'{'.$PageParam.'}/' : ''));
+	// -----------------------------------------------------
+	System::database()->Select($ObjectsTable, "`id`='$ObjectId'");
+	$obj = System::database()->FetchRow();
+	$alloy_comments = $obj[$AlloyField] == '1';
+	$posts = new Posts($CommentsTable, $alloy_comments);
+	if($posts->SavePost($ObjectId, false)){
+		$post_id = System::database()->GetLastId();
+		$counter = $obj[$CounterField] + 1;
+		System::database()->Update($ObjectsTable, "`$CounterField`='$counter'", "`id`='$ObjectId'");
+		$parent_id = explode('_', $_POST['parent_id'], 2);
+		$parent_id = SafeDB($parent_id[1], 11, int);
+		$post_anchor = ($parent_id != 0 ? "#post_$parent_id" : '#post_'.$post_id);
+		GO($back_url.$post_anchor);
+	}else{
+		System::site()->AddTextBox('Îøèáêà', $posts->PrintErrors());
+	}
+}
+
+function CommentsEditPost( $CommentsTable, $SaveUrl ){
+	System::site()->AddTemplatedBox('','edit_comment.html');
+	$posts = new Posts($CommentsTable);
+	$posts->PostFormAction = $SaveUrl;
+	$posts->RenderForm(true, 'post_form');
+}
+
+function CommentsEditPostSave( $ObjectId, $CommentsTable ){
+	$posts = new Posts($CommentsTable);
+	if($posts->SavePost($ObjectId, true)){
+		$post_anchor = "#post_".SafeDB($_GET['post_id'], 11, int);
+		GoRefererUrl($_REQUEST['back'], $post_anchor);
+	}else{
+		$site->AddTextBox('Îøèáêà', $posts->PrintErrors());
+		return false;
+	}
+}
+
+function CommentsDeletePost( $ObjectId, $CommentsTable, $ObjectsTable, $CounterField, $DeleteUrl, $Anchor = '#comments' ){
+	$posts = new Posts($CommentsTable);
+	$posts->DeletePageUrl = $DeleteUrl;
+	$deleted_posts_count = $posts->DeletePost();
+	if($deleted_posts_count > 0){
+		System::database()->Select($ObjectsTable, "`id`='$ObjectId'");
+		$obj = System::database()->FetchRow();
+		$counter = $obj[$CounterField] - $deleted_posts_count;
+		System::database()->Update($ObjectsTable, "`$CounterField`='$counter'", "`id`='$ObjectId'");
+		GoRefererUrl($_REQUEST['back'], $Anchor);
+	}
+}

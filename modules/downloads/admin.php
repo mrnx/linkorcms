@@ -5,10 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-if(!$user->CheckAccess2('downloads', 'downloads')){
-	AddTextBox('Ошибка', $config['general']['admin_accd']);
-	return;
-}
+if(!System::user()->CheckAccess2('downloads', 'downloads')) System::admin()->AccessDenied();
 
 TAddSubTitle('Архив файлов');
 
@@ -24,8 +21,6 @@ $tree->del_met = 'delcat';
 $tree->action_par_name = 'a';
 $tree->id_par_name = 'id';
 
-include_once ($config['inc_dir'].'configuration/functions.php');
-
 if(isset($_GET['a'])){
 	$action = SafeEnv($_GET['a'], 255, str);
 }else{
@@ -33,17 +28,15 @@ if(isset($_GET['a'])){
 }
 
 TAddToolLink('Файлы', 'main', 'downloads');
-if($user->CheckAccess2('downloads', 'edit_files')) TAddToolLink('Добавить файл', 'editor', 'downloads&a=editor');
-TAddToolBox($action);
-if($user->CheckAccess2('downloads', 'edit_cats')){
+if(System::user()->CheckAccess2('downloads', 'edit_files')) TAddToolLink('Добавить файл', 'editor', 'downloads&a=editor');
+if(System::user()->CheckAccess2('downloads', 'edit_cats')){
 	TAddToolLink('Категории', 'cats', 'downloads&a=cats');
 	TAddToolLink('Добавить категорию', 'cateditor', 'downloads&a=cateditor');
-	TAddToolBox($action);
 }
-if($user->CheckAccess2('downloads', 'config')){
+if(System::user()->CheckAccess2('downloads', 'config')){
 	TAddToolLink('Настройки модуля', 'config', 'downloads&a=config');
-	TAddToolBox($action);
 }
+TAddToolBox($action);
 
 switch($action){
 	case 'main':
@@ -60,10 +53,7 @@ switch($action){
 		AdminDownloadsDeleteFile();
 		break;
 	case 'cats':
-		if(!$user->CheckAccess2('downloads', 'edit_cats')){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-			return;
-		}
+		if(!System::user()->CheckAccess2('downloads', 'edit_cats')) System::admin()->AccessDenied();
 		global $tree;
 		$result = $tree->ShowCats();
 		if($result == false){
@@ -71,15 +61,8 @@ switch($action){
 		}
 		AddTextBox('Категории', $result);
 		break;
-		if(!$user->CheckAccess2('downloads', 'edit_cats')){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-			return;
-		}
 	case 'cateditor':
-		if(!$user->CheckAccess2('downloads', 'edit_cats')){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-			return;
-		}
+		if(!System::user()->CheckAccess2('downloads', 'edit_cats')) System::admin()->AccessDenied();
 		global $tree;
 		if(isset($_GET['id'])){
 			$id = SafeEnv($_GET['id'], 11, str);
@@ -94,20 +77,14 @@ switch($action){
 		$text = $tree->CatEditor($id, $to);
 		break;
 	case 'catsave':
-		if(!$user->CheckAccess2('downloads', 'edit_cats')){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-			return;
-		}
+		if(!System::user()->CheckAccess2('downloads', 'edit_cats')) System::admin()->AccessDenied();
 		global $tree, $config;
 		$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
 		GO(ADMIN_FILE.'?exe=downloads&a=cats');
 		break;
 	case 'delcat':
-		if(!$user->CheckAccess2('downloads', 'edit_cats')){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-			return;
-		}
-		global $tree, $config;
+		if(!System::user()->CheckAccess2('downloads', 'edit_cats')) System::admin()->AccessDenied();
+		global $tree;
 		if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
 			GO(ADMIN_FILE.'?exe=downloads&a=cats');
 		}
@@ -115,20 +92,22 @@ switch($action){
 	case 'changestatus':
 		AdminDownloadsChangeStatus();
 		break;
+
 	case 'config':
-		if(!$user->CheckAccess2('downloads', 'config')){
-			AddTextBox('Ошибка', 'Доступ запрещён!');
-			return;
+		if(!System::user()->CheckAccess2('downloads', 'config')) System::admin()->AccessDenied();
+		System::admin()->AddCenterBox('Конфигурация модуля "Архив файлов"');
+		if(CheckGet('saveok')){
+			System::admin()->Highlight('Настройки сохранены.');
 		}
-		AdminConfigurationEdit('downloads', 'downloads', false, false, 'Конфигурация модуля "Архив файлов"');
+		System::admin()->ConfigGroups('downloads');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=downloads&a=configsave');
 		break;
 	case 'configsave':
-		if(!$user->CheckAccess2('downloads', 'config')){
-			AddTextBox('Ошибка', 'Доступ запрещён!');
-			return;
-		}
-		AdminConfigurationSave('downloads&a=config', 'downloads', false);
+		if(!System::user()->CheckAccess2('downloads', 'config')) System::admin()->AccessDenied();
+		System::admin()->SaveConfigs('downloads');
+		GO(ADMIN_FILE.'?exe=downloads&a=config&saveok');
 		break;
+
 	case 'resetrating':
 		AdminDownloadsResetRating();
 		break;
@@ -138,7 +117,7 @@ switch($action){
 }
 
 function AdminDownloadsMain(){
-	global $config, $db, $site, $tree, $user;
+	global $config, $site, $tree;
 	if(isset($_GET['cat']) && $_GET['cat'] > -1){
 		$cat = SafeEnv($_GET['cat'], 11, int);
 		$where = "`category`='$cat'";
@@ -155,58 +134,48 @@ function AdminDownloadsMain(){
 		$page = 1;
 	}
 	AddCenterBox('Файлы');
-	$text = '';
-	$text = '<form name="categories" method="get">'
-	.'<table cellspacing="0" cellpadding="0" border="0" width="100%" align="center">
-	<tr>
-	<td align="center" class="contenttd">'.'Выберите категорию: '.$site->Hidden('exe', 'downloads').$site->Select('cat', $data).$site->Submit('Показать').'</td>
-	</tr>
-	</table>
-	</form>';
 
+	System::admin()->AddJS('
+	DownloadsSelectCat = function(){
+		Admin.LoadPage("'.ADMIN_FILE.'?exe=downloads&cat="+$("#download-cat").val());
+	}
+	');
+	$text = '<div style="text-align: center; margin-bottom: 10px;">Категория: '.$site->Select('cat', $data, false, 'id="download-cat" onchange="DownloadsSelectCat();"').'</div>';
 	AddText($text);
-	$db->Select('downloads', $where);
-	SortArray($db->QueryResult, 'public', true);
-	if(count($db->QueryResult) > $config['downloads']['filesonpage']){
+
+	System::database()->Select('downloads', $where);
+	SortArray(System::database()->QueryResult, 'public', true);
+	if(count(System::database()->QueryResult) > $config['downloads']['filesonpage']){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($db->QueryResult, $config['downloads']['filesonpage'], ADMIN_FILE.'?exe=downloads'.($cat > 0 ? '&cat='.$cat : ''));
-		AddNavigation();
+		$navigator->GenNavigationMenu(System::database()->QueryResult, $config['downloads']['filesonpage'], ADMIN_FILE.'?exe=downloads'.($cat > 0 ? '&cat='.$cat : ''));
 		$nav = true;
 	}else{
 		$nav = false;
-		AddText('<br />');
 	}
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
-	$text .= '<tr><th>Заголовок</th><th>Скачиваний</th><th>Комментарии</th><th>Оценка</th><th>Кто видит</th><th>Статус</th><th>Функции</th></tr>';
-	$editfiles = $user->CheckAccess2('downloads', 'edit_files');
+	$text .= '<tr><th>Заголовок</th><th>Скачиваний</th><th>Оценки</th><th>Кто видит</th><th>Статус</th><th>Функции</th></tr>';
+	$editfiles = System::user()->CheckAccess2('downloads', 'edit_files');
+	$back = SaveRefererUrl();
 	// Генерируем таблицу
-	while($row = $db->FetchRow()){
-		$vi = ViewLevelToStr(SafeDB($row['view'], 1, int));
-		switch($row['active']){
-			case '1':
-				$st = '<font color="#008000">Вкл.</font></a>';
-				break;
-			case '0':
-				$st = '<font color="#FF0000">Выкл.</font>';
-				break;
-		}
+	while($row = System::database()->FetchRow()){
+		$id = SafeDB($row['id'], 11, int);
+		$title = SafeDB($row['title'], 255, str);
+		$hits = SafeDB($row['hits'], 11, int);
+		$rating = '<img src="'.GetRatingImage(SafeDB($row['votes_amount'], 11, int), SafeDB($row['votes'], 11, int)).'" border="0" />';
+		$st = ($row['active'] == '1' ? 'Вкл.' : 'Выкл.');
+		$func = '-';
 		if($editfiles){
-			$st = '<a href="'.ADMIN_FILE.'?exe=downloads&a=changestatus&id='.SafeDB($row['id'], 11, int).'">'.$st.'</a>';
+			$title = '<b>'.System::admin()->Link($title, ADMIN_FILE.'?exe=downloads&a=editor&id='.$id.'&back='.$back).'</b>';
+			$hits .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик скачиваний', ADMIN_FILE.'?exe=downloads&a=resetcounter&id='.$id, 'images/admin/arrow_in.png', 'Сбросить счётчик скачиваний?');
+			$rating .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик оценок ('.SafeDB($row['votes_amount'], 11, int).' голосов)', ADMIN_FILE.'?exe=downloads&a=resetrating&id='.$id, 'images/admin/arrow_in.png', 'Сбросить оценки?');
+			$st = System::admin()->SpeedStatus('Вкл.', 'Выкл.', ADMIN_FILE.'?exe=downloads&a=changestatus&id='.$id, $row['active'] == '1');
+			$func = System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=downloads&a=editor&id='.$id.'&back='.$back, 'images/admin/edit.png');
+			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=downloads&a=deletefile&id='.$id.'&ok=0&back='.$back, 'images/admin/delete.png', 'Удалить файл?');
 		}
-		$rating = '<img src="'.GetRatingImage(SafeDB($row['votes_amount'], 11, int), SafeDB($row['votes'], 11, int)).'" border="0" />/ (всего '.SafeDB($row['votes_amount'], 11, int).')'
-		.($editfiles ? ' / <a href="'.ADMIN_FILE.'?exe=downloads&a=resetrating&id='.SafeDB($row['id'], 11, int).'" title="Обнулить счётчик оценок">Сброс</a>' : '');
-		if($editfiles){
-			$func = '';
-			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=downloads&a=editor&id='.SafeDB($row['id'], 11, int), 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=downloads&a=deletefile&id='.SafeDB($row['id'], 11, int).'&ok=0', 'images/admin/delete.png');
-		}else{
-			$func = '-';
-		}
-		$text .= '<tr><td>'.($editfiles ? '<b><a href="'.ADMIN_FILE.'?exe=downloads&a=editor&id='.SafeDB($row['id'], 11, int).'">' : '').SafeDB($row['title'], 255, str).($editfiles ? '</a><b>' : '').'</td>
-		<td>'.SafeDB($row['hits'], 11, int).($editfiles ? ' / <a href="'.ADMIN_FILE.'?exe=downloads&a=resetcounter&id='.SafeDB($row['id'], 11, str).'" title="Сбросить счётчик скачиваний">Сброс</a>' : '').'</td>
-		<td>'.SafeDB($row['comments_counter'], 11, int).'</a></td>
-		<td>'.$rating.'</td>
-		<td>'.$vi.'</td>
+		$text .= '<tr><td>'.$title.'</td>
+		<td>'.$hits.'</td>
+		<td>'.($row['allow_votes'] == '1' ? $rating : 'Запрещены').'</td>
+		<td>'.ViewLevelToStr(SafeDB($row['view'], 1, int)).'</td>
 		<td>'.$st.'</td>
 		<td>'.$func.'</td>
 		</tr>';
@@ -219,11 +188,8 @@ function AdminDownloadsMain(){
 }
 
 function AdminDownloadsFileEditor( $action ){
-	global $config, $db, $site, $user, $tree;
-	if(!$user->CheckAccess2('downloads', 'edit_files')){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
+	global $config, $site, $tree;
+	if(!System::user()->CheckAccess2('downloads', 'edit_files')) System::admin()->AccessDenied();
 	$category = 0;
 	$title = '';
 	$url = '';
@@ -236,22 +202,20 @@ function AdminDownloadsFileEditor( $action ){
 	$author_site = '';
 	$author_email = '';
 	$file_ver = '';
-	$allow_comments = array(false, false);
-	$allow_votes = array(false, false);
+	$allow_comments = true;
+	$allow_votes = true;
 	$view = array(1=>false, 2=>false, 3=>false, 4=>false);
 	$active = array(false, false);
+	$active = true;
 	if(!isset($_GET['id'])){
-		$allow_comments[1] = true;
-		$allow_votes[1] = true;
 		$view[4] = true;
-		$active[1] = true;
 		$action = 'addfilesave';
 		$top = 'Добавление файла';
 		$cap = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
-		$db->Select('downloads', "`id`='$id'");
-		$file = $db->FetchRow();
+		System::database()->Select('downloads', "`id`='$id'");
+		$file = System::database()->FetchRow();
 		$category = SafeDB($file['category'], 11, int);
 		$title = SafeDB($file['title'], 250, str);
 		$url = SafeDB($file['url'], 250, str);
@@ -264,10 +228,10 @@ function AdminDownloadsFileEditor( $action ){
 		$author_site = SafeDB($file['author_site'], 250, str);
 		$author_email = SafeDB($file['author_email'], 50, str);
 		$file_ver = SafeDB($file['file_version'], 250, str);
-		$allow_comments[SafeDB($file['allow_comments'], 1, int)] = true;
-		$allow_votes[SafeDB($file['allow_votes'], 1, int)] = true;
+		$allow_comments = SafeDB($file['allow_comments'], 1, int);
+		$allow_votes = SafeDB($file['allow_votes'], 1, int);
 		$view[SafeDB($file['view'], 1, int)] = true;
-		$active[SafeDB($file['active'], 1, int)] = true;
+		$active = SafeDB($file['active'], 1, int);
 		$action = 'editfilesave&id='.$id;
 		$top = 'Редактирование файла';
 		$cap = 'Сохранить изменения';
@@ -304,16 +268,20 @@ function AdminDownloadsFileEditor( $action ){
 	FormRow('Автор', $site->Edit('author', $author, false, 'style="width:400px;"'));
 	FormRow('E-mail автора', $site->Edit('author_email', $author_email, false, 'style="width:400px;"'));
 	FormRow('Сайт автора', $site->Edit('author_site', $author_site, false, 'style="width:400px;"'));
-	FormRow('Комментарии', $site->Radio('allow_comments', 'on', $allow_comments[1]).' Разрешить<br />'.$site->Radio('allow_comments', 'off', $allow_comments[0]).' Запретить');
-	FormRow('Оценки', $site->Radio('allow_votes', 'on', $allow_votes[1]).' Разрешить<br />'.$site->Radio('allow_votes', 'off', $allow_votes[0]).' Запретить');
+	FormRow('Комментарии', $site->Select('allow_comments', GetEnData($allow_comments, 'Разрешить', 'Запретить')));
+	FormRow('Оценки', $site->Select('allow_votes', GetEnData($allow_votes, 'Разрешить', 'Запретить')));
 	FormRow('Кто видит', $site->Select('view', $visdata));
-	FormRow('Активен', $site->Radio('active', 'on', $active[1]).' Да&nbsp;<br />'.$site->Radio('active', 'off', $active[0]).' Нет');
+	FormRow('Активен', $site->Select('active', GetEnData($active, 'Да', 'Нет')));
+
 	AddCenterBox($top);
-	AddForm('<form action="'.ADMIN_FILE.'?exe=downloads&a='.$action.'&back='.SaveRefererUrl().'" method="post" enctype="multipart/form-data" name="edit_form">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
+	if(!isset($_REQUEST['back'])){
+		$_REQUEST['back'] = SaveRefererUrl(ADMIN_FILE.'?exe=downloads');
+	}
+	AddForm('<form action="'.ADMIN_FILE.'?exe=downloads&a='.$action.'&back='.SafeDB($_REQUEST['back'], 255, str).'" method="post" enctype="multipart/form-data" name="edit_form">', $site->Button('Отмена', 'onclick="history.go(-1)"').$site->Submit($cap));
 }
 
 function AdminDownloadsSaveFile( $action ){
-	global $config, $db, $tree, $user;
+	global $config, $tree;
 
 	if($_POST == array()){
 		AddTextBox('Ошибка', '<b>Внимание! Превышен максимальный размер POST данных. Изменения не сохранены.</b>');
@@ -321,10 +289,7 @@ function AdminDownloadsSaveFile( $action ){
 	}
 	$Error = '';
 
-	if(!$user->CheckAccess2('downloads', 'edit_files')){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
+	if(!System::user()->CheckAccess2('downloads', 'edit_files')) System::admin()->AccessDenied();
 	$category = SafeEnv($_POST['category'], 11, int);
 	if(in_array($category, $tree->GetAllChildId(0)) === false || $category == 0){
 		GO(ADMIN_FILE.'?exe=downloads');
@@ -392,9 +357,6 @@ function AdminDownloadsSaveFile( $action ){
 	// Загружаем изображение
 	$ImageUploadError = false;
 	$image = LoadImage('up_image', $config['downloads']['images_dir'], $config['downloads']['images_dir'].'thumbs/', $config['downloads']['thumb_max_width'], $config['downloads']['thumb_max_height'], $_POST['image'], $ImageUploadError);
-	if($ImageUploadError){
-		$Error = '<center>Неправильный формат файла. Можно загружать только изображения формата GIF, JPEG или PNG.</center>';
-	}
 	$author = SafeEnv($_POST['author'], 50, str);
 	$author_site = SafeEnv(Url($_POST['author_site']), 250, str);
 	$author_email = SafeEnv($_POST['author_email'], 50, str);
@@ -408,7 +370,7 @@ function AdminDownloadsSaveFile( $action ){
 		//Здесь генерируем Set запрос
 		$set = "title='$title',category='$category',size='$file_size',size_type='$size_type',url='$url',shortdesc='$shortdesc',description='$description',image='$image',author='$author',author_site='$author_site',author_email='$author_email',file_version='$file_ver',allow_comments='$allow_comments',allow_votes='$allow_votes',view='$view',active='$active'";
 		$id = SafeEnv($_GET['id'], 11, int);
-		$r = $db->Select('downloads', "`id`='$id'");
+		$r = System::database()->Select('downloads', "`id`='$id'");
 		if($r[0]['category'] != $category && $r[0]['active'] == '1'){
 			$tree->CalcFileCounter($r[0]['category'], false);
 			$tree->CalcFileCounter($category, true);
@@ -420,66 +382,62 @@ function AdminDownloadsSaveFile( $action ){
 				$tree->CalcFileCounter($category, true);
 			}
 		}
-		$db->Update('downloads', $set, "`id`='$id'");
+		System::database()->Update('downloads', $set, "`id`='$id'");
 	}elseif('addfilesave' == $action){
 		$values = Values('', $category, time(), $file_size, $size_type, $title, $url, $shortdesc, $description, $image, $author, $author_site, $author_email, $file_ver, $allow_comments, 0, $allow_votes, 0, 0, 0, $view, $active);
-		$db->Insert('downloads', $values);
+		System::database()->Insert('downloads', $values);
 		if($active){
 			$tree->CalcFileCounter($category, true);
 		}
 	}
-	if($Error == ''){
-		//GO(ADMIN_FILE.'?exe=downloads');
-		GoRefererUrl($_GET['back']);
-		AddTextBox('Сообщение', 'Изменения успешно сохранены.'); // В случае, если не будет произведено перенаправление
-	}else{
-		AddTextBox('Ошибка', $Error.'.<br /><a href="'.GetRefererUrl($_GET['back']).'">Далее</a>');
+	if($ImageUploadError){
+		AddTextBox('Ошибка', '<center>Неправильный формат файла. Можно загружать только изображения формата GIF, JPEG или PNG. Остальные изменения сохранены.</center><br /><a href="'.GetRefererUrl($_REQUEST['back']).'" class="button">Далее</a>');
+		return;
 	}
-
+	if($Error != ''){
+		AddTextBox('Ошибка', '<center>Не удалось загрузить файл, изменения сохранены. Ошибка: '.$Error.'.</center><br /><a href="'.GetRefererUrl($_REQUEST['back']).'" class="button">Далее</a>');
+		return;
+	}
+	GoRefererUrl($_REQUEST['back']);
 }
 
 function AdminDownloadsDeleteFile(){
-	global $config, $db, $tree, $user;
-	if(!$user->CheckAccess2('downloads', 'edit_files')){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
-	if(!isset($_GET['id'])){
-		GO(ADMIN_FILE.'?exe=downloads');
-	}
-	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
+	global $tree;
+	if(!System::user()->CheckAccess2('downloads', 'edit_files')) System::admin()->AccessDenied();
+	if(IsAjax() || (isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1')){
 		$id = SafeEnv($_GET['id'], 11, int);
-		$r = $db->Select('downloads', "`id`='$id'");
+		$r = System::database()->Select('downloads', "`id`='$id'");
 		$tree->CalcFileCounter(SafeDB($r[0]['category'], 11, int), false);
-		// Удаляем файл
 		if(is_file(RealPath2($r[0]['url']))){
 			unlink(RealPath2($r[0]['url']));
 		}
-		$db->Delete('downloads', "`id`='$id'");
-		$db->Delete('downloads_comments', "`object_id`='$id'");
-		//GO(ADMIN_FILE.'?exe=downloads');
-		GoRefererUrl($_GET['back']);
-		AddTextBox('Сообщение', 'Файл удален успешно.');
+		System::database()->Delete('downloads', "`id`='$id'");
+		System::database()->Delete('downloads_comments', "`object_id`='$id'");
+		GoRefererUrl($_REQUEST['back']);
 	}else{
-		$r = $db->Select('downloads', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите удалить файл "'.SafeDB($r[0]['title'], 250, str).'"<br />'
-		.'<a href="'.ADMIN_FILE.'?exe=downloads&a=deletefile&id='.SafeEnv($_GET['id'], 11, int).'&back='.SaveRefererUrl().'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox('Внимание', $text);
+		System::admin()->AddCenterBox('Удаление файла');
+		System::database()->Select('downloads', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");
+		$file = System::database()->FetchRow();
+		$id = SafeDB($_REQUEST['id'], 11, int);
+		$back = SafeDB($_REQUEST['back'], 255, str);
+		System::admin()->HighlightConfirmNoAjax('Удалить файл "'.SafeDB($file['title'], 255, str).'"?', ADMIN_FILE.'?exe=downloads&a=deletefile&id='.$id.'&ok=1&back='.$back);
 	}
 }
 
 function AdminDownloadsChangeStatus(){
-	global $config, $db, $tree, $user;
-	if(!$user->CheckAccess2('downloads', 'edit_files')){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
+	global $tree;
+	if(!System::user()->CheckAccess2('downloads', 'edit_files')){
+		if(IsAjax()){
+			exit("ACCESS DENIED");
+		}
+		System::admin()->AccessDenied();
 	}
 	if(!isset($_GET['id'])){
-		GO(ADMIN_FILE.'?exe=downloads');
+		exit("ERROR");
 	}
-	$db->Select('downloads', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	if($db->NumRows() > 0){
-		$r = $db->FetchRow();
+	System::database()->Select('downloads', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	if(System::database()->NumRows() > 0){
+		$r = System::database()->FetchRow();
 		if($r['active'] == 1){
 			$en = '0';
 			$tree->CalcFileCounter(SafeDB($r['category'], 11, int), false);
@@ -487,35 +445,19 @@ function AdminDownloadsChangeStatus(){
 			$en = '1';
 			$tree->CalcFileCounter(SafeDB($r['category'], 11, int), true);
 		}
-		$db->Update('downloads', "active='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('downloads', "`active`='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO(ADMIN_FILE.'?exe=downloads');
+	exit("OK");
 }
 
 function AdminDownloadsResetRating(){
-	global $config, $db, $user;
-	if(!$user->CheckAccess2('downloads', 'edit_files')){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
-	if(isset($_GET['ok']) && $_GET['ok'] == '1'){
-		$db->Update('downloads', "votes_amount='0',votes='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		GO(ADMIN_FILE.'?exe=downloads');
-	}else{
-		$r = $db->Select('downloads', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-		$text = 'Вы действительно хотите сбросить оценки файла? "'.SafeDB($r[0]['title'], 250, str).'"<br />'
-			.'<a href="'.ADMIN_FILE.'?exe=downloads&a=resetrating&id='.SafeEnv($_GET['id'], 11, int).'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-		AddTextBox("Внимание", $text);
-	}
-}
-
-function AdminDownloadsResetCounter(){
-	global $config, $db, $user;
-	if(!$user->CheckAccess2('downloads', 'edit_files')){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
-	$db->Update('downloads', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	if(!System::user()->CheckAccess2('downloads', 'edit_files')) System::admin()->AccessDenied();
+	System::database()->Update('downloads', "votes_amount='0',votes='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	GO(ADMIN_FILE.'?exe=downloads');
 }
 
+function AdminDownloadsResetCounter(){
+	if(!System::user()->CheckAccess2('downloads', 'edit_files')) System::admin()->AccessDenied();
+	System::database()->Update('downloads', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	GO(ADMIN_FILE.'?exe=downloads');
+}

@@ -469,17 +469,17 @@ a.nav_item:hover {
 .cfgtable {
 	width: 100%;
 	margin: 10px 0;
-	border-collapse: collapse;
-	border: 1px #CCCCCC solid;
 	cursor: default;
+	border-collapse: collapse;
+	border: 1px #CCC solid;
 }
 
 .cfgtable_even{
-	background-color: #F5F5FF;
+	background-color: #FDFDFF;
 }
 
 .cfgtable_odd{
-	background-color: #FFF;
+	background-color: #F0F0FF;
 }
 
 .cfgtable_hover{
@@ -490,7 +490,7 @@ a.nav_item:hover {
 	padding: 5px;
 	color: #000;
 	background: #DCDCDC url(../img/table_th.png) repeat-x;
-	border: 1px #CCCCCC solid;
+	border: 1px #CCC solid;
 	text-shadow: 0px 1px 0px #fff;
 	text-align: center;
 	font-weight: normal;
@@ -500,7 +500,7 @@ a.nav_item:hover {
 	padding: 4px;
 	text-align: center;
 	vertical-align: middle;
-	border-bottom: 1px #CCCCCC solid;
+	border-bottom: 1px #CCC solid;
 }
 
 /* Формы */
