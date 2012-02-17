@@ -39,7 +39,7 @@ if(isset($_GET['a'])){
 
 TAddToolLink('Изображения', 'main', 'gallery');
 if($editimages){
-	TAddToolLink('Добавить изображения', 'editor', 'gallery&a=editor');
+	TAddToolLink('Добавить изображение', 'editor', 'gallery&a=editor');
 	TAddToolLink('Мультизагрузка', 'upload', 'gallery&a=upload');
 }
 TAddToolBox($action);
@@ -252,7 +252,7 @@ function AdminGalleryEditor(){
 	if(!isset($_GET['id'])){
 		$view[4] = true;
 		$action = 'add';
-		$top = 'Добавление изображения';
+		$top = 'Добавить изображение';
 		$cap = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -271,8 +271,7 @@ function AdminGalleryEditor(){
 		$view[SafeDB($par['view'], 1, int)] = true;
 		$action = 'save&id='.$id;
 		$top = 'Редактирование изображения';
-		$cap = 'Сохранить';
-		unset($par);
+		$cap = 'Сохранить изменения';
 	}
 	$visdata = GetUserTypesFormData($view);
 	$cats_data = array();

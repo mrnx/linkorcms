@@ -256,11 +256,11 @@ function AdminForumEditor() {
 		$f_view[(int)$forum['view']] = true;
 		$f_status[(int)$forum['status']] = true;
 		$id_param = '&id='.$id;
-		$b_cap = 'Сохранить';
+		$b_cap = 'Сохранить изменения';
 		if($f_parent == 0) {
 			$c_cap = 'Редактирование категории';
 		}else {
-			$c_cap = 'Редактирование Форума';
+			$c_cap = 'Редактирование форума';
 		}
 	}else {
 		// Добавление

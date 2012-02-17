@@ -28,7 +28,8 @@ if(isset($_GET['a'])){
 }
 
 TAddToolLink('Файлы', 'main', 'downloads');
-if(System::user()->CheckAccess2('downloads', 'edit_files')) TAddToolLink('Добавить файл', 'editor', 'downloads&a=editor');
+if(System::user()->CheckAccess2('downloads', 'edit_files'))
+	TAddToolLink('Добавить файл', 'editor', 'downloads&a=editor');
 if(System::user()->CheckAccess2('downloads', 'edit_cats')){
 	TAddToolLink('Категории', 'cats', 'downloads&a=cats');
 	TAddToolLink('Добавить категорию', 'cateditor', 'downloads&a=cateditor');
@@ -210,7 +211,7 @@ function AdminDownloadsFileEditor( $action ){
 	if(!isset($_GET['id'])){
 		$view[4] = true;
 		$action = 'addfilesave';
-		$top = 'Добавление файла';
+		$top = 'Добавить файл';
 		$cap = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);

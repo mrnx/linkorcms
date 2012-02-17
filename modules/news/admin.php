@@ -224,7 +224,7 @@ function AdminNewsEditor(){
 
 	if(!isset($_GET['id'])){ // Добавление новости
 		$auto_br = false;
-		$title = 'Добавление новости';
+		$title = 'Добавить новость';
 		$caption = 'Добавить';
 		TAddSubTitle($title);
 		$met = '';
@@ -252,7 +252,7 @@ function AdminNewsEditor(){
 		$public_time = date("G:i", $news['date']);
 
 		$title = 'Редактирование новости';
-		$caption = 'Сохранить';
+		$caption = 'Сохранить изменения';
 		TAddSubTitle($title);
 		$met = '&id='.SafeEnv($_GET['id'], 11, int);
 	}

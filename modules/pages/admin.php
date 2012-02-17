@@ -321,7 +321,7 @@ function AdminPagesEditor(){
 		$alname = 'Добавить';
 		$met = 'add';
 		$url = '';
-		$headt = 'Добавление страницы';
+		$headt = 'Добавить страницу';
 	}elseif(isset($_GET['id']) && !isset($_POST['method'])){
 		$id = SafeEnv($_GET['id'], 11, int);
 		$db->Select('pages', "`id`='".$id."'");
@@ -342,7 +342,7 @@ function AdminPagesEditor(){
 		$seo_keywords = SafeDB($pg['seo_keywords'], 255, str);
 		$seo_description = SafeDB($pg['seo_description'], 255, str);
 		//
-		$alname = 'Сохранить';
+		$alname = 'Сохранить изменения';
 		$met = 'edit';
 		$url = '&id='.$id;
 		$headt = 'Редактирование страницы';
@@ -353,12 +353,12 @@ function AdminPagesEditor(){
 		$alname = 'Добавить';
 		$met = 'add';
 		$url = '';
-		$headt = 'Добавление страницы';
+		$headt = 'Добавить страницу';
 	}elseif(isset($_GET['id']) && isset($_POST['method'])){
 		$id = SafeEnv($_GET['id'], 11, int);
 		AdminPagesAcceptPost($link, $parent_id, $title, $text, $copy, $auto_br, $info, $view, $enabled, $seo_title, $seo_keywords, $seo_description, $showinmenu);
 		AdminPagesRenderPage($title, $text, $copy, $auto_br[1], $info);
-		$alname = 'Сохранить';
+		$alname = 'Сохранить изменения';
 		$met = 'edit';
 		$url = '&id='.$id;
 		$headt = 'Редактирование страницы';
@@ -494,7 +494,7 @@ function AdminPagesLinkEditor(){
 	$showinmenu = true;
 	if(!isset($_GET['id'])){
 		$view[4] = true;
-		$form_title = 'Добавление ссылки';
+		$form_title = 'Добавить ссылку';
 		$submit = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -507,7 +507,7 @@ function AdminPagesLinkEditor(){
 		$enabled = SafeDB($pg['enabled'], 1, bool);
 		$showinmenu = SafeDB($pg['showinmenu'], 1, bool);
 		$form_title = 'Редактирование ссылки';
-		$submit = 'Сохранить';
+		$submit = 'Сохранить изменения';
 	}
 	# Возможные родительские страницы
 	$tree = new Tree('pages');
@@ -591,7 +591,7 @@ function AdminPagesCatEditor(){
 	$showinmenu = true;
 	if(!isset($_GET['id'])){
 		$view[4] = true;
-		$form_title = 'Добавление категории';
+		$form_title = 'Добавить категорию';
 		$submit = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -603,7 +603,7 @@ function AdminPagesCatEditor(){
 		$enabled = SafeDB($pg['enabled'], 1, bool);
 		$showinmenu = SafeDB($pg['showinmenu'], 1, bool);
 		$form_title = 'Редактирование категории';
-		$submit = 'Сохранить';
+		$submit = 'Сохранить изменения';
 	}
 	# Возможные родительские страницы
 	$tree = new Tree('pages');

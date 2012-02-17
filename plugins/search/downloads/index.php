@@ -13,8 +13,8 @@ foreach($objects as $object){
 	$result = array();
 	$result['mod'] = $plugin['mod_title']; //'Архив файлов';  // Имя модуля
 	$result['coincidence'] = ''; // Показывает где было совпадение
-	$result['title'] = SafeDB($object['title'], 255, str); // Дата публикации
-	$result['public'] = TimeRender(SafeDB($object['public'], 11, int));
+	$result['title'] = SafeDB($object['title'], 255, str);
+	$result['public'] = TimeRender(SafeDB($object['public'], 11, int)); // Дата публикации
 	$result['link'] = Ufu('index.php?name=downloads&op=full&cat='.SafeDB($object['category'], 11, int).'&file='.SafeDB($object['id'], 11, int), 'downloads/{cat}/{file}/');
 	$result['text'] = SafeDB($object['shortdesc'], 0, str);
 	if(strlen($result['text']) > 255){
@@ -33,5 +33,3 @@ foreach($objects as $object){
 		$search_results[] = $result;
 	}
 }
-
-?>

@@ -41,5 +41,3 @@ foreach($topics as $topic){
 		}
 	}
 }
-
-?>

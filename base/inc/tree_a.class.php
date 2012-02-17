@@ -88,7 +88,7 @@ class AdminTree extends Tree{
 		$desc = '';
 		$icon = '';
 		$parent = 0;
-		$boxtitle = 'Добавление категории';
+		$boxtitle = 'Добавить категорию';
 		$save_met = $this->save_met;
 		if($cat_id != null){
 			$db->Select($this->Table, "`id`='$cat_id'");
@@ -103,7 +103,7 @@ class AdminTree extends Tree{
 		}else{
 			$parent = -1;
 			$id = -1;
-			$cmd = 'Создать';
+			$cmd = 'Добавить';
 			if($to_id != null){
 				$parent = $to_id;
 			}elseif(isset($_GET['_cat_adto'])){

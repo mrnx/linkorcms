@@ -711,7 +711,7 @@ function AdminUserEditor($save_link, $a = 'adduser', $id = 0, $isadmin = false){
 		$city = '';
 		$url = '';
 		$icq = '';
-		$gmt = $config['general']['default_timeone'];
+		$gmt = System::config('general/default_timeone');
 		$about = '';
 		$avatar = '';
 		$apersonal = '0';

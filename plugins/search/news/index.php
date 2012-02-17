@@ -13,8 +13,8 @@ foreach($news_array as $news){
 	$result = array();
 	$result['mod'] = $plugin['mod_title']; // Имя модуля
 	$result['coincidence'] = ''; // Показывает где было совпадение
-	$result['title'] = SafeDB($news['title'], 255, str); // Дата публикации
-	$result['public'] = TimeRender(SafeDB($news['date'], 11, int));
+	$result['title'] = SafeDB($news['title'], 255, str);
+	$result['public'] = TimeRender(SafeDB($news['date'], 11, int)); // Дата публикации
 	$result['link'] = Ufu('index.php?name=news&op=readfull&news='.SafeDB($news['id'], 11, int).'&topic='.SafeDB($news['topic_id'], 11, int), 'news/{topic}/{news}/');
 	$result['text'] = SafeDB($news['start_text'], 0, str);
 	if($news['auto_br'] == '1'){
@@ -44,5 +44,3 @@ foreach($news_array as $news){
 		$search_results[] = $result;
 	}
 }
-
-?>

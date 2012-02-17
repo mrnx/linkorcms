@@ -223,6 +223,7 @@ function AdminFormsFieldEditor( $action ){
 		$values = '';
 		$cp = 'Добавить';
 		$edit = false;
+		System::admin()->FormTitleRow('Добавить поле');
 	}else{
 		$index = SafeEnv($_GET['index'], 11, int);
 		$db->Select('forms', "`id`='$id'");
@@ -250,7 +251,7 @@ function AdminFormsFieldEditor( $action ){
 		$type = explode(',', $field['type']);
 		$datatypes['selected'] = $type[1];
 		$length = $type[0];
-		$cp = 'Сохранить';
+		$cp = 'Сохранить изменения';
 		$edit = true;
 	}
 	FormRow('Название', $site->Edit('hname', $hname, false, 'maxlength="250" style="width:400px;"'));

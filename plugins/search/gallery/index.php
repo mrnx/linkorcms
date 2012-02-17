@@ -30,5 +30,3 @@ foreach($objects as $object){
 		$search_results[] = $result;
 	}
 }
-
-?>

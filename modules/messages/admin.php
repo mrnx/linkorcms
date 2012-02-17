@@ -19,7 +19,7 @@ if(isset($_GET['a'])){
 }
 
 TAddToolLink('Все сообщения', 'main', 'messages');
-TAddToolLink('Редактор сообщений', 'msgeditor', 'messages&a=msgeditor');
+TAddToolLink('Создать сообщение', 'msgeditor', 'messages&a=msgeditor');
 TAddToolBox($action);
 switch($action){
 	case 'main':
@@ -100,8 +100,8 @@ function AdminSiteMessagesEditor(){
 		$view_title[1] = true;
 		$position[1] = true;
 		$url = '';
-		$btitle = 'Добавление сообщения';
-		$method = 'Добавить';
+		$btitle = 'Создать сообщение';
+		$method = 'Создать';
 		$a = 'add';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);

@@ -475,11 +475,11 @@ a.nav_item:hover {
 }
 
 .cfgtable_even{
-	background-color: #FDFDFF;
+	background-color: #F0F0FF;
 }
 
 .cfgtable_odd{
-	background-color: #F0F0FF;
+	background-color: #FDFDFF;
 }
 
 .cfgtable_hover{

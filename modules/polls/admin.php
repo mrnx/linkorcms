@@ -119,7 +119,7 @@ function AdminPollsEditor(){
 	$view = array(1=>false, 2=>false, 3=>false, 4=>false);
 	if(isset($_GET['id'])){ //Редактирование
 		$title = 'Редактирование опроса';
-		$btitle = 'Сохранить';
+		$btitle = 'Сохранить изменения';
 		$id = SafeEnv($_GET['id'], 11, int);
 		System::database()->Select('polls', "`id`='$id'");
 		$p = System::database()->FetchRow();

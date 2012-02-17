@@ -220,7 +220,7 @@ function AdminArticlesEditor(){
 		System::admin()->AccessDenied();
 	}
 	$site->AddJS('
-	function PreviewOpen(){
+	PreviewOpen = function(){
 		window.open(\'index.php?name=plugins&p=preview&mod=article\',\'Preview\',\'resizable=yes,scrollbars=yes,menubar=no,status=no,location=no,width=640,height=480\');
 	}');
 	$cat_id = 0;
@@ -244,39 +244,38 @@ function AdminArticlesEditor(){
 	//
 	if(!isset($_GET['id'])){
 		$action = 'add';
-		$top = 'Добавление статьи';
+		$top = 'Добавить статью';
 		$cap = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, str);
 		System::database()->Select('articles', "`id`='$id'");
-		$par = System::database()->FetchRow();
-		$cat_id = SafeDB($par['cat_id'], 11, int);
-		$author = SafeDB($par['author'], 200, str);
-		$email = SafeDB($par['email'], 50, str);
-		$www = SafeDB($par['www'], 250, str);
-		$title = SafeDB($par['title'], 255, str);
-		$description = SafeDB($par['description'], 0, str, false);
-		$article = SafeDB($par['article'], 0, str, false);
-		$image = SafeDB($par['image'], 250, str);
+		$art = System::database()->FetchRow();
+		$cat_id = SafeDB($art['cat_id'], 11, int);
+		$author = SafeDB($art['author'], 200, str);
+		$email = SafeDB($art['email'], 50, str);
+		$www = SafeDB($art['www'], 250, str);
+		$title = SafeDB($art['title'], 255, str);
+		$description = SafeDB($art['description'], 0, str, false);
+		$article = SafeDB($art['article'], 0, str, false);
+		$image = SafeDB($art['image'], 250, str);
 
-		$auto_br_article = SafeDB($par['auto_br_article'], 1, bool);
-		$auto_br_desc = SafeDB($par['auto_br_desc'], 1, bool);
+		$auto_br_article = SafeDB($art['auto_br_article'], 1, bool);
+		$auto_br_desc = SafeDB($art['auto_br_desc'], 1, bool);
 
-		$active = SafeDB($par['active'], 1, bool);
+		$active = SafeDB($art['active'], 1, bool);
 
-		$allow_comments = SafeDB($par['allow_comments'], 1, int);
-		$allow_votes = SafeDB($par['allow_votes'], 1, int);
-		$view = SafeDB($par['view'], 1, int);
+		$allow_comments = SafeDB($art['allow_comments'], 1, int);
+		$allow_votes = SafeDB($art['allow_votes'], 1, int);
+		$view = SafeDB($art['view'], 1, int);
 		//Модуль SEO
-		$seo_title = SafeDB($par['seo_title'], 255, str);
-		$seo_keywords = SafeDB($par['seo_keywords'], 255, str);
-		$seo_description = SafeDB($par['seo_description'], 255, str);
+		$seo_title = SafeDB($art['seo_title'], 255, str);
+		$seo_keywords = SafeDB($art['seo_keywords'], 255, str);
+		$seo_description = SafeDB($art['seo_description'], 255, str);
 		//
 		$action = 'save&id='.$id;
 		$top = 'Редактирование статьи';
-		$cap = 'Сохранить';
+		$cap = 'Сохранить изменения';
 	}
-	unset($par);
 
 	$cats_data = array();
 	$cats_data = $tree->GetCatsData($cat_id);

@@ -254,7 +254,7 @@ function AdminsEditGroup(){
 		$image = '';
 		$access = serialize(array());
 		$method = 'addsave';
-		$title = 'Добавление группы';
+		$title = 'Добавить группу';
 		$other = '';
 	}
 	FormRow('Название', $site->Edit('name', $name, false, 'style="width:400px;"'));

@@ -78,7 +78,7 @@ function AdminFeedBackEditor(){
 	$active = array(false, false);
 	if(!isset($_GET['id'])){
 		$active[1] = true;
-		$headt = 'Добавление';
+		$headt = 'Добавить департамент';
 		$bbb = 'Добавить';
 	}elseif(isset($_GET['id'])){
 		$id = SafeEnv($_GET['id'], 11, int);
@@ -87,9 +87,8 @@ function AdminFeedBackEditor(){
 		$name = SafeDB($fb['name'], 255, str);
 		$email = SafeDB($fb['email'], 50, str);
 		$active[$fb['active']] = true;
-		$headt = 'Редактирование';
+		$headt = 'Редактирование департамента';
 		$bbb = 'Сохранить изменения';
-		unset($fb);
 	}
 	FormRow('Название', $site->Edit('name', $name, false, 'style="width:200px;"'));
 	FormRow('E-mail', $site->Edit('email', $email, false, 'style="width:200px;"'));

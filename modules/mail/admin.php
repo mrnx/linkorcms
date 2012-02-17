@@ -106,7 +106,7 @@ function AdminMailEditTopic(){
 		$active[1] = true;
 		$status[1] = true;
 		$action = 'save_topic';
-		$top = 'Добавление темы';
+		$top = 'Добавить тему';
 		$cap = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
