@@ -3,15 +3,15 @@
 /**
  * Извлекает из полного имени файла его расширение
  *
- * @param String $File // Полное имя файла
- * @param bool $RemoveDot // Удалить ведущую точку
+ * @param String $FileName Полное имя файла
+ * @param bool $RemoveDot Удалить ведущую точку
  * @return String
  */
-function GetFileExt( $File, $RemoveDot = false ){
-	$pos = strrpos($File, '.');
+function GetFileExt( $FileName, $RemoveDot = false ){
+	$pos = strrpos($FileName, '.');
 	if($RemoveDot) $pos++;
-	if(!($pos===false)){
-		return substr($File, $pos);
+	if($pos !== false){
+		return substr($FileName, $pos);
 	}else{
 		return '';
 	}
@@ -19,17 +19,31 @@ function GetFileExt( $File, $RemoveDot = false ){
 
 /**
  * Извлекает из полного имени файла его имя
- * @param string $Name Полное имя файла
+ * @param string $FileName Полное имя файла
  * @param bool $RemoveExt Удалить расширение
  * @return String
  */
-function GetFileName( $Name, $RemoveExt = true ){
-	if($RemoveExt){
-		$suffix = substr($Name, strrpos($Name, '.'));
-	}else{
-		$suffix = null;
+function GetFileName( $FileName, $RemoveExt = false ){
+	$pos = strrpos($FileName, '/');
+	if($pos !== false){
+		$FileName = substr($FileName, $pos+1);
 	}
-	return basename($Name, $suffix);
+	if($RemoveExt){
+		$pos = strrpos($FileName, '.');
+		if($pos !== false){
+			$FileName = substr($FileName, 0, $pos);
+		}
+	}
+	return $FileName;
+}
+
+function GetPathName( $FileName ){
+	$pos = strrpos($FileName, '/');
+	if($pos !== false){
+		return substr($FileName, 0, $pos+1);
+	}else{
+		return '';
+	}
 }
 
 /**
