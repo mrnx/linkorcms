@@ -7,6 +7,7 @@ $system_autoload = array(
 	'LmEmailExtended' => $config['inc_dir'].'LmEmailExtended.php',
 	'User'            => $config['inc_dir'].'user.class.php',
 	'RssChannel'      => $config['inc_dir'].'rss.class.php',
+	'Url'             => $config['inc_dir'].'url.class.php',
 	'TPicture'        => $config['inc_dir'].'picture.class.php',
 
 	'HTML'         => $config['inc_dir'].'html.class.php',
