@@ -62,7 +62,7 @@ class AdminTree extends Tree{
 			$elements[] = array(
 				'id'=>$id,
 				'icon'=>$icon,
-				'title'=>'<b><a href="'.$edit_cat_link.'">'.SafeDB($cat['title'], 255, str).' ('.$obj_counts['files'].')</a></b>',
+				'title'=>'<b>'.System::admin()->Link(SafeDB($cat['title'], 255, str).' ('.$obj_counts['files'].')', $edit_cat_link).'</b>',
 				'info'=>$info,
 				'func'=>$func,
 				'isnode'=>isset($this->Cats[$id]),
@@ -83,7 +83,7 @@ class AdminTree extends Tree{
 	 * @param null $to_id
 	 */
 	public function CatEditor( $cat_id = null, $to_id = null ){
-		global $db, $config, $site;
+		global $site;
 		$title = '';
 		$desc = '';
 		$icon = '';
@@ -91,8 +91,8 @@ class AdminTree extends Tree{
 		$boxtitle = 'Добавить категорию';
 		$save_met = $this->save_met;
 		if($cat_id != null){
-			$db->Select($this->Table, "`id`='$cat_id'");
-			$cat = $db->FetchRow();
+			System::database()->Select($this->Table, "`id`='$cat_id'");
+			$cat = System::database()->FetchRow();
 			$title = SafeDB($cat['title'], 255, str);
 			$desc = SafeDB($cat['description'], 255, str);
 			$icon = SafeDB($cat['icon'], 255, str);
@@ -125,23 +125,21 @@ class AdminTree extends Tree{
 	 * @param null $id
 	 */
 	public function EditorSave( $id = null ){
-		global $db, $config;
 		$title = SafeEnv($_POST['title'], 250, str);
 		$desc = SafeEnv($_POST['desc'], 255, str);
 		$icon = SafeEnv($_POST['icon'], 250, str);
 		$parent = SafeEnv($_POST['cat'], 11, int);
 		if($id == null){
 			$query = Values('', $title, $desc, $icon, 0, 0, $parent);
-			$db->Insert($this->Table, $query);
+			System::database()->Insert($this->Table, $query);
 			$this->CalcCatCounter($parent, true);
 		}else{
 			if(in_array($id, $this->GetAllChildId($id))){
 				$query = "title='$title',description='$desc',icon='$icon',parent='$parent'";
-				$db->Update($this->Table, $query, "`id`='$id'");
+				System::database()->Update($this->Table, $query, "`id`='$id'");
 			}
 		}
-		$cache = LmFileCache::Instance();
-		$cache->Delete('tree', $this->Table);
+		LmFileCache::Instance()->Delete('tree', $this->Table);
 	}
 
 	/**
@@ -150,27 +148,15 @@ class AdminTree extends Tree{
 	 * @return bool
 	 */
 	public function DeleteCat( $id ){
-		global $config, $db;
-		if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
-			$r = $db->Select($this->Table, "`id`='$id'");
-			$childs = $this->GetAllChildId($id);
-			for($i = 0, $c = count($childs); $i < $c; $i++){
-				$db->Delete($this->obj_table, "`$this->obj_cat_coll`='".$childs[$i]."'");
-				$db->Delete($this->Table, "`id`='".$childs[$i]."'");
-			}
-			$this->CalcCatCounter($r[0]['parent'], false);
-			$cache = LmFileCache::Instance();
-			$cache->Delete('tree', $this->Table);
-			return true;
-		}else{
-			$r = $db->Select($this->Table, "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-			$text = 'Вы действительно хотите удалить категорию "'.$r[0]['title'].'".'
-			.' Все вложенные категории и файлы будут удалены. Продолжить?<br />'
-			.'<a href="'.ADMIN_FILE.'?exe='.$this->module.'&'.$this->action_par_name.'='.$this->del_met.'&'.$this->id_par_name.'='.SafeEnv($_GET[$this->id_par_name], 11, int).'&ok=1">Да</a>'
-			.' &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a>';
-			AddTextBox('Внимание', $text);
-			return false;
+		$r = System::database()->Select($this->Table, "`id`='$id'");
+		$childs = $this->GetAllChildId($id);
+		for($i = 0, $c = count($childs); $i < $c; $i++){
+			System::database()->Delete($this->obj_table, "`$this->obj_cat_coll`='".$childs[$i]."'");
+			System::database()->Delete($this->Table, "`id`='".$childs[$i]."'");
 		}
+		$this->CalcCatCounter($r[0]['parent'], false);
+		LmFileCache::Instance()->Delete('tree', $this->Table);
+		return true;
 	}
 
 } // End Class;
