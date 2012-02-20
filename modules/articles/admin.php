@@ -178,7 +178,7 @@ function AdminArticlesMain(){
 		$nav = false;
 	}
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
-	$text .= '<tr><th>Название</th><th>Прочитано</th><th>Оценки</th><th>Просматривают</th><th>Статус</th><th>Функции</th></tr>';
+	$text .= '<tr><th>Название</th><th>Прочитано</th><th>Оценки</th><th>Видят</th><th>Статус</th><th>Функции</th></tr>';
 
 	$back = SaveRefererUrl();
 	foreach($r as $art){
@@ -190,8 +190,8 @@ function AdminArticlesMain(){
 		$func = '-';
 		if($editarticles){
 			$title = '<b>'.System::admin()->Link($title, ADMIN_FILE.'?exe=articles&a=editor&id='.$id.'&back='.$back).'</b>';
-			$hits .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик просмотров', ADMIN_FILE.'?exe=articles&a=resethits&id='.$id, 'images/admin/arrow_in.png', 'Сбросить счётчик просмотров?');
-			$rating .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик оценок ('.SafeDB($art['num_votes'], 11, int).' голосов)', ADMIN_FILE.'?exe=articles&a=resetrating&id='.$id, 'images/admin/arrow_in.png', 'Сбросить оценки?');
+			$hits .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик просмотров', ADMIN_FILE.'?exe=articles&a=resethits&id='.$id.'&back='.$back, 'images/admin/arrow_in.png', 'Сбросить счётчик просмотров?');
+			$rating .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик оценок ('.SafeDB($art['num_votes'], 11, int).' голосов)', ADMIN_FILE.'?exe=articles&a=resetrating&id='.$id.'&back='.$back, 'images/admin/arrow_in.png', 'Сбросить оценки?');
 			$st = System::admin()->SpeedStatus('Включена', 'Отключена', ADMIN_FILE.'?exe=articles&a=changestatus&id='.$id, $art['active'] == '1');
 			$func = System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=articles&a=editor&id='.$id.'&back='.$back, 'images/admin/edit.png');
 			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=articles&a=delete&id='.$id.'&ok=1&back='.$back, 'images/admin/delete.png', 'Удалить статью?');
@@ -436,7 +436,7 @@ function AdminArticlesResetHits(){
 	if(isset($_GET['id'])){
 		System::database()->Update('articles', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO(ADMIN_FILE.'?exe=articles');
+	GoRefererUrl($_REQUEST['back']);
 }
 
 // Сброс оценок статьи
@@ -444,6 +444,6 @@ function AdminArticlesResetRating(){
 	global $editarticles;
 	if(!$editarticles) System::admin()->AccessDenied();
 	System::database()->Update('articles', "num_votes='0',all_votes='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	GO(ADMIN_FILE.'?exe=articles');
+	GoRefererUrl($_REQUEST['back']);
 }
 

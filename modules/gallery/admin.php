@@ -5,10 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-if(!$user->CheckAccess2('gallery', 'gallery')){
-	AddTextBox('Ошибка', $config['general']['admin_accd']);
-	return;
-}
+if(!System::user()->CheckAccess2('gallery', 'gallery')) System::admin()->AccessDenied();
 
 TAddSubTitle('Фотогалерея');
 
@@ -23,13 +20,12 @@ $tree->save_met = 'catsave';
 $tree->del_met = 'delcat';
 $tree->action_par_name = 'a';
 $tree->id_par_name = 'id';
-$editimages = $user->CheckAccess2('gallery', 'edit_images');
-$editcats = $user->CheckAccess2('gallery', 'edit_cats');
-$editconf = $user->CheckAccess2('gallery', 'config');
+
+$editimages = System::user()->CheckAccess2('gallery', 'edit_images');
+$editcats = System::user()->CheckAccess2('gallery', 'edit_cats');
+$editconf = System::user()->CheckAccess2('gallery', 'config');
 $GalleryDir = $config['gallery']['gallery_dir'];
 $ThumbsDir = $config['gallery']['thumbs_dir'];
-
-include_once ($config['inc_dir'].'configuration/functions.php');
 
 if(isset($_GET['a'])){
 	$action = $_GET['a'];
@@ -42,14 +38,10 @@ if($editimages){
 	TAddToolLink('Добавить изображение', 'editor', 'gallery&a=editor');
 	TAddToolLink('Мультизагрузка', 'upload', 'gallery&a=upload');
 }
-TAddToolBox($action);
-
 if($editcats){
 	TAddToolLink('Категории', 'cats', 'gallery&a=cats');
 	TAddToolLink('Добавить категорию', 'cateditor', 'gallery&a=cateditor');
 }
-TAddToolBox($action);
-
 if($editconf){
 	TAddToolLink('Настройки', 'config', 'gallery&a=config');
 }
@@ -89,9 +81,7 @@ switch($action){
 		break;
 	////////////////// Категории
 	case 'cats':
-		if(!$editcats){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-		}
+		if(!$editcats) System::admin()->AccessDenied();
 		global $tree;
 		$result = $tree->ShowCats();
 		if($result == false){
@@ -100,9 +90,7 @@ switch($action){
 		AddTextBox('Категории', $result);
 		break;
 	case 'cateditor':
-		if(!$editcats){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-		}
+		if(!$editcats) System::admin()->AccessDenied();
 		global $tree;
 		if(isset($_GET['id'])){
 			$id = SafeEnv($_GET['id'], 11, str);
@@ -117,17 +105,13 @@ switch($action){
 		$text = $tree->CatEditor($id, $to);
 		break;
 	case 'catsave':
-		if(!$editcats){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-		}
+		if(!$editcats) System::admin()->AccessDenied();
 		global $tree, $config;
 		$tree->EditorSave((isset($_GET['id']) ? SafeEnv($_GET['id'], 11, int) : null));
 		GO(ADMIN_FILE.'?exe=gallery&a=cats');
 		break;
 	case 'delcat':
-		if(!$editcats){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-		}
+		if(!$editcats) System::admin()->AccessDenied();
 		global $tree, $config;
 		if($tree->DeleteCat(SafeEnv($_GET['id'], 11, int))){
 			GO(ADMIN_FILE.'?exe=gallery&a=cats');
@@ -135,16 +119,18 @@ switch($action){
 		break;
 	////////////////// Настройки
 	case 'config':
-		if(!$editconf){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
+		if(!$editconf) System::admin()->AccessDenied();
+		System::admin()->AddCenterBox('Конфигурация модуля "Фотогалерея"');
+		if(CheckGet('saveok')){
+			System::admin()->Highlight('Настройки сохранены.');
 		}
-		AdminConfigurationEdit('gallery', 'gallery', false, false, 'Конфигурация модуля "Галерея"');
+		System::admin()->ConfigGroups('gallery');
+		System::admin()->AddConfigsForm(ADMIN_FILE.'?exe=gallery&a=configsave');
 		break;
 	case 'configsave':
-		if(!$editconf){
-			AddTextBox('Ошибка', $config['general']['admin_accd']);
-		}
-		AdminConfigurationSave('gallery&a=config', 'gallery', false);
+		if(!$editconf) System::admin()->AccessDenied();
+		System::admin()->SaveConfigs('gallery');
+		GO(ADMIN_FILE.'?exe=gallery&a=config&saveok');
 		break;
 	////////
 	case 'refreshthumb':
@@ -153,8 +139,8 @@ switch($action){
 }
 
 function AdminGalleryMainFunc(){
-	global $config, $db, $tree, $site, $user, $editimages, $GalleryDir, $ThumbsDir;
-	$vrating = false;
+	global $config, $tree, $editimages, $GalleryDir, $ThumbsDir;
+	$back = SaveRefererUrl();
 	if(isset($_GET['cat']) && $_GET['cat'] > -1){
 		$cat = SafeEnv($_GET['cat'], 11, int);
 		$where = "`cat_id`='$cat'";
@@ -164,63 +150,63 @@ function AdminGalleryMainFunc(){
 	}
 	$data = array();
 	$data = $tree->GetCatsData($cat, true);
-	$site->DataAdd($data, -1, 'Все изображения', $cat == -1);
+	System::site()->DataAdd($data, -1, 'Все изображения', $cat == -1);
 	if(isset($_GET['page'])){
 		$page = SafeEnv($_GET['page'], 11, int);
 	}else{
 		$page = 1;
 	}
 	AddCenterBox('Фото');
-	$text = '';
-	$text = '<form name="categories" method="get">'.'<table cellspacing="0" cellpadding="0" border="0" width="100%" align="center"><tr><td align="center" class="contenttd">'.'Выберите категорию: '.$site->Hidden('exe', 'gallery').$site->Select('cat', $data).$site->Submit('Показать').'</td></tr></table></form><br />';
-	AddText($text);
-	$r = $db->Select('gallery', $where);
 
-	if(count($r) > $config['gallery']['images_on_page']){
+	System::admin()->AddJS('
+	GallerySelectCat = function(){
+		Admin.LoadPage("'.ADMIN_FILE.'?exe=gallery&cat="+$("#gallery-cat").val());
+	}
+	');
+	$text = '<div style="text-align: center; margin-bottom: 10px;">Категория: '.System::site()->Select('cat', $data, false, 'id="gallery-cat" onchange="GallerySelectCat();"').'</div>';
+	AddText($text);
+
+	$images = System::database()->Select('gallery', $where);
+
+	if(count($images) > $config['gallery']['images_on_page']){
 		$navigator = new Navigation($page);
-		$navigator->GenNavigationMenu($r, $config['gallery']['images_on_page'], ADMIN_FILE.'?exe=gallery'.($cat > 0 ? '&cat='.$cat : ''));
-		AddNavigation();
+		$navigator->GenNavigationMenu($images, $config['gallery']['images_on_page'], ADMIN_FILE.'?exe=gallery'.($cat > 0 ? '&cat='.$cat : ''));
 		$nav = true;
 	}else{
 		$nav = false;
-		AddText('<br />');
 	}
+
 	$text = '<table cellspacing="0" cellpadding="0" class="cfgtable">';
-	$text .= '<tr><th>Изображение</th><th>Просмотров</th><th>Комментарии</th>'.($vrating ? '<th>Оценка</th>' : '').'<th>Просматривают</th><th>Статус</th><th>Функции</th></tr>';
-	foreach($r as $img){
+	$text .= '<tr><th>Изображение</th><th>Просмотров</th><th>Видят</th><th>Статус</th><th>Функции</th></tr>';
+	foreach($images as $img){
 		$id = SafeDB($img['id'], 11, int);
-		switch($img['show']){
-			case '1':
-				$st = '<font color="#008000">Вкл.</font></a>';
-				break;
-			case '0':
-				$st = '<font color="#FF0000">Выкл.</font>';
-				break;
-		}
-		if($editimages){
-			$st = '<a href="'.ADMIN_FILE.'?exe=gallery&a=changestatus&id='.SafeDB($img['id'], 11, int).'">'.$st.'</a>';
-		}
-		if($editimages){
-			$func = '';
-			$func .= SpeedButton('Обновить эскиз', ADMIN_FILE.'?exe=gallery&a=refreshthumb&id='.$id, 'images/admin/refresh.png');
-			$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=gallery&a=editor&id='.$id, 'images/admin/edit.png');
-			$func .= SpeedButton('Удалить', ADMIN_FILE.'?exe=gallery&a=delete&id='.$id.'&ok=0', 'images/admin/delete.png');
+		$title = SafeDB($img['title'], 255, str);
+		if($config['gallery']['show_thumbs']){
+			$img_filename = SafeDB($img['file'], 255, str);
+			$size = FormatFileSize(filesize($GalleryDir.$img_filename));
+			$asize = getimagesize($GalleryDir.$img_filename);
+			$asize = $asize[0].'x'.$asize[1];
+			$img = '<div style="margin: 5px 0;"><a href="'.$GalleryDir.$img_filename.'" target="_blank">'
+				.'<img title="'.$title.'" src="'.$ThumbsDir.$img_filename.(isset($_GET['update']) && $_GET['update'] == $id ? '?'.GenRandomString(5) : '').'"></div>'."($asize, $size)";
 		}else{
-			$func = '-';
+			$img = '';
 		}
-		$filename = SafeDB($img['file'], 255, str);
-		$size = FormatFileSize(filesize($GalleryDir.$filename));
-		$asize = getimagesize($GalleryDir.$filename);
-		$asize = $asize[0].'x'.$asize[1];
-		$vi = ViewLevelToStr(SafeDB($img['view'], 1, int));
-			//$rating = '<img src="'.GetRatingImage($img[14],$img[15]).'" border="0" />/ (всего '.$img[14].')'.($editimages?' / <a href="'.ADMIN_FILE.'?exe=gallery&a=resetrating&id='.$img[0].'" title="Обнулить счётчик оценок">Сброс</a>':'');
-		$text .= '<tr>
-		<td><a href="'.$GalleryDir.SafeDB($img['file'], 255, str).'" target="_blank">'.($config['gallery']['show_thumbs'] == 0 ? '<b>'.SafeDB($img['title'], 255, str).'</b>' : '<img title="'.SafeDB($img['title'], 255, str).'" src="'.$ThumbsDir.$filename.'" />
-			<br /><b>'.SafeDB($img['title'], 255, str).'</b>')." ($asize, $size)".'</a>
-		</td>
-		<td>'.SafeDB($img['hits'], 11, int).($editimages ? ' / <a href="'.ADMIN_FILE.'?exe=gallery&a=resethits&id='.$id.'" title="Сбросить счётчик">Сброс</a>' : '').'</td>
-		<td>'.SafeDB($img['com_counter'], 11, int).'</td>
-		<td>'.$vi.'</td>
+
+		$hits = SafeDB($img['hits'], 11, int);
+		$st = ($img['active'] == '1' ? 'Вкл.' : 'Выкл.');
+		$func = '-';
+		if($editimages){
+			$title = '<b>'.System::admin()->Link($title, ADMIN_FILE.'?exe=gallery&a=editor&id='.$id).'</b>';
+			$hits .= '&nbsp;'.System::admin()->SpeedConfirm('Обнулить счётчик просмотров', ADMIN_FILE.'?exe=gallery&a=resethits&id='.$id.'&back='.$back, 'images/admin/arrow_in.png', 'Сбросить счётчик просмотров?');
+
+			$st = System::admin()->SpeedStatus('Вкл.', 'Выкл.', ADMIN_FILE.'?exe=gallery&a=changestatus&id='.$id, $img['show'] == '1');
+			$func = System::admin()->SpeedButton('Обновить эскиз', ADMIN_FILE.'?exe=gallery&a=refreshthumb&id='.$id.'&back='.$back, 'images/admin/refresh.png');
+			$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=gallery&a=editor&id='.$id, 'images/admin/edit.png');
+			$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=gallery&a=delete&id='.$id.'&back='.$back, 'images/admin/delete.png', 'Удалить изображение?');
+		}
+		$text .= '<tr><td>'.$title.$img.'</td>
+		<td>'.$hits.'</td>
+		<td>'.ViewLevelToStr(SafeDB($img['view'], 1, int)).'</td>
 		<td>'.$st.'</td>
 		<td>'.$func.'</td>
 		</tr>';
@@ -233,11 +219,8 @@ function AdminGalleryMainFunc(){
 }
 
 function AdminGalleryEditor(){
-	global $tree, $site, $config, $db, $user, $editimages;
-	if(!$editimages){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
+	global $tree, $site, $config, $editimages;
+	if(!$editimages) System::admin()->AccessDenied();
 	$cat_id = 0;
 	$author = '';
 	$email = '';
@@ -256,8 +239,8 @@ function AdminGalleryEditor(){
 		$cap = 'Добавить';
 	}else{
 		$id = SafeEnv($_GET['id'], 11, int);
-		$db->Select('gallery', "`id`='$id'");
-		$par = $db->FetchRow();
+		System::database()->Select('gallery', "`id`='$id'");
+		$par = System::database()->FetchRow();
 		$cat_id = SafeDB($par['cat_id'], 11, int);
 		$author = SafeDB($par['author'], 50, str);
 		$email = SafeDB($par['email'], 50, str);
@@ -300,11 +283,8 @@ function AdminGalleryEditor(){
 }
 
 function AdminGalleryUploadForm(){
-	global $tree, $site, $config, $db, $user, $editimages;
-	if(!$editimages){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
+	global $tree, $site, $config, $editimages;
+	if(!$editimages) System::admin()->AccessDenied();
 	UseScript('swfupload');
 	$formid = uniqid(); // Уникальный ID формы
 	$_SESSION['uploadforms'][$formid] = array(
@@ -377,10 +357,6 @@ function AdminGalleryUploadForm(){
 		minimum_flash_version: "9.0.28"
 	});');
 
-	if(!$editimages){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
 	$visdata = GetUserTypesFormData(4);
 	$cats_data = array();
 	$cats_data = $tree->GetCatsData(0);
@@ -520,7 +496,7 @@ function AdminGallerySaveUploaded(){
 }
 
 function AdminGallerySaveImage(){
-	global $db, $config, $tree, $GalleryDir, $ThumbsDir;
+	global $config, $tree, $GalleryDir, $ThumbsDir;
 	$cat_id = SafeEnv($_POST['category'], 11, int);
 	$title = SafeEnv($_POST['title'], 255, str);
 	$file = SafeEnv($_POST['image'], 255, str);
@@ -542,14 +518,14 @@ function AdminGallerySaveImage(){
 		return;
 	}
 	if(!isset($_GET['id'])){
-		$db->Insert('gallery', "'','$cat_id','".time()."','$title','$desc','$file','0','$author','$email','$site','$allow_comments','0','$allow_votes','0','0','$view','$show'");
+		System::database()->Insert('gallery', "'','$cat_id','".time()."','$title','$desc','$file','0','$author','$email','$site','$allow_comments','0','$allow_votes','0','0','$view','$show'");
 		if($show){
 			$tree->CalcFileCounter($cat_id, true);
 		}
 	}else{
 		$set = "`cat_id`='$cat_id',`title`='$title',`description`='$desc',`file`='$file',`author`='$author',`email`='$email',`site`='',`allow_comments`='$allow_comments',`allow_votes`='$allow_votes',`view`='$view',`show`='$show'";
 		$id = SafeEnv($_GET['id'], 11, int);
-		$r = $db->Select('gallery', "`id`='$id'");
+		$r = System::database()->Select('gallery', "`id`='$id'");
 		if($r[0]['cat_id'] != $cat_id && $r[0]['show'] == '1'){ //Если переместили в другой раздел
 			$tree->CalcFileCounter(SafeDB($r[0]['cat_id'], 11, int), false);
 			$tree->CalcFileCounter($cat_id, true);
@@ -569,61 +545,42 @@ function AdminGallerySaveImage(){
 				unlink($ThumbsDir.$r[0]['file']);
 			}
 		}
-		$db->Update('gallery', $set, "`id`='$id'");
+		System::database()->Update('gallery', $set, "`id`='$id'");
 	}
 	GO(ADMIN_FILE.'?exe=gallery');
 }
 
 function AdminGalleryDeleteImage(){
-	global $config, $db, $tree, $user, $editimages, $GalleryDir, $ThumbsDir;
-	if(!$editimages){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
+	global $config, $tree, $editimages, $GalleryDir, $ThumbsDir;
+	if(!$editimages) System::admin()->AccessDenied();
 	if(!isset($_GET['id'])){
 		GO(ADMIN_FILE.'?exe=gallery');
 	}
-	if(isset($_GET['ok']) && SafeEnv($_GET['ok'], 1, int) == '1'){
-		$id = SafeEnv($_GET['id'], 11, int);
-		$r = $db->Select('gallery', "`id`='".$id."'");
-		if($db->NumRows() > 0){
-			$img = $db->FetchRow();
-			$filename = $GalleryDir.SafeDB($img['file'], 255, str);
-			if(file_exists($filename) && is_file($filename)){
-				unlink($filename);
-				unlink($ThumbsDir.SafeDB($img['file'], 255, str));
-			}
-			$tree->CalcFileCounter(SafeDB($img['cat_id'], 11, int), false);
+	$id = SafeEnv($_GET['id'], 11, int);
+	$r = System::database()->Select('gallery', "`id`='".$id."'");
+	if(System::database()->NumRows() > 0){
+		$img = System::database()->FetchRow();
+		$filename = $GalleryDir.SafeDB($img['file'], 255, str);
+		if(file_exists($filename) && is_file($filename)){
+			unlink($filename);
+			unlink($ThumbsDir.SafeDB($img['file'], 255, str));
 		}
-		$db->Delete('gallery', "`id`='$id'");
-		$db->Delete('gallery_comments', "`object_id`='$id'");
-		GO(ADMIN_FILE.'?exe=gallery');
-	}else{
-		$id = SafeEnv($_GET['id'], 11, int);
-		$db->Select('gallery', "`id`='$id'");
-		if($db->NumRows() > 0){
-			$img = $db->FetchRow();
-			$filename = $GalleryDir.SafeDB($img['file'], 255, str);
-			$text = '<table cellspacing="0" cellpadding="5" border="0" align="center"><tr><td align="center">'.($config['gallery']['show_thumbs'] == 1 ? '<img width="400" src="'.$filename.'" border="0" /></tr></td><tr><td align="center">' : '').'Удалить изображение "'.SafeDB($img['title'], 255, str).'" из галереи?<br />'.'<a href="'.ADMIN_FILE.'?exe=gallery&a=delete&id='.$id.'&ok=1">Да</a> &nbsp;&nbsp;&nbsp; <a href="javascript:history.go(-1)">Нет</a><br /><br />'.'</td></tr></table>';
-		}else{
-			$text = '<center>Изображение, которое Вы пытаетесь удалить, не найдено в галерее.<br /><a href="javascript:history.go(-1)">Назад в галерею</a></center>';
-		}
-		AddTextBox('Внимание!', $text);
+		$tree->CalcFileCounter(SafeDB($img['cat_id'], 11, int), false);
+		System::database()->Delete('gallery', "`id`='$id'");
+		System::database()->Delete('gallery_comments', "`object_id`='$id'");
 	}
+	GoRefererUrl($_REQUEST['back']);
 }
 
 function AdminGalleryChangeStatus(){
-	global $config, $db, $tree, $user, $editimages;
-	if(!$editimages){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
+	global $config, $tree, $editimages;
+	if(!$editimages) System::admin()->AccessDenied();
 	if(!isset($_GET['id'])){
-		GO(ADMIN_FILE.'?exe=gallery');
+		exit("ERROR");
 	}
-	$db->Select('gallery', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	if($db->NumRows() > 0){
-		$r = $db->FetchRow();
+	System::database()->Select('gallery', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	if(System::database()->NumRows() > 0){
+		$r = System::database()->FetchRow();
 		if($r['show'] == 1){
 			$en = '0';
 			$tree->CalcFileCounter(SafeDB($r['cat_id'], 11, int), false);
@@ -631,36 +588,35 @@ function AdminGalleryChangeStatus(){
 			$en = '1';
 			$tree->CalcFileCounter(SafeDB($r['cat_id'], 11, int), true);
 		}
-		$db->Update('gallery', "show='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('gallery', "show='$en'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO(ADMIN_FILE.'?exe=gallery');
+	exit("OK");
 }
 
 function AdminGalleryResetHits(){
-	global $config, $db, $user, $editimages;
-	if(!$editimages){
-		AddTextBox('Ошибка', $config['general']['admin_accd']);
-		return;
-	}
+	global $config, $editimages;
+	if(!$editimages) System::admin()->AccessDenied();
 	if(isset($_GET['id'])){
-		$db->Update('gallery', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+		System::database()->Update('gallery', "hits='0'", "`id`='".SafeEnv($_GET['id'], 11, int)."'");
 	}
-	GO(ADMIN_FILE.'?exe=gallery');
+	GoRefererUrl($_REQUEST['back']);
 }
 
 function AdminGalleryThumbRefresh(){
-	global $config, $db, $GalleryDir, $ThumbsDir;
+	global $config, $GalleryDir, $ThumbsDir;
 	if(!isset($_GET['id'])){
-		GoBack();
+		GO(ADMIN_FILE.'?exe=gallery');
 	}
-	$db->Select('gallery', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
-	if($db->NumRows() > 0){
-		$r = $db->FetchRow();
+	System::database()->Select('gallery', "`id`='".SafeEnv($_GET['id'], 11, int)."'");
+	if(System::database()->NumRows() > 0){
+		$r = System::database()->FetchRow();
 		$file_name = $r['file'];
 		if(is_file($ThumbsDir.$file_name)){
 			unlink($ThumbsDir.$file_name);
 		}
 		CreateThumb($GalleryDir.$file_name, $ThumbsDir.$file_name, $config['gallery']['thumb_max_width'], $config['gallery']['thumb_max_height']);
 	}
-	GoBack();
+	$back = new Url(GetRefererUrl($_REQUEST['back']));
+	$back['update'] = SafeDB($_GET['id'], 11, int); // Добавляем / изменяем параметр update
+	GO($back);
 }
