@@ -290,13 +290,14 @@ function AdminPhpTesterSnippets( $type ){
 function AdminPhpTesterSave($action){
 	$snippet = SafeR('title,type', 255, str) + SafeR('code', 0, str);
 	ObjectUtf8ToCp1251($snippet);
-	if($action == 'save'){ // Редактирование
+	if($action == 'save' && (isset($_POST['id']) && $_POST['id'] != 0)){ // Редактирование
 		$id = SafeEnv($_POST['id'], 11, int);
 		System::database()->Update('snippets', MakeSet($snippet), "`id`='$id'");
-	}else{
+		echo JsonEncode(array('id'=>$id));
+	}else{ // Добавить новый снипет
 		System::database()->Insert('snippets', MakeValues("'','title','code','type'", $snippet));
+		echo JsonEncode(array('id'=>System::database()->GetLastId()));
 	}
-	echo JsonEncode(array('id'=>System::database()->GetLastId()));
 	exit();
 }
 
