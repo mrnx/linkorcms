@@ -568,7 +568,7 @@ a.nav_item:hover {
 
 .fsubmit{
 	background-color: #EEE;
-	padding: 4px 14px 4px 0;
+	padding: 4px 14px;
 	height: 32px;
 	vertical-align: middle;
 }

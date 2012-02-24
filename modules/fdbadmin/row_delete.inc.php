@@ -24,5 +24,8 @@ foreach($row as $key=>$value){
 $sql = substr($sql, 0, strlen($sql) - 4);
 $db->Delete($table, $sql);
 
-//GO(ADMIN_FILE.'?exe=fdbadmin&a=review&name='.$table);
-GoBack();
+if(isset($_REQUEST['back'])){
+	GoRefererUrl($_REQUEST['back']);
+}else{
+	GO(ADMIN_FILE.'?exe=fdbadmin&a=review&name='.SafeDB($_GET['name'], 255, str));
+}

@@ -12,9 +12,11 @@ if(isset($_GET['ok'])){
 }
 
 if($ok){
-	$db->DropTable(SafeEnv($_GET['name'], 255, str));
+	System::database()->DropTable(SafeEnv($_GET['name'], 255, str));
 	GO(ADMIN_FILE.'?exe=fdbadmin');
 }else{
+	$name = SafeDB($_GET['name'], 255, str);
 	AddCenterBox('Удаление таблицы');
-	System::admin()->HighlightConfirm('Вы действительно хотите удалить таблицу "'.SafeEnv($_GET['name'], 255, str).'"?', ADMIN_FILE.'?exe=fdbadmin&a=droptable&name='.SafeEnv($_GET['name'], 255, str).'&ok=1');
+	System::admin()->HighlightConfirm('Вы действительно хотите удалить таблицу "'.$name.'"?', ADMIN_FILE.'?exe=fdbadmin&a=droptable&name='.$name.'&ok=1');
+	AdminFdbAdminGenTableMenu($name);
 }

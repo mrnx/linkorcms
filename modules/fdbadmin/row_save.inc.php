@@ -35,8 +35,8 @@ if($action == 'insertsave'){ // Добавление записи
 	$db->Update($table_name, $values, $where, true);
 }
 
-//GO(ADMIN_FILE.'?exe=fdbadmin&a=review&name='.$table_name);
-GoRefererUrl($_GET['back']);
-AddTextBox('Сообщение', 'Изменения сохранены.');
-
-?>
+if(isset($_REQUEST['back'])){
+	GoRefererUrl($_REQUEST['back']);
+}else{
+	GO(ADMIN_FILE.'?exe=fdbadmin&a=review&name='.SafeDB($_GET['name'], 255, str));
+}

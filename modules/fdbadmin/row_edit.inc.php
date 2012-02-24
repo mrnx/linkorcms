@@ -10,6 +10,11 @@ if(!defined('VALID_RUN')){
 $table = SafeEnv($_GET['name'], 255, str);
 $columns = $db->GetTableColumns($table);
 
+$back = '';
+if(isset($_REQUEST['back'])){
+	$back = '&back='.SafeDB($_REQUEST['back'], 255, str);
+}
+
 $edit = false;
 if($action == 'editfield'){
 	$edit = true;
@@ -38,7 +43,5 @@ foreach($columns as $col){
 }
 
 AddCenterBox($title);
-AddForm('<form action="'.ADMIN_FILE.'?exe=fdbadmin&a='.($edit ? 'editsave' : 'insertsave').'&name='.$table.($edit ? '&index='.$index : '').'&back='.SaveRefererUrl().'" method="post">', $site->Submit($cap));
+AddForm('<form action="'.ADMIN_FILE.'?exe=fdbadmin&a='.($edit ? 'editsave' : 'insertsave').'&name='.$table.($edit ? '&index='.$index : '').$back.'" method="post">', $site->Submit($cap));
 AdminFdbAdminGenTableMenu($table);
-
-?>

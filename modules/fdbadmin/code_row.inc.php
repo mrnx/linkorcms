@@ -28,3 +28,5 @@ System::admin()->AddCenterBox('PHP код вставки');
 System::admin()->FormRow('Установка', $site->TextArea('code', $install_code, 'style="width: 800px; height: 200px;"'));
 
 System::admin()->AddForm('', $site->Button('Назад', 'onclick="history.go(-1);"'));
+
+AdminFdbAdminGenTableMenu(SafeDB($table, 255, str));

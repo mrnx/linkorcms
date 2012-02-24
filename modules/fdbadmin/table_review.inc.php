@@ -6,6 +6,7 @@ if(!defined('VALID_RUN')){
 }
 
 $name = SafeEnv($_GET['name'], 255, str);
+$namedb = SafeDB($_GET['name'], 255, str);;
 
 $info = $db->GetTableColumns($name);
 $rows = $db->Select($name, '');
@@ -42,11 +43,12 @@ foreach($info as $col){
 $text .= '</tr>';
 
 $i = ($rows_on_page * $page) - $rows_on_page;
+$back = SaveRefererUrl();
 foreach($rows as $col){
 	$func = '';
-	$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=fdbadmin&a=editfield&name='.SafeEnv($_GET['name'], 255, str).'&index='.$i, 'images/admin/edit.png');
-	$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=fdbadmin&a=deleterow&name='.SafeEnv($_GET['name'], 255, str).'&index='.$i, 'images/admin/delete.png', 'Удалить запись?');
-	$func .= SpeedButton('PHP код вставки', ADMIN_FILE.'?exe=fdbadmin&a=viewcode&name='.SafeEnv($_GET['name'], 255, str).'&index='.$i, 'images/admin/php.png');
+	$func .= SpeedButton('Редактировать', ADMIN_FILE.'?exe=fdbadmin&a=editfield&name='.$namedb.'&index='.$i.'&back='.$back, 'images/admin/edit.png');
+	$func .= System::admin()->SpeedConfirm('Удалить', ADMIN_FILE.'?exe=fdbadmin&a=deleterow&name='.$namedb.'&index='.$i.'&back='.$back, 'images/admin/delete.png', 'Удалить запись?');
+	$func .= SpeedButton('PHP код вставки', ADMIN_FILE.'?exe=fdbadmin&a=viewcode&name='.$namedb.'&index='.$i, 'images/admin/php.png');
 
 	$text .= '<tr><td nowrap="nowrap">'.$func.'</td><td></td>';
 	for($j = 0; $j < $nc; $j++){
@@ -64,4 +66,4 @@ if($nav){
 	AddNavigation();
 }
 
-AdminFdbAdminGenTableMenu($name);
+AdminFdbAdminGenTableMenu($namedb);

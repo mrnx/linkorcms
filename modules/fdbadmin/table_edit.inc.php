@@ -179,5 +179,3 @@ if($action == 'edittable'){
 
 $text .= $site->Submit($bcaption).'</form>';
 AddTextBox($tcaption, $text);
-
-?>

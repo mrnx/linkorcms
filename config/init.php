@@ -147,7 +147,9 @@ set_error_handler('ErrorHandler'); // Обработчик ошибок, все ошибки кроме фаталь
 // Логи
 $SiteLog = new Logi($config['log_dir'].'site.log'); // Лог для отладочных сообщений
 $ErrorsLog = new Logi($config['log_dir'].'errors.log'); // Лог для вывода ошибок
-@ini_set('error_log', dirname(__FILE__).'/'.$config['log_dir'].'errors.log'); // Лог ошибок PHP
+
+// FIXME: Нужна функция для определения абсолютного пути к директории сайта
+@ini_set('error_log', dirname(__FILE__).'/../'.$config['log_dir'].'errors.log'); // Лог ошибок PHP
 
 // Сессии
 $user = new User();

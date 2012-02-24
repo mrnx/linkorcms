@@ -60,25 +60,23 @@ $query['comment'] = $_POST['comment'];
 $query['cols'] = $cols;
 
 if($action == 'savetable'){
-	$db->CreateTable($table, $query);
+	System::database()->CreateTable($table, $query);
 	GO(ADMIN_FILE.'?exe=fdbadmin');
 }elseif($action == 'editsavetable'){
 	$info = $db->GetTableInfo($table);
 	$info = $info[0];
 
-	$db->SetTableComment($table, $query['comment']);
+	System::database()->SetTableComment($table, $query['comment']);
 
 	if(isset($query['type'])
 			&& strtoupper($info['type']) != strtoupper($query['type'])){
-		$db->SetTableType( $table, $query['type'] );
+		System::database()->SetTableType( $table, $query['type'] );
 	}
 
 	foreach($query['cols'] as $i=>$col){
-		$db->EditColl( $table, $i, $col );
+		System::database()->EditColl( $table, $i, $col );
 	}
 	GO(ADMIN_FILE.'?exe=fdbadmin&a=structure&name='.SafeEnv($_POST['tablename'], 250, str));
 }
 
 GO(ADMIN_FILE.'?exe=fdbadmin');
-
-?>

@@ -7,9 +7,5 @@ if(!defined('VALID_RUN')){
 
 $name = SafeEnv($_GET['name'], 255, str);
 $id = SafeEnv($_GET['collid'], 11, int);
-$db->DeleteColl($name, $id);
-
-//GO(ADMIN_FILE.'?exe=fdbadmin&a=structure&name='.$name);
-GoBack();
-
-?>
+System::database()->DeleteColl($name, $id);
+GO(ADMIN_FILE.'?exe=fdbadmin&a=structure&name='.$name);
