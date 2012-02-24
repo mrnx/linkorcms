@@ -1,8 +1,8 @@
 body{
 	margin: 0px;
 	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
-	font-size: 8pt;
-	background-color: #ffffff;
+	font-size: 11px;
+	background-color: #FFF;
 }
 
 table, img, form{
@@ -15,16 +15,15 @@ input{
 	color: #000000;
 	border: 1px #F3F3F3 solid;
 	background-color: #FCFCFC;
-	width: 180px;
+	width: 190px;
 }
 
 .submit{
-	cursor: pointer;
 	width: 60px;
 	margin-top: 5px;
 }
 
-div.center{
+div.auth_center{
 	position: absolute;
 	left: 5px;
 	top: 30%;
@@ -33,14 +32,10 @@ div.center{
 }
 
 div.auth_message{
-	background-color: #FFCCCC;
-	border: 1px #cccccc solid;
-	-moz-border-radius: 6px;
-	-webkit-border-radius: 6px;
-	border-radius: 6px;
-	padding: 5px;
-	width: 300px;
-	margin: 0px auto 10px;
+	color: #F00;
+	padding: 5px 0 10px;
+	text-align: center;
+	font-weight: bold;
 }
 
 div.auth_form{
@@ -48,15 +43,31 @@ div.auth_form{
 	border: 1px #CCCCCC solid;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
-	width: 300px;
-	height: 120px;
+	width: 220px;
 	margin: 0px auto;
-	padding: 5px;
+
+	box-shadow: 2px 2px 2px #DDD;
+	-webkit-box-shadow: 2px 2px 2px #DDD;
+	-moz-box-shadow: 2px 2px 2px #DDD;
 }
 
 div.auth_title{
-	padding: 5px;
-	text-align: center;
+	color: #FFF;
+	background-color: #A5C0D4;
+	background-image: url(../img/block_title_bg.png);
+	background-repeat: repeat-x;
+	border-bottom: 1px #CCCCCC solid;
+	font-weight: bold;
+	padding: 3px 0 4px 4px;
+	text-shadow: 0px -1px 0px #85A0D4;
+}
+div.auth_inputs{
+	width: 200px;
+	padding: 5px 10px 5px 10px;
+	border-top: 1px #FFF solid;
+}
+div.auth_submit {
+	float: right;
 }
 
 div.auth_alert{
@@ -66,8 +77,3 @@ div.auth_alert{
 	padding-top: 8px;
 	width: 64px;
 }
-div.auth_inputs{
-	float:right;
-	width: 200px;
-}
-
