@@ -5,7 +5,7 @@
 		exit;
 	}
 
-	UseScript('ajaxcssjs');
+	UseScript('jquery_ui');
 
-	System::site()->AddJSFile('scripts/admin/admin.js', true);
+	System::site()->AddJSFile('scripts/front/front.js', true);
 
