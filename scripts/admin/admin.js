@@ -43,7 +43,7 @@
 				html += '<span>'+options[i].title+'</span></a>';
 				$('<li>').html(html).appendTo($ul);
 
-				if(i != options.length-1 && options[i].menu){
+				if(i != options.length-1 || options[i].menu){
 					var $li = $('<li>').appendTo($ul);
 					var $a = $('<a>', {href: "#", click: function(){return false;}, class: "chevron"}).html('<img src="images/chevron.png">').appendTo($li);
 					if(options[i].menu){

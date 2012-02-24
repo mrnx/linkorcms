@@ -706,6 +706,7 @@ class AdminPage extends PageTemplate{
 			System::database()->Select('modules', "`enabled`='1' and `showinmenu`='1'");
 			SortArray(System::database()->QueryResult, 'name');
 			while($row = System::database()->FetchRow()){
+				if($row['folder'] == 'adminpanel') continue;
 				$menu[] = array(
 					'id' => SafeDB($row['id'], 11, int),
 					'title' => SafeDB($row['name'], 255, str),
@@ -721,7 +722,7 @@ class AdminPage extends PageTemplate{
 			);
 		}
 		if(count($this->BreadCrumbs) == 0){ // Добавляем элемент модуля
-			if($this->Mod !== null){
+			if($this->Mod !== null && $this->Mod['folder'] != 'adminpanel'){
 				$crumbs[] = array(
 					'title'=>SafeDB($this->Mod['name'], 255, str),
 					'link'=>ADMIN_FILE.'?exe='.SafeDB($this->Mod['folder'], 255, str),
