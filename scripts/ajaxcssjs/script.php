@@ -6,5 +6,3 @@
 	}
 
 	System::site()->AddJSFile('scripts/ajaxcssjs/ajaxcssjs.js', true);
-
-?>
