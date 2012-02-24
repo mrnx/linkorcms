@@ -5,7 +5,8 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-System::admin()->AddSubTitle('Тестирование PHP кода');
+System::admin()->AddSubTitle('Тестирование кода');
+
 
 if(isset($_GET['a'])){
 	$action = $_GET['a'];
@@ -17,38 +18,38 @@ if(isset($_GET['a'])){
 	}
 }
 
-System::admin()->SideBarAddMenuItem('PHP', 'exe=phptester&lang=php', 'mainphp');
-System::admin()->SideBarAddMenuItem('Сниппеты PHP', 'exe=phptester&a=phpsnippets', 'phpsnippets');
-System::admin()->SideBarAddMenuItem('JavaScript', 'exe=phptester&lang=js', 'mainjs');
-System::admin()->SideBarAddMenuItem('Сниппеты JS', 'exe=phptester&a=jssnippets', 'jssnippets');
+System::admin()->SideBarAddMenuItem('PHP', 'exe=codetester&lang=php', 'mainphp');
+System::admin()->SideBarAddMenuItem('Сниппеты PHP', 'exe=codetester&a=phpsnippets', 'phpsnippets');
+System::admin()->SideBarAddMenuItem('JavaScript', 'exe=codetester&lang=js', 'mainjs');
+System::admin()->SideBarAddMenuItem('Сниппеты JS', 'exe=codetester&a=jssnippets', 'jssnippets');
 System::admin()->SideBarAddMenuBlock('', $action);
 
 switch($action){
 	case 'mainphp':
-		AdminPhpTester();
+		Admincodetester();
 		break;
 	case 'mainjs':
 		AdminJsTester();
 		break;
 	case 'perform':
-		AdminPhpTesterPerform();
+		AdmincodetesterPerform();
 		break;
 	case 'phpsnippets':
-		AdminPhpTesterSnippets("php");
+		AdmincodetesterSnippets("php");
 		break;
 	case 'jssnippets':
-		AdminPhpTesterSnippets("js");
+		AdmincodetesterSnippets("js");
 		break;
 	case 'add':
 	case 'save':
-		AdminPhpTesterSave($action);
+		AdmincodetesterSave($action);
 		break;
 	case 'delete':
-		AdminPhpTesterDelete();
+		AdmincodetesterDelete();
 		break;
 }
 
-function AdminPhpTester(){
+function Admincodetester(){
 	UseScript('jquery', 'codemirror');
 
 	$code = '';
@@ -83,7 +84,7 @@ PerformPhpCode = function(){
 	$("#perform_result").hide();
 	$.ajax({
 		type: "POST",
-		url: "'.ADMIN_FILE.'?exe=phptester&a=perform",
+		url: "'.ADMIN_FILE.'?exe=codetester&a=perform",
 		data: {code: $("#test_code").val(), id: window.snippet_id},
 		success: function(data){
 			$("#perform").button("option", "label", label);
@@ -102,7 +103,7 @@ SavePhpCode = function(met){
 	$("#"+met).button("option", "label", label+" <img src=\"images/ajax-loader.gif\">");
 	$.ajax({
 		type: "POST",
-		url: "'.ADMIN_FILE.'?exe=phptester&a="+met,
+		url: "'.ADMIN_FILE.'?exe=codetester&a="+met,
 		dataType: "json",
 		data: {code: $("#test_code").val(), title: $("#test_title").val(), id: window.snippet_id, type: "php"},
 		success: function(data){
@@ -176,7 +177,7 @@ SaveJSCode = function(met){
 	$("#"+met).button("option", "label", label+" <img src=\"images/ajax-loader.gif\">");
 	$.ajax({
 		type: "POST",
-		url: "'.ADMIN_FILE.'?exe=phptester&a="+met,
+		url: "'.ADMIN_FILE.'?exe=codetester&a="+met,
 		dataType: "json",
 		data: {code: $("#test_code").val(), title: $("#test_title").val(), id: window.snippet_id, type: "js"},
 		success: function(data){
@@ -205,7 +206,7 @@ HTML;
 	System::admin()->AddTextBox('Тестирование JS', $html);
 }
 
-function AdminPhpTesterPerform(){
+function AdmincodetesterPerform(){
 	ob_start();
 	$test = eval(Utf8ToCp1251($_POST['code']));
 	$source = ob_get_clean();
@@ -218,7 +219,7 @@ function AdminPhpTesterPerform(){
 	exit();
 }
 
-function AdminPhpTesterSnippets( $type ){
+function AdmincodetesterSnippets( $type ){
 	System::admin()->AddSubTitle('Сниппеты');
 	UseScript('jquery_ui_table');
 
@@ -248,8 +249,8 @@ function AdminPhpTesterSnippets( $type ){
 	}
 
 	$table = new jQueryUiTable();
-	$table->listing = ADMIN_FILE.'?exe=phptester&a='.$type.'snippets&ajax';
-	$table->del = ADMIN_FILE.'?exe=phptester&a=delete';
+	$table->listing = ADMIN_FILE.'?exe=codetester&a='.$type.'snippets&ajax';
+	$table->del = ADMIN_FILE.'?exe=codetester&a=delete';
 	$table->total = count($snippets_db);
 	$table->onpage = $num;
 	$table->page = $page;
@@ -262,7 +263,7 @@ function AdminPhpTesterSnippets( $type ){
 	$snippets_db = ArrayPage($snippets_db, $num, $page); // Берем только новости с текущей страницы
 	foreach($snippets_db as $snip){
 		$id = SafeDB($snip['id'], 11, int);
-		$editlink = ADMIN_FILE.'?exe=phptester&id='.$id.'&lang='.$type;
+		$editlink = ADMIN_FILE.'?exe=codetester&id='.$id.'&lang='.$type;
 
 		$func = '';
 		$func .= System::admin()->SpeedButton('Редактировать', $editlink, 'images/admin/edit.png');
@@ -287,7 +288,7 @@ function AdminPhpTesterSnippets( $type ){
 	}
 }
 
-function AdminPhpTesterSave($action){
+function AdmincodetesterSave($action){
 	$snippet = SafeR('title,type', 255, str) + SafeR('code', 0, str);
 	ObjectUtf8ToCp1251($snippet);
 	if($action == 'save' && (isset($_POST['id']) && $_POST['id'] != 0)){ // Редактирование
@@ -301,7 +302,7 @@ function AdminPhpTesterSave($action){
 	exit();
 }
 
-function AdminPhpTesterDelete(){
+function AdmincodetesterDelete(){
 	System::database()->Delete('snippets', "`id`='".SafeEnv($_REQUEST['id'], 11, int)."'");
 	exit('OK');
 }
