@@ -5,9 +5,9 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-if(!System::user()->CheckAccess2('gallery', 'gallery')) System::admin()->AccessDenied();
+System::admin()->AddSubTitle('Фотогалерея');
 
-TAddSubTitle('Фотогалерея');
+if(!System::user()->CheckAccess2('gallery', 'gallery')) System::admin()->AccessDenied();
 
 include_once ($config['inc_dir'].'tree_a.class.php');
 $tree = new AdminTree('gallery_cats');

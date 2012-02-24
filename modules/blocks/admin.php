@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Блоки');
+System::admin()->AddSubTitle('Блоки');
 
 if(!$user->CheckAccess2('blocks', 'blocks')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);

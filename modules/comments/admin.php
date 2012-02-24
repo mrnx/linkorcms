@@ -7,7 +7,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Модерация комментариев');
+System::admin()->AddSubTitle('Модерация комментариев');
 
 if(isset($_GET['a'])){
 	$action = $_GET['a'];

@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Администраторы');
+System::admin()->AddSubTitle('Администраторы');
 
 if(!$user->isSuperUser()){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);

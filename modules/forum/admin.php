@@ -12,10 +12,13 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
+System::admin()->AddSubTitle('Форум');
+
 if(!$user->CheckAccess2('forum', 'forum')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);
 	return;
 }
+
 global $admin_forum_url, $config;
 $admin_forum_url = ADMIN_FILE.'?exe=forum';
 
@@ -28,8 +31,6 @@ if(isset($_GET['a'])) {
 }else {
 	$action = 'main';
 }
-
-TAddSubTitle('Форум');
 
 if(!$config['forum']['basket'] && $config['forum']['del_auto_time']){
 	Forum_Basket_RestoreBasketAll();

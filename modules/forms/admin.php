@@ -5,9 +5,9 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Web-формы');
+System::admin()->AddSubTitle('Web-формы');
 
-include_once ($config['inc_dir'].'forms.inc.php');
+include_once $config['inc_dir'].'forms.inc.php';
 
 if(isset($_GET['a'])){
 	$action = $_GET['a'];

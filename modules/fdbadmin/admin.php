@@ -10,10 +10,9 @@ if(!$user->isSuperUser()){
 	return;
 }
 
-TAddSubTitle('Управление БД');
+System::admin()->AddSubTitle('Управление БД');
 
 $action = isset($_GET['a']) ? $_GET['a'] : 'main';
-
 AdminFdbAdminGenMenu();
 
 switch($action){

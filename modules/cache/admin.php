@@ -1,7 +1,13 @@
 <?php
 
 // Модуль для очистки кэша
-TAddSubTitle('Управление кэшем');
+
+if(!defined('VALID_RUN')){
+	header("HTTP/1.1 404 Not Found");
+	exit;
+}
+
+System::admin()->AddSubTitle('Управление кэшем');
 
 function AdminCache( $action ){
 	switch ($action){

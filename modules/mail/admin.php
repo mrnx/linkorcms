@@ -5,7 +5,8 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Рассылка писем');
+System::admin()->AddSubTitle('Рассылки');
+
 include_once MOD_DIR.'functions.php';
 
 if(isset($_GET['a'])){

@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Редактор меню администратора');
+System::admin()->AddSubTitle('Редактор меню администратора');
 
 if(isset($_GET['a'])){
 	$action = $_GET['a'];

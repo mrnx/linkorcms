@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Обратная связь');
+System::admin()->AddSubTitle('Обратная связь');
 
 if(isset($_GET['a'])){
 	$action = $_GET['a'];

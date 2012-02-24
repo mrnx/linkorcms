@@ -10,7 +10,7 @@ if(!System::user()->CheckAccess2('modules', 'modules')){
 	return;
 }
 
-System::admin()->AddSubTitle('Модули');
+System::admin()->AddSubTitle('Расширения');
 
 $action = isset($_GET['a']) ? $_GET['a'] : 'main';
 
@@ -81,8 +81,8 @@ function AdminModules(){
 
 	// Стили
 	$style = '<style>
-	.ex-mod{ border-bottom: 1px #ccf solid; background-color: #F5F5FF; cursor: pointer; }
-	.ex-mod:hover{ background-color: #DDEAF7; }
+	.ex-mod{ border-bottom: 1px #ccf solid; background-color: #DDEAF7; cursor: pointer; }
+	.ex-mod:hover{ background-color: #F5F5FF; }
 	.ex-mod-info { padding-top: 4px; }
 	.ex-mod-info-description { padding-top: 0; margin-bottom: 5px; }
 	.mod_info { margin-bottom: 5px; }
@@ -92,9 +92,9 @@ function AdminModules(){
 	System::site()->AddJS('
 	window.last_mod_id = "";
 	ShowModInfo = function(id){
-	  $(".mod_info").slideUp().parents(".ex-mod").css("cursor", "pointer");
+	  $(".mod_info").slideUp().parents(".ex-mod").css("background-color", "#DDEAF7");
 	  if(last_mod_id != id){
-	  	$("#mod_info_"+id).slideDown().parents(".ex-mod").css("cursor", "default");
+	  	$("#mod_info_"+id).slideDown().parents(".ex-mod").css("background-color", "#FFF");
 	  	last_mod_id = id;
 	  }else{
 	    last_mod_id = "";
@@ -102,9 +102,9 @@ function AdminModules(){
 	};
 	window.last_block_id = "";
 	ShowBlockInfo = function(id){
-	  $(".mod_info").slideUp().parents(".ex-mod").css("cursor", "pointer");
+	  $(".mod_info").slideUp().parents(".ex-mod").css("background-color", "#DDEAF7");
 	  if(last_block_id != id){
-	  	$("#mod_info_"+id).slideDown().parents(".ex-mod").css("cursor", "default");
+	  	$("#mod_info_"+id).slideDown().parents(".ex-mod").css("background-color", "#FFF");
 	  	last_block_id = id;
 	  }else{
 	    last_block_id = "";

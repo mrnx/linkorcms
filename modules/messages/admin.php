@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Сообщения');
+System::admin()->AddSubTitle('Сообщения');
 
 if(!$user->CheckAccess2('messages', 'messages')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);

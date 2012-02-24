@@ -5,6 +5,8 @@ if(!defined('VALID_RUN')){
 	exit();
 }
 
+System::admin()->AddSubTitle('Аудит');
+
 if(!$user->isSuperUser()){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);
 	return;
@@ -23,7 +25,7 @@ if($user->CheckAccess2('audit', 'audit_conf')){
 }
 TAddToolBox($action);
 
-TAddSubTitle('Аудит');
+
 switch($action){
 	case 'main':
 		AdminAuditMain();

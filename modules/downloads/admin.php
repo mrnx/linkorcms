@@ -5,9 +5,9 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-if(!System::user()->CheckAccess2('downloads', 'downloads')) System::admin()->AccessDenied();
+System::admin()->AddSubTitle('Архив файлов');
 
-TAddSubTitle('Архив файлов');
+if(!System::user()->CheckAccess2('downloads', 'downloads')) System::admin()->AccessDenied();
 
 include_once ($config['inc_dir'].'tree_a.class.php');
 $tree = new AdminTree('downloads_cats');

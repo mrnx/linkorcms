@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Страницы');
+System::admin()->AddSubTitle('Страницы');
 
 if(!$user->CheckAccess2('pages', 'pages')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);

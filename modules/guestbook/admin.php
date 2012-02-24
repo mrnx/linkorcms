@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Гостевая книга');
+System::admin()->AddSubTitle('Гостевая книга');
 
 if(!$user->CheckAccess2('guestbook', 'guestbook')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);

@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Новости');
+System::admin()->AddSubTitle('Новости');
 
 if(!System::user()->CheckAccess2('news', 'news')){
 	System::admin()->AccessDenied();
@@ -92,6 +92,7 @@ function CalcNewsCounter($topic_id, $inc){
  */
 function AdminNewsMain(){
 	System::admin()->AddSubTitle('Главная');
+	$back = SaveRefererUrl();
 
 	// Количество новостей на странице
 	if(isset($_REQUEST['onpage'])){
@@ -152,7 +153,7 @@ function AdminNewsMain(){
 		$comments = SafeDB($news['comments_counter'], 11, int); // Количество комментарий
 
 		$func = '';
-		$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=news&a=edit&id='.$id, 'images/admin/edit.png');
+		$func .= System::admin()->SpeedButton('Редактировать', ADMIN_FILE.'?exe=news&a=edit&id='.$id.'&back='.$back, 'images/admin/edit.png');
 		$func .= System::admin()->SpeedConfirmJs(
 			'Удалить',
 			'$(\'#jqueryuitable\').table(\'deleteRow\', '.$id.');',
@@ -162,7 +163,7 @@ function AdminNewsMain(){
 
 		$table->AddRow(
 			$id,
-			'<b>'.System::admin()->Link(SafeDB($news['title'], 255, str), ADMIN_FILE.'?exe=news&a=edit&id='.$id).'</b>',
+			'<b>'.System::admin()->Link(SafeDB($news['title'], 255, str), ADMIN_FILE.'?exe=news&a=edit&id='.$id.'&back='.$back).'</b>',
 			TimeRender(SafeDB($news['date'], 11, int)),
 			SafeDB($news['hit_counter'], 11, int),
 			($allowComments ? $comments : 'Обсуждение закрыто'),

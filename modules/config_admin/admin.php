@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Управление настройками');
+System::admin()->AddSubTitle('Управление настройками');
 
 if(!$user->CheckAccess2('config', 'config')){
 	AddTextBox('Ошибка', 'Доступ запрещен!');

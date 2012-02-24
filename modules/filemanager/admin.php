@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Ôאיכמגûי לוםוהזונ');
+System::admin()->AddSubTitle('Ôאיכמגûי לוםוהזונ');
 
 if(isset($_GET['a'])){
 	$action = $_GET['a'];

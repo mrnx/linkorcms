@@ -7,7 +7,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Опросы');
+System::admin()->AddSubTitle('Опросы');
 
 if(!$user->CheckAccess2('polls', 'polls')){
 	System::admin()->AccessDenied();

@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Пользователи');
+System::admin()->AddSubTitle('Пользователи');
 
 if(!$user->CheckAccess2('user', 'user')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);

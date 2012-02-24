@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Смайлики');
+System::admin()->AddSubTitle('Смайлики');
 
 if(!$user->CheckAccess2('smilies', 'smilies')){
 	AddTextBox('Ошибка', $config['general']['admin_accd']);

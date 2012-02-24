@@ -5,7 +5,7 @@ if(!defined('VALID_RUN')){
 	exit;
 }
 
-TAddSubTitle('Настройки сайта');
+System::admin()->AddSubTitle('Настройки сайта');
 
 if(!$user->CheckAccess2('config', 'config')){
 	AddTextBox('Ошибка', 'Доступ запрещен!');

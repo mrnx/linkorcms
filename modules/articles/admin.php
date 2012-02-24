@@ -9,7 +9,7 @@ if(!$user->CheckAccess2('articles', 'articles')){
 	System::admin()->AccessDenied();
 }
 
-TAddSubTitle('Архив статей');
+System::admin()->AddSubTitle('Архив статей');
 
 include_once ($config['inc_dir'].'tree_a.class.php');
 $tree = new AdminTree('articles_cats');
