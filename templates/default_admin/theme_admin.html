@@ -1,6 +1,4 @@
 <?php
-	UseScript('admin'); // Обязательно
-	UseScript('jquery_topmenu');
 	System::admin()->AddCSSFile('style.css');
 	System::admin()->AddOnLoadJS('
 	(function($){
@@ -12,6 +10,7 @@
 		});
 		Admin.Live(".button, input[type=button], input[type=submit]", function(){ $(this).button(); });
 		if($("#errors").html() != "") $("#errors").show();
+		$("#testchev").menu([{id:"0", title:"Привет"}, {id:"1", title:"Здарова"}], true);
 	})(jQuery);
 ');
 ?>
@@ -27,14 +26,7 @@
 		<div class="menu" id="admin_menu"><a class="menu_config_btn" href="admin.php?exe=adminmenu" title="Настроить меню"><img src="images/admin/config.png"></a></div>
 	</div>
 
-	<!--	<div class="breadcrumb">-->
-	<!--		<ul>-->
-	<!--			<li class="crumb"><a href="admin.php"><img src="images/logo16.png">&nbsp;&nbsp;<span>Админ-панель</span></a><a href="#" class="crumb"><img src="images/chevron.png"></a></li>-->
-	<!--			<li class="crumb"><a href="#"><img src="modules/news/news.png">&nbsp;&nbsp;<span>Новости</span></a><a href="#" class="crumb"><img src="images/chevron.png"></a></li>-->
-	<!--			<li class="crumb"><a href="#"><span>Добавить новость</span></a></li>-->
-	<!--		</ul>-->
-	<!--		<div style="clear: both;"></div>-->
-	<!--	</div>-->
+	<div class="breadcrumb"><ul id="admin_breadcrumbs"></ul></div>
 
 	<div id="container">
 		<div id="sidebar" {!page:tool_menu_block(style="display: none;")}>
@@ -63,7 +55,8 @@
 	<div><img src="images/loadbar.gif" style="vertical-align: middle;"></div>
 </div>
 <script type="text/javascript">
-	$("#admin_menu").topmenu({page.menu_data});
+	Admin.initTopMenu({page.menu_data});
+	Admin.initBreadCrumbs({page.breadcrumbs_data});
 </script>
 </body>
 {/template}

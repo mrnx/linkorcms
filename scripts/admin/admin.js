@@ -1,9 +1,9 @@
 
-// Клиентский код веб-приложения Админ-панели
+/**
+ * Клиентский код веб-приложения Админ-панели
+ */
 
 (function(window, $, undefined){
-
-	var document = window.document;
 
 	/**
 	 * @class AdminFn
@@ -20,6 +20,38 @@
 	}
 
 	window.AdminFn.prototype = {
+
+		default_breadcrumb_options: {
+			title: 'Title',
+			icon: 'scripts/lTreeView/theme/icon.png',
+			link: '',
+			menu: [] // Элементы меню
+		},
+
+		initTopMenu: function(options){
+			$("#admin_menu").menu(options);
+		},
+
+		initBreadCrumbs: function(options){
+			var $ul = $("ul#admin_breadcrumbs");
+			var html = '';
+			for(var i = 0; i < options.length; i++){
+				html = '<a href="'+options[i].link+'" onclick="return Admin.CheckButton(2, event);" onMouseDown="return Admin.LoadPage(\''+options[i].link+'\', event);">';
+				if(options[i].icon && options[i].icon != ''){
+					html += '<img src="'+options[i].icon+'" class="crumb_icon">';
+				}
+				html += '<span>'+options[i].title+'</span></a>';
+				$('<li>').html(html).appendTo($ul);
+
+				if(i != options.length-1 && options[i].menu){
+					var $li = $('<li>').appendTo($ul);
+					var $a = $('<a>', {href: "#", click: function(){return false;}, class: "chevron"}).html('<img src="images/chevron.png">').appendTo($li);
+					if(options[i].menu){
+						$a.menu(options[i].menu, {popup: true});
+					}
+				}
+			}
+		},
 
 		/**
 		 * Проверка нажатой кнопки мыши
@@ -46,28 +78,30 @@
 
 		/**
 		 * Загрузка страницы Админ-панели
-		 * @param Url
-		 * @param event
+		 * @param url Адрес.
+		 * @param event Объект события.
+		 * @param message Сообщение на экране загрузки.
+		 * @param solveBubble Разрешить всплывание события.
 		 */
-		LoadPage: function( Url, event, Message ){
+		LoadPage: function( url, event, message, solveBubble ){
 			if(event != undefined && !this.CheckButton(1, event)){ // Только левая кнопка мыши
 				return false;
 			}
 			if(this.Ajax){
 				slf = this;
-				slf.ShowSplashScreen(Message);
+				slf.ShowSplashScreen(message);
 				$.ajax({
 					type: "GET",
-					url: Url,
+					url: url,
 					dataType: "json",
 					success: function(data){
 						slf.SetPageData(data);
 					}
 				});
 			}else{
-				document.location = Url;
+				document.location = url;
 			}
-			if(event != undefined){
+			if(event != undefined && !solveBubble){
 				event.cancelBubble = true;
 				event.stopPropagation();
 			}
@@ -76,21 +110,21 @@
 
 		/**
 		 * Загрузка страницы POST запросом
-		 * @param Url
-		 * @param PostData
-		 * @param Message
+		 * @param url
+		 * @param postData
+		 * @param message
 		 */
-		LoadPagePost: function( Url, PostData, Message ){
-			if(PostData == undefined){
-				PostData = {};
+		LoadPagePost: function( url, postData, message ){
+			if(postData == undefined){
+				postData = {};
 			}
 			slf = this;
-			slf.ShowSplashScreen(Message);
+			slf.ShowSplashScreen(message);
 			$.ajax({
 				type: "POST",
-				url: Url,
+				url: url,
 				dataType: "json",
-				data: PostData,
+				data: postData,
 				success: function(data){
 					slf.SetPageData(data);
 				}
@@ -329,6 +363,17 @@
 
 	window.Admin = new AdminFn('admin.php', true); // FIXME: admin.php, ajax ?
 	window.Admin._liveRun();
+
+	// Хлебные крошки :)
+	$.fn.admin_breadcrumbs = function( adminData, AjaxData ){
+		var $breadcrumbs;
+
+		var settings = $.extend({}, options, default_options);
+		$breadcrumbs = BreadCrumbs(this, menuData, popup);
+
+		return this;
+
+	}
 
 })(window, jQuery);
 

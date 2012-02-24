@@ -12,6 +12,7 @@
 body {
 	height: 100%;
 	padding: 5px;
+	background-color: #FFF;
 }
 
 #ajaxsplashscreen {
@@ -57,6 +58,7 @@ body {
 	margin: 0 auto;
 }
 
+a { }
 a:link { color: #334433; text-decoration: none; }
 a:visited { color: #334433; text-decoration: none; }
 a:hover { color: #c66653; }
@@ -95,6 +97,7 @@ div.admin_logo {
 .menu_backing {
 	background-color: #A5C0D4;
 	padding: 1px;
+	padding-bottom: 2px;
 	margin-bottom: 7px;
 
 	border: 1px #A5C0D4 solid;
@@ -126,42 +129,58 @@ div.admin_logo {
 
 .breadcrumb {
 	display: block;
-	clear: both;
-
-	border: 1px #D8DFEA solid;
+	height: 20px;
+	margin: 0 2px 5px 2px;
+	background-color: #F6F6F6;
+	border: 1px #A5C0D4 solid;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
-
-	background-color: #F6F6F6;
-	margin-bottom: 5px;
+	box-shadow: 1px 1px 1px #DDD;
+	-webkit-box-shadow: 1px 1px 1px #DDD;
+	-moz-box-shadow: 1px 1px 1px #DDD;
 }
 
 .breadcrumb li {
+	height: 20px;
 	float: left;
-	background-color: #F6F6F6;
-	border-color: #F6F6F6;
-	border-radius: 3px;
-	-moz-border-radius: 3px;
+	margin-right: 1px;
 }
 
 .breadcrumb a {
-	display: block;
+	display: inline-block;
 	float: left;
-	line-height: 20px;
 	padding: 0 5px 0 5px;
-	color: #646464;
+	height: 20px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
 }
 
-.breadcrumb img {
-	vertical-align: middle;
+.breadcrumb img.crumb_icon {
+	width: 16px;
+	height: 16px;
+	margin: 2px 4px 0 0;
+}
+.breadcrumb a.topmenu-active{
+	background-color: #C5E0F4;
+}
+.breadcrumb a.chevron{
+
+}
+.breadcrumb a.chevron img{
+	margin-top: 3px;
 }
 
 .breadcrumb span {
-	vertical-align: middle;
+	vertical-align: top;
+	height: 20px;
+	line-height: 20px;
+	font-size: 11px;
+	color: #000;
+
 }
 
 .breadcrumb a:hover {
-	color: #222;
+	background-color: #C5E0F4;
 }
 
 
@@ -222,12 +241,13 @@ div.admin_logo {
 	float: left;
 	background-color: #A5C0D4;
 	background-image: url(../img/block_title_bg.png);
+	background-repeat: repeat-x;
 	border-radius: 3px 3px 0 0;
 	-moz-border-radius: 3px 3px 0 0;
 	color: #FFF;
 	font-weight: bold;
 	width: 212px;
-	padding: 3px 0 4px 4px;
+	padding: 4px 0 5px 4px;
 	text-shadow: 0px -1px 0px #85A0D4;
 
 	box-shadow: 2px 2px 2px #DDD;
@@ -250,7 +270,6 @@ div.admin_logo {
 #sidebar .sideNav li a:hover {
 	background: #fdfcf6;
 	color: #222;
-	cursor: default;
 }
 
 #sidebar .sideNav li a.activate {
