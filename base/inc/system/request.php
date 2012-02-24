@@ -164,7 +164,7 @@ function SafeEnv( $Var, $MaxLength, $Type, $StripTags = false, $AddSlashes = tru
  */
 function SafeDB( $Var, $MaxLength, $Type, $StripTags = true, $SpecialChars = true, $SafeXss = true ){
 	if(is_array($Var)){
-		foreach($var as &$v){
+		foreach($Var as &$v){
 			if($MaxLength > 0){
 				$v = substr($v, 0, $MaxLength);
 			}
