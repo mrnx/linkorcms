@@ -1,0 +1,154 @@
+
+
+/* Верхнее меню */
+
+ul.l-topmenu-default {
+	width: 1196px;
+	height: 24px;
+	border-top: 1px #A5C0D4 solid;
+}
+
+ul.l-topmenu-default li.top {
+	float: left;
+	height: 24px;
+	border-right: 1px solid #ddd;
+}
+
+ul.l-topmenu-default li.top a.admin_menu_top_link {
+	display: block;
+	float: left;
+	background: #f0f0f0 url("top-menu-item-bg.gif") repeat-x left top;
+	height: 24px;
+	padding: 0 20px 0 20px;
+	color: #646464;
+	line-height: 24px;
+	text-decoration: none;
+	text-shadow: 0px 1px 0px #fff;
+}
+
+ul.l-topmen-defaultu li.top a.admin_menu_top_link:hover {
+	background: #fdfcf6;
+	color: #222;
+}
+
+ul.l-topmenu-default li.top a.admin_menu_top_link.active {
+	background: #DDEAF7;
+	color: #222;
+}
+
+ul.l-topmenu-default li.right {
+	float: right;
+	border-left: 1px solid #ddd;
+	border-right: none;
+}
+
+
+
+/* Субменю */
+
+ul.l-topmenu-sub-default {
+	display: none;
+	position: absolute;
+	z-index: 10000;
+	text-align: left;
+	background: #fff url("gutter.png") repeat-y left top;
+	border: 1px #A5C0D4 solid;
+	box-shadow: 2px 2px 1px #DDD;
+	-webkit-box-shadow: 2px 2px 1px #DDD;
+	-moz-box-shadow: 2px 2px 1px #DDD;
+	padding: 2px;
+}
+
+
+/* Пункты  субменю */
+
+ul.l-topmenu-sub-default li.sub{
+	min-width: 250px;
+}
+
+ul.l-topmenu-sub-default div.admin_menu_sub_delimiter{
+	border-top: 1px #ccc dashed;
+	margin:  2px 0;
+}
+
+ul.l-topmenu-sub-default a.admin_menu_sub_link{
+	display: block;
+	float: none;
+	position: relative;
+	padding: 0 0 0 4px;
+	height: 20px;
+	color: #444;
+	font-weight: normal;
+	text-decoration: none;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: default;
+}
+	ul.l-topmenu-sub-default div.admin_menu_item_title{
+		display: inline-block;
+		float: left;
+		padding: 0 0 0 6px;
+
+		height: 20px;
+		line-height: 20px;
+		vertical-align: middle;
+		font-size: 11px;
+	}
+	ul.l-topmenu-sub-default div.admin_menu_item_icon{
+		float: left;
+		width: 22px;
+		padding-top: 2px;
+		padding-left: 1px;
+		vertical-align: top;
+	}
+	ul.l-topmenu-sub-default div.admin_menu_item_icon img{
+		vertical-align: top;
+	}
+	ul.l-topmenu-sub-default div.admin_menu_item_noicon{
+		float: left;
+		padding-left: 1px;
+		width: 22px;
+		height: 20px;
+	}
+	ul.l-topmenu-sub-default div.admin_menu_item_arrow{
+		background: url("../../../images/chevron.png") no-repeat;
+		float: right;
+		margin: 3px 1px 0 0;
+		width: 16px;
+		height: 16px;
+	}
+	ul.l-topmenu-sub-default div.admin_menu_item{
+
+	}
+
+ul.l-topmenu-sub-default a.admin_menu_sub_link:hover{
+	color: #222;
+	background-color: #DDEAF7;
+	background-image: url("item_bg.png");
+	border: 1px #CDDAE7 solid;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	height: 18px;
+}
+
+	ul.l-topmenu-sub-default a.admin_menu_sub_link:hover div.admin_menu_item_title{
+		padding: 0 0 0 6px;
+		height: 18px;
+		line-height: 18px;
+	}
+	ul.l-topmenu-sub-default a.admin_menu_sub_link:hover div.admin_menu_item_icon{
+		width: 21px;
+		border-right: 1px #dfdfff solid;
+		padding-top: 1px;
+		padding-bottom: 1px;
+		padding-left: 0;
+	}
+	ul.l-topmenu-sub-default a.admin_menu_sub_link:hover div.admin_menu_item_noicon{
+		border-right: 1px #dfdfff solid;
+		padding-left: 0;
+		width: 21px;
+		height: 18px;
+	}
+	ul.l-topmenu-sub-default a.admin_menu_sub_link:hover div.admin_menu_item_arrow{
+		margin: 2px 0 0 0;
+	}
