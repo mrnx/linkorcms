@@ -21,7 +21,7 @@ if(!($userAuth === 1 && $userAccess === 1 && System::user()->AllowCookie(System:
 			System::user()->SetAdminCookie($admin_name, $admin_password);
 		}else{
 			System::user()->UnsetCookie(System::user()->AdminCookieName);
-			System::admin()->Login('Неверный логин или пароль'); // exit
+			System::admin()->Login('Неверный логин или пароль.'); // exit
 		}
 	}else{ // Форма авторизации
 		System::admin()->Login(); // exit
@@ -61,6 +61,8 @@ if(System::database()->NumRows() == 0){
 	System::admin()->AddTextBox('Админ-панель - модуль не найден', '<div style="text-align: center;">Модуль "'.$ModuleName.'" не найден!</div>');
 	System::admin()->TEcho();
 	exit;
+}else{
+	System::admin()->Mod = SafeDB(System::database()->FetchRow(), 255, str);
 }
 
 // Проверка на доступ

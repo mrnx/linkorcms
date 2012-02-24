@@ -8,7 +8,20 @@ class AdminPage extends PageTemplate{
 
 	public $SideBarMenuLinks = array();
 	public $FormRows = array();
+	public $BreadCrumbs = array();
 	public $ConfigGroups = array();
+
+	/**
+	 * Массив с данными текущего работающего модуля или null
+	 * @var null
+	 */
+	public $Mod = null;
+
+	/**
+	 * Иконка модуля (имя файла, устанавливается из модуля)
+	 * @var string
+	 */
+	public $ModIcon = 'images/application.png';
 
 	/**
 	 * Режим Ajax
@@ -69,7 +82,7 @@ class AdminPage extends PageTemplate{
 		$this->SetRoot($TemplateDir);
 		$this->DefaultRoot = $DefaultTemplateDir;
 		$this->Title = 'Админ-панель';
-		if($this->AjaxMode){ // Загрузка страницы посредством AJAX запроса
+		if($this->AjaxMode){ // AJAX загрузка страницы
 			$this->AjaxSidebarTemplate = new Starkyt();
 			$this->AjaxSidebarTemplate->InitStarkyt($TemplateDir, 'sidebar_ajax.html');
 			$this->AjaxContentTemplate = new Starkyt();
@@ -108,6 +121,7 @@ class AdminPage extends PageTemplate{
 			$vars['content_block']          = false;
 			$this->BlockTemplate->vars = $vars;
 		}
+		UseScript('admin', 'jquery', 'jquery_ui', 'jquery_menu');
 	}
 
 	public function Login( $AuthMessage = '', $AuthTitle = 'Авторизация администратора' ){
@@ -120,7 +134,7 @@ class AdminPage extends PageTemplate{
 			'auth_message' => $AuthMessage,
 			'auth_title' => $AuthTitle
 		);
-		$this->AddCSSFile('login.css', false, true);
+		UseScript('admin', 'jquery', 'jquery_ui');
 		$this->EchoAll();
 		exit();
 	}
@@ -135,7 +149,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Открывает новый блок контента.
-	 *
 	 * @param $title
 	 */
 	public function AddCenterBox( $title ){
@@ -154,7 +167,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет текстовый блок
-	 *
 	 * @param $title
 	 * @param $text
 	 */
@@ -229,7 +241,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Генерирует код красивой ссылки в виде кнопки
-	 *
 	 * @param string $Title
 	 * @param string $Url
 	 * @param string $ImgSrc
@@ -252,7 +263,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Кнопка - ссылка с предупреждением
-	 *
 	 * @param string $Title
 	 * @param string $Url
 	 * @param string $ImgSrc
@@ -281,7 +291,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Кнопка с выполнением JS кода с предупреждением
-	 *
 	 * @param string $Title Заголовок кнопки
 	 * @param string $OnClickJS JavaScript код при нажатии
 	 * @param string $ImgSrc Путь к иконке
@@ -317,7 +326,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Генерирует статусную кнопку работающую через AJAX запрос. При изменении статуса может изменить картинку на кнопке.
-	 *
 	 * @param  $EnabledTitle
 	 * @param  $DisabledTitle
 	 * @param  $AjaxUrl
@@ -378,7 +386,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет Элемент к форме
-	 *
 	 * @param $Caption
 	 * @param $Control
 	 * @param string $OtherParams
@@ -389,7 +396,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет подзаголовок формы.
-	 *
 	 * @param string $TitleCaption
 	 * @param string $OtherParams
 	 * @return void
@@ -419,7 +425,6 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Добавляет форму к странице
-	 *
 	 * @param $open
 	 * @param $submit_btn
 	 */
@@ -591,38 +596,41 @@ class AdminPage extends PageTemplate{
 
 	/**
 	 * Генерирует и выводит верхнее меню администратора
-	 *
 	 * @param $menu
 	 * @param int $parentId
 	 * @return array
 	 */
-	protected function GenAdminMenu(&$menu, $parentId = 0){
+	protected function GenAdminMenu( &$menu, $parentId = 0 ){
 		$menuData = array();
 		if(!isset($menu[$parentId])){
 			return $menuData;
 		}
 		foreach($menu[$parentId] as &$item){
-			$menuData[] = array(
+			$data = array(
 				'id' => SafeDB($item['id'], 11, int),
 				'title' => SafeDB($item['title'], 255, str),
 				'icon' => SafeDB($item['icon'], 255, str),
-				'admin_link' => ADMIN_FILE.'?'.SafeDB($item['admin_link'], 255, str),
-				'external_link' => SafeDB($item['external_link'], 255, str),
-				'js' => SafeDB($item['js'], 0, str, false, false),
-				'blank' => $item['blank'] == '1' ? 'true' : 'false',
-				'type' => $item['type'],
-				'submenu'   => $this->GenAdminMenu($menu, $item['id'])
+				'submenu'   => $this->GenAdminMenu($menu, $item['id']),
+				'type' => $item['type']
 			);
+			if($item['type'] == 'admin'){
+				$data['admin_link'] = ADMIN_FILE.'?'.SafeDB($item['admin_link'], 255, str);
+			}elseif($item['type'] == 'external'){
+				$data['link'] = SafeDB($item['external_link'], 255, str);
+				$data['blank'] = $item['blank'] == '1' ? 'true' : 'false';
+			}elseif($item['type'] == 'js'){
+				$data['js'] = SafeDB($item['js'], 0, str, false, false);
+			}
+			$menuData[] = $data;
 		}
 		return $menuData;
 	}
 
 	/**
 	 * Выводит данные верхнего меню в формате JSON сразу в шаблон.
-	 *
 	 * @return
 	 */
-	function AddAdminMenu(){
+	public function AddAdminMenu(){
 		if($this->AjaxMode) return; // Меню не генерируется при AJAX запросах
 		$menu = System::database()->Select('adminmenu', "`enabled`='1'");
 		SortArray($menu, 'order');
@@ -631,6 +639,99 @@ class AdminPage extends PageTemplate{
 			$items[$item['parent']][] = $item;
 		}
 		$this->BlockTemplate->vars['menu_data'] = JsonEncode($this->GenAdminMenu($items));
+	}
+
+	/**
+	 * Добавляет ссылку в хлебные крошки
+	 * @param $AdminUrl
+	 * @param $Title
+	 * @param string $Icon
+	 */
+	public function BreadCrumbAdd( $Title, $AdminLocation, $Icon = '' ){
+		$crumb = array(
+			'title'=>$Title,
+			'link'=>$AdminLocation
+		);
+		if($Icon != '') $crumb['icon'] = $Icon;
+		$this->BreadCrumbs[] = $crumb;
+	}
+
+	/**
+	 * Добавляет меню к последнему разделителю ссылок в хлебных крошках
+	 * @param $menu Массив инициализации элементов jquery.menu
+	 * @see GenAdminMenu
+	 * @example [{id:"0", title:"Заголовок", type: "admin", admin_link: "admin.php?exe=news"}, {}]
+	 */
+	public function BreadCrumbMenuSetData( $menu ){
+		$this->BreadCrumbs[count($this->BreadCrumbs)-1]['menu'] = $menu;
+	}
+
+	/**
+	 * Более простая функция для добавления ссылок в меню хлебной крошки
+	 * @param $AdminLocation
+	 * @param $Title
+	 * @param string $Icon
+	 */
+	public function BreadCrumbMenuItem( $Title, $AdminLocation, $Icon = '' ){
+		$menu = &$this->BreadCrumbs[count($this->BreadCrumbs)-1]['menu'];
+		$data = array(
+			'id' => count($menu),
+			'title' => $Title,
+			'icon' => $Icon,
+			'type' => 'admin',
+			'admin_link' => ADMIN_FILE.'?'.$AdminLocation
+		);
+		$menu[] = $data;
+	}
+
+	/**
+	 * Более простая функция для добавления разделителя в меню хлебной крошки
+	 * @param $AdminLocation
+	 * @param $Title
+	 * @param string $Icon
+	 */
+	public function BreadCrumbMenuDelimiter( $Title, $AdminLocation, $Icon = '' ){
+		$menu = &$this->BreadCrumbs[count($this->BreadCrumbs)-1]['menu'];
+		$data = array(
+			'id' => count($menu),
+			'type' => 'delimiter'
+		);
+		$menu[] = $data;
+	}
+
+	private function BreadCrumbsGetData( $Ajax = false ){
+		$crumbs = array();
+		if(!$Ajax){ // Добавляем меню администратора
+			$menu = array();
+			System::database()->Select('modules', "`enabled`='1' and `showinmenu`='1'");
+			SortArray(System::database()->QueryResult, 'name');
+			while($row = System::database()->FetchRow()){
+				$menu[] = array(
+					'id' => SafeDB($row['id'], 11, int),
+					'title' => SafeDB($row['name'], 255, str),
+					'type' => 'admin',
+					'admin_link' => ADMIN_FILE.'?exe='.SafeDB($row['folder'], 255, str)
+				);
+			}
+			$crumbs[] = array(
+				'title'=>'Админ-панель',
+				'link'=>ADMIN_FILE,
+				'icon'=>'images/logo16.png',
+				'menu'=>$menu
+			);
+		}
+		if(count($this->BreadCrumbs) == 0){ // Добавляем элемент модуля
+			if($this->Mod !== null){
+				$crumbs[] = array(
+					'title'=>SafeDB($this->Mod['name'], 255, str),
+					'link'=>ADMIN_FILE.'?exe='.SafeDB($this->Mod['folder'], 255, str),
+					'icon'=>$this->ModIcon
+				);
+			}
+		}else{
+			$crumbs += $this->BreadCrumbs;
+		}
+		return $crumbs;
 	}
 
 	/**
@@ -745,7 +846,10 @@ class AdminPage extends PageTemplate{
 				'errors'=>'',
 				'info'=>'',
 				'title'=>'',
-				'uri' => '' // Адрес страницы (после перенаправления адрес может измениться, поэтому передаем его в скрипт)
+				'uri' => '', // Адрес страницы (после перенаправления адрес может измениться, поэтому передаем его в скрипт)
+				'mod' => $this->Mod,
+				'mod_icon' => $this->ModIcon,
+				'breadcrumbs_data' => $this->BreadCrumbsGetData(true)
 			);
 			$response['content'] = $this->AjaxContentTemplate->Compile();
 			if($this->tool_menu_block){
@@ -785,6 +889,7 @@ class AdminPage extends PageTemplate{
 			echo JsonEncode($response);
 		}else{
 			System::user()->OnlineProcess($this->Title);
+			$this->BlockTemplate->vars['breadcrumbs_data'] = JsonEncode($this->BreadCrumbsGetData());
 			$this->BlockTemplate->vars['content_block'] = $this->content_block;
 			$this->BlockTemplate->vars['tool_menu_block'] = $this->tool_menu_block;
 			$this->BlockTemplate->vars['showinfo'] = System::config('general/show_script_time');
